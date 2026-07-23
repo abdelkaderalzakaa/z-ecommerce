@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/company_provider.dart';
-import '../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class ProductEmptyPage extends StatelessWidget {
   const ProductEmptyPage({super.key});
@@ -21,8 +21,7 @@ class ProductEmptyPage extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                context.go(AppRoutes.toHome(cid));
+                changeScreen(context, const HomePage());
               },
               child: const Text('Back to Home'),
             ),

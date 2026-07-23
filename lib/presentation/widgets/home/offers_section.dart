@@ -1,6 +1,7 @@
+import 'package:z_ecommerce/presentation/pages/offers_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import '../../../data/models/offer_model.dart';
 import '../../../data/providers/offer_provider.dart';
@@ -8,7 +9,6 @@ import '../../../data/providers/company_provider.dart';
 import '../offers/offer_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
 
 class OffersSection extends StatelessWidget {
   final String? sectionType; // 'bundles', 'coupons', 'deals'
@@ -117,10 +117,7 @@ class OffersSection extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    final cid =
-                        context.read<CompanyProvider>().companySettings?.id ??
-                        'cmp_001';
-                    context.go(AppRoutes.toOffers(cid, type: type));
+                    changeScreen(context, const OffersPage());
                   },
                   child: Text(TranslationKeys.viewAll.tr(context)),
                 ),
@@ -134,14 +131,25 @@ class OffersSection extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: OfferCard(offer: offers[0], fullWidth: true),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: offers.length,
-                    itemBuilder: (context, index) {
-                      return OfferCard(offer: offers[index]);
-                    },
-                  ),
+                : offers.length == 2 && !ResponsiveLayout.isMobile(context)
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            Expanded(child: OfferCard(offer: offers[0], fullWidth: true)),
+                            const SizedBox(width: 16),
+                            Expanded(child: OfferCard(offer: offers[1], fullWidth: true)),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: offers.length,
+                        itemBuilder: (context, index) {
+                          return OfferCard(offer: offers[index]);
+                        },
+                      ),
           ),
           const SizedBox(height: 24),
         ],

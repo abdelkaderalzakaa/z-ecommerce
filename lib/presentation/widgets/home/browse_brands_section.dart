@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/company_provider.dart';
 import '../../../data/models/brand_model.dart';
-import '../../global/router/app_routes.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../common/product_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
 class BrowseBrandsSection extends StatelessWidget {
   const BrowseBrandsSection({super.key});
@@ -64,7 +64,6 @@ class _BrandCardState extends State<_BrandCard> {
 
   @override
   Widget build(BuildContext context) {
-    final companyId = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
     
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -72,7 +71,7 @@ class _BrandCardState extends State<_BrandCard> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          context.go(AppRoutes.toShop(companyId, brand: widget.brand.name));
+          changeScreen(context, const CategoriesPage());
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),

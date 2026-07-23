@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/cart_provider.dart';
 import '../../../../data/providers/company_provider.dart';
@@ -8,7 +8,7 @@ import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/checkout_page.dart';
 
 class OrderSummary extends StatefulWidget {
   final bool isCheckoutPage;
@@ -239,12 +239,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                 ? null
                 : (widget.onCheckout ??
                     () {
-                      final cid = context
-                              .read<CompanyProvider>()
-                              .companySettings
-                              ?.id ??
-                          'cmp_001';
-                      context.go(AppRoutes.toCheckout(cid));
+                      changeScreen(context, const CheckoutPage());
                     }),
           ),
         ],

@@ -15,6 +15,7 @@ import '../../../data/models/category_model.dart';
 import '../../../data/models/brand_model.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
 class CategoriesPage extends StatelessWidget {
   final CategoryModel? category;

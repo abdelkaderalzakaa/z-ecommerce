@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/category_provider.dart';
-import '../../../data/providers/company_provider.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
-import '../common/page_title_with_back.dart';
 
 class CategoriesHeader extends StatelessWidget {
   final bool isMobile;

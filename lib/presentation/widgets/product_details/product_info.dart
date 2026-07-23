@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
@@ -9,7 +9,6 @@ import '../../../data/providers/company_provider.dart';
 import '../../pages/cart_page.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
 
 class ProductInfo extends StatefulWidget {
   final Product product;
@@ -160,8 +159,7 @@ class _ProductInfoState extends State<ProductInfo> {
           },
           onPrimaryAction: () {
             if (isInCart) {
-              final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-              context.go(AppRoutes.toCart(cid));
+              changeScreen(context, const CartPage());
             } else {
               cartProvider.addToCart(
                 companyId,

@@ -25,7 +25,13 @@ class CompanyProvider extends ChangeNotifier {
       await Future.delayed(const Duration(milliseconds: 800));
       
       if (storeId != null) {
-        _companySettings = fakeCompanies.firstWhere((company) => company.id == storeId, orElse: () => fakeCompanies.first);
+        final found = fakeCompanies.where((company) => company.id == storeId).toList();
+        if (found.isNotEmpty) {
+          _companySettings = found.first;
+        } else {
+          _companySettings = null;
+          _error = "Store not found";
+        }
       } else {
         _companySettings = fakeCompanies.first;
       }
@@ -41,5 +47,9 @@ class CompanyProvider extends ChangeNotifier {
 
   Future<void> switchStore(String storeId) async {
     await loadCompanySettings(storeId);
+  }
+
+  bool companyExists(String id) {
+    return fakeCompanies.any((c) => c.id == id);
   }
 }

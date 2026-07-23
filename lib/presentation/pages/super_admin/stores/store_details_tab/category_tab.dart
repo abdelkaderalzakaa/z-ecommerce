@@ -1,0 +1,2 @@
+  
+  final List<BrandModel> brands;

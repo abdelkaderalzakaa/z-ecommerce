@@ -10,11 +10,12 @@ import 'package:provider/provider.dart';
 import '../../data/providers/cart_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
-import '../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import '../../../data/providers/company_provider.dart';
 
 import '../widgets/cart/cart_items_list.dart';
 import '../widgets/cart/order_summary.dart';
+import 'package:z_ecommerce/presentation/pages/cart_page.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -28,9 +29,7 @@ class CartPage extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: HeaderDetails(
         title: TranslationKeys.yourCart.tr(context),
-        fallbackRoute: AppRoutes.toShop(
-          context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001',
-        ),
+        fallbackRoute: 'shop',
         paths: [
           TranslationKeys.home.tr(context),
           '${TranslationKeys.checkout.tr(context).split(' ').first}:${context.watch<CartProvider>().cartCount(context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001')} ${TranslationKeys.items.tr(context)}',

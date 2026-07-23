@@ -1,20 +1,24 @@
+import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
+import 'package:z_ecommerce/presentation/pages/auth/forgot_password_page.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
+import 'package:z_ecommerce/presentation/pages/admin_store/admin_store_home.dart';
+import 'package:z_ecommerce/presentation/pages/stores_page.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
+import '../../../data/models/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
-import '../../../data/providers/company_provider.dart';
-import '../../widgets/common/headers/header_home.dart';
 import '../../widgets/common/footer_section.dart';
 import '../../widgets/auth/auth_card.dart';
 import '../../widgets/auth/auth_text_field.dart';
 import '../../widgets/auth/password_field.dart';
 import '../../widgets/auth/primary_auth_button.dart';
 import '../../widgets/auth/social_login_buttons.dart';
-import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
+
 
 class LoginPage extends StatefulWidget {
   final String? redirectTo;
@@ -52,9 +56,19 @@ class _LoginPageState extends State<LoginPage> {
 
     if (mounted) {
       if (success) {
-        // If there's a redirect target, go there; otherwise go to platform entry
-        final destination = widget.redirectTo ?? AppRoutes.entry;
-        context.go(destination);
+        final role = authProvider.currentUser?.role;
+        if (role == UserRole.superAdmin) {
+          changeScreenUntill(context, const SuperAdminHome());
+        } else if (role == UserRole.companyOwner) {
+          changeScreenUntill(context, const AdminStore());
+        } else {
+          final destination = widget.redirectTo ?? '/';
+          if (destination == '/') {
+            changeScreenUntill(context, const HomePage());
+          } else {
+            Navigator.pushReplacementNamed(context, destination);
+          }
+        }
       } else {
         setState(() {
           _errorMessage = authProvider.errorMessage ?? TranslationKeys.loginFailed.tr(context);
@@ -73,23 +87,28 @@ class _LoginPageState extends State<LoginPage> {
             AuthCard(
               subtitle: TranslationKeys.pleaseEnterDetailsToSignIn.tr(context),
               subtitleWidget: Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () {
-                      _emailController.text = 'sarah@example.com';
-                      _passwordController.text = 'password123';
-                    },
-                    child: Text(
-                      '(Try sarah@example.com / password123)',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    _QuickFillButton(
+                      label: "Customer",
+                      email: 'sarah@example.com',
+                      onTap: (e) { _emailController.text = e; _passwordController.text = 'password123'; },
                     ),
-                  ),
+                    _QuickFillButton(
+                      label: "Store Owner",
+                      email: 'owner@cmp1.com',
+                      onTap: (e) { _emailController.text = e; _passwordController.text = 'password123'; },
+                    ),
+                    _QuickFillButton(
+                      label: "Super Admin",
+                      email: 'admin@shop.com',
+                      onTap: (e) { _emailController.text = e; _passwordController.text = 'password123'; },
+                    ),
+                  ],
                 ),
               ),
               children: [
@@ -146,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                           Flexible(
                             child: TextButton(
                               onPressed: () {
-                                context.go(AppRoutes.toForgotPassword());
+                                changeScreen(context, const ForgotPasswordPage());
                               },
                               child: Text(
                                 TranslationKeys.forgotPassword.tr(context),
@@ -219,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextButton(
                       onPressed: () {
-                        context.go(AppRoutes.toRegister(redirectTo: widget.redirectTo));
+                        changeScreen(context, RegisterPage(redirectTo: widget.redirectTo));
                       },
                       child: Text(TranslationKeys.signUp.tr(context)),
                     ),
@@ -229,6 +248,42 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const FooterSection(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickFillButton extends StatelessWidget {
+  final String label;
+  final String email;
+  final Function(String) onTap;
+
+  const _QuickFillButton({
+    required this.label,
+    required this.email,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onTap(email),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: Theme.of(context).primaryColor,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

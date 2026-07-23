@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/category_model.dart';
 import '../../../data/providers/category_provider.dart';
 import '../../../data/providers/company_provider.dart';
-import '../../global/router/app_routes.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../pages/categories_page.dart';
@@ -134,8 +133,7 @@ class _CategoryCardState extends State<_CategoryCard> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-          context.go(AppRoutes.toShop(cid, category: widget.data.label));
+          changeScreen(context, const CategoriesPage());
         },
         child: Card(
           margin: EdgeInsets.zero,

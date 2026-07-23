@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/buttons.dart';
 import '../../../../../../data/providers/cart_provider.dart';
 import '../../../../../../data/providers/company_provider.dart';
 import '../../../../global/translate/app_localizations.dart';
 import '../../../../global/translate/translation_keys.dart';
-import '../../../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/cart_page.dart';
 
 class CartHeaderIcon extends StatefulWidget {
   final bool isActive;
@@ -81,8 +81,7 @@ class _CartHeaderIconState extends State<CartHeaderIcon>
             ? null
             : cartCount > 0
             ? () {
-                final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                context.go(AppRoutes.toCart(cid));
+                changeScreen(context, const CartPage());
               }
             : null,
       ),

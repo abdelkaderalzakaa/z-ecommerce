@@ -1,0 +1,301 @@
+import 'package:flutter/material.dart';
+import 'package:z_ecommerce/data/fake_data/users.dart';
+import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
+import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
+import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+
+class UsersManagementPage extends StatefulWidget {
+  const UsersManagementPage({super.key});
+
+  @override
+  State<UsersManagementPage> createState() => _UsersManagementPageState();
+}
+
+class _UsersManagementPageState extends State<UsersManagementPage> {
+  String _searchQuery = '';
+  String _selectedRoleFilter = 'all';
+  List<UserModel> _selectedUsers = [];
+  int _currentPage = 1;
+  int _itemsPerPage = 10;
+
+  @override
+  Widget build(BuildContext context) {
+
+    final filteredUsers = fakeUsers.where((user) {
+      final matchesQuery =
+          _searchQuery.isEmpty ||
+          user.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          user.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          user.id.toLowerCase().contains(_searchQuery.toLowerCase());
+
+      final matchesRole =
+          _selectedRoleFilter == 'all' ||
+          user.role.name.toLowerCase() == _selectedRoleFilter.toLowerCase();
+
+      return matchesQuery && matchesRole;
+    }).toList();
+
+    final totalItems = filteredUsers.length;
+    final totalPages = (totalItems / _itemsPerPage).ceil();
+    final startIndex = (_currentPage - 1) * _itemsPerPage;
+    final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
+    final paginatedUsers = (startIndex < totalItems)
+        ? filteredUsers.sublist(startIndex, endIndex)
+        : <UserModel>[];
+
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Page Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                TranslationKeys.usersManagement.tr(context),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(TranslationKeys.addNewUser.tr(context)),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.person_add_rounded, size: 18),
+                label: Text(TranslationKeys.addNewUser.tr(context)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 11,
+                  ),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Full Height Expanded AppDataTable for UserModel
+          Expanded(
+            child: AppDataTable<UserModel>(
+              items: paginatedUsers,
+              selectable: true,
+              showIndexColumn: true,
+              selectedItems: _selectedUsers,
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedUsers = selected;
+                });
+              },
+              onBulkDelete: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${TranslationKeys.deleteSelected.tr(context)} (${_selectedUsers.length})',
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                setState(() {
+                  _selectedUsers.clear();
+                });
+              },
+              searchQuery: _searchQuery,
+              onSearchChanged: (val) {
+                setState(() {
+                  _searchQuery = val;
+                  _currentPage = 1;
+                });
+              },
+              onFilterTap: () => _showFilterDialog(context),
+              currentPage: _currentPage,
+              totalPages: totalPages > 0 ? totalPages : 1,
+              totalItems: totalItems,
+              itemsPerPage: _itemsPerPage,
+              onPageChanged: (page) => setState(() => _currentPage = page),
+              onItemsPerPageChanged: (rows) {
+                setState(() {
+                  _itemsPerPage = rows;
+                  _currentPage = 1;
+                });
+              },
+              emptyMessage: _searchQuery.isNotEmpty
+                  ? TranslationKeys.noMatchingResults.tr(context)
+                  : TranslationKeys.noDataAvailable.tr(context),
+              columns: [
+                AppTableColumn<UserModel>(
+                  title: TranslationKeys.user.tr(context),
+                  flex: 2,
+                  sortable: true,
+                  sortKey: (u) => u.name,
+                  cellBuilder: (u) => TableImageTextCell(
+                    title: u.name,
+                    subtitle: u.phoneNumber ?? u.id,
+                    imageUrl: u.avatarUrl,
+                    fallbackIcon: Icons.person_rounded,
+                  ),
+                ),
+                AppTableColumn<UserModel>(
+                  title: TranslationKeys.email.tr(context),
+                  flex: 2,
+                  sortable: true,
+                  sortKey: (u) => u.email,
+                  cellBuilder: (u) => TableTextCell(title: u.email),
+                ),
+                AppTableColumn<UserModel>(
+                  title: TranslationKeys.role.tr(context),
+                  flex: 1,
+                  sortable: true,
+                  sortKey: (u) => u.role.name,
+                  cellBuilder: (u) {
+                    String roleLabel;
+                    Color bg;
+                    Color fg;
+
+                    switch (u.role) {
+                      case UserRole.superAdmin:
+                        roleLabel = TranslationKeys.superAdminRole.tr(context);
+                        bg = const Color(0xFFEEF2FF);
+                        fg = const Color(0xFF4F46E5);
+                        break;
+                      case UserRole.companyOwner:
+                        roleLabel = TranslationKeys.storeOwnerRole.tr(context);
+                        bg = const Color(0xFFFEF3C7);
+                        fg = const Color(0xFFD97706);
+                        break;
+                      case UserRole.customer:
+                        roleLabel = TranslationKeys.customerRole.tr(context);
+                        bg = const Color(0xFFE6F4EA);
+                        fg = const Color(0xFF137333);
+                        break;
+                    }
+
+                    return TableStatusBadge(
+                      statusText: roleLabel,
+                      backgroundColor: bg,
+                      textColor: fg,
+                    );
+                  },
+                ),
+                AppTableColumn<UserModel>(
+                  title: TranslationKeys.joinedDate.tr(context),
+                  flex: 1,
+                  sortable: true,
+                  sortKey: (u) => u.createdAt,
+                  cellBuilder: (u) => TableTextCell(
+                    title:
+                        '${u.createdAt.year}-${u.createdAt.month.toString().padLeft(2, '0')}-${u.createdAt.day.toString().padLeft(2, '0')}',
+                  ),
+                ),
+                AppTableColumn<UserModel>(
+                  title: TranslationKeys.statusActive.tr(context),
+                  flex: 1,
+                  cellBuilder: (u) => TableStatusBadge.fromStatus(
+                    TranslationKeys.statusActive.tr(context),
+                  ),
+                ),
+                AppTableColumn<UserModel>(
+                  title: TranslationKeys.actions.tr(context),
+                  width: 70,
+                  alignment: Alignment.center,
+                  cellBuilder: (u) => TablePopupMenuActions(
+                    onView: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${TranslationKeys.viewDetails.tr(context)} "${u.name}"',
+                          ),
+                        ),
+                      );
+                    },
+                    onEdit: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${TranslationKeys.editAddress.tr(context)} "${u.name}"',
+                          ),
+                        ),
+                      );
+                    },
+                    onDelete: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${TranslationKeys.deleteSelected.tr(context)} "${u.name}"',
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(TranslationKeys.filter.tr(context)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              title: Text(TranslationKeys.allProducts.tr(context)),
+              value: 'all',
+              groupValue: _selectedRoleFilter,
+              onChanged: (val) {
+                setState(() => _selectedRoleFilter = val!);
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              title: Text(TranslationKeys.superAdminRole.tr(context)),
+              value: 'superAdmin',
+              groupValue: _selectedRoleFilter,
+              onChanged: (val) {
+                setState(() => _selectedRoleFilter = val!);
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              title: Text(TranslationKeys.storeOwnerRole.tr(context)),
+              value: 'companyOwner',
+              groupValue: _selectedRoleFilter,
+              onChanged: (val) {
+                setState(() => _selectedRoleFilter = val!);
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              title: Text(TranslationKeys.customerRole.tr(context)),
+              value: 'customer',
+              groupValue: _selectedRoleFilter,
+              onChanged: (val) {
+                setState(() => _selectedRoleFilter = val!);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

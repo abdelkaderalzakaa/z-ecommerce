@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/fake_data/company.dart';
 import '../../data/models/company_settings_model.dart';
 import '../../data/providers/locale_provider.dart';
-import '../global/router/app_routes.dart';
+// ignore: duplicate_import
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/stores_page.dart';
 
 class StoresPage extends StatefulWidget {
   const StoresPage({super.key});
@@ -156,7 +159,7 @@ class _StoreCardState extends State<StoreCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: InkWell(
-            onTap: () => context.go(AppRoutes.toHome(widget.company.id)),
+            onTap: () => changeScreen(context, const HomePage()),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -295,7 +298,7 @@ class _StoreCardState extends State<StoreCard> {
                   height: _isHovered ? 48 : 0,
                   margin: EdgeInsets.symmetric(horizontal: 20, vertical: _isHovered ? 12 : 0),
                   child: ElevatedButton(
-                    onPressed: () => context.go(AppRoutes.toHome(widget.company.id)),
+                    onPressed: () => changeScreen(context, const HomePage()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

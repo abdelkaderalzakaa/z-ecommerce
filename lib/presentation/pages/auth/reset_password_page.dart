@@ -1,5 +1,6 @@
+import 'package:z_ecommerce/presentation/pages/auth/auth_success_page.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
 import '../../../data/providers/company_provider.dart';
@@ -11,7 +12,6 @@ import '../../widgets/auth/primary_auth_button.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
@@ -28,14 +28,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => _isLoading = false);
-        context.go(
-          AppRoutes.toAuthSuccess(),
-          extra: {
-            'title': TranslationKeys.passwordReset.tr(context),
-            'message': TranslationKeys.passwordResetSuccessMessage.tr(context),
-            'buttonLabel': TranslationKeys.continueToLogin.tr(context),
-          },
-        );
+        changeScreen(context, AuthSuccessPage(
+          title: TranslationKeys.passwordReset.tr(context),
+          message: TranslationKeys.passwordResetSuccessMessage.tr(context),
+          buttonLabel: TranslationKeys.continueToLogin.tr(context),
+        ));
       }
     });
   }
@@ -71,7 +68,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   children: [
                     TextButton.icon(
                       onPressed: () {
-                        context.pop(); // Back to forgot password
+                        Navigator.pop(context); // Back to forgot password
                       },
                       icon: const Icon(Icons.arrow_back, size: 16),
                       label: Text(TranslationKeys.backToLogin.tr(context)),

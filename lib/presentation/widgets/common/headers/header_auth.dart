@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/buttons.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/logo.dart';
@@ -13,7 +13,7 @@ import '../../../../data/providers/settings_provider.dart';
 import '../../../../data/providers/locale_provider.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
-import '../../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class HeaderAuth extends StatefulWidget implements PreferredSizeWidget {
   final String? title;
@@ -54,11 +54,10 @@ class _HeaderAuthState extends State<HeaderAuth> {
                 /// back button
                 IconButton(
                   onPressed: () {
-                    if (context.canPop()) {
-                      context.pop();
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
                     } else {
-                      final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                      context.go(AppRoutes.toHome(cid));
+                      changeScreen(context, const HomePage());
                     }
                   },
                   icon: Icon(Icons.arrow_back_ios_outlined),

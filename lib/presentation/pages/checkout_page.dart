@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../data/providers/cart_provider.dart';
 import '../../data/providers/invoice_provider.dart';
@@ -17,7 +17,8 @@ import '../widgets/common/headers/widgets/top_title.dart';
 import '../widgets/profile/tabs/widgets/address_form_dialog.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
-import '../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/confirm_order_page.dart';
+import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -117,47 +118,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     cartProvider.clearCart(companyId);
 
-    _showSuccessDialog(generatedInvoiceIds);
-  }
-
-  void _showSuccessDialog(List<String> invoiceIds) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green, size: 28),
-            const SizedBox(width: 8),
-            Text(
-              TranslationKeys.orderPlacedSuccessfully.tr(context),
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          '${TranslationKeys.thankYouForPurchase.tr(context)}${invoiceIds.map((id) => '• $id').join('\n')}',
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodyMedium?.color,
-            fontSize: 16,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              final cid =
-                  context.read<CompanyProvider>().companySettings?.id ??
-                  'cmp_001';
-              Navigator.of(context).pop();
-              context.go(AppRoutes.toHome(cid));
-            },
-            child: Text(TranslationKeys.backToHome.tr(context)),
-          ),
-        ],
-      ),
-    );
+    changeScreen(context, ConfirmOrderPage(invoiceIds: generatedInvoiceIds));
   }
 
   @override
@@ -169,9 +130,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: HeaderDetails(
         title: TranslationKeys.checkoutTitle.tr(context),
-        fallbackRoute: AppRoutes.toCart(
-          context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001',
-        ),
+        fallbackRoute: 'cart',
         paths: [
           TranslationKeys.home.tr(context),
           TranslationKeys.yourCart.tr(context),
@@ -289,7 +248,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    context.go(AppRoutes.toLogin());
+                    changeScreen(context, const LoginPage());
                   },
                   child: Text(TranslationKeys.login.tr(context)),
                 ),
@@ -556,7 +515,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 orElse: () => ModelPaymenttype.availableMethods.first,
               );
               final String title = methodData.title.get(context);
-              final String iconPath = methodData.icon;
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -586,10 +544,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       child: Row(
                         children: [
-                          Image.asset(
-                            iconPath,
-                            width: 28,
-                            height: 28,
+                          Icon(
+                            method.name == 'cod' ? Icons.money :
+                            method.name == 'creditCard' ? Icons.credit_card :
+                            method.name == 'paypal' ? Icons.paypal :
+                            Icons.account_balance_wallet,
+                            size: 28,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                           const SizedBox(width: 16),
                           Expanded(

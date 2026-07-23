@@ -1,5 +1,6 @@
+import 'package:z_ecommerce/presentation/pages/cart_page.dart';
+import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../../data/models/product_model.dart';
@@ -9,7 +10,7 @@ import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/company_provider.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
@@ -34,10 +35,7 @@ class _ProductCardState extends State<ProductCard> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-          context.go(
-            AppRoutes.toProduct(cid, widget.product.id),
-          );
+          changeScreen(context, ProductDetailsPage(product: widget.product));
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -179,9 +177,9 @@ class _ProductImagePlaceholder extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     if (isInCart) {
-                      context.push(AppRoutes.toCart(companyId));
+                      changeScreen(context, const CartPage());
                     } else {
-                      final router = GoRouter.of(context);
+                      
                       cartProvider.addToCart(companyId, product,
                         selectedColor: product.colors.isNotEmpty ? product.colors.first : null,
                         selectedSize: product.sizes.isNotEmpty ? product.sizes.first : null,
@@ -192,7 +190,7 @@ class _ProductImagePlaceholder extends StatelessWidget {
                           duration: const Duration(seconds: 2),
                           action: SnackBarAction(
                             label: 'View Cart',
-                            onPressed: () => router.push(AppRoutes.toCart(companyId)),
+                            onPressed: () => changeScreen(context, const CartPage()),
                           ),
                         ),
                       );

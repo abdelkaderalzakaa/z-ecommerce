@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/breadcrumb.dart';
@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 import '../../../../data/providers/cart_provider.dart';
 import '../../../../data/providers/company_provider.dart';
-import '../../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class HeaderDetails extends StatefulWidget implements PreferredSizeWidget {
   final List<String> paths;
@@ -54,10 +54,7 @@ class _HeaderDetailsState extends State<HeaderDetails> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
-                      final cid =
-                          context.read<CompanyProvider>().companySettings?.id ??
-                          'cmp_001';
-                      context.go(AppRoutes.toHome(cid));
+                      changeScreen(context, const HomePage());
                     },
                     child: const Logo(),
                   ),

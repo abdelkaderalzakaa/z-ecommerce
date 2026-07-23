@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../../../../data/providers/auth_provider.dart';
 import '../../../../../../data/providers/company_provider.dart';
@@ -7,8 +7,9 @@ import 'buttons.dart';
 import '../../../../global/core/constants/app_constants.dart';
 import '../../../../global/translate/app_localizations.dart';
 import '../../../../global/translate/translation_keys.dart';
-import '../../../../global/router/app_routes.dart';
 import '../../../../global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/pages/profile_page.dart';
+import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 
 class AccountHeaderIcon extends StatelessWidget {
   const AccountHeaderIcon({super.key});
@@ -24,9 +25,9 @@ class AccountHeaderIcon extends StatelessWidget {
 
         void handlePress() {
           if (isAuthenticated) {
-            context.go(AppRoutes.toProfile());
+            changeScreen(context, const ProfilePage());
           } else {
-            context.go(AppRoutes.toLogin());
+            changeScreen(context, const LoginPage());
           }
         }
 

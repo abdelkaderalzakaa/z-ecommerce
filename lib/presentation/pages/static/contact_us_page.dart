@@ -10,6 +10,7 @@ import '../../widgets/common/footer_section.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import '../../widgets/common/headers/widgets/top_title.dart';
+import 'package:z_ecommerce/presentation/pages/static/contact_us_page.dart';
 
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});

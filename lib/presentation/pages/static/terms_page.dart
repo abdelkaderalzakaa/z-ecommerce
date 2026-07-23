@@ -8,6 +8,7 @@ import '../../global/core/responsive/responsive_layout.dart';
 import '../../widgets/common/headers/header_details.dart';
 import '../../widgets/common/footer_section.dart';
 import '../../widgets/common/headers/widgets/top_title.dart';
+import 'package:z_ecommerce/presentation/pages/static/terms_page.dart';
 
 class TermsPage extends StatelessWidget {
   const TermsPage({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
@@ -18,7 +18,7 @@ import '../widgets/profile/tabs/settings_tab.dart';
 import '../widgets/profile/tabs/my_stores_tab.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
-import '../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final String? tabId;
@@ -96,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _onSelectTab(int index) {
     if (index != _selectedIndex) {
-      context.go(AppRoutes.toProfile(tabId: _indexToTabId(index)));
+      changeScreenReplacement(context, ProfilePage(tabId: _indexToTabId(index)));
     }
   }
 

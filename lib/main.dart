@@ -11,10 +11,11 @@ import 'data/providers/company_provider.dart';
 import 'data/providers/locale_provider.dart';
 import 'data/providers/user_visits_provider.dart';
 import 'data/providers/offer_provider.dart';
+import 'data/providers/super_admin_stores_provider.dart';
 import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_colors.dart';
 import 'presentation/global/theme/app_theme.dart';
-import 'presentation/global/router/app_router.dart';
+import 'presentation/pages/store_entry_page.dart';
 void main() {
   runApp(const ZEcommerceApp());
 }
@@ -36,6 +37,7 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => UserVisitsProvider()),
         ChangeNotifierProvider(create: (_) => OfferProvider()),
+        ChangeNotifierProvider(create: (_) => SuperAdminStoresProvider()),
       ],
       child: Consumer3<SettingsProvider, LocaleProvider, CompanyProvider>(
         builder: (context, settings, localeProvider, companyProvider, child) {
@@ -47,7 +49,7 @@ class ZEcommerceApp extends StatelessWidget {
               ? HexColor.fromHex(themeInfo!.secondaryColor) 
               : null;
 
-          return MaterialApp.router(
+          return MaterialApp(
             title: 'Shop.co – Find Clothes That Matches Your Style',
             debugShowCheckedModeBanner: false,
             themeMode: settings.themeMode,
@@ -70,7 +72,7 @@ class ZEcommerceApp extends StatelessWidget {
               primaryColor: primaryColor,
               secondaryColor: secondaryColor,
             ),
-            routerConfig: AppRouter.router,
+            home: const StoreEntryPage(),
           );
         },
       ),

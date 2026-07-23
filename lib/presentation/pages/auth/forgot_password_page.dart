@@ -1,5 +1,6 @@
+import 'package:z_ecommerce/presentation/pages/auth/reset_password_page.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
 import '../../../data/providers/company_provider.dart';
@@ -11,7 +12,6 @@ import '../../widgets/auth/primary_auth_button.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -28,7 +28,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => _isLoading = false);
-        context.go(AppRoutes.toResetPassword());
+        changeScreen(context, const ResetPasswordPage());
       }
     });
   }
@@ -62,7 +62,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   children: [
                     TextButton.icon(
                       onPressed: () {
-                        context.pop(); // Back to login
+                        Navigator.pop(context); // Back to login
                       },
                       icon: const Icon(Icons.arrow_back, size: 16),
                       label: Text(TranslationKeys.backToLogin.tr(context)),

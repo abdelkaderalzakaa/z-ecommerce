@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/company_provider.dart';
@@ -54,7 +54,7 @@ class StoreSelectorSheet extends StatelessWidget {
                 if (!isSelected) {
                   companyProvider.switchStore(store.id);
                 }
-                context.pop();
+                Navigator.pop(context);
               },
               leading: CircleAvatar(
                 backgroundColor: isSelected ? Theme.of(context).primaryColor : Theme.of(context).dividerColor,

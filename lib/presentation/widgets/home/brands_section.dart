@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import '../../../data/providers/company_provider.dart';
 import '../../../data/models/brand_model.dart';
 import '../../global/core/constants/app_constants.dart';
-import '../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
 class BrandsSection extends StatefulWidget {
   const BrandsSection({super.key});
@@ -15,13 +15,6 @@ class BrandsSection extends StatefulWidget {
 }
 
 class _BrandsSectionState extends State<BrandsSection> {
-  static const List<BrandModel> _defaultBrands = [
-    BrandModel(id: '1', name: 'VERSACE'),
-    BrandModel(id: '2', name: 'ZARA'),
-    BrandModel(id: '3', name: 'GUCCI'),
-    BrandModel(id: '4', name: 'PRADA'),
-    BrandModel(id: '5', name: 'Calvin Klein'),
-  ];
 
   late final ScrollController _scrollController;
   Timer? _timer;
@@ -55,7 +48,7 @@ class _BrandsSectionState extends State<BrandsSection> {
   @override
   Widget build(BuildContext context) {
     final companyData = context.watch<CompanyProvider>().companySettings;
-    final brands = companyData?.brands ?? _defaultBrands;
+    final brands = companyData?.brands ?? [];
 
     if (brands.isEmpty) return const SizedBox();
 
@@ -91,7 +84,7 @@ class _BrandItem extends StatelessWidget {
     
     return GestureDetector(
       onTap: () {
-        context.go(AppRoutes.toShop(companyId, brand: brand.name));
+        changeScreen(context, const CategoriesPage());
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),

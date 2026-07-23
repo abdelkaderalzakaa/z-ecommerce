@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/company_provider.dart';
@@ -8,8 +8,8 @@ import '../../global/core/responsive/responsive_layout.dart';
 import '../common/product_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
 import '../../../data/models/product_model.dart';
+import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
 class NewArrivalsSection extends StatelessWidget {
   const NewArrivalsSection({super.key});
@@ -37,8 +37,7 @@ class NewArrivalsSection extends StatelessWidget {
                   : _DesktopProductGrid(products: products),
           const SizedBox(height: 36),
           ViewAllButton(onTap: () {
-            final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-            context.go(AppRoutes.toShop(cid));
+            changeScreen(context, const CategoriesPage());
           }),
             ],
           ),

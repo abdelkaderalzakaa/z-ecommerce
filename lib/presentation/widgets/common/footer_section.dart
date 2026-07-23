@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,7 +10,10 @@ import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/static/about_page.dart';
+import 'package:z_ecommerce/presentation/pages/static/contact_us_page.dart';
+import 'package:z_ecommerce/presentation/pages/static/terms_page.dart';
+import 'package:z_ecommerce/presentation/pages/static/privacy_policy_page.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
@@ -58,29 +61,25 @@ class _DesktopFooter extends StatelessWidget {
               (
                 label: TranslationKeys.about.tr(context),
                 onTap: () {
-                  final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                  context.go(AppRoutes.toAbout(cid));
+                  changeScreen(context, const AboutPage());
                 },
               ),
               (
                 label: TranslationKeys.contactUs.tr(context),
                 onTap: () {
-                  final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                  context.go(AppRoutes.toContact(cid));
+                  changeScreen(context, const ContactUsPage());
                 },
               ),
               (
                 label: TranslationKeys.termsConditions.tr(context),
                 onTap: () {
-                  final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                  context.go(AppRoutes.toTerms(cid));
+                  changeScreen(context, const TermsPage());
                 },
               ),
               (
                 label: TranslationKeys.privacyPolicy.tr(context),
                 onTap: () {
-                  final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                  context.go(AppRoutes.toPrivacy(cid));
+                  changeScreen(context, const PrivacyPolicyPage());
                 },
               ),
             ],
@@ -109,29 +108,25 @@ class _MobileFooter extends StatelessWidget {
                 (
                   label: TranslationKeys.about.tr(context),
                   onTap: () {
-                    final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                    context.push(AppRoutes.toAbout(cid));
+                    changeScreen(context, const AboutPage());
                   },
                 ),
                 (
                   label: TranslationKeys.contactUs.tr(context),
                   onTap: () {
-                    final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                    context.push(AppRoutes.toContact(cid));
+                    changeScreen(context, const ContactUsPage());
                   },
                 ),
                 (
                   label: TranslationKeys.termsConditions.tr(context),
                   onTap: () {
-                    final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                    context.push(AppRoutes.toTerms(cid));
+                    changeScreen(context, const TermsPage());
                   },
                 ),
                 (
                   label: TranslationKeys.privacyPolicy.tr(context),
                   onTap: () {
-                    final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                    context.push(AppRoutes.toPrivacy(cid));
+                    changeScreen(context, const PrivacyPolicyPage());
                   },
                 ),
               ],

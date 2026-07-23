@@ -44,7 +44,8 @@ final List<CompanySettingsModel> fakeCompanies = [
         latitude: 33.8938,
         longitude: 35.5018,
         isTHIS: true,
-        imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80',
+        imageUrl:
+            'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80',
         linkMap: 'https://maps.google.com/?q=33.8938,35.5018',
       ),
       CompanyAddressModel(
@@ -55,7 +56,8 @@ final List<CompanySettingsModel> fakeCompanies = [
         latitude: 33.9182,
         longitude: 35.5880,
         isTHIS: false,
-        imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80',
+        imageUrl:
+            'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80',
         linkMap: 'https://maps.google.com/?q=33.9182,35.5880',
       ),
     ],

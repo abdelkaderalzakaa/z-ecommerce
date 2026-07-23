@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
 import '../../../data/providers/company_provider.dart';
 import '../../widgets/common/headers/header_home.dart';
 import '../../widgets/common/footer_section.dart';
 import '../../widgets/auth/success_widget.dart';
-import '../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 
 class AuthSuccessPage extends StatelessWidget {
   final String title;
@@ -31,7 +31,7 @@ class AuthSuccessPage extends StatelessWidget {
               message: message,
               buttonLabel: buttonLabel,
               onPressed: () {
-                context.go(AppRoutes.toLogin());
+                changeScreen(context, const LoginPage());
               },
             ),
             const FooterSection(),

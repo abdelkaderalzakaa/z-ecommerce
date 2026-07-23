@@ -4,7 +4,7 @@ import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
 import '../widgets/common/footer_section.dart';
 import '../widgets/common/headers/widgets/top_title.dart';
-import '../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/company_provider.dart';
 import '../widgets/product_details/product_gallery.dart';
@@ -14,6 +14,7 @@ import '../global/translate/translation_keys.dart';
 
 import '../widgets/product_details/related_products.dart';
 import '../../../data/models/product_model.dart';
+import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final Product product;
@@ -29,9 +30,7 @@ class ProductDetailsPage extends StatelessWidget {
       appBar: HeaderDetails(
         title: TranslationKeys.productDetails.tr(context),
 
-        fallbackRoute: AppRoutes.toShop(
-          context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001',
-        ),
+        fallbackRoute: 'shop',
         paths: [
           TranslationKeys.home.tr(context),
           TranslationKeys.shop.tr(context),

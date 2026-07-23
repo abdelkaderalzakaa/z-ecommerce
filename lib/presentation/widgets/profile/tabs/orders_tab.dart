@@ -1,5 +1,6 @@
+import 'package:z_ecommerce/presentation/pages/order_details_page.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
@@ -8,7 +9,6 @@ import '../../../../data/providers/invoice_provider.dart';
 import '../../../../data/providers/company_provider.dart';
 import '../../../../data/models/invoice_model.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
-import '../../../global/router/app_routes.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
 class OrdersTab extends StatelessWidget {
@@ -272,7 +272,7 @@ class _ViewDetailsButtonState extends State<_ViewDetailsButton> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          context.go(AppRoutes.toOrder(widget.invoice.storeId, widget.invoice.invoiceId));
+          changeScreen(context, OrderDetailsPage(invoice: widget.invoice));
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

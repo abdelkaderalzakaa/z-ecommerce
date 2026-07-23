@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
 
@@ -13,10 +13,16 @@ import '../../data/models/offer_model.dart';
 import '../../data/models/product_model.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/locale_provider.dart';
-import '../global/router/app_routes.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
-
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/profile_page.dart';
+import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
+import 'package:z_ecommerce/presentation/pages/store_entry_page.dart';
+import 'package:z_ecommerce/presentation/pages/stores_page.dart';
+import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
+import 'package:z_ecommerce/presentation/pages/offer_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
 class StoreEntryPage extends StatefulWidget {
   const StoreEntryPage({super.key});
 
@@ -183,7 +189,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
         const SizedBox(width: 8),
         if (!auth.isAuthenticated) ...[
           TextButton(
-            onPressed: () => context.go(AppRoutes.toLogin()),
+            onPressed: () => changeScreen(context, const LoginPage()),
             style: TextButton.styleFrom(
               foregroundColor: _isScrolled ? Colors.black87 : Colors.white,
             ),
@@ -196,7 +202,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: ElevatedButton(
-              onPressed: () => context.go(AppRoutes.toRegister()),
+              onPressed: () => changeScreen(context, const RegisterPage()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isScrolled ? primaryColor : Colors.white,
                 foregroundColor: _isScrolled ? Colors.white : primaryColor,
@@ -218,7 +224,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
               Icons.person,
               color: _isScrolled ? Colors.black87 : Colors.white,
             ),
-            onPressed: () => context.go(AppRoutes.toProfile()),
+            onPressed: () => changeScreen(context, const ProfilePage()),
           ),
           const SizedBox(width: 16),
         ],
@@ -463,7 +469,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
           // Categories
           Expanded(
             child: SizedBox(
-              height: 100, // Fixed height for the category items
+              height: 130, // Increased height to prevent bottom overflow
               child: ListView.builder(
                 controller: _categoriesScrollController,
                 scrollDirection: Axis.horizontal,
@@ -761,7 +767,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                     style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
                   TextButton(
-                    onPressed: () => context.go(AppRoutes.toStores()),
+                    onPressed: () => changeScreenReplacement(context, const StoresPage()),
                     child: Text(
                       isAr ? 'الجميع' : 'See All',
                       style: TextStyle(
@@ -1047,9 +1053,12 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                               size: 16,
                             ),
                             SizedBox(width: 8),
-                            Text(
-                              'www.alzaka.com',
-                              style: TextStyle(color: Colors.blueAccent),
+                            Expanded(
+                              child: Text(
+                                'www.alzaka.com',
+                                style: TextStyle(color: Colors.blueAccent),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
@@ -1058,9 +1067,12 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                           children: [
                             Icon(Icons.email, color: Colors.white70, size: 16),
                             SizedBox(width: 8),
-                            Text(
-                              'info@alzaka.com',
-                              style: TextStyle(color: Colors.blueAccent),
+                            Expanded(
+                              child: Text(
+                                'info@alzaka.com',
+                                style: TextStyle(color: Colors.blueAccent),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
@@ -1243,7 +1255,7 @@ class _StoreCardState extends State<_StoreCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: InkWell(
-            onTap: () => context.go(AppRoutes.toHome(widget.company.id)),
+            onTap: () => changeScreen(context, const HomePage()),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1425,7 +1437,7 @@ class _StoreCardState extends State<_StoreCard> {
                   ),
                   child: ElevatedButton(
                     onPressed: () =>
-                        context.go(AppRoutes.toHome(widget.company.id)),
+                        changeScreen(context, const HomePage()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       shape: RoundedRectangleBorder(
@@ -1479,7 +1491,7 @@ class _TrendingProductCard extends StatelessWidget {
       child: InkWell(
         onTap: () {
           // Go directly to the product page inside its specific store
-          context.go('/$companyId/product/${product.id}');
+          changeScreen(context, ProductDetailsPage(product: product));
         },
         borderRadius: BorderRadius.circular(20),
         child: Column(
@@ -2109,7 +2121,7 @@ class _TrendingOfferCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          context.go('/$companyId/offer/${offer.id}');
+          changeScreen(context, OfferDetailsPage(offerId: offer.id));
         },
         borderRadius: BorderRadius.circular(20),
         child: Column(
@@ -2207,7 +2219,7 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
-        onTap: () => context.go(AppRoutes.toHome(widget.company.id)),
+        onTap: () => changeScreen(context, const HomePage()),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           transform: Matrix4.translationValues(0, _isHovered ? -8 : 0, 0),

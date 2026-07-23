@@ -17,26 +17,30 @@ class Breadcrumb extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          for (int i = 0; i < paths.length; i++) ...[
-            _BreadcrumbItem(
-              label: paths[i],
-              isLast: i == paths.length - 1,
-              isMobile: isMobile,
-            ),
-            if (i < paths.length - 1)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Icon(
-                  Icons.chevron_right,
-                  size: isMobile ? 10 : 12,
-                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            for (int i = 0; i < paths.length; i++) ...[
+              _BreadcrumbItem(
+                label: paths[i],
+                isLast: i == paths.length - 1,
+                isMobile: isMobile,
               ),
+              if (i < paths.length - 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Icon(
+                    Icons.chevron_right,
+                    size: isMobile ? 10 : 12,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

@@ -1,15 +1,16 @@
+import 'package:z_ecommerce/presentation/pages/offer_details_page.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/models/offer_model.dart';
 import '../../../data/models/product_model.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/company_provider.dart';
-import '../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/cart_page.dart';
 
 class OfferCard extends StatefulWidget {
   final OfferModel offer;
@@ -239,8 +240,7 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                                     icon: isInCart ? Icons.check_circle : Icons.shopping_cart,
                                     onTap: () {
                                       if (isInCart) {
-                                        final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                                        context.go(AppRoutes.toCart(cid));
+                                        changeScreen(context, const CartPage());
                                       } else {
                                         _addToCart(context);
                                       }
@@ -262,8 +262,7 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                                     text: 'Shop Now',
                                     icon: Icons.visibility,
                                     onTap: () {
-                                      final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                                      context.go(AppRoutes.toOfferDetails(cid, offer.id));
+                                      changeScreen(context, OfferDetailsPage(offerId: widget.offer.id));
                                     },
                                   );
                                 }

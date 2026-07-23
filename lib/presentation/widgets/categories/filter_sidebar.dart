@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/company_provider.dart';
 import '../../../data/providers/category_provider.dart';
-import '../../global/router/app_routes.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
 class FilterSidebar extends StatefulWidget {
   final bool isMobile;
@@ -89,7 +89,7 @@ class _FilterSidebarState extends State<FilterSidebar> {
                   ),
                   const SizedBox(width: 12),
                   GestureDetector(
-                    onTap: widget.isMobile ? () => context.pop() : null,
+                    onTap: widget.isMobile ? () => Navigator.pop(context) : null,
                     child: Icon(
                       widget.isMobile ? Icons.close : Icons.tune,
                       color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -129,11 +129,10 @@ class _FilterSidebarState extends State<FilterSidebar> {
                     label: Text(label),
                     selected: isSelected,
                     onSelected: (selected) {
-                      final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
                       if (isAll) {
-                        context.go(AppRoutes.toShop(cid));
+                        changeScreen(context, const CategoriesPage());
                       } else {
-                        context.go(AppRoutes.toShop(cid, category: cat!.label));
+                        changeScreen(context, const CategoriesPage());
                       }
                     },
                     selectedColor: Theme.of(context).primaryColor,

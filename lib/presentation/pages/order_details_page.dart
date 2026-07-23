@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../data/providers/company_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/order_details_page.dart';
 
 class OrderDetailsPage extends StatelessWidget {
   final InvoiceModel invoice;

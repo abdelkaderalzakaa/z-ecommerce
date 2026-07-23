@@ -23,11 +23,13 @@ class AuthProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final savedEmail = prefs.getString('saved_email');
       if (savedEmail != null) {
-        // Try to find the fake user, otherwise create a mock one to restore session
+        // Try to find the fake user, otherwise create a mock one to restore session. 
+        // For security in a real app, we'd validate session token.
         _currentUser = authenticateFakeUser(savedEmail, 'password123') ?? UserModel(
           id: 'usr_restored',
           name: savedEmail.split('@').first,
           email: savedEmail,
+          role: UserRole.customer, // Fallback to customer
           createdAt: DateTime.now(),
         );
         notifyListeners();
@@ -62,11 +64,13 @@ class AuthProvider extends ChangeNotifier {
       }
       
       // If not a fake user, but password is >= 6, we just mock login successfully
+      // ONLY ALLOW THIS FOR CUSTOMERS to prevent fake admin access
       if (password.length >= 6) {
         _currentUser = UserModel(
           id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
           name: email.split('@').first,
           email: email,
+          role: UserRole.customer,
           createdAt: DateTime.now(),
         );
         _isLoading = false;
@@ -82,7 +86,7 @@ class AuthProvider extends ChangeNotifier {
     }
     
     _isLoading = false;
-    _errorMessage = 'Invalid email or password. Use sarah@example.com / password123';
+    _errorMessage = 'Invalid email, password, or unauthorized role.';
     notifyListeners();
     return false;
   }
@@ -96,10 +100,12 @@ class AuthProvider extends ChangeNotifier {
     await Future.delayed(const Duration(seconds: 1));
 
     if (name.isNotEmpty && email.isNotEmpty && password.length >= 6) {
+      // REGISTRATION IS ONLY FOR CUSTOMERS
       _currentUser = UserModel(
         id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
         name: name,
         email: email,
+        role: UserRole.customer, 
         createdAt: DateTime.now(),
       );
       _isLoading = false;

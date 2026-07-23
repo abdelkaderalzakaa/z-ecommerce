@@ -2,20 +2,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'dart:async';
 
 import '../../../data/models/offer_model.dart';
 import '../../../data/providers/offer_provider.dart';
 import '../../../data/providers/product_provider.dart';
-import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import '../widgets/common/product_card.dart';
 import '../widgets/common/footer_section.dart';
 import '../widgets/common/headers/header_details.dart';
-import '../global/router/app_routes.dart';
 import '../../../data/providers/company_provider.dart';
 
 class OfferDetailsPage extends StatefulWidget {
@@ -40,8 +37,12 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-      final companyId = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-      final offer = context.read<OfferProvider>().getOfferById(companyId, widget.offerId);
+      final companyId =
+          context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+      final offer = context.read<OfferProvider>().getOfferById(
+        companyId,
+        widget.offerId,
+      );
       if (offer != null) {
         final now = DateTime.now();
         if (offer.endDate.isAfter(now)) {
@@ -66,8 +67,12 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final companyId = context.watch<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-    final offer = context.watch<OfferProvider>().getOfferById(companyId, widget.offerId);
+    final companyId =
+        context.watch<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+    final offer = context.watch<OfferProvider>().getOfferById(
+      companyId,
+      widget.offerId,
+    );
 
     if (offer == null) {
       return Scaffold(
@@ -91,75 +96,79 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
       offerProducts = products.take(12).toList();
     }
 
+    final hPad = ResponsiveLayout.horizontalPadding(context);
     return Scaffold(
       appBar: HeaderDetails(
         title: offer.name.get(context),
-        fallbackRoute: AppRoutes.toOffers(context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001'),
+        fallbackRoute: 'offers',
         paths: [
           TranslationKeys.home.tr(context),
           TranslationKeys.specialOffers.tr(context),
           offer.name.get(context),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          _buildHeroHeader(context, offer),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 32.0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    TranslationKeys.specialOffers.tr(context),
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: hPad),
+        child: CustomScrollView(
+          slivers: [
+            _buildHeroHeader(context, offer),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 32.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      TranslationKeys.specialOffers.tr(context),
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Products included in this offer',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Products included in this offer',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.only(
-              left: 24.0,
-              right: 24.0,
-              bottom: 40.0,
-            ),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: ResponsiveLayout.isMobile(context)
-                    ? 2
-                    : ResponsiveLayout.isTablet(context)
-                    ? 3
-                    : 4,
-                childAspectRatio: ResponsiveLayout.isMobile(context)
-                    ? 0.75
-                    : 0.8,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 24,
+            SliverPadding(
+              padding: const EdgeInsets.only(
+                left: 24.0,
+                right: 24.0,
+                bottom: 40.0,
               ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                return ProductCard(product: offerProducts[index]);
-              }, childCount: offerProducts.length),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: ResponsiveLayout.isMobile(context)
+                      ? 2
+                      : ResponsiveLayout.isTablet(context)
+                      ? 3
+                      : 4,
+                  childAspectRatio: ResponsiveLayout.isMobile(context)
+                      ? 0.75
+                      : 0.8,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 24,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  return ProductCard(product: offerProducts[index]);
+                }, childCount: offerProducts.length),
+              ),
             ),
-          ),
-          if (!ResponsiveLayout.isMobile(context))
-            const SliverToBoxAdapter(child: FooterSection()),
-        ],
+            if (!ResponsiveLayout.isMobile(context))
+              const SliverToBoxAdapter(child: FooterSection()),
+          ],
+        ),
       ),
     );
   }
@@ -274,13 +283,17 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
                             ),
                           );
                         },
-                        icon: Icon(Icons.copy, color: Theme.of(context).primaryColor),
+                        icon: Icon(
+                          Icons.copy,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         label: Text(
                           'Copy: ${offer.couponCode}',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,

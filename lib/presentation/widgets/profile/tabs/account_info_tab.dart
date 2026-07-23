@@ -6,8 +6,8 @@ import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
 import '../../../../../data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:go_router/go_router.dart';
-import 'package:z_ecommerce/presentation/global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/pages/store_entry_page.dart';
 
 class AccountInfoTab extends StatefulWidget {
   const AccountInfoTab({super.key});
@@ -171,7 +171,7 @@ class _LogoutButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: () {
         context.read<AuthProvider>().logout();
-        context.go(AppRoutes.entry);
+        changeScreenReplacement(context, const StoreEntryPage());
       },
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),

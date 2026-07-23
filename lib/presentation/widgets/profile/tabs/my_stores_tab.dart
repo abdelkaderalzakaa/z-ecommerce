@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/user_visits_provider.dart';
 import '../../../global/core/constants/app_constants.dart';
-import '../../../global/router/app_routes.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class MyStoresTab extends StatelessWidget {
   const MyStoresTab({super.key});
@@ -97,7 +97,7 @@ class _StoreCardState extends State<_StoreCard> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          context.go(AppRoutes.toHome(widget.visit.storeId));
+          changeScreen(context, const HomePage());
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),

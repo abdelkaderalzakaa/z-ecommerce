@@ -10,6 +10,7 @@ import '../widgets/common/headers/header_details.dart';
 import '../../../data/models/localized_string.dart';
 import '../widgets/common/footer_section.dart';
 import '../widgets/offers/offer_card.dart';
+import 'package:z_ecommerce/presentation/pages/offers_page.dart';
 
 class OffersPage extends StatelessWidget {
   final String? offerType;
@@ -18,6 +19,7 @@ class OffersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hPad = ResponsiveLayout.horizontalPadding(context);
     return Scaffold(
       appBar: HeaderDetails(
         title: offerType != null
@@ -28,115 +30,120 @@ class OffersPage extends StatelessWidget {
           TranslationKeys.offers.tr(context),
         ],
       ),
-      body: CustomScrollView(
-        slivers: [
-          // Hero Header for Specific Offer Type
-          if (offerType != null) _buildHeroHeader(context, offerType!),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: hPad),
+        child: CustomScrollView(
+          slivers: [
+            // Hero Header for Specific Offer Type
+            if (offerType != null) _buildHeroHeader(context, offerType!),
 
-          // Title Section for General Offers
-          if (offerType == null)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 32.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      TranslationKeys.offers.tr(context),
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
+            // Title Section for General Offers
+            if (offerType == null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 32.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        TranslationKeys.offers.tr(context),
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      TranslationKeys.specialOffers.tr(context),
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      const SizedBox(height: 8),
+                      Text(
+                        TranslationKeys.specialOffers.tr(context),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
+
+            // Offers Grid
+            Consumer<OfferProvider>(
+              builder: (context, provider, child) {
+                final companyId =
+                    context.watch<CompanyProvider>().companySettings?.id ??
+                    'cmp_001';
+                var offers = provider.getActiveOffers(companyId);
+
+                // Filter by offerType if provided
+                if (offerType != null) {
+                  if (offerType == 'coupon') {
+                    offers = offers
+                        .where(
+                          (o) => [
+                            'coupon',
+                            'percentage_discount',
+                            'fixed_discount',
+                            'clearance',
+                          ].contains(o.type),
+                        )
+                        .toList();
+                  } else if (offerType == 'product_gift') {
+                    offers = offers
+                        .where(
+                          (o) => [
+                            'product_gift',
+                            'buy_x_get_y',
+                            'loyalty_points',
+                          ].contains(o.type),
+                        )
+                        .toList();
+                  } else {
+                    offers = offers.where((o) => o.type == offerType).toList();
+                  }
+                }
+
+                if (offers.isEmpty) {
+                  return SliverFillRemaining(
+                    child: Center(
+                      child: Text('No offers available right now.'),
+                    ),
+                  );
+                }
+
+                return SliverPadding(
+                  padding: const EdgeInsets.only(
+                    left: 24.0,
+                    right: 24.0,
+                    bottom: 40.0,
+                  ),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: ResponsiveLayout.isMobile(context)
+                          ? 1
+                          : ResponsiveLayout.isTablet(context)
+                          ? 2
+                          : 3,
+                      childAspectRatio: ResponsiveLayout.isMobile(context)
+                          ? 1.5
+                          : 1.2,
+                      crossAxisSpacing: 24,
+                      mainAxisSpacing: 24,
+                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return OfferCard(offer: offers[index]);
+                    }, childCount: offers.length),
+                  ),
+                );
+              },
             ),
 
-          // Offers Grid
-          Consumer<OfferProvider>(
-            builder: (context, provider, child) {
-              final companyId =
-                  context.watch<CompanyProvider>().companySettings?.id ??
-                  'cmp_001';
-              var offers = provider.getActiveOffers(companyId);
-
-              // Filter by offerType if provided
-              if (offerType != null) {
-                if (offerType == 'coupon') {
-                  offers = offers
-                      .where(
-                        (o) => [
-                          'coupon',
-                          'percentage_discount',
-                          'fixed_discount',
-                          'clearance',
-                        ].contains(o.type),
-                      )
-                      .toList();
-                } else if (offerType == 'product_gift') {
-                  offers = offers
-                      .where(
-                        (o) => [
-                          'product_gift',
-                          'buy_x_get_y',
-                          'loyalty_points',
-                        ].contains(o.type),
-                      )
-                      .toList();
-                } else {
-                  offers = offers.where((o) => o.type == offerType).toList();
-                }
-              }
-
-              if (offers.isEmpty) {
-                return SliverFillRemaining(
-                  child: Center(child: Text('No offers available right now.')),
-                );
-              }
-
-              return SliverPadding(
-                padding: const EdgeInsets.only(
-                  left: 24.0,
-                  right: 24.0,
-                  bottom: 40.0,
-                ),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: ResponsiveLayout.isMobile(context)
-                        ? 1
-                        : ResponsiveLayout.isTablet(context)
-                        ? 2
-                        : 3,
-                    childAspectRatio: ResponsiveLayout.isMobile(context)
-                        ? 1.5
-                        : 1.2,
-                    crossAxisSpacing: 24,
-                    mainAxisSpacing: 24,
-                  ),
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return OfferCard(offer: offers[index]);
-                  }, childCount: offers.length),
-                ),
-              );
-            },
-          ),
-
-          if (!ResponsiveLayout.isMobile(context))
-            const SliverToBoxAdapter(child: FooterSection()),
-        ],
+            if (!ResponsiveLayout.isMobile(context))
+              const SliverToBoxAdapter(child: FooterSection()),
+          ],
+        ),
       ),
     );
   }

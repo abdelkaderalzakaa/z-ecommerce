@@ -38,6 +38,15 @@ class CompanySettingsModel {
 
   final List<PaymentMethodType> paymentMethods;
 
+  // New Super Admin / Store Management fields
+  final String? logoUrl;
+  final String? coverUrl;
+  final String? status; // 'Active', 'Inactive', 'Suspended'
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final String? contactEmail;
+  final String? contactPhone;
+
   const CompanySettingsModel({
     required this.id,
     required this.category,
@@ -61,6 +70,13 @@ class CompanySettingsModel {
     required this.privacyPolicy,
     required this.socials,
     this.paymentMethods = const [PaymentMethodType.cod],
+    this.logoUrl,
+    this.coverUrl,
+    this.status = 'Active',
+    this.createdAt,
+    this.updatedAt,
+    this.contactEmail,
+    this.contactPhone,
   });
    /// تم تحويلها إلى دالة getter تحسب التقييم بناءً على التقييمات، الطلبات، المتابعين، والزيارات
   double get rate {

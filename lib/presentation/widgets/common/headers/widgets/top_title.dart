@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
-import 'package:z_ecommerce/presentation/global/router/app_routes.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/breadcrumb.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class TopTitle extends StatelessWidget {
   final String title;
@@ -32,13 +32,10 @@ class TopTitle extends StatelessWidget {
             onTap:
                 onBack ??
                 () {
-                  if (context.canPop()) {
-                    context.pop();
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
                   } else {
-                    final cid =
-                        context.read<CompanyProvider>().companySettings?.id ??
-                        'cmp_001';
-                    context.go(fallbackRoute ?? AppRoutes.toHome(cid));
+                    changeScreen(context, const HomePage());
                   }
                 },
             child: Padding(
@@ -51,19 +48,28 @@ class TopTitle extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-              letterSpacing: -0.5,
+          Flexible(
+            flex: 1,
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+                letterSpacing: -0.5,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
           ),
-          Spacer(),
-          Breadcrumb(paths: paths),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Breadcrumb(paths: paths),
+            ),
+          ),
         ],
       ),
     );

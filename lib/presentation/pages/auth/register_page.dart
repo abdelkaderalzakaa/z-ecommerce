@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -14,8 +14,11 @@ import '../../widgets/auth/social_login_buttons.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../global/router/app_routes.dart';
 import 'package:flutter/gestures.dart';
+import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
+import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
+import 'package:z_ecommerce/presentation/pages/static/terms_page.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class RegisterPage extends StatefulWidget {
   final String? redirectTo;
@@ -71,8 +74,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (mounted) {
       if (success) {
-        final destination = widget.redirectTo ?? AppRoutes.entry;
-        context.go(destination);
+        final destination = widget.redirectTo ?? '/';
+        if (destination == '/') {
+          changeScreenUntill(context, const HomePage());
+        } else {
+          Navigator.pushReplacementNamed(context, destination);
+        }
       } else {
         setState(() {
           _errorMessage = authProvider.errorMessage ?? TranslationKeys.registrationFailed.tr(context);
@@ -175,8 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ),
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
-                                        final cid = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                                        context.go(AppRoutes.toTerms(cid));
+                                        changeScreen(context, const TermsPage());
                                       },
                                   ),
                                   TextSpan(text: TranslationKeys.andPrivacyPolicy.tr(context)),
@@ -238,7 +244,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
                         onTap: () {
-                          context.go(AppRoutes.toLogin());
+                          changeScreen(context, LoginPage(redirectTo: widget.redirectTo));
                         },
                         child: Text(
                           TranslationKeys.logIn.tr(context),

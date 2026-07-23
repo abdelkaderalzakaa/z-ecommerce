@@ -398,6 +398,7 @@ class _HeroBottomSection extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(left: 16),
         height: 180,
+        width: 150,
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
@@ -421,6 +422,7 @@ class _HeroBottomSection extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(left: 16), // Margin for spacing between cards
       height: 180,
+      width: 250,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: Theme.of(context).cardColor,

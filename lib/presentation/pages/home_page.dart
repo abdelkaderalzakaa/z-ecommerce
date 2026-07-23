@@ -12,6 +12,7 @@ import '../widgets/home/offers_section.dart';
 import '../widgets/home/newsletter_section.dart';
 import '../widgets/common/footer_section.dart';
 import '../global/core/constants/app_constants.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

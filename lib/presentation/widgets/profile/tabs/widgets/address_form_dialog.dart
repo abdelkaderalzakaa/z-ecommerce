@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
@@ -67,7 +67,7 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
         authProvider.updateAddress(newAddress);
       }
       
-      context.pop();
+      Navigator.pop(context);
     }
   }
 
@@ -98,7 +98,7 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
                     MouseRegion(
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
-                        onTap: () => context.pop(),
+                        onTap: () => Navigator.pop(context),
                         child: Icon(Icons.close, color: Theme.of(context).textTheme.bodyMedium?.color),
                       ),
                     ),

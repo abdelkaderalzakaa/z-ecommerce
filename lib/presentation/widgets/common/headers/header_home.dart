@@ -1,5 +1,6 @@
+import 'package:z_ecommerce/presentation/pages/offers_page.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/buttons.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/logo.dart';
@@ -13,7 +14,8 @@ import '../../../../data/providers/settings_provider.dart';
 import '../../../../data/providers/locale_provider.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
-import '../../../global/router/app_routes.dart';
+import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
 class HeaderHome extends StatefulWidget implements PreferredSizeWidget {
   final void Function(String section) onNavTap;
@@ -54,13 +56,10 @@ class _HeaderHomeState extends State<HeaderHome> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
-                      final cid =
-                          context.read<CompanyProvider>().companySettings?.id ??
-                          'cmp_001';
                       if (ModalRoute.of(context)?.isFirst == true) {
                         widget.onNavTap('hero');
                       } else {
-                        context.go(AppRoutes.toHome(cid));
+                        changeScreen(context, const HomePage());
                       }
                     },
                     child: const Logo(),
@@ -71,13 +70,10 @@ class _HeaderHomeState extends State<HeaderHome> {
                   _NavLink(
                     label: TranslationKeys.home.tr(context),
                     onTap: () {
-                      final cid =
-                          context.read<CompanyProvider>().companySettings?.id ??
-                          'cmp_001';
                       if (ModalRoute.of(context)?.isFirst == true) {
                         widget.onNavTap('hero');
                       } else {
-                        context.go(AppRoutes.toHome(cid));
+                        changeScreen(context, const HomePage());
                       }
                     },
                   ),
@@ -85,48 +81,36 @@ class _HeaderHomeState extends State<HeaderHome> {
                   _NavLink(
                     label: TranslationKeys.newArrivals.tr(context),
                     onTap: () {
-                      final cid =
-                          context.read<CompanyProvider>().companySettings?.id ??
-                          'cmp_001';
                       if (ModalRoute.of(context)?.isFirst == true) {
                         widget.onNavTap('newArrivals');
                       } else {
-                        context.go(AppRoutes.toHome(cid));
+                        changeScreen(context, const HomePage());
                       }
                     },
                   ),
                   _NavLink(
                     label: TranslationKeys.topSelling.tr(context),
                     onTap: () {
-                      final cid =
-                          context.read<CompanyProvider>().companySettings?.id ??
-                          'cmp_001';
                       if (ModalRoute.of(context)?.isFirst == true) {
                         widget.onNavTap('topSelling');
                       } else {
-                        context.go(AppRoutes.toHome(cid));
+                        changeScreen(context, const HomePage());
                       }
                     },
                   ),
                   _NavLink(
                     label: TranslationKeys.offers.tr(context),
                     onTap: () {
-                      final cid =
-                          context.read<CompanyProvider>().companySettings?.id ??
-                          'cmp_001';
-                      context.go(AppRoutes.toOffers(cid));
+                      changeScreen(context, const OffersPage());
                     },
                   ),
                   _NavLink(
                     label: TranslationKeys.categories.tr(context),
                     onTap: () {
-                      final cid =
-                          context.read<CompanyProvider>().companySettings?.id ??
-                          'cmp_001';
                       if (ModalRoute.of(context)?.isFirst == true) {
                         widget.onNavTap('browseCategories');
                       } else {
-                        context.go(AppRoutes.toShop(cid));
+                        changeScreen(context, const CategoriesPage());
                       }
                     },
                   ),
