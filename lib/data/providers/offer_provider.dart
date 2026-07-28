@@ -15,6 +15,27 @@ class OfferProvider extends ChangeNotifier {
   }
 
   List<OfferModel> get allOffers => _offers;
+  List<OfferModel> get offers => _offers;
+
+  // ==================== CRUD OPERATIONS ====================
+
+  void addOffer(OfferModel offer) {
+    _offers.insert(0, offer);
+    notifyListeners();
+  }
+
+  void updateOffer(OfferModel offer) {
+    final index = _offers.indexWhere((o) => o.id == offer.id);
+    if (index != -1) {
+      _offers[index] = offer;
+      notifyListeners();
+    }
+  }
+
+  void deleteOffer(String offerId) {
+    _offers.removeWhere((o) => o.id == offerId);
+    notifyListeners();
+  }
   
   List<OfferModel> getActiveOffers(String companyId) {
     return _offers.where((o) => o.isValid && o.companyId == companyId).toList();

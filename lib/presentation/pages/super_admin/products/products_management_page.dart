@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/products/product_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/products/create_edit_product_page.dart';
 
 class ProductsManagementPage extends StatefulWidget {
   const ProductsManagementPage({super.key});
@@ -23,6 +26,7 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
@@ -42,22 +46,55 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
             ? filteredProducts.sublist(startIndex, endIndex)
             : <Product>[];
 
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Page Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                 Text(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         TranslationKeys.productsManagement.tr(context),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'إدارة ومعاينة منتجات المنصة المتاحة عبر كافة المتاجر',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: theme.textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => changeScreen(
+                      context,
+                      const CreateEditProductPage(),
+                    ),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(TranslationKeys.addNewProduct.tr(context)),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 11,
+                      ),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -66,7 +103,6 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
               Expanded(
                 child: AppDataTable<Product>(
                   items: paginatedProducts,
-                  isLoading: false,
                   selectable: true,
                   showIndexColumn: true,
                   selectedItems: _selectedProducts,
@@ -76,6 +112,9 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
                     });
                   },
                   onBulkDelete: () {
+                    for (var p in _selectedProducts) {
+                      provider.deleteProduct(p.id);
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})'),
@@ -93,25 +132,6 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
                       _currentPage = 1;
                     });
                   },
-                  primaryActionButton: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(TranslationKeys.addNewProduct.tr(context))),
-                      );
-                    },
-                    icon: const Icon(Icons.add, size: 18),
-                    label: Text(TranslationKeys.addNewProduct.tr(context)),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 11,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
                   currentPage: _currentPage,
                   totalPages: totalPages > 0 ? totalPages : 1,
                   totalItems: totalItems,
@@ -126,6 +146,10 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
                   emptyMessage: _searchQuery.isNotEmpty
                       ? TranslationKeys.noMatchingResults.tr(context)
                       : TranslationKeys.noDataAvailable.tr(context),
+                  onRowTap: (product) => changeScreen(
+                    context,
+                    ProductDetailsPage(productId: product.id),
+                  ),
                   columns: [
                     AppTableColumn<Product>(
                       title: TranslationKeys.product.tr(context),
@@ -170,20 +194,19 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
                       width: 70,
                       alignment: Alignment.center,
                       cellBuilder: (p) => TablePopupMenuActions(
-                        onView: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${TranslationKeys.viewDetails.tr(context)} "${p.name}"')),
-                          );
-                        },
-                        onEdit: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${TranslationKeys.editAddress.tr(context)} "${p.name}"')),
-                          );
-                        },
+                        onView: () => changeScreen(
+                          context,
+                          ProductDetailsPage(productId: p.id),
+                        ),
+                        onEdit: () => changeScreen(
+                          context,
+                          CreateEditProductPage(product: p),
+                        ),
                         onDelete: () {
+                          provider.deleteProduct(p.id);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('${TranslationKeys.deleteSelected.tr(context)} "${p.name}"'),
+                              content: Text('تم حذف المنتج "${p.name}" بنجاح'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -195,6 +218,7 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
               ),
             ],
           ),
+        ),
         );
       },
     );

@@ -188,14 +188,17 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
         _displayedItems.isNotEmpty &&
         widget.selectedItems.length == _displayedItems.length;
 
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.12)),
-      ),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.dividerColor.withOpacity(0.12)),
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -348,6 +351,7 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
           ),
         ],
       ),
+    ),
     );
   }
 

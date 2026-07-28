@@ -27,11 +27,14 @@ class TableHeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: hasSelection
-          ? _buildSelectionHeaderBar(context, theme)
-          : _buildNormalHeaderBar(context, theme),
+    return Material(
+      color: Colors.transparent,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: hasSelection
+            ? _buildSelectionHeaderBar(context, theme)
+            : _buildNormalHeaderBar(context, theme),
+      ),
     );
   }
 
@@ -56,25 +59,28 @@ class TableHeaderBar extends StatelessWidget {
         if (onSearchChanged != null && searchController != null)
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 320),
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
-              ),
-              child: TextField(
-                controller: searchController,
-                onChanged: onSearchChanged,
-                decoration: InputDecoration(
-                  hintText: TranslationKeys.searchPlaceholder.tr(context),
-                  hintStyle: TextStyle(
-                    fontSize: 13,
-                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+            child: Material(
+              color: theme.scaffoldBackgroundColor,
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
+                ),
+                child: TextField(
+                  controller: searchController,
+                  onChanged: onSearchChanged,
+                  decoration: InputDecoration(
+                    hintText: TranslationKeys.searchPlaceholder.tr(context),
+                    hintStyle: TextStyle(
+                      fontSize: 13,
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                    ),
+                    prefixIcon: const Icon(Icons.search, size: 18),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
                   ),
-                  prefixIcon: const Icon(Icons.search, size: 18),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
             ),

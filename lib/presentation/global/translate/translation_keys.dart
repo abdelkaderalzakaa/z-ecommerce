@@ -326,4 +326,8 @@ class TranslationKeys {
   static const String storesSubtitle = 'stores_subtitle';
   static const String offersSubtitle = 'offers_subtitle';
   static const String categoriesSubtitle = 'categories_subtitle';
+  static const String dashboard = 'dashboard';
+  static const String reviews = 'reviews';
+  static const String notifications = 'notifications';
+  static const String contactInformation = 'contact_information';
 }

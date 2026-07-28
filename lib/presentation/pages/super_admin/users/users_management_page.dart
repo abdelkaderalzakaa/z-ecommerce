@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/data/fake_data/users.dart';
 import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/users/user_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/users/create_edit_user_page.dart';
 
 class UsersManagementPage extends StatefulWidget {
   const UsersManagementPage({super.key});
@@ -23,6 +26,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
     final filteredUsers = fakeUsers.where((user) {
       final matchesQuery =
@@ -46,31 +50,43 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
         ? filteredUsers.sublist(startIndex, endIndex)
         : <UserModel>[];
 
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Page Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                TranslationKeys.usersManagement.tr(context),
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    TranslationKeys.usersManagement.tr(context),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'إدارة ومتابعة كافة الحسابات والعملاء والمشرفين المسجلين',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
               ),
               ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(TranslationKeys.addNewUser.tr(context)),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.person_add_rounded, size: 18),
+                onPressed: () => changeScreen(
+                  context,
+                  const CreateEditUserPage(),
+                ),
+                icon: const Icon(Icons.add, size: 18),
                 label: Text(TranslationKeys.addNewUser.tr(context)),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
@@ -100,17 +116,18 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                 });
               },
               onBulkDelete: () {
+                setState(() {
+                  for (var u in _selectedUsers) {
+                    fakeUsers.removeWhere((item) => item.id == u.id);
+                  }
+                  _selectedUsers.clear();
+                });
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      '${TranslationKeys.deleteSelected.tr(context)} (${_selectedUsers.length})',
-                    ),
+                    content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedUsers.length})'),
                     backgroundColor: Colors.red,
                   ),
                 );
-                setState(() {
-                  _selectedUsers.clear();
-                });
               },
               searchQuery: _searchQuery,
               onSearchChanged: (val) {
@@ -134,6 +151,10 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
               emptyMessage: _searchQuery.isNotEmpty
                   ? TranslationKeys.noMatchingResults.tr(context)
                   : TranslationKeys.noDataAvailable.tr(context),
+              onRowTap: (user) => changeScreen(
+                context,
+                UserDetailsPage(userId: user.id),
+              ),
               columns: [
                 AppTableColumn<UserModel>(
                   title: TranslationKeys.user.tr(context),
@@ -142,17 +163,10 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                   sortKey: (u) => u.name,
                   cellBuilder: (u) => TableImageTextCell(
                     title: u.name,
-                    subtitle: u.phoneNumber ?? u.id,
+                    subtitle: u.email,
                     imageUrl: u.avatarUrl,
-                    fallbackIcon: Icons.person_rounded,
+                    fallbackIcon: Icons.person_outline_rounded,
                   ),
-                ),
-                AppTableColumn<UserModel>(
-                  title: TranslationKeys.email.tr(context),
-                  flex: 2,
-                  sortable: true,
-                  sortKey: (u) => u.email,
-                  cellBuilder: (u) => TableTextCell(title: u.email),
                 ),
                 AppTableColumn<UserModel>(
                   title: TranslationKeys.role.tr(context),
@@ -211,30 +225,21 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                   width: 70,
                   alignment: Alignment.center,
                   cellBuilder: (u) => TablePopupMenuActions(
-                    onView: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '${TranslationKeys.viewDetails.tr(context)} "${u.name}"',
-                          ),
-                        ),
-                      );
-                    },
-                    onEdit: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '${TranslationKeys.editAddress.tr(context)} "${u.name}"',
-                          ),
-                        ),
-                      );
-                    },
+                    onView: () => changeScreen(
+                      context,
+                      UserDetailsPage(userId: u.id),
+                    ),
+                    onEdit: () => changeScreen(
+                      context,
+                      CreateEditUserPage(user: u),
+                    ),
                     onDelete: () {
+                      setState(() {
+                        fakeUsers.removeWhere((item) => item.id == u.id);
+                      });
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(
-                            '${TranslationKeys.deleteSelected.tr(context)} "${u.name}"',
-                          ),
+                          content: Text('تم حذف حساب المستخدم "${u.name}" بنجاح'),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -246,6 +251,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
           ),
         ],
       ),
+    ),
     );
   }
 

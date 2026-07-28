@@ -3,11 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/address_model.dart';
 import 'package:z_ecommerce/data/models/invoice_model.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/orders/order_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/common/status_dialogs.dart';
 
 class OrdersManagementPage extends StatefulWidget {
   const OrdersManagementPage({super.key});
@@ -25,6 +28,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
     return Consumer<InvoiceProvider>(
       builder: (context, provider, child) {
@@ -61,22 +65,37 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
             ? filteredOrders.sublist(startIndex, endIndex)
             : <InvoiceModel>[];
 
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Page Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
                         TranslationKeys.ordersManagement.tr(context),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'استعراض ومتابعة كافة الطلبات المنفذة عبر جميع المتاجر',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: theme.textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -126,6 +145,10 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                   emptyMessage: _searchQuery.isNotEmpty
                       ? TranslationKeys.noMatchingResults.tr(context)
                       : TranslationKeys.noDataAvailable.tr(context),
+                  onRowTap: (order) => changeScreen(
+                    context,
+                    OrderDetailsPage(orderId: order.invoiceId),
+                  ),
                   columns: [
                     AppTableColumn<InvoiceModel>(
                       title: TranslationKeys.orderId.tr(context),
@@ -144,8 +167,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                       sortKey: (order) => order.storeId,
                       cellBuilder: (order) => TableImageTextCell(
                         title: '${TranslationKeys.store.tr(context)} ${order.storeId}',
-                        subtitle: order.storeId,
-                        fallbackIcon: Icons.store_rounded,
+                        fallbackIcon: Icons.storefront_rounded,
                       ),
                     ),
                     AppTableColumn<InvoiceModel>(
@@ -171,12 +193,16 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                       flex: 1,
                       sortable: true,
                       sortKey: (order) => order.status,
-                      cellBuilder: (order) => TableStatusBadge.fromStatus(
-                        order.status == 'Pending'
-                            ? TranslationKeys.statusPending.tr(context)
-                            : (order.status == 'Paid'
-                                ? TranslationKeys.statusPaid.tr(context)
-                                : TranslationKeys.statusCompleted.tr(context)),
+                      cellBuilder: (order) => InkWell(
+                        onTap: () => showOrderStatusDialog(context, order),
+                        borderRadius: BorderRadius.circular(16),
+                        child: TableStatusBadge.fromStatus(
+                          order.status == 'Pending'
+                              ? TranslationKeys.statusPending.tr(context)
+                              : (order.status == 'Paid'
+                                  ? TranslationKeys.statusPaid.tr(context)
+                                  : TranslationKeys.statusCompleted.tr(context)),
+                        ),
                       ),
                     ),
                     AppTableColumn<InvoiceModel>(
@@ -184,16 +210,11 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                       width: 70,
                       alignment: Alignment.center,
                       cellBuilder: (order) => TablePopupMenuActions(
-                        onView: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${TranslationKeys.viewDetails.tr(context)} #${order.invoiceId}')),
-                          );
-                        },
-                        onEdit: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('${TranslationKeys.editAddress.tr(context)} #${order.invoiceId}')),
-                          );
-                        },
+                        onView: () => changeScreen(
+                          context,
+                          OrderDetailsPage(orderId: order.invoiceId),
+                        ),
+                        onEdit: () => showOrderStatusDialog(context, order),
                         onDelete: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -209,6 +230,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
               ),
             ],
           ),
+        ),
         );
       },
     );

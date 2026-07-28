@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/category_model.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/categories/create_edit_category_page.dart';
 
 class CategoriesManagementPage extends StatefulWidget {
   const CategoriesManagementPage({super.key});
@@ -24,14 +26,14 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
+    final theme = Theme.of(context);
 
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
         final filteredCategories = provider.categories.where((cat) {
-          final matchesQuery =
-              _searchQuery.isEmpty ||
-              cat.label.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          final titleStr = cat.label.toLowerCase();
+          final matchesQuery = _searchQuery.isEmpty ||
+              titleStr.contains(_searchQuery.toLowerCase()) ||
               cat.id.toLowerCase().contains(_searchQuery.toLowerCase());
           return matchesQuery;
         }).toList();
@@ -44,32 +46,42 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
             ? filteredCategories.sublist(startIndex, endIndex)
             : <CategoryModel>[];
 
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Page Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    TranslationKeys.categoriesManagement.tr(context),
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        TranslationKeys.categoriesManagement.tr(context),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'إدارة وتنظيم شجرة الأقسام والتصنيفات الرئيسية والفرعية',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: theme.textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ],
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            TranslationKeys.addNewCategory.tr(context),
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => changeScreen(
+                      context,
+                      const CreateEditCategoryPage(),
+                    ),
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(TranslationKeys.addNewCategory.tr(context)),
                     style: ElevatedButton.styleFrom(
@@ -100,6 +112,12 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
                     });
                   },
                   onBulkDelete: () {
+                    setState(() {
+                      for (var c in _selectedCategories) {
+                        provider.categories.removeWhere((item) => item.id == c.id);
+                      }
+                      _selectedCategories.clear();
+                    });
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -108,9 +126,6 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
                         backgroundColor: Colors.red,
                       ),
                     );
-                    setState(() {
-                      _selectedCategories.clear();
-                    });
                   },
                   searchQuery: _searchQuery,
                   onSearchChanged: (val) {
@@ -141,10 +156,9 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
                       sortKey: (c) => c.label,
                       cellBuilder: (c) => TableImageTextCell(
                         title: c.label,
-                        subtitle: c.id,
+                        subtitle: 'رمز: ${c.id}',
+                        iconBackgroundColor: c.bgColor,
                         fallbackIcon: c.icon ?? Icons.category_rounded,
-                        iconBackgroundColor: c.bgColor.withOpacity(0.15),
-                        iconColor: c.bgColor,
                       ),
                     ),
                     AppTableColumn<CategoryModel>(
@@ -152,7 +166,10 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
                       flex: 1,
                       sortable: true,
                       sortKey: (c) => c.id,
-                      cellBuilder: (c) => TableTextCell(title: c.id),
+                      cellBuilder: (c) => TableTextCell(
+                        title: c.id,
+                        isBold: true,
+                      ),
                     ),
                     AppTableColumn<CategoryModel>(
                       title: TranslationKeys.categoryStatus.tr(context),
@@ -166,29 +183,22 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
                       width: 70,
                       alignment: Alignment.center,
                       cellBuilder: (c) => TablePopupMenuActions(
-                        onView: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${TranslationKeys.viewDetails.tr(context)} "${c.label}"',
-                              ),
-                            ),
-                          );
-                        },
-                        onEdit: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '${TranslationKeys.editAddress.tr(context)} "${c.label}"',
-                              ),
-                            ),
-                          );
-                        },
+                        onView: () => changeScreen(
+                          context,
+                          CreateEditCategoryPage(category: c),
+                        ),
+                        onEdit: () => changeScreen(
+                          context,
+                          CreateEditCategoryPage(category: c),
+                        ),
                         onDelete: () {
+                          setState(() {
+                            provider.categories.removeWhere((item) => item.id == c.id);
+                          });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '${TranslationKeys.deleteSelected.tr(context)} "${c.label}"',
+                                'تم حذف القسم "${c.label}" بنجاح',
                               ),
                               backgroundColor: Colors.red,
                             ),
@@ -201,6 +211,7 @@ class _CategoriesManagementPageState extends State<CategoriesManagementPage> {
               ),
             ],
           ),
+        ),
         );
       },
     );

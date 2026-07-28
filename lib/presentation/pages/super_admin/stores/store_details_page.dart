@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/details_template.dart';
 import '../../../../../data/providers/super_admin_stores_provider.dart';
+
+// Tab View Components
+import 'store_details_tab/overview_tab.dart';
+import 'store_details_tab/products_tab.dart';
+import 'store_details_tab/orders_tab.dart';
+import 'store_details_tab/reviews_tab.dart';
+import 'store_details_tab/category_tab.dart';
+import 'store_details_tab/settings_tab.dart';
 
 class StoreDetailsPage extends StatelessWidget {
   final String storeId;
@@ -19,22 +29,22 @@ class StoreDetailsPage extends StatelessWidget {
         );
 
         return DetailsTemplate(
-          title: 'تفاصيل المتجر',
+          title: TranslationKeys.storeDetailsTitle.tr(context),
           name: store.name.get(context),
-          subtitle: 'قسم: ${store.category.name.get(context)} • معرف: ${store.id}',
+          subtitle: '${TranslationKeys.category.tr(context)}: ${store.category.name.get(context)} • ${store.id}',
           avatarUrl: store.logoUrl,
           fallbackIcon: Icons.storefront_rounded,
           statusBadge: TableStatusBadge.fromStatus(store.status ?? 'Active'),
           headerMetrics: [
             Chip(
               avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
-              label: Text('تقييم ${store.rate.toStringAsFixed(1)}'),
+              label: Text('⭐ ${store.rate.toStringAsFixed(1)}'),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             Chip(
               avatar: const Icon(Icons.shopping_bag, size: 16, color: Colors.blue),
-              label: Text('${store.orders ?? 0} طلبات'),
+              label: Text('${store.orders ?? 0} ${TranslationKeys.orders.tr(context)}'),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -53,113 +63,35 @@ class StoreDetailsPage extends StatelessWidget {
           },
           onEdit: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('تعديل المتجر "${store.name.get(context)}"')),
+              SnackBar(content: Text('${TranslationKeys.editAddress.tr(context)} "${store.name.get(context)}"')),
             );
           },
           onDelete: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('حذف المتجر "${store.name.get(context)}"'),
+                content: Text('${TranslationKeys.deleteSelected.tr(context)} "${store.name.get(context)}"'),
                 backgroundColor: Colors.red,
               ),
             );
           },
-          tabs: const [
-            Tab(text: 'نظرة عامة'),
-            Tab(text: 'المنتجات'),
-            Tab(text: 'الطلبات'),
-            Tab(text: 'الإعدادات'),
+          tabs: [
+            Tab(text: TranslationKeys.overviewTab.tr(context)),
+            Tab(text: TranslationKeys.productsTab.tr(context)),
+            Tab(text: TranslationKeys.ordersTab.tr(context)),
+            const Tab(text: 'التقييمات والمتابعات'),
+            const Tab(text: 'الأقسام والعلامات'),
+            Tab(text: TranslationKeys.settingsTab.tr(context)),
           ],
           tabViews: [
-            _buildOverviewTab(context, store),
-            const Center(child: Text('المنتجات التابعة للمتجر')),
-            const Center(child: Text('الطلبات المنفذة في المتجر')),
-            const Center(child: Text('إعدادات المتجر الهيكلية')),
+            OverviewTab(store: store),
+            ProductsTab(store: store),
+            OrdersTab(store: store),
+            ReviewsTab(store: store),
+            CategoryTab(store: store),
+            SettingsTab(store: store),
           ],
         );
       },
-    );
-  }
-
-  Widget _buildOverviewTab(BuildContext context, store) {
-    final theme = Theme.of(context);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'نظرة عامة على الأداء',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildMetricCard(context, 'إجمالي المنتجات', '156', Icons.inventory),
-              const SizedBox(width: 16),
-              _buildMetricCard(context, 'إجمالي الطلبات', '${store.orders ?? 0}', Icons.shopping_bag),
-              const SizedBox(width: 16),
-              _buildMetricCard(context, 'إجمالي المتابعين', '${store.followers ?? 0}', Icons.people),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-              side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
-            ),
-            child: const SizedBox(
-              height: 260,
-              width: double.infinity,
-              child: Center(
-                child: Text('رسم بياني لأداء المبيعات والزيارات (Sales Analytics Chart)'),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetricCard(BuildContext context, String title, String value, IconData icon) {
-    final theme = Theme.of(context);
-
-    return Expanded(
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
-                  ),
-                  Icon(icon, color: theme.primaryColor, size: 20),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                value,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

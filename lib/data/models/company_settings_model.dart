@@ -3,6 +3,7 @@ import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_c
 import 'localized_string.dart';
 import 'brand_model.dart';
 export '../../presentation/global/core/constants/payment_methods_constant.dart';
+
 class CompanySettingsModel {
   final String id;
 
@@ -22,11 +23,10 @@ class CompanySettingsModel {
 
   final List<StoreStatistic>? heroCards;
 
- 
   final List<RatingStore>? ratingStore;
 
-  final StoreTheme theme;
   final List<BrandModel> brands;
+  final StoreTheme theme;
 
   final String currency;
   final double deliveryFee;
@@ -78,22 +78,26 @@ class CompanySettingsModel {
     this.contactEmail,
     this.contactPhone,
   });
-   /// تم تحويلها إلى دالة getter تحسب التقييم بناءً على التقييمات، الطلبات، المتابعين، والزيارات
+
+  /// تم تحويلها إلى دالة getter تحسب التقييم بناءً على التقييمات، الطلبات، المتابعين، والزيارات
   double get rate {
     double avgUserRating = 0.0;
     if (ratingStore != null && ratingStore!.isNotEmpty) {
-      final totalRating = ratingStore!.map((r) => r.rating).fold(0, (a, b) => a + b);
+      final totalRating = ratingStore!
+          .map((r) => r.rating)
+          .fold(0, (a, b) => a + b);
       avgUserRating = totalRating / ratingStore!.length;
     } else {
       avgUserRating = 3.5; // Default base rating if no reviews
     }
 
     // Calculate engagement bonus
-    final double ordersScore = (orders ?? 0) / 1000.0; 
-    final double followersScore = (followers ?? 0) / 5000.0; 
-    final double visitorsScore = (visitor ?? 0) / 10000.0; 
+    final double ordersScore = (orders ?? 0) / 1000.0;
+    final double followersScore = (followers ?? 0) / 5000.0;
+    final double visitorsScore = (visitor ?? 0) / 10000.0;
 
-    double engagementBonus = (ordersScore * 0.5) + (followersScore * 0.3) + (visitorsScore * 0.2);
+    double engagementBonus =
+        (ordersScore * 0.5) + (followersScore * 0.3) + (visitorsScore * 0.2);
     if (engagementBonus > 1.5) engagementBonus = 1.5;
 
     final double finalRate = avgUserRating + engagementBonus;
@@ -118,13 +122,62 @@ class StoreStatistic {
 class StoreTheme {
   final String primaryColor;
   final String secondaryColor;
+  final String backgroundColor;
+  final String surfaceColor;
+  final String textColor;
+
+  final String fontFamily;
+  final double fontScale;
+
+  final double buttonRadius;
+  final double cardRadius;
+  final double inputRadius;
+
+  final String? logoUrl;
+  final String? coverBannerUrl;
   final bool isDarkModeEnabled;
 
   const StoreTheme({
     required this.primaryColor,
     required this.secondaryColor,
+    this.backgroundColor = '#F9FAFB',
+    this.surfaceColor = '#FFFFFF',
+    this.textColor = '#111827',
+    this.fontFamily = 'Cairo',
+    this.fontScale = 1.0,
+    this.buttonRadius = 12.0,
+    this.cardRadius = 16.0,
+    this.inputRadius = 10.0,
+    this.logoUrl,
+    this.coverBannerUrl,
     this.isDarkModeEnabled = false,
   });
+
+  // Backward compatibility getters
+  double get raduisButton => buttonRadius;
+  double get raduisCard => cardRadius;
+
+  // Flutter Helper Getters
+  Color get primaryColorValue => _parseColor(primaryColor, const Color(0xFF4F46E5));
+  Color get secondaryColorValue => _parseColor(secondaryColor, const Color(0xFF10B981));
+  Color get backgroundColorValue => _parseColor(backgroundColor, const Color(0xFFF9FAFB));
+  Color get surfaceColorValue => _parseColor(surfaceColor, const Color(0xFFFFFFFF));
+  Color get textColorValue => _parseColor(textColor, const Color(0xFF111827));
+
+  BorderRadius get buttonBorderRadius => BorderRadius.circular(buttonRadius);
+  BorderRadius get cardBorderRadius => BorderRadius.circular(cardRadius);
+  BorderRadius get inputBorderRadius => BorderRadius.circular(inputRadius);
+
+  static Color _parseColor(String hex, Color fallback) {
+    try {
+      final buffer = StringBuffer();
+      if (hex.length == 6 || hex.length == 7) buffer.write('ff');
+      buffer.write(hex.replaceFirst('#', ''));
+      return Color(int.parse(buffer.toString(), radix: 16));
+    } catch (_) {
+      return fallback;
+    }
+  }
 }
 
 enum SocialType {
@@ -139,7 +192,6 @@ enum SocialType {
   contactPhoneSecond,
   contactEmail,
 }
-
 
 class SocialModel {
   final LocalizedString title;
@@ -174,8 +226,6 @@ class CompanyAddressModel {
     required this.isTHIS,
   });
 }
-
-
 
 class RatingStore {
   final String idUser;
@@ -213,4 +263,3 @@ class StoreCategoryModel {
     this.imageUrl,
   });
 }
-

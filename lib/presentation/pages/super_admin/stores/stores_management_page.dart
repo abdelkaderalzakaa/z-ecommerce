@@ -8,6 +8,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/stores/create_store_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/stores/store_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/common/status_dialogs.dart';
 import '../../../../data/models/company_settings_model.dart';
 import '../../../../data/providers/super_admin_stores_provider.dart';
 
@@ -53,9 +54,11 @@ class _StoresManagementPageState extends State<StoresManagementPage> {
             ? filteredStores.sublist(startIndex, endIndex)
             : <CompanySettingsModel>[];
 
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Page Header Title
@@ -191,10 +194,14 @@ class _StoresManagementPageState extends State<StoresManagementPage> {
                       flex: 1,
                       sortable: true,
                       sortKey: (store) => store.status ?? 'Active',
-                      cellBuilder: (store) => TableStatusBadge.fromStatus(
-                        (store.status ?? 'Active') == 'Active'
-                            ? TranslationKeys.statusActive.tr(context)
-                            : TranslationKeys.statusInactive.tr(context),
+                      cellBuilder: (store) => InkWell(
+                        onTap: () => showStoreStatusDialog(context, store),
+                        borderRadius: BorderRadius.circular(16),
+                        child: TableStatusBadge.fromStatus(
+                          (store.status ?? 'Active') == 'Active'
+                              ? TranslationKeys.statusActive.tr(context)
+                              : TranslationKeys.statusInactive.tr(context),
+                        ),
                       ),
                     ),
                     AppTableColumn<CompanySettingsModel>(
@@ -228,6 +235,7 @@ class _StoresManagementPageState extends State<StoresManagementPage> {
               ),
             ],
           ),
+        ),
         );
       },
     );

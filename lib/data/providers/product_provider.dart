@@ -233,4 +233,24 @@ class ProductProvider extends ChangeNotifier {
         .take(4) // أخذ 4 منتجات كحد أقصى للـ Related Products
         .toList();
   }
+
+  // ==================== CRUD OPERATIONS ====================
+
+  void addProduct(Product product) {
+    _allProducts.insert(0, product);
+    _loadProducts();
+  }
+
+  void updateProduct(Product product) {
+    final index = _allProducts.indexWhere((p) => p.id == product.id);
+    if (index != -1) {
+      _allProducts[index] = product;
+      _loadProducts();
+    }
+  }
+
+  void deleteProduct(String productId) {
+    _allProducts.removeWhere((p) => p.id == productId);
+    _loadProducts();
+  }
 }
