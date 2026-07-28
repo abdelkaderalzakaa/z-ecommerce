@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/admin_store/branding/restaurant_menu_branding_page.dart';
 import 'package:z_ecommerce/presentation/pages/admin_store/branding/store_branding_page.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/add_edit_template.dart';
 
@@ -162,12 +163,13 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
           ],
         ),
 
-        // 2. Theme & Visual Branding Section
+        // 2. Visual Theme & Branding Studios (زرين منفصلين كلياً)
         FormSection(
-          title: 'الهوية البصرية وثيم الألوان (Store Theme & Branding)',
-          subtitle: 'تخصيص الألوان، اللوجو، الغلاف، والخطوط عبر المعاينة المباشرة',
+          title: 'استوديوهات الهوية والتصميم المباشر (Branding & Menu Studios)',
+          subtitle: 'خصص هوية المتجر العامة وثيم الألوان، أو خصص منيو المطعم الرقمي بشكل مستقل',
           icon: Icons.palette_rounded,
           fields: [
+            // Button 1: Store General UI Branding Studio
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -191,17 +193,17 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                     child: Icon(Icons.palette_rounded, size: 28, color: Theme.of(context).primaryColor),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          'استوديو تخصيص الهوية وثيم المتجر المباشر (Live Studio)',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          'استوديو تخصيص الهوية وثيم المتجر المباشر (Store Theme Studio)',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'تحكم كامل بالألوان الرئيسية والفرعية، روابط اللوجو والغلاف، الخطوط العربي والإنجليزي، انحناءات الأزرار والكروت، والمظهر الداكن مع معاينة حية لحظية للمتجر.',
+                          'تحكم بالدرجات والألوان الرئيسية والفرعية، روابط اللوجو والغلاف، الخطوط العربي والإنجليزي، انحناءات الأزرار للكروت مع معاينة حية.',
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
@@ -216,7 +218,70 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // Button 2: Dedicated Digital Restaurant Menu Studio
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.deepOrange.withOpacity(0.08),
+                    Colors.deepOrange.withOpacity(0.02),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.deepOrange.withOpacity(0.25)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.deepOrange.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.restaurant_menu_rounded, size: 28, color: Colors.deepOrange),
+                  ),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'استوديو تخصيص منيو المطعم الرقمي (Restaurant Menu Studio)',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'استوديو مخصص للمطاعم والكافيهات لتنسيق المنيو الرقمي، السعرات الحرارية، مكونات الحساسية، والطلب المباشر للطاولة بالـ QR.',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => changeScreen(context, const RestaurantMenuBrandingPage()),
+                    icon: const Icon(Icons.restaurant_rounded, size: 18),
+                    label: const Text(
+                      'تخصيص المنيو الرقمي الآن',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

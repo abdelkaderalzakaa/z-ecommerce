@@ -48,6 +48,12 @@ class ZEcommerceApp extends StatelessWidget {
           final secondaryColor = themeInfo?.secondaryColor != null 
               ? HexColor.fromHex(themeInfo!.secondaryColor) 
               : null;
+          final backgroundColor = themeInfo?.backgroundColor != null
+              ? HexColor.fromHex(themeInfo!.backgroundColor)
+              : null;
+          final surfaceColor = themeInfo?.surfaceColor != null
+              ? HexColor.fromHex(themeInfo!.surfaceColor)
+              : null;
 
           return MaterialApp(
             title: 'Shop.co – Find Clothes That Matches Your Style',
@@ -67,6 +73,12 @@ class ZEcommerceApp extends StatelessWidget {
             theme: AppTheme.getLightTheme(
               primaryColor: primaryColor,
               secondaryColor: secondaryColor,
+              backgroundColor: backgroundColor,
+              surfaceColor: surfaceColor,
+              fontFamily: themeInfo?.fontFamily,
+              buttonRadius: themeInfo?.buttonRadius,
+              cardRadius: themeInfo?.cardRadius,
+              inputRadius: themeInfo?.inputRadius,
             ),
             darkTheme: AppTheme.getDarkTheme(
               primaryColor: primaryColor,

@@ -49,6 +49,13 @@ class CompanyProvider extends ChangeNotifier {
     await loadCompanySettings(storeId);
   }
 
+  void updateStoreTheme(StoreTheme newTheme) {
+    if (_companySettings != null) {
+      _companySettings = _companySettings!.copyWith(theme: newTheme);
+      notifyListeners();
+    }
+  }
+
   bool companyExists(String id) {
     return fakeCompanies.any((c) => c.id == id);
   }

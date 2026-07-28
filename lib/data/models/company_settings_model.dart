@@ -79,6 +79,70 @@ class CompanySettingsModel {
     this.contactPhone,
   });
 
+  CompanySettingsModel copyWith({
+    String? id,
+    StoreCategoryModel? category,
+    LocalizedString? name,
+    List<CompanyAddressModel>? addresses,
+    LocalizedString? slogan,
+    LocalizedString? description,
+    LocalizedString? footerDescription,
+    int? orders,
+    int? followers,
+    List<FollowersStore>? followersUsers,
+    int? visitor,
+    List<StoreStatistic>? heroCards,
+    List<RatingStore>? ratingStore,
+    StoreTheme? theme,
+    List<BrandModel>? brands,
+    String? currency,
+    double? deliveryFee,
+    LocalizedString? aboutUs,
+    LocalizedString? termsAndConditions,
+    LocalizedString? privacyPolicy,
+    List<SocialModel>? socials,
+    List<PaymentMethodType>? paymentMethods,
+    String? logoUrl,
+    String? coverUrl,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? contactEmail,
+    String? contactPhone,
+  }) {
+    return CompanySettingsModel(
+      id: id ?? this.id,
+      category: category ?? this.category,
+      name: name ?? this.name,
+      addresses: addresses ?? this.addresses,
+      slogan: slogan ?? this.slogan,
+      description: description ?? this.description,
+      footerDescription: footerDescription ?? this.footerDescription,
+      orders: orders ?? this.orders,
+      followers: followers ?? this.followers,
+      followersUsers: followersUsers ?? this.followersUsers,
+      visitor: visitor ?? this.visitor,
+      heroCards: heroCards ?? this.heroCards,
+      ratingStore: ratingStore ?? this.ratingStore,
+      theme: theme ?? this.theme,
+      brands: brands ?? this.brands,
+      currency: currency ?? this.currency,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      aboutUs: aboutUs ?? this.aboutUs,
+      termsAndConditions: termsAndConditions ?? this.termsAndConditions,
+      privacyPolicy: privacyPolicy ?? this.privacyPolicy,
+      socials: socials ?? this.socials,
+      paymentMethods: paymentMethods ?? this.paymentMethods,
+      logoUrl: logoUrl ?? this.logoUrl,
+      coverUrl: coverUrl ?? this.coverUrl,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      contactEmail: contactEmail ?? this.contactEmail,
+      contactPhone: contactPhone ?? this.contactPhone,
+    );
+  }
+
   /// تم تحويلها إلى دالة getter تحسب التقييم بناءً على التقييمات، الطلبات، المتابعين، والزيارات
   double get rate {
     double avgUserRating = 0.0;
@@ -137,6 +201,20 @@ class StoreTheme {
   final String? coverBannerUrl;
   final bool isDarkModeEnabled;
 
+  // Restaurant Digital Menu Branding Fields
+  final bool isRestaurantMenuEnabled;
+  final String restaurantMenuLayout;
+  final String restaurantMenuThemeStyle; // 'modern', 'chalkboard', 'italiano'
+  final bool showCaloriesBadges;
+  final bool showAllergensBadges;
+  final bool enableTableOrderQR;
+
+  // Restaurant Menu Front Cover Page Fields
+  final String menuCoverTitle;
+  final String menuCoverSubtitle;
+  final String menuOfferBadgeText;
+  final String menuContactPhone;
+
   const StoreTheme({
     required this.primaryColor,
     required this.secondaryColor,
@@ -151,6 +229,16 @@ class StoreTheme {
     this.logoUrl,
     this.coverBannerUrl,
     this.isDarkModeEnabled = false,
+    this.isRestaurantMenuEnabled = false,
+    this.restaurantMenuLayout = 'grid',
+    this.restaurantMenuThemeStyle = 'chalkboard',
+    this.showCaloriesBadges = true,
+    this.showAllergensBadges = true,
+    this.enableTableOrderQR = true,
+    this.menuCoverTitle = 'THE FOOD RESTO MENU',
+    this.menuCoverSubtitle = 'استمتع بأشهى وأجود الوجبات والمأكولات الطازجة اليوم',
+    this.menuOfferBadgeText = '🔥 خصم 20% لفترة محدودة',
+    this.menuContactPhone = '+966 50 123 4567',
   });
 
   // Backward compatibility getters

@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/locale_provider.dart';
 import '../../../data/providers/settings_provider.dart';
+import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import '../../pages/auth/login_page.dart';
+import '../../pages/super_admin/profile/super_admin_profile_page.dart';
 
 class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
@@ -243,7 +245,9 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
             onSelected: (value) async {
-              if (value == 'logout') {
+              if (value == 'profile') {
+                changeScreen(context, const SuperAdminProfilePage());
+              } else if (value == 'logout') {
                 await authProvider.logout();
                 if (context.mounted) {
                   Navigator.of(context).pushReplacement(

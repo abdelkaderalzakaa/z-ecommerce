@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/company_settings_model.dart';
+import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -29,8 +31,43 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
   String _logoUrl = 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=150';
   String _coverBannerUrl = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800';
   final bool _isDarkModeEnabled = false;
-
   bool _isSaving = false;
+
+  // Restaurant Digital Menu States
+  bool _isRestaurantMenuEnabled = true;
+  String _restaurantMenuLayout = 'grid';
+  bool _showCaloriesBadges = true;
+  bool _showAllergensBadges = true;
+  bool _enableTableOrderQR = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentStoreTheme = context.read<CompanyProvider>().companySettings?.theme;
+      if (currentStoreTheme != null) {
+        setState(() {
+          _primaryColorHex = currentStoreTheme.primaryColor;
+          _secondaryColorHex = currentStoreTheme.secondaryColor;
+          _backgroundColorHex = currentStoreTheme.backgroundColor;
+          _surfaceColorHex = currentStoreTheme.surfaceColor;
+          _textColorHex = currentStoreTheme.textColor;
+          _selectedFontFamily = currentStoreTheme.fontFamily;
+          _fontScale = currentStoreTheme.fontScale;
+          _buttonRadius = currentStoreTheme.buttonRadius;
+          _cardRadius = currentStoreTheme.cardRadius;
+          _inputRadius = currentStoreTheme.inputRadius;
+          _isRestaurantMenuEnabled = currentStoreTheme.isRestaurantMenuEnabled;
+          _restaurantMenuLayout = currentStoreTheme.restaurantMenuLayout;
+          _showCaloriesBadges = currentStoreTheme.showCaloriesBadges;
+          _showAllergensBadges = currentStoreTheme.showAllergensBadges;
+          _enableTableOrderQR = currentStoreTheme.enableTableOrderQR;
+          if (currentStoreTheme.logoUrl != null) _logoUrl = currentStoreTheme.logoUrl!;
+          if (currentStoreTheme.coverBannerUrl != null) _coverBannerUrl = currentStoreTheme.coverBannerUrl!;
+        });
+      }
+    });
+  }
 
   // Color Palette Presets
   static const List<Map<String, String>> _primaryPalette = [
@@ -85,7 +122,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
     },
     {
       'title': 'لوجو فاخر',
-      'url': 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=150',
+      'url': 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
     },
   ];
 
@@ -127,11 +164,19 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
         logoUrl: _logoUrl,
         coverBannerUrl: _coverBannerUrl,
         isDarkModeEnabled: _isDarkModeEnabled,
+        isRestaurantMenuEnabled: _isRestaurantMenuEnabled,
+        restaurantMenuLayout: _restaurantMenuLayout,
+        showCaloriesBadges: _showCaloriesBadges,
+        showAllergensBadges: _showAllergensBadges,
+        enableTableOrderQR: _enableTableOrderQR,
       );
 
   Future<void> _saveTheme() async {
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (mounted) {
+      context.read<CompanyProvider>().updateStoreTheme(_currentTheme);
+    }
     setState(() => _isSaving = false);
 
     if (mounted) {
@@ -1651,6 +1696,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   onPressed: () => _showCustomColorPickerDialog(
+                    context: context,
                     initialColorHex: _primaryColorHex,
                     titleText: 'اختيار اللون الرئيسي (Primary Color Picker)',
                     onColorSelected: (hex) => setState(() => _primaryColorHex = hex),
@@ -1698,6 +1744,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   onPressed: () => _showCustomColorPickerDialog(
+                    context: context,
                     initialColorHex: _secondaryColorHex,
                     titleText: 'اختيار اللون الفرعي (Secondary Color Picker)',
                     onColorSelected: (hex) => setState(() => _secondaryColorHex = hex),
@@ -2087,6 +2134,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
   }
 
   void _showCustomColorPickerDialog({
+    required BuildContext context,
     required String initialColorHex,
     required String titleText,
     required ValueChanged<String> onColorSelected,
