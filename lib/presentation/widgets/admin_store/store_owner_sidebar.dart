@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/company_provider.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
@@ -56,6 +58,10 @@ class StoreOwnerSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
+    final primaryColor = storeTheme?.primaryColorValue ?? theme.primaryColor;
+    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
     final width = isCollapsed ? 70.0 : 240.0;
 
     return AnimatedContainer(
@@ -63,7 +69,7 @@ class StoreOwnerSidebar extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       width: width,
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: storeTheme?.backgroundColorValue.withOpacity(0.95) ?? theme.cardColor,
         border: Border(
           left: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
           right: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
@@ -98,12 +104,12 @@ class StoreOwnerSidebar extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? theme.primaryColor.withOpacity(0.12)
+                          ? primaryColor.withOpacity(0.12)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: storeTheme?.buttonBorderRadius ?? BorderRadius.circular(12),
                       border: isSelected
                           ? Border.all(
-                              color: theme.primaryColor.withOpacity(0.3),
+                              color: primaryColor.withOpacity(0.3),
                               width: 1,
                             )
                           : null,
@@ -117,7 +123,7 @@ class StoreOwnerSidebar extends StatelessWidget {
                           item.icon,
                           size: 22,
                           color: isSelected
-                              ? theme.primaryColor
+                              ? primaryColor
                               : theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                         ),
                         if (!isCollapsed) ...[
@@ -126,12 +132,13 @@ class StoreOwnerSidebar extends StatelessWidget {
                             child: Text(
                               item.titleKey.tr(context),
                               style: TextStyle(
+                                fontFamily: fontFamily,
                                 fontSize: 13,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
                                     : FontWeight.w500,
                                 color: isSelected
-                                    ? theme.primaryColor
+                                    ? primaryColor
                                     : theme.textTheme.bodyLarge?.color,
                               ),
                               maxLines: 1,

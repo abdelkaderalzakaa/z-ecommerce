@@ -163,16 +163,20 @@ class _RestaurantMenuBrandingPageState
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'استوديو تخصيص منيو المطعم الرقمي (Restaurant Menu Studio)',
-                        style: TextStyle(
+                      Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'استوديو تخصيص منيو المطعم الرقمي (Restaurant Menu Studio)'
+                            : 'Digital Restaurant Menu Branding Studio',
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'تخصيص نمط المنيو، السعرات الحرارية، تنبيهات الحساسية، ورقم الطاولة مع معاينة حية للمطعم',
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'تخصيص نمط المنيو، السعرات الحرارية، تنبيهات الحساسية، ورقم الطاولة مع معاينة حية للمطعم'
+                            : 'Customize menu layout, calories, allergen alerts, and table QR with live restaurant preview',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.textTheme.bodySmall?.color,
@@ -191,7 +195,9 @@ class _RestaurantMenuBrandingPageState
                                 strokeWidth: 2, color: Colors.white),
                           )
                         : const Icon(Icons.save_rounded, size: 18),
-                    label: Text(_isSaving ? 'جاري الحفظ...' : 'حفظ الهوية للمنيو'),
+                    label: Text(_isSaving
+                        ? (Localizations.localeOf(context).languageCode == 'ar' ? 'جاري الحفظ...' : 'Saving...')
+                        : (Localizations.localeOf(context).languageCode == 'ar' ? 'حفظ الهوية للمنيو' : 'Save Menu Settings')),
                   ),
                 ],
               ),
@@ -211,20 +217,27 @@ class _RestaurantMenuBrandingPageState
                         children: [
                           _buildControlCard(
                             theme,
-                            title: 'تفعيل وإعدادات المنيو الرقمي',
-                            subtitle:
-                                'تحويل واجهة المتجر إلى منيو تفاعلي مخصص للمطاعم والكافيهات',
+                            title: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'تفعيل وإعدادات المنيو الرقمي'
+                                : 'Restaurant Digital Menu Settings',
+                            subtitle: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'تحويل واجهة المتجر إلى منيو تفاعلي مخصص للمطاعم والكافيهات'
+                                : 'Convert store layout into interactive digital restaurant menu',
                             icon: Icons.restaurant_menu_rounded,
                             children: [
                               SwitchListTile(
-                                title: const Text(
-                                  'تفعيل نمط المنيو الرقمي للمطعم (Restaurant Digital Menu)',
-                                  style: TextStyle(
+                                title: Text(
+                                  Localizations.localeOf(context).languageCode == 'ar'
+                                      ? 'تفعيل نمط المنيو الرقمي للمطعم (Restaurant Digital Menu)'
+                                      : 'Enable Restaurant Digital Menu Mode',
+                                  style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                subtitle: const Text(
-                                    'عرض وجبات وأطباق الطعام بتنسيق المنيو التفاعلي'),
+                                subtitle: Text(
+                                    Localizations.localeOf(context).languageCode == 'ar'
+                                        ? 'عرض وجبات وأطباق الطعام بتنسيق المنيو التفاعلي'
+                                        : 'Display dishes and meals in digital menu format'),
                                 value: _isRestaurantMenuEnabled,
                                 onChanged: (val) => setState(
                                     () => _isRestaurantMenuEnabled = val),
@@ -235,9 +248,12 @@ class _RestaurantMenuBrandingPageState
                           const SizedBox(height: 16),
                           _buildControlCard(
                             theme,
-                            title: 'نمط عرض وجبات الطعام',
-                            subtitle:
-                                'اختر التنسيق الأنسب لعرض قائمة الطعام للزبائن',
+                            title: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'نمط عرض وجبات الطعام'
+                                : 'Dishes Display Layout',
+                            subtitle: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'اختر التنسيق الأنسب لعرض قائمة الطعام للزبائن'
+                                : 'Choose the best layout to present meals to customers',
                             icon: Icons.grid_view_rounded,
                             children: [
                               Wrap(
@@ -245,10 +261,16 @@ class _RestaurantMenuBrandingPageState
                                 runSpacing: 12,
                                 children: [
                                   _buildLayoutChip(
-                                      'grid', 'شبكة كروت (Grid)', Icons.grid_on_rounded),
-                                  _buildLayoutChip('list', 'قائمة أفقية (List)',
+                                      'grid',
+                                      Localizations.localeOf(context).languageCode == 'ar' ? 'شبكة كروت (Grid)' : 'Grid View',
+                                      Icons.grid_on_rounded),
+                                  _buildLayoutChip(
+                                      'list',
+                                      Localizations.localeOf(context).languageCode == 'ar' ? 'قائمة أفقية (List)' : 'List View',
                                       Icons.view_list_rounded),
-                                  _buildLayoutChip('board', 'لوحة مميزة (Board)',
+                                  _buildLayoutChip(
+                                      'board',
+                                      Localizations.localeOf(context).languageCode == 'ar' ? 'لوحة مميزة (Board)' : 'Board View',
                                       Icons.dashboard_customize_rounded),
                                 ],
                               ),
@@ -257,9 +279,12 @@ class _RestaurantMenuBrandingPageState
                           const SizedBox(height: 16),
                           _buildControlCard(
                             theme,
-                            title: 'طراز وتصميم المنيو الفاخر (Menu Theme Style)',
-                            subtitle:
-                                'اختر مظهر وثيم المنيو المفضل لمطعمك المستوحى من أشهر التصاميم العالمية',
+                            title: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'طراز وتصميم المنيو الفاخر (Menu Theme Style)'
+                                : 'Menu Theme Style',
+                            subtitle: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'اختر مظهر وثيم المنيو المفضل لمطعمك المستوحى من أشهر التصاميم العالمية'
+                                : 'Select world-class menu theme for your restaurant',
                             icon: Icons.auto_awesome_rounded,
                             children: [
                               Wrap(
@@ -268,21 +293,36 @@ class _RestaurantMenuBrandingPageState
                                 children: [
                                   ChoiceChip(
                                     avatar: const Icon(Icons.dark_mode_rounded, size: 16, color: Colors.amber),
-                                    label: const Text('🌙 ثيم السبورة والذهب (Chalkboard Gold)', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    label: Text(
+                                      Localizations.localeOf(context).languageCode == 'ar'
+                                          ? '🌙 ثيم السبورة والذهب (Chalkboard Gold)'
+                                          : '🌙 Chalkboard Gold',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
                                     selected: _restaurantMenuThemeStyle == 'chalkboard',
                                     selectedColor: Colors.amber.shade800,
                                     onSelected: (val) => setState(() => _restaurantMenuThemeStyle = 'chalkboard'),
                                   ),
                                   ChoiceChip(
                                     avatar: const Icon(Icons.restaurant_rounded, size: 16, color: Colors.deepOrange),
-                                    label: const Text('🍊 ثيم إيطاليانو دافئ (Italiano Amber)', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    label: Text(
+                                      Localizations.localeOf(context).languageCode == 'ar'
+                                          ? '🍊 ثيم إيطاليانو دافئ (Italiano Amber)'
+                                          : '🍊 Italiano Amber',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
                                     selected: _restaurantMenuThemeStyle == 'italiano',
                                     selectedColor: Colors.deepOrange,
                                     onSelected: (val) => setState(() => _restaurantMenuThemeStyle = 'italiano'),
                                   ),
                                   ChoiceChip(
                                     avatar: const Icon(Icons.wb_sunny_rounded, size: 16, color: Colors.blue),
-                                    label: const Text('🌿 ثيم مودرن نقي (Modern Clean)', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    label: Text(
+                                      Localizations.localeOf(context).languageCode == 'ar'
+                                          ? '🌿 ثيم مودرن نقي (Modern Clean)'
+                                          : '🌿 Modern Clean',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
                                     selected: _restaurantMenuThemeStyle == 'modern',
                                     selectedColor: Colors.blue,
                                     onSelected: (val) => setState(() => _restaurantMenuThemeStyle = 'modern'),
@@ -294,48 +334,63 @@ class _RestaurantMenuBrandingPageState
                           const SizedBox(height: 16),
                           _buildControlCard(
                             theme,
-                            title: 'شارات ومعلومات الوجبة الحية',
-                            subtitle:
-                                'تحديد البيانات الصحية والغذائية الظاهرة على الأطباق',
+                            title: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'شارات ومعلومات الوجبة الحية'
+                                : 'Live Meal Badges & Info',
+                            subtitle: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'تحديد البيانات الصحية والغذائية الظاهرة على الأطباق'
+                                : 'Configure nutritional & health info on dishes',
                             icon: Icons.local_fire_department_rounded,
                             children: [
                               SwitchListTile(
-                                title: const Text(
-                                  'إظهار شارة السعرات الحرارية (🔥 Calories Badges)',
-                                  style: TextStyle(
+                                title: Text(
+                                  Localizations.localeOf(context).languageCode == 'ar'
+                                      ? 'إظهار شارة السعرات الحرارية (🔥 Calories Badges)'
+                                      : 'Show Calories Badges (🔥 Calories Badges)',
+                                  style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                subtitle: const Text(
-                                    'عرض عدد السعرات الحرارية لكل وجبة (مثل 680 Kcal)'),
+                                subtitle: Text(
+                                    Localizations.localeOf(context).languageCode == 'ar'
+                                        ? 'عرض عدد السعرات الحرارية لكل وجبة (مثل 680 Kcal)'
+                                        : 'Display calories per meal (e.g., 680 Kcal)'),
                                 value: _showCaloriesBadges,
                                 onChanged: (val) => setState(
                                     () => _showCaloriesBadges = val),
                                 activeColor: Colors.deepOrange,
                               ),
                               SwitchListTile(
-                                title: const Text(
-                                  'إظهار مكونات الحساسية (🌾 Allergens Badges)',
-                                  style: TextStyle(
+                                title: Text(
+                                  Localizations.localeOf(context).languageCode == 'ar'
+                                      ? 'إظهار مكونات الحساسية (🌾 Allergens Badges)'
+                                      : 'Show Allergens Alerts (🌾 Allergens Badges)',
+                                  style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                subtitle: const Text(
-                                    'تنبيه الزبائن لمكونات الحساسية (جليوتين، حليب، مكسرات)'),
+                                subtitle: Text(
+                                    Localizations.localeOf(context).languageCode == 'ar'
+                                        ? 'تنبيه الزبائن لمكونات الحساسية (جليوتين، حليب، مكسرات)'
+                                        : 'Alert customers about gluten, dairy & nuts'),
                                 value: _showAllergensBadges,
                                 onChanged: (val) => setState(
                                     () => _showAllergensBadges = val),
                                 activeColor: Colors.deepOrange,
                               ),
                               SwitchListTile(
-                                title: const Text(
-                                  'تفعيل الطلب المباشر للطاولة بالـ QR Code',
-                                  style: TextStyle(
+                                title: Text(
+                                  Localizations.localeOf(context).languageCode == 'ar'
+                                      ? 'تفعيل الطلب المباشر للطاولة بالـ QR Code'
+                                      : 'Enable Direct Table QR Ordering',
+                                  style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                subtitle: const Text(
-                                    'السماح للزبون بإدخال رقم الطاولة وإرسال الطلب المباشر'),
+                                subtitle: Text(
+                                    Localizations.localeOf(context).languageCode == 'ar'
+                                        ? 'السماح للزبون بإدخال رقم الطاولة وإرسال الطلب المباشر'
+                                        : 'Allow guests to input table number and order directly'),
                                 value: _enableTableOrderQR,
                                 onChanged: (val) =>
                                     setState(() => _enableTableOrderQR = val),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/data/models/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -27,9 +28,11 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) {
           final filteredProducts = provider.allProducts.where((product) {
@@ -69,7 +72,7 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'إدارة وإضافة وتحديث كافة منتجاتك في المتجر',
+                          TranslationKeys.productsSubtitle.tr(context),
                           style: TextStyle(
                             fontSize: 13,
                             color: theme.textTheme.bodySmall?.color,
@@ -179,7 +182,7 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                         sortKey: (p) => p.rating,
                         cellBuilder: (p) => TableTextCell(
                           title: '⭐ ${p.rating.toStringAsFixed(1)}',
-                          subtitle: '${p.reviewsCount} تقييم',
+                          subtitle: '${p.reviewsCount} ${TranslationKeys.reviews.tr(context)}',
                         ),
                       ),
                       AppTableColumn<Product>(

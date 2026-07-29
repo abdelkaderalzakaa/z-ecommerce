@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -100,8 +102,8 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return AddEditTemplate(
-      title: 'إعدادات متجري الشاملة',
-      subtitle: 'تعديل الهوية، الشعار، ألوان الثيم، التواصل وشبكات التواصل الاجتماعي',
+      title: TranslationKeys.storeSettingsTitle.tr(context),
+      subtitle: TranslationKeys.storeSettingsSubtitle.tr(context),
       isEditMode: true,
       formKey: _formKey,
       submitLabel: TranslationKeys.saveChanges.tr(context),
@@ -112,8 +114,8 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
       sections: [
         // 1. Store Identity Section
         FormSection(
-          title: 'هوية واسم المتجر',
-          subtitle: 'اسم المتجر باللغتين العربية والإنجليزية والشعار اللفظي والوصف',
+          title: TranslationKeys.storeInformation.tr(context),
+          subtitle: TranslationKeys.storeInfoSubtitle.tr(context),
           icon: Icons.storefront_rounded,
           fields: [
             Row(
@@ -121,10 +123,10 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                 Expanded(
                   child: TextFormField(
                     controller: _nameArController,
-                    decoration: const InputDecoration(
-                      labelText: 'اسم المتجر (عربي)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.language, size: 20),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.storeNameAr.tr(context),
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.language, size: 20),
                     ),
                     validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
                   ),
@@ -133,10 +135,10 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                 Expanded(
                   child: TextFormField(
                     controller: _nameEnController,
-                    decoration: const InputDecoration(
-                      labelText: 'اسم المتجر (إنجليزي)',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.language, size: 20),
+                    decoration: InputDecoration(
+                      labelText: TranslationKeys.storeNameEn.tr(context),
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.language, size: 20),
                     ),
                     validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
                   ),
@@ -146,7 +148,7 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
             TextFormField(
               controller: _sloganController,
               decoration: const InputDecoration(
-                labelText: 'الشعار اللفظي (Slogan)',
+                labelText: 'Slogan',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.auto_awesome_rounded, size: 20),
               ),
@@ -154,19 +156,23 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
             TextFormField(
               controller: _descriptionController,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'وصف المتجر',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.description_outlined, size: 20),
+              decoration: InputDecoration(
+                labelText: TranslationKeys.storeInfoSubtitle.tr(context),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.description_outlined, size: 20),
               ),
             ),
           ],
         ),
 
-        // 2. Visual Theme & Branding Studios (زرين منفصلين كلياً)
+        // 2. Visual Theme & Branding Studios
         FormSection(
-          title: 'استوديوهات الهوية والتصميم المباشر (Branding & Menu Studios)',
-          subtitle: 'خصص هوية المتجر العامة وثيم الألوان، أو خصص منيو المطعم الرقمي بشكل مستقل',
+          title: Localizations.localeOf(context).languageCode == 'ar'
+              ? 'استوديوهات الهوية والتصميم المباشر (Branding & Menu Studios)'
+              : 'Branding & Menu Studios',
+          subtitle: Localizations.localeOf(context).languageCode == 'ar'
+              ? 'خصص هوية المتجر العامة وثيم الألوان، أو خصص منيو المطعم الرقمي بشكل مستقل'
+              : 'Customize general store UI branding or digital restaurant menu independently',
           icon: Icons.palette_rounded,
           fields: [
             // Button 1: Store General UI Branding Studio
@@ -193,18 +199,22 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                     child: Icon(Icons.palette_rounded, size: 28, color: Theme.of(context).primaryColor),
                   ),
                   const SizedBox(width: 16),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'استوديو تخصيص الهوية وثيم المتجر المباشر (Store Theme Studio)',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'استوديو تخصيص الهوية وثيم المتجر المباشر (Store Theme Studio)'
+                              : 'Store Theme & Branding Studio',
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'تحكم بالدرجات والألوان الرئيسية والفرعية، روابط اللوجو والغلاف، الخطوط العربي والإنجليزي، انحناءات الأزرار للكروت مع معاينة حية.',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'تحكم بالدرجات والألوان الرئيسية والفرعية، روابط اللوجو والغلاف، الخطوط العربي والإنجليزي، انحناءات الأزرار للكروت مع معاينة حية.'
+                              : 'Control primary/secondary colors, logo/banner URLs, Arabic/English fonts, and radii with real-time preview.',
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -213,9 +223,11 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                   ElevatedButton.icon(
                     onPressed: () => changeScreen(context, const StoreBrandingPage()),
                     icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                    label: const Text(
-                      'تخصيص الهوية والثيم الآن',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    label: Text(
+                      Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'تخصيص الهوية والثيم الآن'
+                          : 'Customize Store Branding',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
@@ -254,18 +266,22 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                     child: const Icon(Icons.restaurant_menu_rounded, size: 28, color: Colors.deepOrange),
                   ),
                   const SizedBox(width: 16),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'استوديو تخصيص منيو المطعم الرقمي (Restaurant Menu Studio)',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'استوديو تخصيص منيو المطعم الرقمي (Restaurant Menu Studio)'
+                              : 'Digital Restaurant Menu Studio',
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'استوديو مخصص للمطاعم والكافيهات لتنسيق المنيو الرقمي، السعرات الحرارية، مكونات الحساسية، والطلب المباشر للطاولة بالـ QR.',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'استوديو مخصص للمطاعم والكافيهات لتنسيق المنيو الرقمي، السعرات الحرارية، مكونات الحساسية، والطلب المباشر للطاولة بالـ QR.'
+                              : 'Dedicated studio for restaurants & cafes to customize 2-page digital menu, calories, allergens & table QR ordering.',
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -274,9 +290,11 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                   ElevatedButton.icon(
                     onPressed: () => changeScreen(context, const RestaurantMenuBrandingPage()),
                     icon: const Icon(Icons.restaurant_rounded, size: 18),
-                    label: const Text(
-                      'تخصيص المنيو الرقمي الآن',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    label: Text(
+                      Localizations.localeOf(context).languageCode == 'ar'
+                          ? 'تخصيص المنيو الرقمي الآن'
+                          : 'Customize Restaurant Menu',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepOrange,

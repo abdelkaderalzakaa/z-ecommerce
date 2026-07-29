@@ -26,30 +26,36 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
     final localeProvider = Provider.of<LocaleProvider>(context);
     final companyProvider = Provider.of<CompanyProvider>(context);
     final isArabic = localeProvider.locale.languageCode == 'ar';
+    final storeTheme = companyProvider.companySettings?.theme;
+    final primaryColor = storeTheme?.primaryColorValue ?? theme.primaryColor;
+    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
     final nameObj = companyProvider.companySettings?.name;
-    final storeName = nameObj != null ? (isArabic ? nameObj.ar : nameObj.en) : 'لوحة تحكم المتجر';
-    final logoUrl = companyProvider.companySettings?.theme.logoUrl;
+    final storeName = nameObj != null
+        ? (isArabic ? nameObj.ar : nameObj.en)
+        : TranslationKeys.mainStore.tr(context);
+    final logoUrl = storeTheme?.logoUrl;
 
     return AppBar(
       elevation: 0,
-      backgroundColor: theme.cardColor,
+      backgroundColor: storeTheme?.backgroundColorValue.withOpacity(0.95) ?? theme.cardColor,
       surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
       titleSpacing: 16,
       leading: isMobile
           ? IconButton(
-              icon: const Icon(Icons.menu_rounded),
+              icon: Icon(Icons.menu_rounded, color: primaryColor),
               onPressed: onMenuPressed,
             )
           : null,
       title: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: theme.primaryColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
+              color: primaryColor.withOpacity(0.12),
+              borderRadius: storeTheme?.cardBorderRadius ?? BorderRadius.circular(10),
+              border: Border.all(color: primaryColor.withOpacity(0.2)),
               image: logoUrl != null
                   ? DecorationImage(image: NetworkImage(logoUrl), fit: BoxFit.cover)
                   : null,
@@ -57,7 +63,7 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: logoUrl == null
                 ? Icon(
                     Icons.storefront_rounded,
-                    color: theme.primaryColor,
+                    color: primaryColor,
                     size: 20,
                   )
                 : null,
@@ -69,16 +75,20 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: [
               Text(
                 storeName,
-                style: const TextStyle(
+                style: TextStyle(
+                  fontFamily: fontFamily,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
+                  color: storeTheme?.textColorValue,
                 ),
               ),
               Text(
-                'Store Owner Portal',
+                TranslationKeys.storeOwnerPortal.tr(context),
                 style: TextStyle(
-                  fontSize: 11,
-                  color: theme.textTheme.bodySmall?.color,
+                  fontFamily: fontFamily,
+                  fontSize: 10,
+                  color: primaryColor,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -120,7 +130,13 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
           tooltip: TranslationKeys.notifications.tr(context),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('لا توجد إشعارات جديدة حالياً')),
+              SnackBar(
+                content: Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'لا توجد إشعارات جديدة حالياً'
+                      : 'No new notifications currently',
+                ),
+              ),
             );
           },
         ),

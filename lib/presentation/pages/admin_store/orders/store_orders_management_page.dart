@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/invoice_model.dart';
+import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
@@ -33,9 +34,11 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
       body: Consumer<InvoiceProvider>(
         builder: (context, provider, child) {
           final filteredInvoices = provider.invoices.where((invoice) {
@@ -79,7 +82,7 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'متابعة ومعالجة الطلبات الواردة لمتجرك وتحديث حالتها',
+                          TranslationKeys.ordersSubtitle.tr(context),
                           style: TextStyle(
                             fontSize: 13,
                             color: theme.textTheme.bodySmall?.color,

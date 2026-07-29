@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../data/providers/company_provider.dart';
 import '../widgets/common/headers/header_home.dart';
 import '../widgets/home/hero_section.dart';
 import '../widgets/home/brands_section.dart';
@@ -8,11 +10,8 @@ import '../widgets/home/browse_categories_section.dart';
 import '../widgets/home/browse_brands_section.dart';
 import '../widgets/home/discounted_products_section.dart';
 import '../widgets/home/offers_section.dart';
-
 import '../widgets/home/newsletter_section.dart';
 import '../widgets/common/footer_section.dart';
-import '../global/core/constants/app_constants.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -62,36 +61,61 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: HeaderHome(onNavTap: _scrollToSection),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            HeroSection(key: _heroKey),
-            const BrandsSection(),
-            const OffersSection(sectionType: 'bundles'),
-            const SizedBox(height: 72),
-            NewArrivalsSection(key: _newArrivalsKey),
-            const SizedBox(height: 72),
-            const BrowseBrandsSection(),
-            Divider(color: Theme.of(context).dividerColor, height: 1),
-            const OffersSection(sectionType: 'coupons'),
-            const SizedBox(height: 72),
-            TopSellingSection(key: _topSellingKey),
-            const SizedBox(height: 72),
-            const DiscountedProductsSection(),
-            const SizedBox(height: 72),
-            BrowseCategoriesSection(key: _browseCategoriesKey),
-            const SizedBox(height: 72),
-            const OffersSection(sectionType: 'deals'),
-            const SizedBox(height: 72),
-            NewsletterSection(key: _newsletterKey),
-            const FooterSection(),
-          ],
-        ),
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
+
+    final primaryColor = storeTheme?.primaryColorValue ?? Theme.of(context).primaryColor;
+    final secondaryColor = storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
+    final bgColor = storeTheme?.backgroundColorValue ?? Theme.of(context).scaffoldBackgroundColor;
+    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
+
+    final dynamicTheme = Theme.of(context).copyWith(
+      primaryColor: primaryColor,
+      colorScheme: Theme.of(context).colorScheme.copyWith(
+        primary: primaryColor,
+        secondary: secondaryColor,
+      ),
+      scaffoldBackgroundColor: bgColor,
+      textTheme: Theme.of(context).textTheme.apply(fontFamily: fontFamily),
+    );
+
+    return Theme(
+      data: dynamicTheme,
+      child: Builder(
+        builder: (innerContext) {
+          return Scaffold(
+            backgroundColor: bgColor,
+            appBar: HeaderHome(onNavTap: _scrollToSection),
+            body: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  HeroSection(key: _heroKey),
+                  const BrandsSection(),
+                  const OffersSection(sectionType: 'bundles'),
+                  const SizedBox(height: 72),
+                  NewArrivalsSection(key: _newArrivalsKey),
+                  const SizedBox(height: 72),
+                  const BrowseBrandsSection(),
+                  Divider(color: Theme.of(innerContext).dividerColor, height: 1),
+                  const OffersSection(sectionType: 'coupons'),
+                  const SizedBox(height: 72),
+                  TopSellingSection(key: _topSellingKey),
+                  const SizedBox(height: 72),
+                  const DiscountedProductsSection(),
+                  const SizedBox(height: 72),
+                  BrowseCategoriesSection(key: _browseCategoriesKey),
+                  const SizedBox(height: 72),
+                  const OffersSection(sectionType: 'deals'),
+                  const SizedBox(height: 72),
+                  NewsletterSection(key: _newsletterKey),
+                  const FooterSection(),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

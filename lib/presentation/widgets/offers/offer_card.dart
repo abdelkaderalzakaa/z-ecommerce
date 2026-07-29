@@ -484,8 +484,16 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
       cart.addToCart(companyId, mainProduct, quantity: widget.offer.getQuantity ?? 1, isGift: true);
     }
     
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final offerTitle = widget.offer.name.get(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${widget.offer.name} added to cart!')),
+      SnackBar(
+        content: Text(
+          isArabic
+              ? 'تمت إضافة "$offerTitle" لسلة التسوق بنجاح!'
+              : '"$offerTitle" added to cart!',
+        ),
+      ),
     );
   }
 }

@@ -12,6 +12,7 @@ import '../../data/models/company_settings_model.dart';
 import '../../data/models/offer_model.dart';
 import '../../data/models/product_model.dart';
 import '../../data/providers/auth_provider.dart';
+import '../../data/providers/company_provider.dart';
 import '../../data/providers/locale_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
@@ -78,19 +79,26 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Force a specific theme for the Hub page (Black and White only)
-    final hubTheme = ThemeData(
-      primaryColor: Colors.black,
-      colorScheme: const ColorScheme.light(
-        primary: Colors.black,
-        secondary: Colors.black,
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
+
+    final primaryColor = storeTheme?.primaryColorValue ?? Colors.black;
+    final secondaryColor = storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
+    final bgColor = storeTheme?.backgroundColorValue ?? Colors.white;
+    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
+
+    final dynamicTheme = ThemeData(
+      primaryColor: primaryColor,
+      colorScheme: ColorScheme.light(
+        primary: primaryColor,
+        secondary: secondaryColor,
       ),
-      fontFamily: 'Inter',
-      scaffoldBackgroundColor: Colors.white,
+      fontFamily: fontFamily,
+      scaffoldBackgroundColor: bgColor,
     );
 
     return Theme(
-      data: hubTheme,
+      data: dynamicTheme,
       child: Builder(
         builder: (innerContext) {
           return Scaffold(

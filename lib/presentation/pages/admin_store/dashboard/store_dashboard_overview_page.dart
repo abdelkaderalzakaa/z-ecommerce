@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -20,9 +21,11 @@ class StoreDashboardOverviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
       body: Consumer2<ProductProvider, InvoiceProvider>(
         builder: (context, productProvider, invoiceProvider, child) {
           // My Store Data Filters
@@ -54,7 +57,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'لوحة تحكم المتجر',
+                          TranslationKeys.storeDashboardTitle.tr(context),
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -62,7 +65,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'متابعة أداء المبيعات والمنتجات والطلبات الخاصة بمتجرك',
+                          TranslationKeys.storeDashboardSubtitle.tr(context),
                           style: TextStyle(
                             fontSize: 13,
                             color: theme.textTheme.bodySmall?.color,
@@ -82,7 +85,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                           Icon(Icons.storefront_rounded, size: 16, color: theme.primaryColor),
                           const SizedBox(width: 8),
                           Text(
-                            'المتجر الرئيسي ($companyId)',
+                            '${TranslationKeys.mainStore.tr(context)} ($companyId)',
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -109,36 +112,36 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                       children: [
                         _buildKpiCard(
                           context,
-                          title: 'منتجات المتجر',
-                          value: '$totalProductsCount منتج',
-                          subText: 'جميع المنتجات المعروضة',
+                          title: TranslationKeys.storeProducts.tr(context),
+                          value: '$totalProductsCount ${TranslationKeys.product.tr(context)}',
+                          subText: TranslationKeys.allProducts.tr(context),
                           icon: Icons.inventory_2_rounded,
                           color: const Color(0xFF4F46E5),
                           onTap: () {},
                         ),
                         _buildKpiCard(
                           context,
-                          title: 'إجمالي الطلبات',
-                          value: '$totalOrdersCount طلب',
-                          subText: '$completedOrdersCount مكتمل • $pendingOrdersCount معلق',
+                          title: TranslationKeys.totalOrders.tr(context),
+                          value: '$totalOrdersCount ${TranslationKeys.orders.tr(context)}',
+                          subText: '$completedOrdersCount ${TranslationKeys.statusCompleted.tr(context)} • $pendingOrdersCount ${TranslationKeys.statusPending.tr(context)}',
                           icon: Icons.shopping_cart_rounded,
                           color: const Color(0xFF10B981),
                           onTap: () {},
                         ),
                         _buildKpiCard(
                           context,
-                          title: 'الطلبات المعلقة',
-                          value: '$pendingOrdersCount طلب',
-                          subText: 'تتطلب المراجعة والتجهيز',
+                          title: TranslationKeys.pendingOrders.tr(context),
+                          value: '$pendingOrdersCount ${TranslationKeys.orders.tr(context)}',
+                          subText: TranslationKeys.statusPending.tr(context),
                           icon: Icons.hourglass_top_rounded,
                           color: const Color(0xFFF59E0B),
                           onTap: () {},
                         ),
                         _buildKpiCard(
                           context,
-                          title: 'تقييم المتجر',
+                          title: TranslationKeys.storeRating.tr(context),
                           value: '⭐ ${avgStoreRating.toStringAsFixed(1)}',
-                          subText: 'تقييم العملاء العام',
+                          subText: TranslationKeys.rating.tr(context),
                           icon: Icons.star_rounded,
                           color: const Color(0xFFEC4899),
                           onTap: () {},
@@ -189,16 +192,19 @@ class StoreDashboardOverviewPage extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
+    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        color: storeTheme?.surfaceColorValue ?? theme.cardColor,
+        borderRadius: storeTheme?.cardBorderRadius ?? BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: color.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -215,7 +221,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: storeTheme?.buttonBorderRadius ?? BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 20),
               ),
@@ -226,17 +232,20 @@ class StoreDashboardOverviewPage extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
+                  fontFamily: fontFamily,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: storeTheme?.textColorValue,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 title,
                 style: TextStyle(
+                  fontFamily: fontFamily,
                   fontSize: 12,
-                  color: theme.textTheme.bodySmall?.color,
+                  color: storeTheme?.textColorValue.withOpacity(0.6) ?? theme.textTheme.bodySmall?.color,
                 ),
               ),
             ],
@@ -248,7 +257,10 @@ class StoreDashboardOverviewPage extends StatelessWidget {
 
   Widget _buildOrdersFlowChart(BuildContext context) {
     final theme = Theme.of(context);
-    final days = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final days = isArabic
+        ? ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
+        : ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     final heights = [0.6, 0.85, 0.5, 0.9, 0.75, 0.8, 0.45];
 
     return Container(
@@ -261,13 +273,9 @@ class StoreDashboardOverviewPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'مخطط طلبات المتجر الأسبوعي',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
           Text(
-            'توزيع الطلبات اليومية المستلمة في المتجر',
-            style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color),
+            TranslationKeys.weeklyOrdersChart.tr(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -328,9 +336,9 @@ class StoreDashboardOverviewPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'المنتجات الأكثر مبيعاً بمتجرك',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            TranslationKeys.topSellingStoreProducts.tr(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Text(
             'المنتجات الفائزة بأعلى الطلبات',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -11,9 +12,11 @@ class StoreReviewsManagementPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
       body: Consumer<ProductProvider>(
         builder: (context, productProvider, child) {
           final products = productProvider.allProducts;
@@ -31,7 +34,7 @@ class StoreReviewsManagementPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'تقييمات المتجر',
+                          TranslationKeys.reviews.tr(context),
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -39,7 +42,7 @@ class StoreReviewsManagementPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'متابعة واستعراض آراء وتقييمات العملاء بمنتجات متجرك',
+                          TranslationKeys.storeRating.tr(context),
                           style: TextStyle(
                             fontSize: 13,
                             color: theme.textTheme.bodySmall?.color,
@@ -71,7 +74,7 @@ class StoreReviewsManagementPage extends StatelessWidget {
                           children: [
                             TableImageTextCell(
                               title: p.name,
-                              subtitle: '${p.reviewsCount} تقييم مسجل',
+                              subtitle: '${p.reviewsCount} ${TranslationKeys.reviews.tr(context)}',
                               imageUrl: p.images.isNotEmpty ? p.images.first : null,
                               fallbackIcon: Icons.shopping_bag_outlined,
                             ),
@@ -100,11 +103,11 @@ class StoreReviewsManagementPage extends StatelessWidget {
                                 OutlinedButton.icon(
                                   onPressed: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('متابعة تقييمات "${p.name}"')),
+                                      SnackBar(content: Text('${TranslationKeys.reviews.tr(context)} "${p.name}"')),
                                     );
                                   },
                                   icon: const Icon(Icons.rate_review_outlined, size: 14),
-                                  label: const Text('معاينة التعليقات', style: TextStyle(fontSize: 11)),
+                                  label: Text(TranslationKeys.viewDetails.tr(context), style: const TextStyle(fontSize: 11)),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   ),

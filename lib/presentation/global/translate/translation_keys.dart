@@ -330,4 +330,26 @@ class TranslationKeys {
   static const String reviews = 'reviews';
   static const String notifications = 'notifications';
   static const String contactInformation = 'contact_information';
+
+  // Store Owner Keys
+  static const String storeOwnerPortal = 'store_owner_portal';
+  static const String storeDashboardTitle = 'store_dashboard_title';
+  static const String storeDashboardSubtitle = 'store_dashboard_subtitle';
+  static const String mainStore = 'main_store';
+  static const String storeProducts = 'store_products';
+  static const String totalOrders = 'total_orders';
+  static const String pendingOrders = 'pending_orders';
+  static const String storeRating = 'store_rating';
+  static const String weeklyOrdersChart = 'weekly_orders_chart';
+  static const String topSellingStoreProducts = 'top_selling_store_products';
+  static const String storeOwnerProfileTitle = 'store_owner_profile_title';
+  static const String storeOwnerProfileSubtitle = 'store_owner_profile_subtitle';
+  static const String personalInfoTab = 'personal_info_tab';
+  static const String ownershipInfoTab = 'ownership_info_tab';
+  static const String securityTab = 'security_tab';
+  static const String notificationsTab = 'notifications_tab';
+  static const String storeSettingsTitle = 'store_settings_title';
+  static const String storeSettingsSubtitle = 'store_settings_subtitle';
+  static const String productsSubtitle = 'products_subtitle';
+  static const String ordersSubtitle = 'orders_subtitle';
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/providers/company_provider.dart';
+import '../../../global/translate/app_localizations.dart';
+import '../../../global/translate/translation_keys.dart';
 
 class StoreOwnerProfilePage extends StatefulWidget {
   const StoreOwnerProfilePage({super.key});
@@ -94,11 +96,12 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
     final theme = Theme.of(context);
     final companyProvider = Provider.of<CompanyProvider>(context);
     final companySettings = companyProvider.companySettings;
+    final storeTheme = companySettings?.theme;
     final storeName = companySettings?.name.ar ?? 'متجري الرقمي';
-    final storeLogo = companySettings?.theme.logoUrl;
+    final storeLogo = storeTheme?.logoUrl;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: storeTheme?.backgroundColorValue ?? theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -106,7 +109,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
-                color: theme.cardColor,
+                color: storeTheme?.surfaceColorValue ?? theme.cardColor,
                 border: Border(
                   bottom: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
                 ),
@@ -130,16 +133,16 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'الملف الشخصي والمهني لصاحب المتجر',
-                        style: TextStyle(
+                      Text(
+                        TranslationKeys.storeOwnerProfileTitle.tr(context),
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'إدارة بيانات مالك المتجر، السجل التجاري، الأمان، والإشعارات الحية',
+                        TranslationKeys.storeOwnerProfileSubtitle.tr(context),
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.textTheme.bodySmall?.color,
@@ -157,7 +160,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
                         : const Icon(Icons.save_rounded, size: 18),
-                    label: Text(_isSaving ? 'جاري الحفظ...' : 'حفظ التعديلات'),
+                    label: Text(_isSaving ? '...' : TranslationKeys.saveChanges.tr(context)),
                   ),
                 ],
               ),
@@ -185,11 +188,11 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                         unselectedLabelColor: theme.textTheme.bodyMedium?.color,
                         indicatorColor: theme.primaryColor,
                         indicatorWeight: 3,
-                        tabs: const [
-                          Tab(icon: Icon(Icons.person_rounded, size: 18), text: 'البيانات الشخصية'),
-                          Tab(icon: Icon(Icons.business_center_rounded, size: 18), text: 'بيانات الملكية'),
-                          Tab(icon: Icon(Icons.security_rounded, size: 18), text: 'الأمان والأجهزة'),
-                          Tab(icon: Icon(Icons.notifications_active_rounded, size: 18), text: 'الإشعارات'),
+                        tabs: [
+                          Tab(icon: const Icon(Icons.person_rounded, size: 18), text: TranslationKeys.personalInfoTab.tr(context)),
+                          Tab(icon: const Icon(Icons.business_center_rounded, size: 18), text: TranslationKeys.ownershipInfoTab.tr(context)),
+                          Tab(icon: const Icon(Icons.security_rounded, size: 18), text: TranslationKeys.securityTab.tr(context)),
+                          Tab(icon: const Icon(Icons.notifications_active_rounded, size: 18), text: TranslationKeys.notificationsTab.tr(context)),
                         ],
                       ),
                     ),

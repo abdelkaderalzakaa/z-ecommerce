@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/offer_model.dart';
+import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/data/providers/offer_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
@@ -31,9 +32,11 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final companyProvider = Provider.of<CompanyProvider>(context);
+    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
       body: Consumer<OfferProvider>(
         builder: (context, provider, child) {
           final filteredOffers = provider.offers.where((offer) {
@@ -75,7 +78,7 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'إدارة وإنشاء الكوبونات والعروض الترويجية الخادمة لمتجرك',
+                          TranslationKeys.offersSubtitle.tr(context),
                           style: TextStyle(
                             fontSize: 13,
                             color: theme.textTheme.bodySmall?.color,
@@ -160,7 +163,9 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                         sortKey: (o) => o.name.get(context),
                         cellBuilder: (o) => TableImageTextCell(
                           title: o.name.get(context),
-                          subtitle: 'كود: ${o.couponCode ?? "بدون كود"}',
+                          subtitle: Localizations.localeOf(context).languageCode == 'ar'
+                              ? 'كود: ${o.couponCode ?? "بدون كود"}'
+                              : 'Code: ${o.couponCode ?? "No Code"}',
                           fallbackIcon: Icons.local_offer_rounded,
                         ),
                       ),
@@ -172,7 +177,9 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                         cellBuilder: (o) => TableTextCell(
                           title: o.discountPercent != null
                               ? '${o.discountPercent}%'
-                              : (o.discountAmount != null ? '\$${o.discountAmount}' : 'خصم خاص'),
+                              : (o.discountAmount != null
+                                  ? '\$${o.discountAmount}'
+                                  : (Localizations.localeOf(context).languageCode == 'ar' ? 'خصم خاص' : 'Special Discount')),
                           isBold: true,
                         ),
                       ),

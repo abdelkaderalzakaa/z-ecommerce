@@ -277,34 +277,34 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'profile',
                 child: Row(
                   children: [
-                    Icon(Icons.person_outline, size: 18),
-                    SizedBox(width: 10),
-                    Text('الملف الشخصي'),
+                    const Icon(Icons.person_outline, size: 18),
+                    const SizedBox(width: 10),
+                    Text(TranslationKeys.profile.tr(context)),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'settings',
                 child: Row(
                   children: [
-                    Icon(Icons.settings_outlined, size: 18),
-                    SizedBox(width: 10),
-                    Text('الإعدادات'),
+                    const Icon(Icons.settings_outlined, size: 18),
+                    const SizedBox(width: 10),
+                    Text(TranslationKeys.settings.tr(context)),
                   ],
                 ),
               ),
               const PopupMenuDivider(),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'logout',
                 child: Row(
                   children: [
-                    Icon(Icons.logout, size: 18, color: Colors.red),
-                    SizedBox(width: 10),
-                    Text('تسجيل الخروج', style: TextStyle(color: Colors.red)),
+                    const Icon(Icons.logout, size: 18, color: Colors.red),
+                    const SizedBox(width: 10),
+                    Text(TranslationKeys.logout.tr(context), style: const TextStyle(color: Colors.red)),
                   ],
                 ),
               ),

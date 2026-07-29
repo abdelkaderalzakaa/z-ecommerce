@@ -231,16 +231,20 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'استوديو تخصيص الهوية والثيم المباشر (100% Visual Studio)',
-                            style: TextStyle(
+                          Text(
+                            Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'استوديو تخصيص الهوية والثيم المباشر (100% Visual Studio)'
+                                : 'Store Theme & Branding Visual Studio (100% Real-Time)',
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'اختر الألوان، الخطوط، اللوجو، والغلاف بنقرة واحدة واستعرض المعاينة اللحظية',
+                            Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'اختر الألوان، الخطوط، اللوجو، والغلاف بنقرة واحدة واستعرض المعاينة اللحظية'
+                                : 'Choose colors, fonts, logo and cover banner with instant live preview',
                             style: TextStyle(
                               fontSize: 12,
                               color: theme.textTheme.bodySmall?.color,
@@ -1657,14 +1661,20 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
   // 100% VISUAL THEME SELECTION CONTROLS FORM
   // ───────────────────────────────────────────────
   Widget _buildVisualThemeControlsForm(ThemeData theme) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 1. Primary Colors Palette Selector
         _buildControlSectionCard(
           theme,
-          title: 'اللون الرئيسي للمتجر (Primary Color)',
-          subtitle: 'اختر اللون الأساسي للأزرار، الهيدر، والعناوين أو اختر لونك الخاص',
+          title: isArabic
+              ? 'اللون الرئيسي للمتجر (Primary Color)'
+              : 'Store Primary Color',
+          subtitle: isArabic
+              ? 'اختر اللون الأساسي للأزرار، الهيدر، والعناوين أو اختر لونك الخاص'
+              : 'Choose primary color for buttons, headers and titles or select custom color',
           icon: Icons.palette_rounded,
           children: [
             Wrap(
@@ -1691,14 +1701,14 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 }),
                 ActionChip(
                   avatar: const Icon(Icons.colorize_rounded, size: 16),
-                  label: const Text(
-                    '🎨 فتح دولاب اختيار اللون المخصص...',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  label: Text(
+                    isArabic ? '🎨 فتح دولاب اختيار اللون المخصص...' : '🎨 Open Custom Color Picker...',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   onPressed: () => _showCustomColorPickerDialog(
                     context: context,
                     initialColorHex: _primaryColorHex,
-                    titleText: 'اختيار اللون الرئيسي (Primary Color Picker)',
+                    titleText: isArabic ? 'اختيار اللون الرئيسي (Primary Color Picker)' : 'Primary Color Picker',
                     onColorSelected: (hex) => setState(() => _primaryColorHex = hex),
                   ),
                 ),
@@ -1711,8 +1721,12 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
         // 2. Secondary Colors Palette Selector
         _buildControlSectionCard(
           theme,
-          title: 'اللون الفرعي والخصومات (Secondary Color)',
-          subtitle: 'اختر اللون الفرعي لبطاقات الخصم والتأكيدات أو اختر لونك الخاص',
+          title: isArabic
+              ? 'اللون الفرعي والخصومات (Secondary Color)'
+              : 'Store Secondary Color',
+          subtitle: isArabic
+              ? 'اختر اللون الفرعي لبطاقات الخصم والتأكيدات أو اختر لونك الخاص'
+              : 'Choose secondary color for discount badges and confirmations',
           icon: Icons.color_lens_rounded,
           children: [
             Wrap(
@@ -1739,14 +1753,14 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 }),
                 ActionChip(
                   avatar: const Icon(Icons.colorize_rounded, size: 16),
-                  label: const Text(
-                    '🎨 فتح دولاب اختيار اللون المخصص...',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  label: Text(
+                    isArabic ? '🎨 فتح دولاب اختيار اللون المخصص...' : '🎨 Open Custom Color Picker...',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   onPressed: () => _showCustomColorPickerDialog(
                     context: context,
                     initialColorHex: _secondaryColorHex,
-                    titleText: 'اختيار اللون الفرعي (Secondary Color Picker)',
+                    titleText: isArabic ? 'اختيار اللون الفرعي (Secondary Color Picker)' : 'Secondary Color Picker',
                     onColorSelected: (hex) => setState(() => _secondaryColorHex = hex),
                   ),
                 ),
@@ -1759,8 +1773,12 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
         // 3. Background Theme Style Cards (خلفية ذات لون ناعم وخفيف جداً إجبارياً)
         _buildControlSectionCard(
           theme,
-          title: 'نمط خلفية وشكل المتجر (Soft Tinted Background Theme)',
-          subtitle: 'اختر المظهر العام للخلفية (درجات ألوان خفيفة وناعمة جداً إجبارياً لضمان وضوح النصوص)',
+          title: isArabic
+              ? 'نمط خلفية وشكل المتجر (Soft Tinted Background Theme)'
+              : 'Soft Tinted Background Theme',
+          subtitle: isArabic
+              ? 'اختر المظهر العام للخلفية (درجات ألوان خفيفة وناعمة جداً إجبارياً لضمان وضوح النصوص)'
+              : 'Select overall background theme (soft tinted background for best contrast)',
           icon: Icons.wallpaper_rounded,
           children: [
             Wrap(
