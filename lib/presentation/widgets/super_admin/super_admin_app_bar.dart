@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/auth_provider.dart';
-import '../../../data/providers/locale_provider.dart';
-import '../../../data/providers/settings_provider.dart';
+import '../../global/locale_provider.dart';
+import '../../global/settings_provider.dart';
 import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
@@ -225,15 +225,17 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        currentUser?.name ?? 'Admin User',
+                        (currentUser?.name != null && currentUser!.name.isNotEmpty)
+                            ? currentUser.name
+                            : 'Super Admin',
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
                       ),
-                      const Text(
-                        'Super Admin',
-                        style: TextStyle(
+                      Text(
+                        currentUser?.email ?? 'alzakaasimplesolutions@gmail.com',
+                        style: const TextStyle(
                           fontSize: 11,
                           color: Colors.grey,
                         ),

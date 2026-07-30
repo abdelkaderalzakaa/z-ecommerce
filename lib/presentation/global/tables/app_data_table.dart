@@ -188,17 +188,28 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
         _displayedItems.isNotEmpty &&
         widget.selectedItems.length == _displayedItems.length;
 
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.dividerColor.withOpacity(0.12)),
+    // Unified Light Gray Table Background across all themes
+    const tableBackgroundColor = Color(0xFFF8FAFC);
+
+    return Theme(
+      data: theme.copyWith(
+        cardColor: tableBackgroundColor,
+        textTheme: theme.textTheme.apply(
+          bodyColor: const Color(0xFF0F172A),
+          displayColor: const Color(0xFF0F172A),
         ),
+      ),
+      child: Material(
+        color: tableBackgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            color: tableBackgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -351,6 +362,7 @@ class _AppDataTableState<T> extends State<AppDataTable<T>> {
           ),
         ],
       ),
+    ),
     ),
     );
   }

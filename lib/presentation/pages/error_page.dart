@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/providers/locale_provider.dart';
+import '../global/locale_provider.dart';
 import 'package:z_ecommerce/presentation/pages/store_entry_page.dart';
 
 class ErrorPage extends StatelessWidget {

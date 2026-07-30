@@ -9,55 +9,97 @@ class SuperAdminProfilePage extends StatefulWidget {
   State<SuperAdminProfilePage> createState() => _SuperAdminProfilePageState();
 }
 
-class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
+  final TextEditingController _adminNameController = TextEditingController();
+  final TextEditingController _adminEmailController = TextEditingController();
+  final TextEditingController _adminPhoneController = TextEditingController();
+  final TextEditingController _systemIdController = TextEditingController();
 
-  final TextEditingController _adminNameController =
-      TextEditingController(text: 'سوبر ادمن النظام الأقصى (Master Super Admin)');
-  final TextEditingController _adminEmailController =
-      TextEditingController(text: 'superadmin@platform.com');
-  final TextEditingController _adminPhoneController =
-      TextEditingController(text: '+966 55 000 9999');
-  final TextEditingController _systemIdController =
-      TextEditingController(text: 'SA-ROOT-9901-PROD');
-
-  bool _systemOutageAlerts = true;
-  bool _newStoreSignupAlerts = true;
-  bool _criticalErrorLogAlerts = true;
-  bool _masterPasskeyEnabled = true;
+  // Social Media Links Controllers
+  final TextEditingController _whatsappController = TextEditingController();
+  final TextEditingController _instagramController = TextEditingController();
+  final TextEditingController _linkedinController = TextEditingController();
+  final TextEditingController _facebookController = TextEditingController();
+  final TextEditingController _websiteController = TextEditingController();
 
   bool _isSaving = false;
+  bool _isInitialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final user = context.watch<AuthProvider>().currentUser;
+      if (user != null) {
+        _adminNameController.text = user.name.isNotEmpty ? user.name : 'Super Admin';
+        _adminEmailController.text = user.email;
+        _adminPhoneController.text = (user.phoneNumber != null && user.phoneNumber!.isNotEmpty)
+            ? user.phoneNumber!
+            : '+961 70 123 456';
+        _systemIdController.text = user.id.isNotEmpty ? user.id : 'SA-ROOT-9901-PROD';
+
+        final socials = user.socialLinks;
+        _whatsappController.text = socials['whatsapp'] ?? '+961 70 123 456';
+        _instagramController.text = socials['instagram'] ?? 'https://instagram.com/alzakaa';
+        _linkedinController.text = socials['linkedin'] ?? 'https://linkedin.com/company/alzakaa';
+        _facebookController.text = socials['facebook'] ?? 'https://facebook.com/alzakaa';
+        _websiteController.text = socials['website'] ?? 'https://alzakaa.com';
+      } else {
+        _adminNameController.text = 'Super Admin';
+        _adminEmailController.text = 'alzakaasimplesolutions@gmail.com';
+        _adminPhoneController.text = '+961 70 123 456';
+        _systemIdController.text = 'SA-ROOT-9901-PROD';
+        _whatsappController.text = '+961 70 123 456';
+        _instagramController.text = 'https://instagram.com/alzakaa';
+        _linkedinController.text = 'https://linkedin.com/company/alzakaa';
+        _facebookController.text = 'https://facebook.com/alzakaa';
+        _websiteController.text = 'https://alzakaa.com';
+      }
+      _isInitialized = true;
+    }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _adminNameController.dispose();
     _adminEmailController.dispose();
     _adminPhoneController.dispose();
     _systemIdController.dispose();
+    _whatsappController.dispose();
+    _instagramController.dispose();
+    _linkedinController.dispose();
+    _facebookController.dispose();
+    _websiteController.dispose();
     super.dispose();
   }
 
   Future<void> _handleSaveProfile() async {
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    setState(() => _isSaving = false);
+    final authProvider = context.read<AuthProvider>();
+
+    final Map<String, String> socialLinks = {
+      'whatsapp': _whatsappController.text.trim(),
+      'instagram': _instagramController.text.trim(),
+      'linkedin': _linkedinController.text.trim(),
+      'facebook': _facebookController.text.trim(),
+      'website': _websiteController.text.trim(),
+    };
+
+    await authProvider.updateUserProfile(
+      name: _adminNameController.text.trim(),
+      phoneNumber: _adminPhoneController.text.trim(),
+      socialLinks: socialLinks,
+    );
 
     if (mounted) {
+      setState(() => _isSaving = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
             children: [
               Icon(Icons.shield_rounded, color: Colors.white, size: 18),
               SizedBox(width: 8),
-              Text('تم تحديث وحفظ بيانات واعتمادات مدير النظام الأقصى بنجاح!'),
+              Text('تم تحديث وحفظ بيانات الاعتماد وروايط التواصل بنجاح!'),
             ],
           ),
           backgroundColor: Theme.of(context).primaryColor,
@@ -105,7 +147,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'الملف الشخصي لمدير النظام الأقصى (Super Admin)',
+                        'الملف الشخصي لمدير النظام (Super Admin)',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -113,7 +155,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'إدارة واعتمادات أعلى مستوى صلاحيات بالنظام وسجلات الأمان العامة',
+                        'إدارة الاعتماد ورقم التواصل وروابط التواصل الاجتماعي المعتمدة',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.textTheme.bodySmall?.color,
@@ -122,6 +164,20 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
                     ],
                   ),
                   const Spacer(),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await context.read<AuthProvider>().signOut();
+                      if (context.mounted) {
+                        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                      }
+                    },
+                    icon: const Icon(Icons.logout_rounded, size: 18, color: Colors.white),
+                    label: const Text('تسجيل الخروج', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   ElevatedButton.icon(
                     onPressed: _isSaving ? null : _handleSaveProfile,
                     icon: _isSaving
@@ -142,46 +198,16 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
-                    // Top Super Admin Profile Banner Card
+                    // Top Super Admin Banner Header
                     _buildAdminCardHeader(theme),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
-                    // Custom Tab Bar
-                    Container(
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        labelColor: theme.primaryColor,
-                        unselectedLabelColor: theme.textTheme.bodyMedium?.color,
-                        indicatorColor: theme.primaryColor,
-                        indicatorWeight: 3,
-                        tabs: const [
-                          Tab(icon: Icon(Icons.badge_rounded, size: 18), text: 'اعتمادات المدير'),
-                          Tab(icon: Icon(Icons.admin_panel_settings_rounded, size: 18), text: 'مصفوفة الصلاحيات'),
-                          Tab(icon: Icon(Icons.gavel_rounded, size: 18), text: 'سجل الأمان والعمليات'),
-                          Tab(icon: Icon(Icons.dvr_rounded, size: 18), text: 'تنبيهات المنصة'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+                    // Admin Credentials Section
+                    _buildAdminCredentialsSection(theme),
+                    const SizedBox(height: 24),
 
-                    // Tab View Box
-                    SizedBox(
-                      height: 520,
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildAdminCredentialsTab(theme),
-                          _buildPermissionsMatrixTab(theme),
-                          _buildSecurityAuditLogsTab(theme),
-                          _buildPlatformAlertsTab(theme),
-                        ],
-                      ),
-                    ),
+                    // Social Media Links Section
+                    _buildSocialMediaSection(theme),
                   ],
                 ),
               ),
@@ -238,7 +264,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
                 Row(
                   children: [
                     Text(
-                      _adminNameController.text,
+                      _adminNameController.text.isNotEmpty ? _adminNameController.text : 'Super Admin',
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 10),
@@ -254,7 +280,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
                           Icon(Icons.workspace_premium_rounded, size: 14, color: Color(0xFFDC2626)),
                           SizedBox(width: 4),
                           Text(
-                            'مدير النظام الأقصى (Super Admin)',
+                            'مدير النظام (Super Admin)',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -279,7 +305,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
     );
   }
 
-  Widget _buildAdminCredentialsTab(ThemeData theme) {
+  Widget _buildAdminCredentialsSection(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -290,7 +316,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('بيانات الاعتماد الرسمية لمدير النظام', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const Text('بيانات الاعتماد الرسمية لمدير النظام', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -308,9 +334,11 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
                 child: TextField(
                   controller: _systemIdController,
                   readOnly: true,
+                  enabled: false,
                   decoration: const InputDecoration(
-                    labelText: 'المعرف الرقمي الماستر (System ID)',
+                    labelText: 'المعرف الرقمي الماستر (غير قابل للتعديل)',
                     prefixIcon: Icon(Icons.fingerprint_rounded),
+                    helperText: 'معرّف آمن ثابت مخصص لمستند السوبر أدمن',
                   ),
                 ),
               ),
@@ -322,9 +350,12 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
               Expanded(
                 child: TextField(
                   controller: _adminEmailController,
+                  readOnly: true,
+                  enabled: false,
                   decoration: const InputDecoration(
-                    labelText: 'البريد الرسمي المعتمد للمنصة',
+                    labelText: 'البريد الرسمي المعتمد (غير قابل للتعديل)',
                     prefixIcon: Icon(Icons.mark_email_read_rounded),
+                    helperText: 'لا يمكن تغيير البريد الإلكتروني الرئيسي لمنع فقدان الصلاحيات',
                   ),
                 ),
               ),
@@ -332,8 +363,10 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
               Expanded(
                 child: TextField(
                   controller: _adminPhoneController,
+                  keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    labelText: 'رقم الهاتف المباشر للطوارئ',
+                    labelText: 'رقم الهاتف المباشر (لبناني +961)',
+                    hintText: '+961 70 123 456',
                     prefixIcon: Icon(Icons.phone_in_talk_rounded),
                   ),
                 ),
@@ -345,14 +378,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
     );
   }
 
-  Widget _buildPermissionsMatrixTab(ThemeData theme) {
-    final permissions = [
-      {'name': 'إدارة المتاجر وحظر الحسابات', 'desc': 'صلاحية كاملة لإنشاء، تعديل، إيقاف، أو تعليق المتاجر', 'active': true},
-      {'name': 'إدارة العمولات والاشتراكات', 'desc': 'التحكم بنسب العمولات وخطط الباقات المالية الفعالة', 'active': true},
-      {'name': 'إدارة أدوار المشرفين والمستخدمين', 'desc': 'منح وسحب الصلاحيات الإدارية لجميع مدراء النظام', 'active': true},
-      {'name': 'الاطلاع على السجلات الحساسة (Audit Logs)', 'desc': 'استعراض كافة السجلات الأمنية والتحركات بالمنصة', 'active': true},
-    ];
-
+  Widget _buildSocialMediaSection(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -363,128 +389,78 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('مصفوفة الصلاحيات العليا الممنوحة لحسابك', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView.separated(
-              itemCount: permissions.length,
-              separatorBuilder: (_, _) => const Divider(height: 16),
-              itemBuilder: (context, index) {
-                final item = permissions[index];
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: theme.primaryColor.withOpacity(0.1),
-                    child: Icon(Icons.check_circle_rounded, color: theme.primaryColor, size: 20),
+          const Row(
+            children: [
+              Icon(Icons.share_rounded, size: 20),
+              SizedBox(width: 8),
+              Text('روابط التواصل الاجتماعي والتواصل المباشر', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'روابط وسائل التواصل الرسمية الخاصة بالإدارة والمساعدة والمنصة',
+            style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _whatsappController,
+                  decoration: const InputDecoration(
+                    labelText: 'رقم واتساب للتواصل (WhatsApp)',
+                    prefixIcon: Icon(Icons.chat_bubble_outline_rounded),
+                    hintText: '+961 70 123 456',
                   ),
-                  title: Text(item['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  subtitle: Text(item['desc'] as String, style: const TextStyle(fontSize: 12)),
-                  trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text('مُفعلة 100%', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF10B981))),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  controller: _instagramController,
+                  decoration: const InputDecoration(
+                    labelText: 'رابط إنستغرام (Instagram)',
+                    prefixIcon: Icon(Icons.camera_alt_outlined),
+                    hintText: 'https://instagram.com/...',
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSecurityAuditLogsTab(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('سجل الأمان والنشاطات الإدارية الأخيرة', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('تفعيل مفتاح الأمان البيومتري (Passkey Security)'),
-            subtitle: const Text('طلب بصمة الأصبع أو الوجه قبل إجراء أي عملية حساسة بالمنصة'),
-            value: _masterPasskeyEnabled,
-            onChanged: (val) => setState(() => _masterPasskeyEnabled = val),
-            activeColor: theme.primaryColor,
-          ),
-          const Divider(),
-          const SizedBox(height: 10),
-          const Text('سجل الدخول والتحركات الأخير:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: theme.dividerColor.withOpacity(0.15)),
-            ),
-            child: const Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('🔐 تسجيل دخول ناجح - IP: 197.230.12.88', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    Text('اليوم 12:44 م', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                  ],
                 ),
-                SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('🛡️ تعديل خطة اشتراك متجر "الأنشطة المودرن"', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    Text('أمس 08:30 م', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlatformAlertsTab(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('إعدادات تنبيهات وإشعارات المنصة الشاملة', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('تنبيهات حالة السيرفرات وتوقف الخدمات'),
-            subtitle: const Text('إرسال تنبيه فوري عاجل في حال حدوث أي بطء أو انقطاع بالنظام'),
-            value: _systemOutageAlerts,
-            onChanged: (val) => setState(() => _systemOutageAlerts = val),
-            activeColor: theme.primaryColor,
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _linkedinController,
+                  decoration: const InputDecoration(
+                    labelText: 'رابط لينكد إن (LinkedIn)',
+                    prefixIcon: Icon(Icons.business_center_outlined),
+                    hintText: 'https://linkedin.com/...',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  controller: _facebookController,
+                  decoration: const InputDecoration(
+                    labelText: 'رابط فيسبوك (Facebook)',
+                    prefixIcon: Icon(Icons.facebook_outlined),
+                    hintText: 'https://facebook.com/...',
+                  ),
+                ),
+              ),
+            ],
           ),
-          SwitchListTile(
-            title: const Text('إشعارات انضمام المتاجر الجديدة'),
-            subtitle: const Text('تنبيه عند قيام تاجر جديد بإنشاء متجر على المنصة'),
-            value: _newStoreSignupAlerts,
-            onChanged: (val) => setState(() => _newStoreSignupAlerts = val),
-            activeColor: theme.primaryColor,
-          ),
-          SwitchListTile(
-            title: const Text('سجلات الأخطاء والـ Critical Logs'),
-            subtitle: const Text('توجيه إشعارات الأخطاء البرمجية الحرجة فور حدوثها بالخادم'),
-            value: _criticalErrorLogAlerts,
-            onChanged: (val) => setState(() => _criticalErrorLogAlerts = val),
-            activeColor: theme.primaryColor,
+          const SizedBox(height: 16),
+          TextField(
+            controller: _websiteController,
+            decoration: const InputDecoration(
+              labelText: 'الموقع الإلكتروني الرسمي (Official Website)',
+              prefixIcon: Icon(Icons.language_rounded),
+              hintText: 'https://alzakaa.com',
+            ),
           ),
         ],
       ),

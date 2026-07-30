@@ -32,7 +32,7 @@ class CartPage extends StatelessWidget {
         fallbackRoute: 'shop',
         paths: [
           TranslationKeys.home.tr(context),
-          '${TranslationKeys.checkout.tr(context).split(' ').first}:${context.watch<CartProvider>().cartCount(context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001')} ${TranslationKeys.items.tr(context)}',
+          '${TranslationKeys.checkout.tr(context).split(' ').first}:${context.watch<CartProvider>().cartCount(context.read<CompanyProvider>().companySettings?.id)} ${TranslationKeys.items.tr(context)}',
         ],
         isCartActive: false,
       ),

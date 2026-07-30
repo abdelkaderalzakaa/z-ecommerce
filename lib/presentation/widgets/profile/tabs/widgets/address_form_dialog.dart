@@ -3,7 +3,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
-import '../../../../../../data/models/address_model.dart';
+import '../../../../../../data/models/common/address_model.dart';
 import '../../../../../../data/providers/auth_provider.dart';
 import '../../../../global/translate/app_localizations.dart';
 import '../../../../global/translate/translation_keys.dart';

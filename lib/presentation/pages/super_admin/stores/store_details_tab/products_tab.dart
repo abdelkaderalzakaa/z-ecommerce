@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/company_settings_model.dart';
-import 'package:z_ecommerce/data/models/product_model.dart';
+import 'package:z_ecommerce/data/models/company/company_settings_model.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
@@ -29,11 +29,13 @@ class _ProductsTabState extends State<ProductsTab> {
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
         final storeProducts = provider.allProducts.where((p) {
+          final belongsToStore = p.businessId == widget.store.id;
           final titleStr = p.name.toLowerCase();
-          final matchesQuery = _searchQuery.isEmpty ||
+          final matchesQuery =
+              _searchQuery.isEmpty ||
               titleStr.contains(_searchQuery.toLowerCase()) ||
               p.id.toLowerCase().contains(_searchQuery.toLowerCase());
-          return matchesQuery;
+          return belongsToStore && matchesQuery;
         }).toList();
 
         final totalItems = storeProducts.length;
@@ -59,7 +61,9 @@ class _ProductsTabState extends State<ProductsTab> {
             onBulkDelete: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})'),
+                  content: Text(
+                    '${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})',
+                  ),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -106,9 +110,7 @@ class _ProductsTabState extends State<ProductsTab> {
                 flex: 1,
                 sortable: true,
                 sortKey: (p) => p.price,
-                cellBuilder: (p) => TablePriceCell(
-                  amount: p.price,
-                ),
+                cellBuilder: (p) => TablePriceCell(amount: p.price),
               ),
               AppTableColumn<Product>(
                 title: TranslationKeys.rating.tr(context),

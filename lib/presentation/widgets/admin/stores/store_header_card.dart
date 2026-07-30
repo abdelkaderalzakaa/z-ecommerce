@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../data/models/company_settings_model.dart';
-import '../../../../../data/models/user_model.dart';
+import '../../../../../data/models/company/company_settings_model.dart';
+import '../../../../data/models/auth/user_model.dart';
 
 class StoreHeaderCard extends StatelessWidget {
   final CompanySettingsModel store;

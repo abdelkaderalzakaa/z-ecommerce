@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/company_provider.dart';
-import '../../../data/models/brand_model.dart';
+import '../../../data/models/product/brand_model.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../common/product_card.dart';

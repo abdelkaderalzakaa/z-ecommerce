@@ -25,15 +25,16 @@ class AuthTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Auth UI is strictly Light Mode only
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
+            color: Color(0xFF0F172A),
           ),
         ),
         const SizedBox(height: 8),
@@ -42,14 +43,30 @@ class AuthTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           validator: validator,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
+            color: Color(0xFF0F172A),
           ),
           decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFF8FAFC),
             hintText: hintText,
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20) : null,
+            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+            prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: const Color(0xFF64748B)) : null,
             suffixIcon: suffixIcon,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF635BFF), width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
           ),
         ),
       ],

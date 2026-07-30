@@ -4,16 +4,15 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
 
-
 import '../../data/fake_data/company.dart';
-import '../../data/fake_data/products.dart';
 import '../../data/fake_data/offers.dart';
-import '../../data/models/company_settings_model.dart';
-import '../../data/models/offer_model.dart';
-import '../../data/models/product_model.dart';
+import '../../data/models/company/company_settings_model.dart';
+import '../../data/models/product/offer_model.dart';
+import '../../data/models/product/product_model.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/company_provider.dart';
-import '../../data/providers/locale_provider.dart';
+import '../../data/providers/product_provider.dart';
+import '../global/locale_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
@@ -24,6 +23,7 @@ import 'package:z_ecommerce/presentation/pages/stores_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
 import 'package:z_ecommerce/presentation/pages/offer_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
+
 class StoreEntryPage extends StatefulWidget {
   const StoreEntryPage({super.key});
 
@@ -62,7 +62,8 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
     _heroTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (mounted) {
         setState(() {
-          _currentHeroImageIndex = (_currentHeroImageIndex + 1) % _heroImages.length;
+          _currentHeroImageIndex =
+              (_currentHeroImageIndex + 1) % _heroImages.length;
         });
       }
     });
@@ -83,7 +84,8 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
     final storeTheme = companyProvider.companySettings?.theme;
 
     final primaryColor = storeTheme?.primaryColorValue ?? Colors.black;
-    final secondaryColor = storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
+    final secondaryColor =
+        storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
     final bgColor = storeTheme?.backgroundColorValue ?? Colors.white;
     final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
 
@@ -114,7 +116,10 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                     alignment: Alignment.bottomCenter,
                     children: [
                       _buildHeroSection(innerContext),
-                      Positioned(bottom: -60, child: _buildCategoriesBar(innerContext)),
+                      Positioned(
+                        bottom: -60,
+                        child: _buildCategoriesBar(innerContext),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 60),
@@ -130,7 +135,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
               ),
             ),
           );
-        }
+        },
       ),
     );
   }
@@ -314,7 +319,10 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                             isAr
                                 ? 'اكتشف أفضل المتاجر، العروض الحصرية، والمنتجات الرائعة.'
                                 : 'Discover top stores, exclusive offers, and amazing products.',
-                            style: const TextStyle(color: Colors.white70, fontSize: 20),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 20,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -369,13 +377,17 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                                     Icons.arrow_forward,
                                     color: Colors.white,
                                   ),
-                                  onPressed: () => _showSnackBar(isAr ? 'جاري البحث...' : 'Searching...'),
+                                  onPressed: () => _showSnackBar(
+                                    isAr ? 'جاري البحث...' : 'Searching...',
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 80), // Space to prevent overlap with Categories Bar
+                        const SizedBox(
+                          height: 80,
+                        ), // Space to prevent overlap with Categories Bar
                       ],
                     );
 
@@ -426,11 +438,36 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
 
     final categories = [
-      {'icon': Icons.restaurant, 'en': 'Restaurants', 'ar': 'مطاعم', 'id': 'restaurant'},
-      {'icon': Icons.devices, 'en': 'Electronics', 'ar': 'إلكترونيات', 'id': 'electronics'},
-      {'icon': Icons.home, 'en': 'Home & Living', 'ar': 'المنزل والديكور', 'id': 'appliances'},
-      {'icon': Icons.checkroom, 'en': 'Fashion', 'ar': 'أزياء', 'id': 'fashion'},
-      {'icon': Icons.face_retouching_natural, 'en': 'Beauty', 'ar': 'تجميل', 'id': 'beauty'},
+      {
+        'icon': Icons.restaurant,
+        'en': 'Restaurants',
+        'ar': 'مطاعم',
+        'id': 'restaurant',
+      },
+      {
+        'icon': Icons.devices,
+        'en': 'Electronics',
+        'ar': 'إلكترونيات',
+        'id': 'electronics',
+      },
+      {
+        'icon': Icons.home,
+        'en': 'Home & Living',
+        'ar': 'المنزل والديكور',
+        'id': 'appliances',
+      },
+      {
+        'icon': Icons.checkroom,
+        'en': 'Fashion',
+        'ar': 'أزياء',
+        'id': 'fashion',
+      },
+      {
+        'icon': Icons.face_retouching_natural,
+        'en': 'Beauty',
+        'ar': 'تجميل',
+        'id': 'beauty',
+      },
     ];
 
     return Container(
@@ -467,7 +504,10 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
               icon: const Icon(Icons.chevron_left, color: Colors.black54),
               onPressed: () {
                 _categoriesScrollController.animateTo(
-                  (_categoriesScrollController.offset - 120).clamp(0, _categoriesScrollController.position.maxScrollExtent),
+                  (_categoriesScrollController.offset - 120).clamp(
+                    0,
+                    _categoriesScrollController.position.maxScrollExtent,
+                  ),
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                 );
@@ -487,9 +527,14 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                   final cat = categories[index];
                   final catId = cat['id'] as String;
                   final isSelected = _selectedCategory == catId;
-                  
+
                   return SizedBox(
-                    width: (MediaQuery.of(context).size.width * 0.8 - 100) / min(4, categories.length), // Calculate width so 4 items fit max
+                    width:
+                        (MediaQuery.of(context).size.width * 0.8 - 100) /
+                        min(
+                          4,
+                          categories.length,
+                        ), // Calculate width so 4 items fit max
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -506,9 +551,15 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: isSelected ? Theme.of(context).primaryColor : Colors.grey[50],
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey[50],
                               shape: BoxShape.circle,
-                              border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Colors.grey[200]!),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey[200]!,
+                              ),
                             ),
                             child: Icon(
                               cat['icon'] as IconData,
@@ -522,7 +573,9 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: isSelected ? Theme.of(context).primaryColor : Colors.black87,
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.black87,
                             ),
                           ),
                         ],
@@ -549,7 +602,10 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
               icon: const Icon(Icons.chevron_right, color: Colors.black54),
               onPressed: () {
                 _categoriesScrollController.animateTo(
-                  (_categoriesScrollController.offset + 120).clamp(0, _categoriesScrollController.position.maxScrollExtent),
+                  (_categoriesScrollController.offset + 120).clamp(
+                    0,
+                    _categoriesScrollController.position.maxScrollExtent,
+                  ),
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                 );
@@ -575,7 +631,9 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
               final cards = [
                 _FeatureCard(
                   icon: Icons.local_shipping_outlined,
-                  title: isAr ? 'توصيل موثوق وسريع' : 'Fast & Reliable Delivery',
+                  title: isAr
+                      ? 'توصيل موثوق وسريع'
+                      : 'Fast & Reliable Delivery',
                   description: isAr
                       ? 'نضمن لك وصول منتجاتك بسرعة وأمان أينما كنت، عبر شبكة واسعة من شركاء التوصيل المعتمدين.'
                       : 'We ensure your products arrive quickly and safely wherever you are, through our certified delivery partners.',
@@ -644,8 +702,9 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
   Widget _buildRecommendedStoresSection(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
     // App determines recommended stores by highest rating
-    final List<CompanySettingsModel> recommendedStores = List.from(fakeCompanies)
-      ..sort((a, b) => b.rate.compareTo(a.rate));
+    final List<CompanySettingsModel> recommendedStores = List.from(
+      fakeCompanies,
+    )..sort((a, b) => b.rate.compareTo(a.rate));
     final displayStores = recommendedStores.take(3).toList();
 
     if (displayStores.isEmpty) return const SizedBox.shrink();
@@ -669,11 +728,10 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
               ),
               const SizedBox(height: 12),
               Text(
-                isAr ? 'اكتشف أفضل المتاجر المختارة بعناية لك' : 'Discover the best stores carefully selected for you',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                isAr
+                    ? 'اكتشف أفضل المتاجر المختارة بعناية لك'
+                    : 'Discover the best stores carefully selected for you',
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 40),
               LayoutBuilder(
@@ -732,7 +790,8 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: displayStores.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 20),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 20),
                       itemBuilder: (context, index) {
                         return SizedBox(
                           width: constraints.maxWidth * 0.8,
@@ -775,7 +834,8 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                     style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
                   TextButton(
-                    onPressed: () => changeScreenReplacement(context, const StoresPage()),
+                    onPressed: () =>
+                        changeScreenReplacement(context, const StoresPage()),
                     child: Text(
                       isAr ? 'الجميع' : 'See All',
                       style: TextStyle(
@@ -792,10 +852,17 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                 builder: (context, constraints) {
                   // Filter logic
                   final filteredStores = fakeCompanies.where((company) {
-                    final matchesSearch = company.name.en.toLowerCase().contains(_searchQuery.toLowerCase()) || 
-                                          company.name.ar.toLowerCase().contains(_searchQuery.toLowerCase());
-                    final matchesCategory = _selectedCategory == null || company.category.id == _selectedCategory;
-                    
+                    final matchesSearch =
+                        company.name.en.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        ) ||
+                        company.name.ar.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        );
+                    final matchesCategory =
+                        _selectedCategory == null ||
+                        company.category.id == _selectedCategory;
+
                     return matchesSearch && matchesCategory;
                   }).toList();
 
@@ -805,11 +872,20 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                         padding: const EdgeInsets.symmetric(vertical: 40),
                         child: Column(
                           children: [
-                            Icon(Icons.storefront_outlined, size: 64, color: Colors.grey[400]),
+                            Icon(
+                              Icons.storefront_outlined,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
                             const SizedBox(height: 16),
                             Text(
-                              isAr ? 'عذراً، لم يتم العثور على أي متجر يطابق بحثك.' : 'Sorry, no stores found matching your criteria.',
-                              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                              isAr
+                                  ? 'عذراً، لم يتم العثور على أي متجر يطابق بحثك.'
+                                  : 'Sorry, no stores found matching your criteria.',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
@@ -851,7 +927,8 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
 
   Widget _buildOffersSection(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-    final List<OfferModel> trendingOffers = List.from(fakeOffers)..shuffle(Random(42));
+    final List<OfferModel> trendingOffers = List.from(fakeOffers)
+      ..shuffle(Random(42));
     final displayOffers = trendingOffers.take(6).toList();
 
     return Container(
@@ -875,7 +952,11 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => _showSnackBar(isAr ? 'سيتم عرض جميع العروض قريباً' : 'Will show all offers soon'),
+                    onPressed: () => _showSnackBar(
+                      isAr
+                          ? 'سيتم عرض جميع العروض قريباً'
+                          : 'Will show all offers soon',
+                    ),
                     child: Text(
                       isAr ? 'الجميع' : 'See All',
                       style: TextStyle(
@@ -897,10 +978,10 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                       const SizedBox(width: 24),
                   itemBuilder: (context, index) {
                     final offer = displayOffers[index];
-                    final assignedCompanyId = offer.companyId;
+                    final assignedbusinessId = offer.businessId;
                     return _TrendingOfferCard(
                       offer: offer,
-                      companyId: assignedCompanyId,
+                      businessId: assignedbusinessId,
                       isAr: isAr,
                     );
                   },
@@ -915,8 +996,9 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
 
   Widget _buildTrendingProducts(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-    // We pick 6 random products for display
-    final List<Product> trending = List.from(fakeProducts)..shuffle(Random(42));
+    final productProvider = context.watch<ProductProvider>();
+    final productsList = productProvider.allProducts;
+    final List<Product> trending = List.from(productsList)..shuffle(Random(42));
     final displayProducts = trending.take(6).toList();
 
     return Container(
@@ -940,7 +1022,11 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => _showSnackBar(isAr ? 'سيتم عرض جميع المنتجات قريباً' : 'Will show all products soon'),
+                    onPressed: () => _showSnackBar(
+                      isAr
+                          ? 'سيتم عرض جميع المنتجات قريباً'
+                          : 'Will show all products soon',
+                    ),
                     child: Text(
                       isAr ? 'الجميع' : 'See All',
                       style: TextStyle(
@@ -963,12 +1049,12 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                   itemBuilder: (context, index) {
                     final product = displayProducts[index];
                     // We randomly assign a company ID for the routing just for demonstration
-                    // In a real app, products would have a companyId field
-                    final assignedCompanyId =
+                    // In a real app, products would have a businessId field
+                    final assignedbusinessId =
                         fakeCompanies[index % fakeCompanies.length].id;
                     return _TrendingProductCard(
                       product: product,
-                      companyId: assignedCompanyId,
+                      businessId: assignedbusinessId,
                       isAr: isAr,
                     );
                   },
@@ -1184,7 +1270,10 @@ class _FeatureCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -1275,7 +1364,11 @@ class _StoreCardState extends State<_StoreCard> {
                     children: [
                       Container(
                         color: Colors.grey.shade300,
-                        child: const Icon(Icons.store, size: 64, color: Colors.grey),
+                        child: const Icon(
+                          Icons.store,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
                       ),
                       // Gradient Overlay
                       Positioned.fill(
@@ -1363,7 +1456,10 @@ class _StoreCardState extends State<_StoreCard> {
                                   width: 60,
                                   height: 60,
                                   color: Colors.grey.shade200,
-                                  child: const Icon(Icons.store, color: Colors.grey),
+                                  child: const Icon(
+                                    Icons.store,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1405,8 +1501,20 @@ class _StoreCardState extends State<_StoreCard> {
                             Expanded(
                               child: Text(
                                 widget.isAr
-                                    ? (widget.company.addresses?.firstOrNull?.address.ar ?? '')
-                                    : (widget.company.addresses?.firstOrNull?.address.en ?? ''),
+                                    ? (widget
+                                              .company
+                                              .addresses
+                                              ?.firstOrNull
+                                              ?.address
+                                              .ar ??
+                                          '')
+                                    : (widget
+                                              .company
+                                              .addresses
+                                              ?.firstOrNull
+                                              ?.address
+                                              .en ??
+                                          ''),
                                 style: TextStyle(color: Colors.grey[600]),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1444,8 +1552,7 @@ class _StoreCardState extends State<_StoreCard> {
                     vertical: _isHovered ? 12 : 0,
                   ),
                   child: ElevatedButton(
-                    onPressed: () =>
-                        changeScreen(context, const HomePage()),
+                    onPressed: () => changeScreen(context, const HomePage()),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       shape: RoundedRectangleBorder(
@@ -1472,12 +1579,12 @@ class _StoreCardState extends State<_StoreCard> {
 
 class _TrendingProductCard extends StatelessWidget {
   final Product product;
-  final String companyId;
+  final String businessId;
   final bool isAr;
 
   const _TrendingProductCard({
     required this.product,
-    required this.companyId,
+    required this.businessId,
     required this.isAr,
   });
 
@@ -1578,10 +1685,12 @@ class _PremiumNewsletterSection extends StatefulWidget {
   const _PremiumNewsletterSection();
 
   @override
-  State<_PremiumNewsletterSection> createState() => _PremiumNewsletterSectionState();
+  State<_PremiumNewsletterSection> createState() =>
+      _PremiumNewsletterSectionState();
 }
 
-class _PremiumNewsletterSectionState extends State<_PremiumNewsletterSection> with SingleTickerProviderStateMixin {
+class _PremiumNewsletterSectionState extends State<_PremiumNewsletterSection>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _floatingAnimation;
   late Animation<Color?> _colorAnimation1;
@@ -1595,7 +1704,7 @@ class _PremiumNewsletterSectionState extends State<_PremiumNewsletterSection> wi
       vsync: this,
       duration: const Duration(seconds: 4),
     )..repeat(reverse: true);
-    
+
     _floatingAnimation = Tween<double>(begin: -15, end: 15).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
     );
@@ -1610,7 +1719,7 @@ class _PremiumNewsletterSectionState extends State<_PremiumNewsletterSection> wi
         begin: primaryColor.withOpacity(0.05),
         end: primaryColor.withOpacity(0.2),
       ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-      
+
       _colorAnimation2 = ColorTween(
         begin: primaryColor.withOpacity(0.15),
         end: primaryColor.withOpacity(0.02),
@@ -1682,7 +1791,11 @@ class _PremiumNewsletterSectionState extends State<_PremiumNewsletterSection> wi
                                 ),
                               ],
                             ),
-                            child: Icon(Icons.mark_email_read_rounded, color: primaryColor, size: 40),
+                            child: Icon(
+                              Icons.mark_email_read_rounded,
+                              color: primaryColor,
+                              size: 40,
+                            ),
                           ),
                           const SizedBox(width: 24),
                           Expanded(
@@ -1713,127 +1826,142 @@ class _PremiumNewsletterSectionState extends State<_PremiumNewsletterSection> wi
                     ],
                   );
 
-              final formContent = Container(
-                padding: const EdgeInsets.all(40),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: Colors.grey[200]!),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+                  final formContent = Container(
+                    padding: const EdgeInsets.all(40),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(color: Colors.grey[200]!),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedBuilder(
-                      animation: _floatingAnimation,
-                      builder: (context, child) {
-                        return Transform.translate(
-                          offset: Offset(0, _floatingAnimation.value),
-                          child: Icon(
-                            Icons.mail_outline_rounded,
-                            size: 64,
-                            color: primaryColor.withOpacity(0.5),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 32),
-                    TextField(
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
-                        hintText: isAr ? 'البريد الإلكتروني' : 'Email Address',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _floatingAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(0, _floatingAnimation.value),
+                              child: Icon(
+                                Icons.mail_outline_rounded,
+                                size: 64,
+                                color: primaryColor.withOpacity(0.5),
+                              ),
+                            );
+                          },
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: primaryColor, width: 2),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 18,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => _showSnackBar(context, isAr ? 'تم الاشتراك بنجاح! شكراً لك.' : 'Subscribed successfully! Thank you.'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 4,
-                        shadowColor: primaryColor.withOpacity(0.4),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            isAr ? 'تسجيل الدخول / اشتراك' : 'Subscribe Now',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                        const SizedBox(height: 32),
+                        TextField(
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(
+                              Icons.email_outlined,
+                              color: Colors.grey,
+                            ),
+                            hintText: isAr
+                                ? 'البريد الإلكتروني'
+                                : 'Email Address',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: primaryColor,
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 18,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.send_rounded, size: 20),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () => _showSnackBar(
+                            context,
+                            isAr
+                                ? 'تم الاشتراك بنجاح! شكراً لك.'
+                                : 'Subscribed successfully! Thank you.',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 4,
+                            shadowColor: primaryColor.withOpacity(0.4),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isAr
+                                    ? 'تسجيل الدخول / اشتراك'
+                                    : 'Subscribe Now',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.send_rounded, size: 20),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
+                  );
 
-              if (isDesktop) {
-                // Determine layout direction based on locale
-                // In the wireframe, form is on the left, text is on the right for Arabic?
-                // Actually if it's right-to-left, the right side is the start. Let's stick to the wireframe layout
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (!isAr) ...[
-                      Expanded(child: textContent),
-                      const SizedBox(width: 80),
-                      Expanded(child: formContent),
-                    ] else ...[
-                      Expanded(child: formContent),
-                      const SizedBox(width: 80),
-                      Expanded(child: textContent),
-                    ]
-                  ],
-                );
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    textContent,
-                    const SizedBox(height: 40),
-                    formContent,
-                  ],
-                );
-              }
-            },
+                  if (isDesktop) {
+                    // Determine layout direction based on locale
+                    // In the wireframe, form is on the left, text is on the right for Arabic?
+                    // Actually if it's right-to-left, the right side is the start. Let's stick to the wireframe layout
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (!isAr) ...[
+                          Expanded(child: textContent),
+                          const SizedBox(width: 80),
+                          Expanded(child: formContent),
+                        ] else ...[
+                          Expanded(child: formContent),
+                          const SizedBox(width: 80),
+                          Expanded(child: textContent),
+                        ],
+                      ],
+                    );
+                  } else {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        textContent,
+                        const SizedBox(height: 40),
+                        formContent,
+                      ],
+                    );
+                  }
+                },
+              ),
+            ),
           ),
-        ),
-      ),
-    );
+        );
       },
     );
   }
@@ -1843,10 +1971,12 @@ class _PremiumHowItWorksSection extends StatefulWidget {
   const _PremiumHowItWorksSection();
 
   @override
-  State<_PremiumHowItWorksSection> createState() => _PremiumHowItWorksSectionState();
+  State<_PremiumHowItWorksSection> createState() =>
+      _PremiumHowItWorksSectionState();
 }
 
-class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> with SingleTickerProviderStateMixin {
+class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection>
+    with SingleTickerProviderStateMixin {
   int _currentStep = 0;
   late AnimationController _videoPulseController;
 
@@ -1855,29 +1985,37 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
       'icon': Icons.search_rounded,
       'title_ar': 'تصفح الواجهة بسهولة',
       'title_en': 'Browse Easily',
-      'desc_ar': 'قمنا بتصميم المنصة لتكون بأعلى درجات السهولة والوضوح للبحث عن متاجرك المفضلة.',
-      'desc_en': 'We designed the platform for maximum clarity and ease when searching for your favorite stores.',
+      'desc_ar':
+          'قمنا بتصميم المنصة لتكون بأعلى درجات السهولة والوضوح للبحث عن متاجرك المفضلة.',
+      'desc_en':
+          'We designed the platform for maximum clarity and ease when searching for your favorite stores.',
     },
     {
       'icon': Icons.shopping_cart_checkout_rounded,
       'title_ar': 'أضف للسلة',
       'title_en': 'Add to Cart',
-      'desc_ar': 'اختر منتجاتك من متاجر متعددة وأضفها لسلة تسوق واحدة متكاملة بضغطة زر.',
-      'desc_en': 'Choose products from multiple stores and add them to a single cart with one click.',
+      'desc_ar':
+          'اختر منتجاتك من متاجر متعددة وأضفها لسلة تسوق واحدة متكاملة بضغطة زر.',
+      'desc_en':
+          'Choose products from multiple stores and add them to a single cart with one click.',
     },
     {
       'icon': Icons.payment_rounded,
       'title_ar': 'دفع آمن وسريع',
       'title_en': 'Fast & Secure Payment',
-      'desc_ar': 'وفرنا لك بوابات دفع إلكترونية مشفرة وآمنة 100% لضمان راحة بالك.',
-      'desc_en': 'We provide 100% secure and encrypted payment gateways for your peace of mind.',
+      'desc_ar':
+          'وفرنا لك بوابات دفع إلكترونية مشفرة وآمنة 100% لضمان راحة بالك.',
+      'desc_en':
+          'We provide 100% secure and encrypted payment gateways for your peace of mind.',
     },
     {
       'icon': Icons.local_shipping_rounded,
       'title_ar': 'توصيل موثوق',
       'title_en': 'Reliable Delivery',
-      'desc_ar': 'نضمن لك وصول منتجاتك أينما كنت عبر شبكة واسعة من شركاء التوصيل.',
-      'desc_en': 'We guarantee delivery wherever you are via a wide network of delivery partners.',
+      'desc_ar':
+          'نضمن لك وصول منتجاتك أينما كنت عبر شبكة واسعة من شركاء التوصيل.',
+      'desc_en':
+          'We guarantee delivery wherever you are via a wide network of delivery partners.',
     },
   ];
 
@@ -1942,12 +2080,22 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
                       alignment: Alignment.center,
                       children: [
                         const Positioned.fill(
-                          child: Icon(Icons.ondemand_video, size: 100, color: Colors.white24),
+                          child: Icon(
+                            Icons.ondemand_video,
+                            size: 100,
+                            color: Colors.white24,
+                          ),
                         ),
                         InkWell(
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(isAr ? 'سيتم تشغيل الفيديو قريباً' : 'Video will play soon')),
+                              SnackBar(
+                                content: Text(
+                                  isAr
+                                      ? 'سيتم تشغيل الفيديو قريباً'
+                                      : 'Video will play soon',
+                                ),
+                              ),
                             );
                           },
                           child: Container(
@@ -1963,7 +2111,11 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
                                 ),
                               ],
                             ),
-                            child: const Icon(Icons.play_arrow, size: 48, color: Colors.white),
+                            child: const Icon(
+                              Icons.play_arrow,
+                              size: 48,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -1983,7 +2135,9 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isAr ? _steps[_currentStep]['title_ar'] : _steps[_currentStep]['title_en'],
+                                isAr
+                                    ? _steps[_currentStep]['title_ar']
+                                    : _steps[_currentStep]['title_en'],
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
@@ -1992,7 +2146,9 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                isAr ? _steps[_currentStep]['desc_ar'] : _steps[_currentStep]['desc_en'],
+                                isAr
+                                    ? _steps[_currentStep]['desc_ar']
+                                    : _steps[_currentStep]['desc_en'],
                                 style: TextStyle(
                                   fontSize: 18,
                                   color: Colors.grey[700],
@@ -2015,30 +2171,42 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
                                 duration: const Duration(milliseconds: 300),
                                 height: 80,
                                 margin: EdgeInsets.only(
-                                  right: isAr && index != _steps.length - 1 ? 16 : 0,
-                                  left: !isAr && index != _steps.length - 1 ? 16 : 0,
+                                  right: isAr && index != _steps.length - 1
+                                      ? 16
+                                      : 0,
+                                  left: !isAr && index != _steps.length - 1
+                                      ? 16
+                                      : 0,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? primaryColor : Colors.white,
+                                  color: isSelected
+                                      ? primaryColor
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: isSelected ? primaryColor : Colors.grey[300]!,
+                                    color: isSelected
+                                        ? primaryColor
+                                        : Colors.grey[300]!,
                                     width: 2,
                                   ),
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: primaryColor.withOpacity(0.3),
+                                            color: primaryColor.withOpacity(
+                                              0.3,
+                                            ),
                                             blurRadius: 15,
                                             offset: const Offset(0, 8),
-                                          )
+                                          ),
                                         ]
                                       : [],
                                 ),
                                 child: Center(
                                   child: Icon(
                                     _steps[index]['icon'],
-                                    color: isSelected ? Colors.white : Colors.grey[400],
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.grey[400],
                                     size: 32,
                                   ),
                                 ),
@@ -2051,18 +2219,23 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          ...List.generate(_steps.length, (index) => AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                height: 8,
-                                width: _currentStep == index ? 40 : 12,
-                                decoration: BoxDecoration(
-                                  color: _currentStep == index ? primaryColor : Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              )),
+                          ...List.generate(
+                            _steps.length,
+                            (index) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              height: 8,
+                              width: _currentStep == index ? 40 : 12,
+                              decoration: BoxDecoration(
+                                color: _currentStep == index
+                                    ? primaryColor
+                                    : Colors.grey[300],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   );
 
@@ -2078,7 +2251,7 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
                           Expanded(flex: 6, child: videoSection),
                           const SizedBox(width: 80),
                           Expanded(flex: 5, child: detailsSection),
-                        ]
+                        ],
                       ],
                     );
                   } else {
@@ -2103,12 +2276,12 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection> wi
 
 class _TrendingOfferCard extends StatelessWidget {
   final OfferModel offer;
-  final String companyId;
+  final String businessId;
   final bool isAr;
 
   const _TrendingOfferCard({
     required this.offer,
-    required this.companyId,
+    required this.businessId,
     required this.isAr,
   });
 
@@ -2169,10 +2342,7 @@ class _TrendingOfferCard extends StatelessWidget {
                     ),
                     Text(
                       offer.description?.get(context) ?? '',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -2201,7 +2371,8 @@ class _PremiumRecommendedCard extends StatefulWidget {
   });
 
   @override
-  State<_PremiumRecommendedCard> createState() => _PremiumRecommendedCardState();
+  State<_PremiumRecommendedCard> createState() =>
+      _PremiumRecommendedCardState();
 }
 
 class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
@@ -2247,9 +2418,7 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
               fit: StackFit.expand,
               children: [
                 // Background
-                Container(
-                  decoration: BoxDecoration(gradient: gradient),
-                ),
+                Container(decoration: BoxDecoration(gradient: gradient)),
                 // Pattern overlay or Icon
                 Positioned(
                   right: widget.isAr ? -50 : null,
@@ -2285,7 +2454,10 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                       // Badge
                       if (widget.rank == 1)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.amber,
                             borderRadius: BorderRadius.circular(20),
@@ -2293,11 +2465,19 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.star_rounded, color: Colors.white, size: 16),
+                              const Icon(
+                                Icons.star_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 widget.isAr ? 'الأعلى تقييماً' : 'Top Rated',
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -2305,7 +2485,9 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                       if (widget.rank == 1) const SizedBox(height: 16),
                       // Store Name
                       Text(
-                        widget.isAr ? widget.company.name.ar : widget.company.name.en,
+                        widget.isAr
+                            ? widget.company.name.ar
+                            : widget.company.name.en,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: widget.isHero ? 32 : 24,
@@ -2318,14 +2500,33 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                       // Store Description or location
                       Row(
                         children: [
-                          const Icon(Icons.location_on, color: Colors.white70, size: 16),
+                          const Icon(
+                            Icons.location_on,
+                            color: Colors.white70,
+                            size: 16,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              widget.isAr 
-                                ? (widget.company.addresses?.firstOrNull?.address.ar ?? 'عنوان غير متوفر') 
-                                : (widget.company.addresses?.firstOrNull?.address.en ?? 'Address not available'),
-                              style: const TextStyle(color: Colors.white70, fontSize: 14),
+                              widget.isAr
+                                  ? (widget
+                                            .company
+                                            .addresses
+                                            ?.firstOrNull
+                                            ?.address
+                                            .ar ??
+                                        'عنوان غير متوفر')
+                                  : (widget
+                                            .company
+                                            .addresses
+                                            ?.firstOrNull
+                                            ?.address
+                                            .en ??
+                                        'Address not available'),
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -2345,7 +2546,10 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                       duration: const Duration(milliseconds: 200),
                       opacity: _isHovered ? 1.0 : 0.0,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(30),
@@ -2360,7 +2564,11 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Icon(Icons.arrow_forward_rounded, color: colors[colorIdx][0], size: 16),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              color: colors[colorIdx][0],
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),

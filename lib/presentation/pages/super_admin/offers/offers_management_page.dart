@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/offer_model.dart';
+import 'package:z_ecommerce/data/models/product/offer_model.dart';
 import 'package:z_ecommerce/data/providers/offer_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
@@ -31,10 +31,14 @@ class _OffersManagementPageState extends State<OffersManagementPage> {
       builder: (context, provider, child) {
         final filteredOffers = provider.offers.where((offer) {
           final titleStr = offer.name.get(context).toLowerCase();
-          final matchesQuery = _searchQuery.isEmpty ||
+          final matchesQuery =
+              _searchQuery.isEmpty ||
               titleStr.contains(_searchQuery.toLowerCase()) ||
               offer.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              (offer.couponCode != null && offer.couponCode!.toLowerCase().contains(_searchQuery.toLowerCase()));
+              (offer.couponCode != null &&
+                  offer.couponCode!.toLowerCase().contains(
+                    _searchQuery.toLowerCase(),
+                  ));
           return matchesQuery;
         }).toList();
 
@@ -51,186 +55,197 @@ class _OffersManagementPageState extends State<OffersManagementPage> {
           body: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Page Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        TranslationKeys.offersManagement.tr(context),
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Page Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          TranslationKeys.offersManagement.tr(context),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'إدارة ومتابعة كافة الكوبونات والحملات التسويقية المتاحة',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.textTheme.bodySmall?.color,
+                        const SizedBox(height: 4),
+                        Text(
+                          'إدارة ومتابعة كافة الكوبونات والحملات التسويقية المتاحة',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.textTheme.bodySmall?.color,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => changeScreen(
-                      context,
-                      const CreateEditOfferPage(),
+                      ],
                     ),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: Text(TranslationKeys.addNewOffer.tr(context)),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 11,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Full Height Expanded AppDataTable for OfferModel
-              Expanded(
-                child: AppDataTable<OfferModel>(
-                  items: paginatedOffers,
-                  selectable: true,
-                  showIndexColumn: true,
-                  selectedItems: _selectedOffers,
-                  onSelectionChanged: (selected) {
-                    setState(() {
-                      _selectedOffers = selected;
-                    });
-                  },
-                  onBulkDelete: () {
-                    setState(() {
-                      for (var o in _selectedOffers) {
-                        provider.offers.removeWhere((item) => item.id == o.id);
-                      }
-                      _selectedOffers.clear();
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedOffers.length})'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  },
-                  searchQuery: _searchQuery,
-                  onSearchChanged: (val) {
-                    setState(() {
-                      _searchQuery = val;
-                      _currentPage = 1;
-                    });
-                  },
-                  currentPage: _currentPage,
-                  totalPages: totalPages > 0 ? totalPages : 1,
-                  totalItems: totalItems,
-                  itemsPerPage: _itemsPerPage,
-                  onPageChanged: (page) => setState(() => _currentPage = page),
-                  onItemsPerPageChanged: (rows) {
-                    setState(() {
-                      _itemsPerPage = rows;
-                      _currentPage = 1;
-                    });
-                  },
-                  emptyMessage: _searchQuery.isNotEmpty
-                      ? TranslationKeys.noMatchingResults.tr(context)
-                      : TranslationKeys.noDataAvailable.tr(context),
-                  columns: [
-                    AppTableColumn<OfferModel>(
-                      title: TranslationKeys.offerMarketing.tr(context),
-                      flex: 2,
-                      sortable: true,
-                      sortKey: (o) => o.name.get(context),
-                      cellBuilder: (o) => TableImageTextCell(
-                        title: o.name.get(context),
-                        subtitle: 'كود: ${o.couponCode ?? "بدون كود"}',
-                        fallbackIcon: Icons.local_offer_rounded,
-                      ),
-                    ),
-                    AppTableColumn<OfferModel>(
-                      title: TranslationKeys.associatedStore.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (o) => o.companyId,
-                      cellBuilder: (o) => TableTextCell(
-                        title: '${TranslationKeys.store.tr(context)} ${o.companyId}',
-                      ),
-                    ),
-                    AppTableColumn<OfferModel>(
-                      title: TranslationKeys.discountRate.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (o) => o.discountPercent ?? 0.0,
-                      cellBuilder: (o) => TableTextCell(
-                        title: o.discountPercent != null
-                            ? '${o.discountPercent}%'
-                            : (o.discountAmount != null ? '\$${o.discountAmount}' : 'خصم خاص'),
-                        isBold: true,
-                      ),
-                    ),
-                    AppTableColumn<OfferModel>(
-                      title: TranslationKeys.validityDate.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (o) => o.endDate,
-                      cellBuilder: (o) => TableTextCell(
-                        title: '${o.endDate.year}-${o.endDate.month.toString().padLeft(2, '0')}-${o.endDate.day.toString().padLeft(2, '0')}',
-                      ),
-                    ),
-                    AppTableColumn<OfferModel>(
-                      title: TranslationKeys.statusActive.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (o) => o.isActive ? 1 : 0,
-                      cellBuilder: (o) => TableStatusBadge.fromStatus(
-                        o.isActive
-                            ? TranslationKeys.statusActive.tr(context)
-                            : TranslationKeys.statusInactive.tr(context),
-                      ),
-                    ),
-                    AppTableColumn<OfferModel>(
-                      title: TranslationKeys.actions.tr(context),
-                      width: 70,
-                      alignment: Alignment.center,
-                      cellBuilder: (o) => TablePopupMenuActions(
-                        onView: () => changeScreen(
-                          context,
-                          CreateEditOfferPage(offer: o),
+                    ElevatedButton.icon(
+                      onPressed: () =>
+                          changeScreen(context, const CreateEditOfferPage()),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: Text(TranslationKeys.addNewOffer.tr(context)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 11,
                         ),
-                        onEdit: () => changeScreen(
-                          context,
-                          CreateEditOfferPage(offer: o),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        onDelete: () {
-                          setState(() {
-                            provider.offers.removeWhere((item) => item.id == o.id);
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('تم حذف العرض "${o.name.get(context)}" بنجاح'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        },
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+
+                // Full Height Expanded AppDataTable for OfferModel
+                Expanded(
+                  child: AppDataTable<OfferModel>(
+                    items: paginatedOffers,
+                    selectable: true,
+                    showIndexColumn: true,
+                    selectedItems: _selectedOffers,
+                    onSelectionChanged: (selected) {
+                      setState(() {
+                        _selectedOffers = selected;
+                      });
+                    },
+                    onBulkDelete: () {
+                      setState(() {
+                        for (var o in _selectedOffers) {
+                          provider.offers.removeWhere(
+                            (item) => item.id == o.id,
+                          );
+                        }
+                        _selectedOffers.clear();
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedOffers.length})',
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    },
+                    searchQuery: _searchQuery,
+                    onSearchChanged: (val) {
+                      setState(() {
+                        _searchQuery = val;
+                        _currentPage = 1;
+                      });
+                    },
+                    currentPage: _currentPage,
+                    totalPages: totalPages > 0 ? totalPages : 1,
+                    totalItems: totalItems,
+                    itemsPerPage: _itemsPerPage,
+                    onPageChanged: (page) =>
+                        setState(() => _currentPage = page),
+                    onItemsPerPageChanged: (rows) {
+                      setState(() {
+                        _itemsPerPage = rows;
+                        _currentPage = 1;
+                      });
+                    },
+                    emptyMessage: _searchQuery.isNotEmpty
+                        ? TranslationKeys.noMatchingResults.tr(context)
+                        : TranslationKeys.noDataAvailable.tr(context),
+                    columns: [
+                      AppTableColumn<OfferModel>(
+                        title: TranslationKeys.offerMarketing.tr(context),
+                        flex: 2,
+                        sortable: true,
+                        sortKey: (o) => o.name.get(context),
+                        cellBuilder: (o) => TableImageTextCell(
+                          title: o.name.get(context),
+                          subtitle: 'كود: ${o.couponCode ?? "بدون كود"}',
+                          fallbackIcon: Icons.local_offer_rounded,
+                        ),
+                      ),
+                      AppTableColumn<OfferModel>(
+                        title: TranslationKeys.associatedStore.tr(context),
+                        flex: 1,
+                        sortable: true,
+                        sortKey: (o) => o.businessId,
+                        cellBuilder: (o) => TableTextCell(
+                          title:
+                              '${TranslationKeys.store.tr(context)} ${o.businessId}',
+                        ),
+                      ),
+                      AppTableColumn<OfferModel>(
+                        title: TranslationKeys.discountRate.tr(context),
+                        flex: 1,
+                        sortable: true,
+                        sortKey: (o) => o.discountPercent ?? 0.0,
+                        cellBuilder: (o) => TableTextCell(
+                          title: o.discountPercent != null
+                              ? '${o.discountPercent}%'
+                              : (o.discountAmount != null
+                                    ? '\$${o.discountAmount}'
+                                    : 'خصم خاص'),
+                          isBold: true,
+                        ),
+                      ),
+                      AppTableColumn<OfferModel>(
+                        title: TranslationKeys.validityDate.tr(context),
+                        flex: 1,
+                        sortable: true,
+                        sortKey: (o) => o.endDate,
+                        cellBuilder: (o) => TableTextCell(
+                          title:
+                              '${o.endDate.year}-${o.endDate.month.toString().padLeft(2, '0')}-${o.endDate.day.toString().padLeft(2, '0')}',
+                        ),
+                      ),
+                      AppTableColumn<OfferModel>(
+                        title: TranslationKeys.statusActive.tr(context),
+                        flex: 1,
+                        sortable: true,
+                        sortKey: (o) => o.isActive ? 1 : 0,
+                        cellBuilder: (o) => TableStatusBadge.fromStatus(
+                          o.isActive
+                              ? TranslationKeys.statusActive.tr(context)
+                              : TranslationKeys.statusInactive.tr(context),
+                        ),
+                      ),
+                      AppTableColumn<OfferModel>(
+                        title: TranslationKeys.actions.tr(context),
+                        width: 70,
+                        alignment: Alignment.center,
+                        cellBuilder: (o) => TablePopupMenuActions(
+                          onView: () => changeScreen(
+                            context,
+                            CreateEditOfferPage(offer: o),
+                          ),
+                          onEdit: () => changeScreen(
+                            context,
+                            CreateEditOfferPage(offer: o),
+                          ),
+                          onDelete: () {
+                            setState(() {
+                              provider.offers.removeWhere(
+                                (item) => item.id == o.id,
+                              );
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'تم حذف العرض "${o.name.get(context)}" بنجاح',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         );
       },
     );

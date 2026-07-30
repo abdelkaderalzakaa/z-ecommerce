@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/locale_provider.dart';
+import '../../global/locale_provider.dart';
 import '../../../data/providers/company_provider.dart';
+import '../../global/settings_provider.dart';
 import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
@@ -37,7 +38,7 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       elevation: 0,
-      backgroundColor: storeTheme?.backgroundColorValue.withOpacity(0.95) ?? theme.cardColor,
+      backgroundColor: theme.cardColor,
       surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
       titleSpacing: 16,
@@ -96,6 +97,27 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        // Theme Mode Toggle Button (Light / Dark)
+        Consumer<SettingsProvider>(
+          builder: (context, settings, _) {
+            final isDark = settings.themeMode == ThemeMode.dark;
+            return IconButton(
+              icon: Icon(
+                isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                color: isDark ? Colors.amber : theme.primaryColor,
+                size: 22,
+              ),
+              onPressed: () {
+                settings.setThemeMode(
+                  isDark ? ThemeMode.light : ThemeMode.dark,
+                );
+              },
+              tooltip: TranslationKeys.theme.tr(context),
+            );
+          },
+        ),
+        const SizedBox(width: 8),
+
         // Language Toggle Button (AR / EN)
         InkWell(
           onTap: () {

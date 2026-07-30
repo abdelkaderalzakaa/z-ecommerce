@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/fake_data/users.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -20,12 +21,16 @@ class UserDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = fakeUsers.firstWhere(
-      (u) => u.id == userId,
-      orElse: () => fakeUsers.first,
+    final authUser = context.watch<AuthProvider>().currentUser;
+    final user = authUser ?? UserModel(
+      id: userId,
+      name: 'Super Admin',
+      email: 'alzakaasimplesolutions@gmail.com',
+      role: UserRole.superAdmin,
+      createdAt: DateTime.now(),
     );
 
-    String roleText;
+    String roleText = '';
     switch (user.role) {
       case UserRole.superAdmin:
         roleText = TranslationKeys.superAdminRole.tr(context);

@@ -12,11 +12,9 @@ class StoreReviewsManagementPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer<ProductProvider>(
         builder: (context, productProvider, child) {
           final products = productProvider.allProducts;

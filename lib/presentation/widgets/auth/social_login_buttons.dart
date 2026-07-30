@@ -1,75 +1,64 @@
 import 'package:flutter/material.dart';
-import '../../global/core/constants/app_constants.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
 
 class SocialLoginButtons extends StatelessWidget {
-  const SocialLoginButtons({super.key});
+  final VoidCallback? onGooglePressed;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const Expanded(child: Divider(color: AppColors.divider)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                TranslationKeys.orContinueWith.tr(context),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-            const Expanded(child: Divider(color: AppColors.divider)),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: _SocialButton(
-                icon: Icons.g_mobiledata, // Placeholder for Google
-                label: TranslationKeys.google.tr(context),
-                onPressed: () {},
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _SocialButton(
-                icon: Icons.apple,
-                label: TranslationKeys.apple.tr(context),
-                onPressed: () {},
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  const _SocialButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
+  const SocialLoginButtons({
+    super.key,
+    this.onGooglePressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 24),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+    // Auth UI is strictly Light Mode only
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: onGooglePressed ?? () {},
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          side: const BorderSide(
+            color: Color(0xFFE2E8F0),
+            width: 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Google G Logo
+            Container(
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  'G',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.blue.shade600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Continue with Google',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

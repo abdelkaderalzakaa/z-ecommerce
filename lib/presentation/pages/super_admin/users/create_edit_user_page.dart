@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/fake_data/users.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/add_edit_template.dart';
@@ -20,7 +19,7 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-  late TextEditingController _companyIdController;
+  late TextEditingController _businessIdController;
   late TextEditingController _avatarUrlController;
 
   UserRole _selectedRole = UserRole.customer;
@@ -34,7 +33,7 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
     _nameController = TextEditingController(text: u?.name ?? '');
     _emailController = TextEditingController(text: u?.email ?? '');
     _phoneController = TextEditingController(text: u?.phoneNumber ?? '');
-    _companyIdController = TextEditingController(text: u?.companyId ?? '');
+    _businessIdController = TextEditingController(text: u?.businessId ?? '');
     _avatarUrlController = TextEditingController(text: u?.avatarUrl ?? '');
 
     _selectedRole = u?.role ?? UserRole.customer;
@@ -45,7 +44,7 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _companyIdController.dispose();
+    _businessIdController.dispose();
     _avatarUrlController.dispose();
     super.dispose();
   }
@@ -56,38 +55,15 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
     setState(() => _isSubmitting = true);
 
     final isEdit = widget.user != null;
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final userId = isEdit ? widget.user!.id : 'usr_${timestamp.substring(timestamp.length - 6)}';
-
-    final updatedUser = UserModel(
-      id: userId,
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      role: _selectedRole,
-      phoneNumber: _phoneController.text.trim().isNotEmpty ? _phoneController.text.trim() : null,
-      companyId: _selectedRole == UserRole.companyOwner && _companyIdController.text.trim().isNotEmpty
-          ? _companyIdController.text.trim()
-          : null,
-      avatarUrl: _avatarUrlController.text.trim().isNotEmpty ? _avatarUrlController.text.trim() : null,
-      createdAt: widget.user?.createdAt ?? DateTime.now(),
-    );
-
-    if (isEdit) {
-      final index = fakeUsers.indexWhere((u) => u.id == userId);
-      if (index != -1) {
-        fakeUsers[index] = updatedUser;
-      }
-    } else {
-      fakeUsers.insert(0, updatedUser);
-    }
-
     setState(() => _isSubmitting = false);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isEdit ? 'تم تحديث بيانات المستخدم بنجاح!' : 'تم إضافة المستخدم الجديد بنجاح!',
+            isEdit
+                ? 'تم تحديث بيانات المستخدم بنجاح!'
+                : 'تم إضافة المستخدم الجديد بنجاح!',
           ),
         ),
       );
@@ -100,11 +76,17 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
     final isEdit = widget.user != null;
 
     return AddEditTemplate(
-      title: isEdit ? 'تعديل بيانيات المستخدم' : TranslationKeys.addNewUser.tr(context),
-      subtitle: isEdit ? 'تعديل الاسم والبريد والدور والصلاحيات بالحساب' : 'إدخال بيانات الحساب الجديد والدور المطلوب في المنصة',
+      title: isEdit
+          ? 'تعديل بيانيات المستخدم'
+          : TranslationKeys.addNewUser.tr(context),
+      subtitle: isEdit
+          ? 'تعديل الاسم والبريد والدور والصلاحيات بالحساب'
+          : 'إدخال بيانات الحساب الجديد والدور المطلوب في المنصة',
       isEditMode: isEdit,
       formKey: _formKey,
-      submitLabel: isEdit ? TranslationKeys.saveChanges.tr(context) : TranslationKeys.addNewUser.tr(context),
+      submitLabel: isEdit
+          ? TranslationKeys.saveChanges.tr(context)
+          : TranslationKeys.addNewUser.tr(context),
       submitIcon: isEdit ? Icons.save_rounded : Icons.person_add_alt_1_rounded,
       onSubmit: _submit,
       isSubmitting: _isSubmitting,
@@ -123,7 +105,8 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.badge_outlined, size: 20),
               ),
-              validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+              validator: (v) =>
+                  v!.isEmpty ? TranslationKeys.required.tr(context) : null,
             ),
             Row(
               children: [
@@ -136,7 +119,9 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.email_outlined, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                    validator: (v) => v!.isEmpty
+                        ? TranslationKeys.required.tr(context)
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -192,9 +177,10 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
             if (_selectedRole == UserRole.companyOwner) ...[
               const SizedBox(height: 12),
               TextFormField(
-                controller: _companyIdController,
+                controller: _businessIdController,
                 decoration: InputDecoration(
-                  labelText: '${TranslationKeys.associatedStore.tr(context)} (رمز المتجر ID)',
+                  labelText:
+                      '${TranslationKeys.associatedStore.tr(context)} (رمز المتجر ID)',
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.storefront_rounded, size: 20),
                 ),

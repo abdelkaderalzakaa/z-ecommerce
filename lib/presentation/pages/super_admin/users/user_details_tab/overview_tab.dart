@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -44,12 +44,25 @@ class UserOverviewTab extends StatelessWidget {
                 children: [
                   Text(
                     TranslationKeys.accountInformation.tr(context),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 14),
-                  _buildInfoRow(context, TranslationKeys.user.tr(context), user.name, Icons.person_outline_rounded),
+                  _buildInfoRow(
+                    context,
+                    TranslationKeys.user.tr(context),
+                    user.name,
+                    Icons.person_outline_rounded,
+                  ),
                   const Divider(),
-                  _buildInfoRow(context, TranslationKeys.email.tr(context), user.email, Icons.email_outlined),
+                  _buildInfoRow(
+                    context,
+                    TranslationKeys.email.tr(context),
+                    user.email,
+                    Icons.email_outlined,
+                  ),
                   const Divider(),
                   _buildInfoRow(
                     context,
@@ -58,10 +71,20 @@ class UserOverviewTab extends StatelessWidget {
                     Icons.phone_outlined,
                   ),
                   const Divider(),
-                  _buildInfoRow(context, TranslationKeys.role.tr(context), roleText, Icons.admin_panel_settings_outlined),
-                  if (user.companyId != null) ...[
+                  _buildInfoRow(
+                    context,
+                    TranslationKeys.role.tr(context),
+                    roleText,
+                    Icons.admin_panel_settings_outlined,
+                  ),
+                  if (user.businessId != null) ...[
                     const Divider(),
-                    _buildInfoRow(context, TranslationKeys.associatedStore.tr(context), 'متجر ${user.companyId}', Icons.storefront_rounded),
+                    _buildInfoRow(
+                      context,
+                      TranslationKeys.associatedStore.tr(context),
+                      'متجر ${user.businessId}',
+                      Icons.storefront_rounded,
+                    ),
                   ],
                   const Divider(),
                   _buildInfoRow(
@@ -79,7 +102,12 @@ class UserOverviewTab extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value, IconData icon) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -90,7 +118,10 @@ class UserOverviewTab extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: theme.textTheme.bodySmall?.color),
+            style: TextStyle(
+              fontSize: 13,
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
           const Spacer(),
           Text(

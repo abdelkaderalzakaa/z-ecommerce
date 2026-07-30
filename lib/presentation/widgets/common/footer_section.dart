@@ -3,7 +3,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../data/models/company_settings_model.dart';
+import '../../../data/models/company/company_settings_model.dart';
 import '../../../data/providers/company_provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/logo.dart';
 import '../../global/core/constants/app_constants.dart';

@@ -17,9 +17,10 @@ class CartItemsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final companyId = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+    final businessId =
+        context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
     final cartProvider = context.watch<CartProvider>();
-    final items = cartProvider.items(companyId);
+    final items = cartProvider.items(businessId);
 
     if (items.isEmpty) {
       return Card(
@@ -28,7 +29,11 @@ class CartItemsList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.shopping_cart_outlined, size: 64, color: Theme.of(context).dividerColor),
+              Icon(
+                Icons.shopping_cart_outlined,
+                size: 64,
+                color: Theme.of(context).dividerColor,
+              ),
               const SizedBox(height: 16),
               Text(
                 TranslationKeys.yourCartIsEmpty.tr(context),
@@ -52,32 +57,38 @@ class CartItemsList extends StatelessWidget {
       );
     }
 
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-        children: List.generate(
-          items.length,
-          (index) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: List.generate(items.length, (index) {
             final item = items[index];
             return Column(
               children: [
                 CartItemWidget(
                   title: item.product.name,
-                  size: item.selectedSize ?? TranslationKeys.notAvailable.tr(context),
+                  size:
+                      item.selectedSize ??
+                      TranslationKeys.notAvailable.tr(context),
                   color: _colorToHex(context, item.selectedColor),
                   price: item.isGift ? 0.0 : item.product.price,
                   quantity: item.quantity,
                   isGift: item.isGift,
                   isBundle: item.isBundle,
                   onQuantityChanged: (newQuantity) {
-                    cartProvider.updateQuantity(companyId, item.id, newQuantity);
+                    cartProvider.updateQuantity(
+                      businessId,
+                      item.id,
+                      newQuantity,
+                    );
                   },
                   onRemove: () {
-                    cartProvider.removeFromCart(companyId, item.id);
+                    cartProvider.removeFromCart(businessId, item.id);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(TranslationKeys.itemRemovedFromCart.tr(context)),
+                        content: Text(
+                          TranslationKeys.itemRemovedFromCart.tr(context),
+                        ),
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -86,12 +97,14 @@ class CartItemsList extends StatelessWidget {
                 if (index < items.length - 1)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: Divider(color: Theme.of(context).dividerColor, height: 1),
+                    child: Divider(
+                      color: Theme.of(context).dividerColor,
+                      height: 1,
+                    ),
                   ),
               ],
             );
-          },
-        ),
+          }),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../data/models/invoice_model.dart';
+import '../../data/models/order/invoice_model.dart';
 import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
 import '../widgets/common/headers/header_details.dart';

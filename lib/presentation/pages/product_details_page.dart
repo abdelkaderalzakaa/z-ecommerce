@@ -13,7 +13,7 @@ import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 
 import '../widgets/product_details/related_products.dart';
-import '../../../data/models/product_model.dart';
+import '../../../data/models/product/product_model.dart';
 import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
 
 class ProductDetailsPage extends StatelessWidget {

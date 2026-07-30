@@ -4,6 +4,7 @@ import '../../widgets/admin_store/store_owner_sidebar.dart';
 import 'branding/store_branding_page.dart';
 import 'dashboard/store_dashboard_overview_page.dart';
 import 'products/store_products_management_page.dart';
+import 'categories_brands/store_categories_brands_page.dart';
 import 'orders/store_orders_management_page.dart';
 import 'offers/store_offers_management_page.dart';
 import 'reviews/store_reviews_management_page.dart';
@@ -24,6 +25,7 @@ class _AdminStoreState extends State<AdminStore> {
   final List<Widget> _pages = const [
     StoreDashboardOverviewPage(),
     StoreProductsManagementPage(),
+    StoreCategoriesBrandsPage(),
     StoreOrdersManagementPage(),
     StoreOffersManagementPage(),
     StoreReviewsManagementPage(),

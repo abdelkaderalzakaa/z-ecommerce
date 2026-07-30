@@ -5,8 +5,8 @@ import '../../data/providers/cart_provider.dart';
 import '../../data/providers/invoice_provider.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/company_provider.dart';
-import '../../data/models/address_model.dart';
-import '../../data/models/company_settings_model.dart';
+import '../../data/models/common/address_model.dart';
+import '../../data/models/company/company_settings_model.dart';
 import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
 import '../widgets/common/headers/header_details.dart';
@@ -47,7 +47,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       final companyProvider = context.read<CompanyProvider>();
       final methods =
-          companyProvider.companySettings?.paymentMethods ?? [PaymentMethodType.cod];
+          companyProvider.companySettings?.paymentMethods ??
+          [PaymentMethodType.cod];
       if (methods.isNotEmpty) {
         setState(() {
           _selectedPaymentMethod = methods.first;
@@ -73,10 +74,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
 
-    final companyId =
-        context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+    final businessId =
+        context.read<CompanyProvider>().companySettings?.id;
 
-    if (cartProvider.items(companyId).isEmpty) {
+    if (cartProvider.items(businessId).isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(TranslationKeys.yourCartIsEmpty.tr(context))),
       );
@@ -98,7 +99,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     final invoiceProvider = context.read<InvoiceProvider>();
 
-    final subtotal = cartProvider.subTotal(companyId);
+    final subtotal = cartProvider.subTotal(businessId);
     final discount = subtotal * 0.20;
     final shipping = subtotal > 0 ? 15.0 : 0.0;
 
@@ -106,8 +107,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     for (var address in _selectedAddresses) {
       invoiceProvider.generateInvoice(
-        storeId: companyId,
-        items: cartProvider.items(companyId),
+        storeId: businessId,
+        items: cartProvider.items(businessId),
         discount: discount,
         tax: 0,
         shippingCost: shipping,
@@ -116,7 +117,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       generatedInvoiceIds.add(invoiceProvider.invoices.last.invoiceId);
     }
 
-    cartProvider.clearCart(companyId);
+    cartProvider.clearCart(businessId);
 
     changeScreen(context, ConfirmOrderPage(invoiceIds: generatedInvoiceIds));
   }
@@ -498,7 +499,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return Consumer<CompanyProvider>(
       builder: (context, companyProvider, child) {
         final methods =
-            companyProvider.companySettings?.paymentMethods ?? [PaymentMethodType.cod];
+            companyProvider.companySettings?.paymentMethods ??
+            [PaymentMethodType.cod];
 
         if (methods.isEmpty) {
           return const SizedBox.shrink();
@@ -545,10 +547,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       child: Row(
                         children: [
                           Icon(
-                            method.name == 'cod' ? Icons.money :
-                            method.name == 'creditCard' ? Icons.credit_card :
-                            method.name == 'paypal' ? Icons.paypal :
-                            Icons.account_balance_wallet,
+                            method.name == 'cod'
+                                ? Icons.money
+                                : method.name == 'creditCard'
+                                ? Icons.credit_card
+                                : method.name == 'paypal'
+                                ? Icons.paypal
+                                : Icons.account_balance_wallet,
                             size: 28,
                             color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),

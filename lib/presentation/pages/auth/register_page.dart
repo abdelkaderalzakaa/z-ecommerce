@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
 import '../../../data/providers/auth_provider.dart';
+import '../../../data/models/auth/user_model.dart';
 import '../../../data/providers/company_provider.dart';
-import '../../widgets/common/headers/header_home.dart';
-import '../../widgets/common/footer_section.dart';
-import '../../widgets/auth/auth_card.dart';
+import '../../global/theme/theme_auth.dart';
+import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
 import '../../widgets/auth/password_field.dart';
 import '../../widgets/auth/primary_auth_button.dart';
 import '../../widgets/auth/social_login_buttons.dart';
-import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import 'package:flutter/gestures.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
-import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
-import 'package:z_ecommerce/presentation/pages/static/terms_page.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
+import 'package:z_ecommerce/presentation/pages/admin_store/admin_store_home.dart';
 
 class RegisterPage extends StatefulWidget {
   final String? redirectTo;
+  final AuthThemeConfig? customAuthTheme;
 
-  const RegisterPage({super.key, this.redirectTo});
+  const RegisterPage({
+    super.key,
+    this.redirectTo,
+    this.customAuthTheme,
+  });
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -52,7 +54,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void _handleRegister() async {
     setState(() => _errorMessage = null);
     if (!_formKey.currentState!.validate()) return;
-    
+
     if (!_agreeToTerms) {
       setState(() => _errorMessage = TranslationKeys.pleaseAgreeToTerms.tr(context));
       return;
@@ -74,11 +76,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (mounted) {
       if (success) {
-        final destination = widget.redirectTo ?? '/';
-        if (destination == '/') {
-          changeScreenUntill(context, const HomePage());
+        final role = authProvider.currentUser?.role;
+        if (role == UserRole.superAdmin) {
+          changeScreenUntill(context, const SuperAdminHome());
+        } else if (role == UserRole.companyOwner) {
+          changeScreenUntill(context, const AdminStore());
         } else {
-          Navigator.pushReplacementNamed(context, destination);
+          final destination = widget.redirectTo ?? '/';
+          if (destination == '/') {
+            changeScreenUntill(context, const HomePage());
+          } else {
+            Navigator.pushReplacementNamed(context, destination);
+          }
         }
       } else {
         setState(() {
@@ -90,180 +99,173 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: HeaderAuth(title: TranslationKeys.createAccount.tr(context)),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            AuthCard(
-              subtitle: TranslationKeys.pleaseEnterDetailsToSignUp.tr(context),
-              children: [
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AuthTextField(
-                              controller: _firstNameController,
-                              label: TranslationKeys.firstName.tr(context),
-                              hintText: TranslationKeys.john.tr(context),
-                              prefixIcon: Icons.person_outline,
-                              validator: (v) => v == null || v.isEmpty ? TranslationKeys.requiredField.tr(context) : null,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: AuthTextField(
-                              controller: _lastNameController,
-                              label: TranslationKeys.lastName.tr(context),
-                              hintText: TranslationKeys.doe.tr(context),
-                              prefixIcon: Icons.person_outline,
-                              validator: (v) => v == null || v.isEmpty ? TranslationKeys.requiredField.tr(context) : null,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      AuthTextField(
-                        controller: _emailController,
-                        label: TranslationKeys.email.tr(context),
-                        hintText: TranslationKeys.enterYourEmail.tr(context),
-                        prefixIcon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (v) => v == null || v.isEmpty ? TranslationKeys.requiredField.tr(context) : null,
-                      ),
-                      const SizedBox(height: 24),
-                      PasswordField(
-                        controller: _passwordController,
-                        label: TranslationKeys.password.tr(context),
-                        hintText: TranslationKeys.createPassword.tr(context),
-                        validator: (v) => v == null || v.isEmpty ? TranslationKeys.requiredField.tr(context) : null,
-                      ),
-                      const SizedBox(height: 24),
-                      PasswordField(
-                        controller: _confirmPasswordController,
-                        label: TranslationKeys.confirmPassword.tr(context),
-                        hintText: TranslationKeys.confirmYourPassword.tr(context),
-                        validator: (v) => v == null || v.isEmpty ? TranslationKeys.requiredField.tr(context) : null,
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Checkbox(
-                              value: _agreeToTerms,
-                              onChanged: (value) {
-                                setState(() => _agreeToTerms = value ?? false);
-                              },
-                              activeColor: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: RichText(
-                              text: TextSpan(
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                                ),
-                                children: [
-                                  TextSpan(text: TranslationKeys.iAgreeToThe.tr(context)),
-                                  TextSpan(
-                                    text: TranslationKeys.termsConditions.tr(context),
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontWeight: FontWeight.w600,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        changeScreen(context, const TermsPage());
-                                      },
-                                  ),
-                                  TextSpan(text: TranslationKeys.andPrivacyPolicy.tr(context)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      if (_errorMessage != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.withOpacity(0.5)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _errorMessage!,
-                                  style: const TextStyle(color: Colors.red, fontSize: 14),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                      Consumer<AuthProvider>(
-                        builder: (context, auth, _) => PrimaryAuthButton(
-                          label: TranslationKeys.createAccount.tr(context),
-                          onPressed: _handleRegister,
-                          isLoading: auth.isLoading,
-                        ),
-                      ),
-                    ],
+    final authTheme = widget.customAuthTheme ?? const AuthThemeConfig();
+    final primaryColor = authTheme.primaryColor;
+
+    return AuthSplitLayout(
+      pageTitle: authTheme.registerTitle,
+      pageSubtitle: authTheme.registerSubtitle,
+      customAuthTheme: authTheme,
+      children: [
+        Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: AuthTextField(
+                      controller: _firstNameController,
+                      label: TranslationKeys.firstName.tr(context),
+                      hintText: 'John',
+                    ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AuthTextField(
+                      controller: _lastNameController,
+                      label: TranslationKeys.lastName.tr(context),
+                      hintText: 'Doe',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              AuthTextField(
+                controller: _emailController,
+                label: TranslationKeys.email.tr(context),
+                hintText: 'alex.jordan@gmail.com',
+                prefixIcon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              PasswordField(
+                controller: _passwordController,
+                label: TranslationKeys.password.tr(context),
+                hintText: '••••••••••••',
+              ),
+              const SizedBox(height: 16),
+              PasswordField(
+                controller: _confirmPasswordController,
+                label: TranslationKeys.confirmPassword.tr(context),
+                hintText: '••••••••••••',
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                children: [
+                  Checkbox(
+                    value: _agreeToTerms,
+                    activeColor: primaryColor,
+                    onChanged: (val) => setState(() => _agreeToTerms = val ?? false),
+                  ),
+                  Expanded(
+                    child: Text(
+                      authTheme.termsAgreementText.get(context),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: authTheme.subtitleColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red, fontSize: 13),
                 ),
-                const SizedBox(height: 32),
-                const SocialLoginButtons(),
-                const SizedBox(height: 32),
-                Row(
+              ],
+
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: PrimaryAuthButton(
+                  label: TranslationKeys.signUp.tr(context),
+                  onPressed: _handleRegister,
+                  isLoading: context.watch<AuthProvider>().isLoading,
+                  customAuthTheme: authTheme,
+                ),
+              ),
+
+              if (authTheme.showGoogleLogin) ...[
+                const SizedBox(height: 20),
+                SocialLoginButtons(
+                  onGooglePressed: () async {
+                    final navigator = Navigator.of(context);
+                    final authProvider = context.read<AuthProvider>();
+                    final success = await authProvider.loginWithGoogle();
+                    if (mounted && success) {
+                      final role = authProvider.currentUser?.role;
+                      if (role == UserRole.superAdmin) {
+                        navigator.pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const SuperAdminHome()),
+                          (route) => false,
+                        );
+                      } else if (role == UserRole.companyOwner) {
+                        navigator.pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const AdminStore()),
+                          (route) => false,
+                        );
+                      } else {
+                        final destination = widget.redirectTo ?? '/';
+                        if (destination == '/') {
+                          navigator.pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => const HomePage()),
+                            (route) => false,
+                          );
+                        } else {
+                          navigator.pushReplacementNamed(destination);
+                        }
+                      }
+                    } else if (mounted && !success) {
+                      setState(() {
+                        _errorMessage = authProvider.errorMessage ?? 'فشل إنشاء الحساب عبر غوغل';
+                      });
+                    }
+                  },
+                ),
+              ],
+
+              const SizedBox(height: 24),
+              Center(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       TranslationKeys.alreadyHaveAccount.tr(context),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
-                    MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () {
-                          changeScreen(context, LoginPage(redirectTo: widget.redirectTo));
-                        },
-                        child: Text(
-                          TranslationKeys.logIn.tr(context),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).primaryColor,
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () {
+                        changeScreen(
+                          context,
+                          LoginPage(
+                            redirectTo: widget.redirectTo,
+                            customAuthTheme: authTheme,
                           ),
+                        );
+                      },
+                      child: Text(
+                        TranslationKeys.signIn.tr(context),
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            const FooterSection(),
-          ],
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

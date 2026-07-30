@@ -57,7 +57,7 @@ class TableRowDataHelper {
     required void Function(int columnIndex) onSort,
   }) {
     return TableRow(
-      decoration: BoxDecoration(color: theme.cardColor),
+      decoration: const BoxDecoration(color: Color(0xFFF1F5F9)),
       children: [
         if (selectable)
           Padding(
@@ -173,13 +173,13 @@ class TableRowDataHelper {
   }) {
     return TableRow(
       decoration: BoxDecoration(
-        color: isSelected ? theme.primaryColor.withOpacity(0.08) : Colors.white,
+        color: isSelected ? theme.primaryColor.withOpacity(0.08) : const Color(0xFFF8FAFC),
         border: Border(
           left: isSelected
               ? BorderSide(color: theme.primaryColor, width: 3.5)
               : BorderSide.none,
-          bottom: BorderSide(
-            color: theme.dividerColor.withOpacity(0.08),
+          bottom: const BorderSide(
+            color: Color(0xFFE2E8F0),
             width: 1,
           ),
         ),

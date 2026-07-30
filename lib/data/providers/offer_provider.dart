@@ -36,40 +36,50 @@ class OfferProvider extends ChangeNotifier {
     _offers.removeWhere((o) => o.id == offerId);
     notifyListeners();
   }
-  
-  List<OfferModel> getActiveOffers(String companyId) {
-    return _offers.where((o) => o.isValid && o.companyId == companyId).toList();
+
+  List<OfferModel> getActiveOffers(String businessId) {
+    return _offers
+        .where((o) => o.isValid && o.businessId == businessId)
+        .toList();
   }
 
-  OfferModel? getOfferById(String companyId, String offerId) {
+  OfferModel? getOfferById(String businessId, String offerId) {
     try {
-      return getActiveOffers(companyId).firstWhere((o) => o.id == offerId);
+      return getActiveOffers(businessId).firstWhere((o) => o.id == offerId);
     } catch (_) {
       return null;
     }
   }
 
-  OfferModel? getOfferForProduct(String companyId, String productId) {
+  OfferModel? getOfferForProduct(String businessId, String productId) {
     try {
-      return getActiveOffers(companyId).firstWhere((o) => 
-        (o.type == 'product_gift' || o.type == 'buy_x_get_y') && 
-        (o.productId == productId || (o.productIds != null && o.productIds!.contains(productId)))
+      return getActiveOffers(businessId).firstWhere(
+        (o) =>
+            (o.type == 'product_gift' || o.type == 'buy_x_get_y') &&
+            (o.productId == productId ||
+                (o.productIds != null && o.productIds!.contains(productId))),
       );
     } catch (_) {
       return null;
     }
   }
 
-  double calculateDiscount(String companyId, double subtotal, List<String> cartProductIds, String? couponCode) {
+  double calculateDiscount(
+    String businessId,
+    double subtotal,
+    List<String> cartProductIds,
+    String? couponCode,
+  ) {
     double totalDiscount = 0;
-    
-    for (var offer in getActiveOffers(companyId)) {
+
+    for (var offer in getActiveOffers(businessId)) {
       if (offer.type == 'percentage_discount' || offer.type == 'clearance') {
-        if (offer.productIds != null && offer.productIds!.any((id) => cartProductIds.contains(id))) {
-           // For simplicity, applying discount to the whole subtotal if any product matches. In a real app, calculate per item.
-           totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
+        if (offer.productIds != null &&
+            offer.productIds!.any((id) => cartProductIds.contains(id))) {
+          // For simplicity, applying discount to the whole subtotal if any product matches. In a real app, calculate per item.
+          totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
         } else if (offer.productIds == null) {
-           totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
+          totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
         }
       } else if (offer.type == 'fixed_discount') {
         if (offer.minOrderAmount != null && subtotal >= offer.minOrderAmount!) {
@@ -77,11 +87,14 @@ class OfferProvider extends ChangeNotifier {
         } else if (offer.minOrderAmount == null) {
           totalDiscount += offer.discountAmount ?? 0;
         }
-      } else if (offer.type == 'coupon' && couponCode != null && offer.couponCode == couponCode) {
+      } else if (offer.type == 'coupon' &&
+          couponCode != null &&
+          offer.couponCode == couponCode) {
         if (offer.discountPercent != null) {
           totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
         } else if (offer.discountAmount != null) {
-          if (offer.minOrderAmount == null || subtotal >= offer.minOrderAmount!) {
+          if (offer.minOrderAmount == null ||
+              subtotal >= offer.minOrderAmount!) {
             totalDiscount += offer.discountAmount ?? 0;
           }
         }
@@ -90,10 +103,11 @@ class OfferProvider extends ChangeNotifier {
     return totalDiscount;
   }
 
-  bool hasFreeShipping(String companyId, double subtotal) {
-    return getActiveOffers(companyId).any((offer) => 
-      offer.type == 'free_shipping' && 
-      (offer.minOrderAmount == null || subtotal >= offer.minOrderAmount!)
+  bool hasFreeShipping(String businessId, double subtotal) {
+    return getActiveOffers(businessId).any(
+      (offer) =>
+          offer.type == 'free_shipping' &&
+          (offer.minOrderAmount == null || subtotal >= offer.minOrderAmount!),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/store_visit_model.dart';
+import '../models/store/business_visit_model.dart';
 
 class UserVisitsProvider extends ChangeNotifier {
   // Keyed by storeId

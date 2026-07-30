@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/invoice_model.dart';
+import 'package:z_ecommerce/data/models/order/invoice_model.dart';
 import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -13,15 +13,13 @@ import 'package:z_ecommerce/presentation/pages/super_admin/common/status_dialogs
 import 'package:z_ecommerce/presentation/pages/super_admin/orders/order_details_page.dart';
 
 class StoreOrdersManagementPage extends StatefulWidget {
-  final String companyId;
+  final String businessId;
 
-  const StoreOrdersManagementPage({
-    super.key,
-    this.companyId = 'cmp_001',
-  });
+  const StoreOrdersManagementPage({super.key, this.businessId = 'cmp_001'});
 
   @override
-  State<StoreOrdersManagementPage> createState() => _StoreOrdersManagementPageState();
+  State<StoreOrdersManagementPage> createState() =>
+      _StoreOrdersManagementPageState();
 }
 
 class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
@@ -34,21 +32,28 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer<InvoiceProvider>(
         builder: (context, provider, child) {
           final filteredInvoices = provider.invoices.where((invoice) {
-            final matchesStore = invoice.storeId == widget.companyId || invoice.storeId == 'cmp_001';
-            final matchesQuery = _searchQuery.isEmpty ||
-                invoice.invoiceId.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                invoice.shippingAddress.city.toLowerCase().contains(_searchQuery.toLowerCase());
+            final matchesStore =
+                invoice.storeId == widget.businessId ||
+                invoice.storeId == 'cmp_001';
+            final matchesQuery =
+                _searchQuery.isEmpty ||
+                invoice.invoiceId.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                invoice.shippingAddress.city.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                );
 
-            final matchesStatus = _selectedStatusFilter == 'all' ||
-                invoice.status.toLowerCase() == _selectedStatusFilter.toLowerCase();
+            final matchesStatus =
+                _selectedStatusFilter == 'all' ||
+                invoice.status.toLowerCase() ==
+                    _selectedStatusFilter.toLowerCase();
 
             return matchesStore && matchesQuery && matchesStatus;
           }).toList();
@@ -109,13 +114,17 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
                     onBulkDelete: () {
                       setState(() {
                         for (var inv in _selectedInvoices) {
-                          provider.invoices.removeWhere((item) => item.invoiceId == inv.invoiceId);
+                          provider.invoices.removeWhere(
+                            (item) => item.invoiceId == inv.invoiceId,
+                          );
                         }
                         _selectedInvoices.clear();
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedInvoices.length})'),
+                          content: Text(
+                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedInvoices.length})',
+                          ),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -132,7 +141,8 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
                     totalPages: totalPages > 0 ? totalPages : 1,
                     totalItems: totalItems,
                     itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) => setState(() => _currentPage = page),
+                    onPageChanged: (page) =>
+                        setState(() => _currentPage = page),
                     onItemsPerPageChanged: (rows) {
                       setState(() {
                         _itemsPerPage = rows;
@@ -154,7 +164,8 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
                         sortKey: (order) => order.invoiceId,
                         cellBuilder: (order) => TableImageTextCell(
                           title: '#${order.invoiceId}',
-                          subtitle: '${order.shippingAddress.city}, ${order.shippingAddress.country}',
+                          subtitle:
+                              '${order.shippingAddress.city}, ${order.shippingAddress.country}',
                           fallbackIcon: Icons.receipt_long_rounded,
                         ),
                       ),
@@ -173,7 +184,8 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
                         sortable: true,
                         sortKey: (order) => order.date,
                         cellBuilder: (order) => TableTextCell(
-                          title: '${order.date.year}-${order.date.month.toString().padLeft(2, '0')}-${order.date.day.toString().padLeft(2, '0')}',
+                          title:
+                              '${order.date.year}-${order.date.month.toString().padLeft(2, '0')}-${order.date.day.toString().padLeft(2, '0')}',
                         ),
                       ),
                       AppTableColumn<InvoiceModel>(
@@ -188,8 +200,10 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
                             order.status == 'Pending'
                                 ? TranslationKeys.statusPending.tr(context)
                                 : (order.status == 'Paid'
-                                    ? TranslationKeys.statusPaid.tr(context)
-                                    : TranslationKeys.statusCompleted.tr(context)),
+                                      ? TranslationKeys.statusPaid.tr(context)
+                                      : TranslationKeys.statusCompleted.tr(
+                                          context,
+                                        )),
                           ),
                         ),
                       ),
@@ -205,11 +219,15 @@ class _StoreOrdersManagementPageState extends State<StoreOrdersManagementPage> {
                           onEdit: () => showOrderStatusDialog(context, order),
                           onDelete: () {
                             setState(() {
-                              provider.invoices.removeWhere((item) => item.invoiceId == order.invoiceId);
+                              provider.invoices.removeWhere(
+                                (item) => item.invoiceId == order.invoiceId,
+                              );
                             });
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('تم حذف طلب الفاتورة #${order.invoiceId} بنجاح'),
+                                content: Text(
+                                  'تم حذف طلب الفاتورة #${order.invoiceId} بنجاح',
+                                ),
                                 backgroundColor: Colors.red,
                               ),
                             );

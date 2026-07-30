@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/localized_string.dart';
-import 'package:z_ecommerce/data/models/offer_model.dart';
+import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
+import 'package:z_ecommerce/data/models/product/offer_model.dart';
 import 'package:z_ecommerce/data/providers/offer_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -21,7 +21,7 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
 
   late TextEditingController _titleArController;
   late TextEditingController _titleEnController;
-  late TextEditingController _companyIdController;
+  late TextEditingController _businessIdController;
   late TextEditingController _couponCodeController;
   late TextEditingController _discountPercentController;
   late TextEditingController _discountAmountController;
@@ -37,10 +37,16 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
 
     _titleArController = TextEditingController(text: o?.name.ar ?? '');
     _titleEnController = TextEditingController(text: o?.name.en ?? '');
-    _companyIdController = TextEditingController(text: o?.companyId ?? 'cmp_001');
+    _businessIdController = TextEditingController(
+      text: o?.businessId ?? 'cmp_001',
+    );
     _couponCodeController = TextEditingController(text: o?.couponCode ?? '');
-    _discountPercentController = TextEditingController(text: o?.discountPercent != null ? o!.discountPercent.toString() : '');
-    _discountAmountController = TextEditingController(text: o?.discountAmount != null ? o!.discountAmount.toString() : '');
+    _discountPercentController = TextEditingController(
+      text: o?.discountPercent != null ? o!.discountPercent.toString() : '',
+    );
+    _discountAmountController = TextEditingController(
+      text: o?.discountAmount != null ? o!.discountAmount.toString() : '',
+    );
 
     _selectedType = o?.type ?? 'percentage_discount';
     _isActive = o?.isActive ?? true;
@@ -50,7 +56,7 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
   void dispose() {
     _titleArController.dispose();
     _titleEnController.dispose();
-    _companyIdController.dispose();
+    _businessIdController.dispose();
     _couponCodeController.dispose();
     _discountPercentController.dispose();
     _discountAmountController.dispose();
@@ -65,21 +71,26 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
     final provider = context.read<OfferProvider>();
     final isEdit = widget.offer != null;
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final offerId = isEdit ? widget.offer!.id : 'ofr_${timestamp.substring(timestamp.length - 6)}';
+    final offerId = isEdit
+        ? widget.offer!.id
+        : 'ofr_${timestamp.substring(timestamp.length - 6)}';
 
     final updatedOffer = OfferModel(
       id: offerId,
-      companyId: _companyIdController.text.trim(),
+      businessId: _businessIdController.text.trim(),
       name: LocalizedString(
         ar: _titleArController.text.trim(),
         en: _titleEnController.text.trim(),
       ),
       type: _selectedType,
-      couponCode: _couponCodeController.text.trim().isNotEmpty ? _couponCodeController.text.trim() : null,
+      couponCode: _couponCodeController.text.trim().isNotEmpty
+          ? _couponCodeController.text.trim()
+          : null,
       discountPercent: double.tryParse(_discountPercentController.text),
       discountAmount: double.tryParse(_discountAmountController.text),
       startDate: widget.offer?.startDate ?? DateTime.now(),
-      endDate: widget.offer?.endDate ?? DateTime.now().add(const Duration(days: 30)),
+      endDate:
+          widget.offer?.endDate ?? DateTime.now().add(const Duration(days: 30)),
       isActive: _isActive,
     );
 
@@ -98,7 +109,9 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isEdit ? 'تم تحديث بيانات العرض بنجاح!' : 'تم إنشاء العرض التسويقي الجديد بنجاح!',
+            isEdit
+                ? 'تم تحديث بيانات العرض بنجاح!'
+                : 'تم إنشاء العرض التسويقي الجديد بنجاح!',
           ),
         ),
       );
@@ -111,11 +124,17 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
     final isEdit = widget.offer != null;
 
     return AddEditTemplate(
-      title: isEdit ? 'تعديل العرض التسويقي' : TranslationKeys.addNewOffer.tr(context),
-      subtitle: isEdit ? 'تعديل بيانات ونسبة العرض والكوبون الحالي' : 'إدخال بيانات الحملة التسويقية أو كوبون الخصم الجديد',
+      title: isEdit
+          ? 'تعديل العرض التسويقي'
+          : TranslationKeys.addNewOffer.tr(context),
+      subtitle: isEdit
+          ? 'تعديل بيانات ونسبة العرض والكوبون الحالي'
+          : 'إدخال بيانات الحملة التسويقية أو كوبون الخصم الجديد',
       isEditMode: isEdit,
       formKey: _formKey,
-      submitLabel: isEdit ? TranslationKeys.saveChanges.tr(context) : TranslationKeys.addNewOffer.tr(context),
+      submitLabel: isEdit
+          ? TranslationKeys.saveChanges.tr(context)
+          : TranslationKeys.addNewOffer.tr(context),
       submitIcon: isEdit ? Icons.save_rounded : Icons.local_offer_rounded,
       onSubmit: _submit,
       isSubmitting: _isSubmitting,
@@ -137,7 +156,9 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                    validator: (v) => v!.isEmpty
+                        ? TranslationKeys.required.tr(context)
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -149,19 +170,22 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                    validator: (v) => v!.isEmpty
+                        ? TranslationKeys.required.tr(context)
+                        : null,
                   ),
                 ),
               ],
             ),
             TextFormField(
-              controller: _companyIdController,
+              controller: _businessIdController,
               decoration: InputDecoration(
                 labelText: TranslationKeys.associatedStore.tr(context),
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.storefront_rounded, size: 20),
               ),
-              validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+              validator: (v) =>
+                  v!.isEmpty ? TranslationKeys.required.tr(context) : null,
             ),
           ],
         ),
@@ -180,10 +204,22 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
                 prefixIcon: Icon(Icons.category_rounded, size: 20),
               ),
               items: const [
-                DropdownMenuItem(value: 'percentage_discount', child: Text('خصم مئوي (%)')),
-                DropdownMenuItem(value: 'fixed_discount', child: Text('خصم بمبلغ ثابت (\$)')),
-                DropdownMenuItem(value: 'coupon', child: Text('كوبون خصم (Coupon)')),
-                DropdownMenuItem(value: 'free_shipping', child: Text('شحن مجاني')),
+                DropdownMenuItem(
+                  value: 'percentage_discount',
+                  child: Text('خصم مئوي (%)'),
+                ),
+                DropdownMenuItem(
+                  value: 'fixed_discount',
+                  child: Text('خصم بمبلغ ثابت (\$)'),
+                ),
+                DropdownMenuItem(
+                  value: 'coupon',
+                  child: Text('كوبون خصم (Coupon)'),
+                ),
+                DropdownMenuItem(
+                  value: 'free_shipping',
+                  child: Text('شحن مجاني'),
+                ),
               ],
               onChanged: (val) => setState(() => _selectedType = val!),
             ),
@@ -205,7 +241,8 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
                     controller: _discountPercentController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: '${TranslationKeys.discountRate.tr(context)} (%)',
+                      labelText:
+                          '${TranslationKeys.discountRate.tr(context)} (%)',
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.percent_rounded, size: 20),
                     ),

@@ -1,31 +1,56 @@
 import 'package:flutter/material.dart';
 import '../models/product_model.dart';
-import '../fake_data/products.dart';
+import '../services/product_service.dart';
 
 class ProductProvider extends ChangeNotifier {
+  final ProductService _productService = ProductService();
+
   List<Product> _allProducts = [];
   List<Product> _newArrivals = [];
   List<Product> _topSelling = [];
   List<Product> _discountedProducts = [];
 
+  bool _isLoading = false;
+  String? _error;
+
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
   ProductProvider() {
-    _loadProducts();
+    fetchProducts();
   }
 
-  void _loadProducts() {
-    // تحميل البيانات الوهمية
-    _allProducts = fakeProducts;
-    
-    // تصفية المنتجات لقائمة أحدث الوصول (New Arrivals)
-    _newArrivals = _allProducts.where((p) => p.isNewArrival).toList();
-    
-    // تصفية المنتجات لقائمة الأكثر مبيعاً (Top Selling)
-    _topSelling = _allProducts.where((p) => p.isTopSelling).toList();
-    
-    // تصفية المنتجات التي عليها خصم
-    _discountedProducts = _allProducts.where((p) => p.discountPercent != null && p.discountPercent! > 0).toList();
-    
+  Future<void> fetchProducts([String? businessId]) async {
+    _isLoading = true;
+    _error = null;
     notifyListeners();
+
+    try {
+      final realProducts = businessId != null
+          ? await _productService.getProductsBybusinessId(businessId)
+          : await _productService.getAllProducts();
+
+      _allProducts = realProducts;
+
+      _updateSubLists();
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading products: $e');
+      _error = e.toString();
+      _allProducts = [];
+      _updateSubLists();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void _updateSubLists() {
+    _newArrivals = _allProducts.where((p) => p.isNewArrival).toList();
+    _topSelling = _allProducts.where((p) => p.isTopSelling).toList();
+    _discountedProducts = _allProducts
+        .where((p) => p.discountPercent != null && p.discountPercent! > 0)
+        .toList();
   }
 
   // Getters للوصول إلى القوائم
@@ -41,7 +66,7 @@ class ProductProvider extends ChangeNotifier {
   List<String> _selectedSizes = [];
   List<String> _selectedStyles = []; // from Figma "Dress Style"
   List<String> _selectedBrands = [];
-  
+
   String _sortBy = 'Most Popular';
   int _currentPage = 1;
   final int _itemsPerPage = 9;
@@ -60,8 +85,12 @@ class ProductProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   // ==================== DYNAMIC GETTERS ====================
-  
-  List<Product> getFilteredAndSortedProducts(String? category, {String? brand, bool onSale = false}) {
+
+  List<Product> getFilteredAndSortedProducts(
+    String? category, {
+    String? brand,
+    bool onSale = false,
+  }) {
     var list = _allProducts.where((p) {
       // 1. Category check
       if (category != null && category.isNotEmpty) {
@@ -72,12 +101,13 @@ class ProductProvider extends ChangeNotifier {
       if (brand != null && brand.isNotEmpty) {
         if (p.brand?.toLowerCase() != brand.toLowerCase()) return false;
       }
-      
+
       // 1.5. Search Query check
       if (_searchQuery.isNotEmpty) {
-        if (!p.name.toLowerCase().contains(_searchQuery.toLowerCase())) return false;
+        if (!p.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+          return false;
       }
-      
+
       // 1.6 On Sale check
       if (onSale) {
         if (p.discountPercent == null || p.discountPercent! <= 0) return false;
@@ -85,7 +115,7 @@ class ProductProvider extends ChangeNotifier {
 
       // 2. Price check
       if (p.price < _minPrice || p.price > _maxPrice) return false;
-      
+
       // 3. Colors check (Product must have at least one of the selected colors)
       if (_selectedColors.isNotEmpty) {
         bool hasColor = false;
@@ -97,7 +127,7 @@ class ProductProvider extends ChangeNotifier {
         }
         if (!hasColor) return false;
       }
-      
+
       // 4. Sizes check
       if (_selectedSizes.isNotEmpty) {
         bool hasSize = false;
@@ -109,12 +139,12 @@ class ProductProvider extends ChangeNotifier {
         }
         if (!hasSize) return false;
       }
-      
+
       // 5. Brands check (Sidebar filter level)
       if (_selectedBrands.isNotEmpty) {
         if (p.brand == null || !_selectedBrands.contains(p.brand)) return false;
       }
-      
+
       return true;
     }).toList();
 
@@ -133,23 +163,39 @@ class ProductProvider extends ChangeNotifier {
     return list;
   }
 
-  List<Product> getPaginatedProducts(String? category, {String? brand, bool onSale = false}) {
-    final list = getFilteredAndSortedProducts(category, brand: brand, onSale: onSale);
+  List<Product> getPaginatedProducts(
+    String? category, {
+    String? brand,
+    bool onSale = false,
+  }) {
+    final list = getFilteredAndSortedProducts(
+      category,
+      brand: brand,
+      onSale: onSale,
+    );
     final startIndex = (_currentPage - 1) * _itemsPerPage;
     if (startIndex >= list.length) return [];
     return list.skip(startIndex).take(_itemsPerPage).toList();
   }
 
   int getTotalPages(String? category, {String? brand, bool onSale = false}) {
-    final list = getFilteredAndSortedProducts(category, brand: brand, onSale: onSale);
+    final list = getFilteredAndSortedProducts(
+      category,
+      brand: brand,
+      onSale: onSale,
+    );
     return (list.length / _itemsPerPage).ceil();
   }
 
   // ==================== DYNAMIC FILTERS DATA ====================
-  
+
   List<Color> getAvailableColors(String? category) {
     final Set<Color> colors = {};
-    final products = category != null ? _allProducts.where((p) => p.category.toLowerCase() == category.toLowerCase()) : _allProducts;
+    final products = category != null
+        ? _allProducts.where(
+            (p) => p.category.toLowerCase() == category.toLowerCase(),
+          )
+        : _allProducts;
     for (var p in products) {
       colors.addAll(p.colors);
     }
@@ -158,7 +204,11 @@ class ProductProvider extends ChangeNotifier {
 
   List<String> getAvailableSizes(String? category) {
     final Set<String> sizes = {};
-    final products = category != null ? _allProducts.where((p) => p.category.toLowerCase() == category.toLowerCase()) : _allProducts;
+    final products = category != null
+        ? _allProducts.where(
+            (p) => p.category.toLowerCase() == category.toLowerCase(),
+          )
+        : _allProducts;
     for (var p in products) {
       sizes.addAll(p.sizes);
     }
@@ -197,7 +247,12 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPage(int page, String? category, {String? brand, bool onSale = false}) {
+  void setPage(
+    int page,
+    String? category, {
+    String? brand,
+    bool onSale = false,
+  }) {
     final total = getTotalPages(category, brand: brand, onSale: onSale);
     if (page > 0 && page <= total) {
       _currentPage = page;
@@ -236,21 +291,60 @@ class ProductProvider extends ChangeNotifier {
 
   // ==================== CRUD OPERATIONS ====================
 
-  void addProduct(Product product) {
-    _allProducts.insert(0, product);
-    _loadProducts();
-  }
-
-  void updateProduct(Product product) {
-    final index = _allProducts.indexWhere((p) => p.id == product.id);
-    if (index != -1) {
-      _allProducts[index] = product;
-      _loadProducts();
+  Future<bool> addProduct(Product product) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final createdProduct = await _productService.createProduct(product);
+      _allProducts.insert(0, createdProduct);
+      _updateSubLists();
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      return false;
     }
   }
 
-  void deleteProduct(String productId) {
-    _allProducts.removeWhere((p) => p.id == productId);
-    _loadProducts();
+  Future<bool> updateProduct(Product product) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _productService.updateProduct(product.id, product.toJson());
+      final index = _allProducts.indexWhere((p) => p.id == product.id);
+      if (index != -1) {
+        _allProducts[index] = product;
+        _updateSubLists();
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteProduct(String productId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _productService.deleteProduct(productId);
+      _allProducts.removeWhere((p) => p.id == productId);
+      _updateSubLists();
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 }

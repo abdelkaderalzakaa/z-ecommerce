@@ -8,7 +8,7 @@ import '../../global/core/responsive/responsive_layout.dart';
 import '../common/product_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../../data/models/product_model.dart';
+import '../../../data/models/product/product_model.dart';
 import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
 class NewArrivalsSection extends StatelessWidget {

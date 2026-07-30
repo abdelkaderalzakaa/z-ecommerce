@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/add_edit_template.dart';
@@ -22,6 +24,7 @@ class _PlatformSettingsPageState extends State<PlatformSettingsPage> {
 
   bool _isMaintenanceMode = false;
   bool _isSubmitting = false;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -29,9 +32,26 @@ class _PlatformSettingsPageState extends State<PlatformSettingsPage> {
     _platformNameArController = TextEditingController(text: 'منصة الزكاة الرقمية');
     _platformNameEnController = TextEditingController(text: 'Alzaka Digital Platform');
     _commissionRateController = TextEditingController(text: '5.0');
-    _contactEmailController = TextEditingController(text: 'admin@alzaka-digital.com');
-    _supportPhoneController = TextEditingController(text: '+966 50 000 0000');
+    _contactEmailController = TextEditingController(text: 'alzakaasimplesolutions@gmail.com');
+    _supportPhoneController = TextEditingController(text: '+961 70 123 456');
     _currencyController = TextEditingController(text: 'USD');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final user = context.watch<AuthProvider>().currentUser;
+      if (user != null) {
+        if (user.email.isNotEmpty) {
+          _contactEmailController.text = user.email;
+        }
+        if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
+          _supportPhoneController.text = user.phoneNumber!;
+        }
+      }
+      _isInitialized = true;
+    }
   }
 
   @override

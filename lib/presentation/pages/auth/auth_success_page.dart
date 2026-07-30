@@ -34,7 +34,6 @@ class AuthSuccessPage extends StatelessWidget {
                 changeScreen(context, const LoginPage());
               },
             ),
-            const FooterSection(),
           ],
         ),
       ),

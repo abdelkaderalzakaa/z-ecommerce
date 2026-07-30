@@ -3,7 +3,7 @@ import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
 import 'package:flutter/material.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
-import '../../../data/models/product_model.dart';
+import '../../../data/models/product/product_model.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -15,10 +15,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 class ProductCard extends StatefulWidget {
   final Product product;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-  });
+  const ProductCard({super.key, required this.product});
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -85,7 +82,9 @@ class _ProductImagePlaceholder extends StatelessWidget {
         color: bgColor,
         borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(
-          color: hovered ? Theme.of(context).primaryColor : Theme.of(context).dividerColor,
+          color: hovered
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).dividerColor,
           width: hovered ? 1.5 : 1.0,
         ),
         boxShadow: hovered
@@ -112,7 +111,10 @@ class _ProductImagePlaceholder extends StatelessWidget {
               top: 12,
               left: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.discountBadge,
                   borderRadius: BorderRadius.circular(AppRadius.xxl),
@@ -128,8 +130,10 @@ class _ProductImagePlaceholder extends StatelessWidget {
             right: 12,
             child: Consumer<AuthProvider>(
               builder: (context, authProvider, child) {
-                final isFavorite = authProvider.currentUser?.wishlist.contains(product.id) ?? false;
-                
+                final isFavorite =
+                    authProvider.currentUser?.wishlist.contains(product.id) ??
+                    false;
+
                 return GestureDetector(
                   onTap: () {
                     if (authProvider.isAuthenticated) {
@@ -137,7 +141,9 @@ class _ProductImagePlaceholder extends StatelessWidget {
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(TranslationKeys.pleaseLoginToSaveItems.tr(context)),
+                          content: Text(
+                            TranslationKeys.pleaseLoginToSaveItems.tr(context),
+                          ),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -172,17 +178,25 @@ class _ProductImagePlaceholder extends StatelessWidget {
             right: 12,
             child: Consumer2<CartProvider, CompanyProvider>(
               builder: (context, cartProvider, companyProvider, child) {
-                final companyId = companyProvider.companySettings?.id ?? 'cmp_001';
-                final isInCart = cartProvider.items(companyId).any((item) => item.product.id == product.id);
+                final businessId =
+                    companyProvider.companySettings?.id ?? 'cmp_001';
+                final isInCart = cartProvider
+                    .items(businessId)
+                    .any((item) => item.product.id == product.id);
                 return GestureDetector(
                   onTap: () {
                     if (isInCart) {
                       changeScreen(context, const CartPage());
                     } else {
-                      
-                      cartProvider.addToCart(companyId, product,
-                        selectedColor: product.colors.isNotEmpty ? product.colors.first : null,
-                        selectedSize: product.sizes.isNotEmpty ? product.sizes.first : null,
+                      cartProvider.addToCart(
+                        businessId,
+                        product,
+                        selectedColor: product.colors.isNotEmpty
+                            ? product.colors.first
+                            : null,
+                        selectedSize: product.sizes.isNotEmpty
+                            ? product.sizes.first
+                            : null,
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -190,7 +204,8 @@ class _ProductImagePlaceholder extends StatelessWidget {
                           duration: const Duration(seconds: 2),
                           action: SnackBarAction(
                             label: 'View Cart',
-                            onPressed: () => changeScreen(context, const CartPage()),
+                            onPressed: () =>
+                                changeScreen(context, const CartPage()),
                           ),
                         ),
                       );
@@ -200,7 +215,9 @@ class _ProductImagePlaceholder extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isInCart ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+                      color: isInCart
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).cardColor,
                       shape: BoxShape.circle,
                       boxShadow: const [
                         BoxShadow(
@@ -213,7 +230,9 @@ class _ProductImagePlaceholder extends StatelessWidget {
                     child: Icon(
                       isInCart ? Icons.check : Icons.add_shopping_cart,
                       size: 20,
-                      color: isInCart ? Colors.white : Theme.of(context).primaryColor,
+                      color: isInCart
+                          ? Colors.white
+                          : Theme.of(context).primaryColor,
                     ),
                   ),
                 );
@@ -249,24 +268,17 @@ class _ProductInfo extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 6),
-        _PriceRow(
-          price: price,
-          originalPrice: originalPrice,
-        ),
+        _PriceRow(price: price, originalPrice: originalPrice),
       ],
     );
   }
 }
 
-
 class _PriceRow extends StatelessWidget {
   final double price;
   final double? originalPrice;
 
-  const _PriceRow({
-    required this.price,
-    this.originalPrice,
-  });
+  const _PriceRow({required this.price, this.originalPrice});
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +287,10 @@ class _PriceRow extends StatelessWidget {
 
     return Row(
       children: [
-        Text('$currency${price.toInt()}', style: AppTextStyles.priceStyle(context)),
+        Text(
+          '$currency${price.toInt()}',
+          style: AppTextStyles.priceStyle(context),
+        ),
         if (originalPrice != null) ...[
           const SizedBox(width: 10),
           Text(
@@ -306,7 +321,10 @@ class SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: AppTextStyles.sectionTitle(context, ResponsiveLayout.isMobile(context)),
+          style: AppTextStyles.sectionTitle(
+            context,
+            ResponsiveLayout.isMobile(context),
+          ),
           textAlign: TextAlign.center,
         ),
       ],

@@ -269,10 +269,13 @@ class AddEditTemplate extends StatelessWidget {
               vertical: 14.0,
             ),
             decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor.withOpacity(0.5),
+              color: theme.cardColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(14),
                 topRight: Radius.circular(14),
+              ),
+              border: Border(
+                bottom: BorderSide(color: theme.dividerColor.withOpacity(0.08)),
               ),
             ),
             child: Row(

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/company_provider.dart';
-import 'package:z_ecommerce/data/models/product_model.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
@@ -16,10 +17,12 @@ class StoreProductsManagementPage extends StatefulWidget {
   const StoreProductsManagementPage({super.key});
 
   @override
-  State<StoreProductsManagementPage> createState() => _StoreProductsManagementPageState();
+  State<StoreProductsManagementPage> createState() =>
+      _StoreProductsManagementPageState();
 }
 
-class _StoreProductsManagementPageState extends State<StoreProductsManagementPage> {
+class _StoreProductsManagementPageState
+    extends State<StoreProductsManagementPage> {
   String _searchQuery = '';
   List<Product> _selectedProducts = [];
   int _currentPage = 1;
@@ -29,18 +32,25 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
+    final currentStoreId =
+        companyProvider.companySettings?.id ??
+        context.read<AuthProvider>().currentUser?.businessId;
 
     return Scaffold(
-      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) {
           final filteredProducts = provider.allProducts.where((product) {
+            final belongsToStore =
+                currentStoreId == null ||
+                product.businessId == null ||
+                product.businessId == currentStoreId;
             final titleStr = product.name.toLowerCase();
-            final matchesQuery = _searchQuery.isEmpty ||
+            final matchesQuery =
+                _searchQuery.isEmpty ||
                 titleStr.contains(_searchQuery.toLowerCase()) ||
                 product.id.toLowerCase().contains(_searchQuery.toLowerCase());
-            return matchesQuery;
+            return belongsToStore && matchesQuery;
           }).toList();
 
           final totalItems = filteredProducts.length;
@@ -83,7 +93,7 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                     ElevatedButton.icon(
                       onPressed: () => changeScreen(
                         context,
-                        const CreateEditProductPage(),
+                        CreateEditProductPage(businessId: currentStoreId),
                       ),
                       icon: const Icon(Icons.add, size: 18),
                       label: Text(TranslationKeys.addNewProduct.tr(context)),
@@ -120,7 +130,9 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                       }
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})'),
+                          content: Text(
+                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})',
+                          ),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -139,7 +151,8 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                     totalPages: totalPages > 0 ? totalPages : 1,
                     totalItems: totalItems,
                     itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) => setState(() => _currentPage = page),
+                    onPageChanged: (page) =>
+                        setState(() => _currentPage = page),
                     onItemsPerPageChanged: (rows) {
                       setState(() {
                         _itemsPerPage = rows;
@@ -162,7 +175,9 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                         cellBuilder: (p) => TableImageTextCell(
                           title: p.name,
                           subtitle: p.id,
-                          imageUrl: (p.images.isNotEmpty) ? p.images.first : null,
+                          imageUrl: (p.images.isNotEmpty)
+                              ? p.images.first
+                              : null,
                           fallbackIcon: Icons.shopping_bag_outlined,
                         ),
                       ),
@@ -171,9 +186,7 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                         flex: 1,
                         sortable: true,
                         sortKey: (p) => p.price,
-                        cellBuilder: (p) => TablePriceCell(
-                          amount: p.price,
-                        ),
+                        cellBuilder: (p) => TablePriceCell(amount: p.price),
                       ),
                       AppTableColumn<Product>(
                         title: TranslationKeys.rating.tr(context),
@@ -182,7 +195,8 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                         sortKey: (p) => p.rating,
                         cellBuilder: (p) => TableTextCell(
                           title: '⭐ ${p.rating.toStringAsFixed(1)}',
-                          subtitle: '${p.reviewsCount} ${TranslationKeys.reviews.tr(context)}',
+                          subtitle:
+                              '${p.reviewsCount} ${TranslationKeys.reviews.tr(context)}',
                         ),
                       ),
                       AppTableColumn<Product>(
@@ -209,7 +223,9 @@ class _StoreProductsManagementPageState extends State<StoreProductsManagementPag
                             provider.deleteProduct(p.id);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('تم حذف المنتج "${p.name}" بنجاح'),
+                                content: Text(
+                                  'تم حذف المنتج "${p.name}" بنجاح',
+                                ),
                                 backgroundColor: Colors.red,
                               ),
                             );

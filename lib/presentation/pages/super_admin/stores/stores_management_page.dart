@@ -9,7 +9,7 @@ import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart'
 import 'package:z_ecommerce/presentation/pages/super_admin/stores/create_store_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/stores/store_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/common/status_dialogs.dart';
-import '../../../../data/models/company_settings_model.dart';
+import '../../../../data/models/company/company_settings_model.dart';
 import '../../../../data/providers/super_admin_stores_provider.dart';
 
 class StoresManagementPage extends StatefulWidget {

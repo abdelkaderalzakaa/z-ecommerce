@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
-import '../../../data/models/offer_model.dart';
+import '../../../data/models/product/offer_model.dart';
 import '../../../data/providers/offer_provider.dart';
 import '../../../data/providers/company_provider.dart';
 import '../offers/offer_card.dart';
@@ -19,9 +19,9 @@ class OffersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OfferProvider>(
       builder: (context, provider, child) {
-        final companyId =
+        final businessId =
             context.watch<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-        final activeOffers = provider.getActiveOffers(companyId);
+        final activeOffers = provider.getActiveOffers(businessId);
         if (activeOffers.isEmpty) return const SizedBox.shrink();
 
         final bundles = activeOffers.where((o) => o.type == 'bundle').toList();
@@ -132,24 +132,28 @@ class OffersSection extends StatelessWidget {
                     child: OfferCard(offer: offers[0], fullWidth: true),
                   )
                 : offers.length == 2 && !ResponsiveLayout.isMobile(context)
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Row(
-                          children: [
-                            Expanded(child: OfferCard(offer: offers[0], fullWidth: true)),
-                            const SizedBox(width: 16),
-                            Expanded(child: OfferCard(offer: offers[1], fullWidth: true)),
-                          ],
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OfferCard(offer: offers[0], fullWidth: true),
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: offers.length,
-                        itemBuilder: (context, index) {
-                          return OfferCard(offer: offers[index]);
-                        },
-                      ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: OfferCard(offer: offers[1], fullWidth: true),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: offers.length,
+                    itemBuilder: (context, index) {
+                      return OfferCard(offer: offers[index]);
+                    },
+                  ),
           ),
           const SizedBox(height: 24),
         ],

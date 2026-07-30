@@ -3,7 +3,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
-import '../../../data/models/product_model.dart';
+import '../../../data/models/product/product_model.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/company_provider.dart';
 import '../../pages/cart_page.dart';
@@ -40,16 +40,18 @@ class _ProductInfoState extends State<ProductInfo> {
     final cartProvider = context.watch<CartProvider>();
     final companyData = context.watch<CompanyProvider>().companySettings;
     final currency = companyData?.currency ?? '\$';
-    final companyId = companyData?.id ?? 'cmp_001';
+    final businessId = companyData?.id ?? 'cmp_001';
 
-    final cartItemIndex = cartProvider.items(companyId).indexWhere(
-      (item) =>
-          item.product.id == product.id &&
-          item.selectedColor?.value == selectedColor.value &&
-          item.selectedSize == selectedSize,
-    );
+    final cartItemIndex = cartProvider
+        .items(businessId)
+        .indexWhere(
+          (item) =>
+              item.product.id == product.id &&
+              item.selectedColor?.value == selectedColor.value &&
+              item.selectedSize == selectedSize,
+        );
     final cartItem = cartItemIndex >= 0
-        ? cartProvider.items(companyId)[cartItemIndex]
+        ? cartProvider.items(businessId)[cartItemIndex]
         : null;
     final isInCart = cartItem != null;
 
@@ -77,17 +79,17 @@ class _ProductInfoState extends State<ProductInfo> {
           children: [
             Text(
               '$currency${product.price.toStringAsFixed(0)}',
-              style: AppTextStyles.priceStyle(context).copyWith(
-                fontSize: isMobile ? 24 : 32,
-              ),
+              style: AppTextStyles.priceStyle(
+                context,
+              ).copyWith(fontSize: isMobile ? 24 : 32),
             ),
             if (product.originalPrice != null) ...[
               const SizedBox(width: 12),
               Text(
                 '$currency${product.originalPrice!.toStringAsFixed(0)}',
-                style: AppTextStyles.priceStrike(context).copyWith(
-                  fontSize: isMobile ? 24 : 32,
-                ),
+                style: AppTextStyles.priceStrike(
+                  context,
+                ).copyWith(fontSize: isMobile ? 24 : 32),
               ),
             ],
             if (product.discountPercent != null) ...[
@@ -116,7 +118,9 @@ class _ProductInfoState extends State<ProductInfo> {
         const SizedBox(height: 20),
         Text(
           product.description,
-          style: AppTextStyles.bodyText(context).copyWith(fontSize: isMobile ? 14 : 16),
+          style: AppTextStyles.bodyText(
+            context,
+          ).copyWith(fontSize: isMobile ? 14 : 16),
         ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 24),
@@ -152,7 +156,7 @@ class _ProductInfoState extends State<ProductInfo> {
           buttonText: buttonText,
           onQuantityChanged: (val) {
             if (isInCart) {
-              cartProvider.updateQuantity(companyId, cartItem.id, val);
+              cartProvider.updateQuantity(businessId, cartItem.id, val);
             } else {
               setState(() => _localQuantity = val);
             }
@@ -162,7 +166,7 @@ class _ProductInfoState extends State<ProductInfo> {
               changeScreen(context, const CartPage());
             } else {
               cartProvider.addToCart(
-                companyId,
+                businessId,
                 product,
                 quantity: displayQuantity,
                 selectedColor: selectedColor,
@@ -271,7 +275,9 @@ class _SizeSelector extends StatelessWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+                    color: isSelected
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(AppRadius.button),
                   ),
                   child: Text(
@@ -398,7 +404,10 @@ class _ActionRowState extends State<_ActionRow> {
                         const Icon(Icons.check, color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                       ],
-                      Text(widget.buttonText, style: AppTextStyles.buttonText(context)),
+                      Text(
+                        widget.buttonText,
+                        style: AppTextStyles.buttonText(context),
+                      ),
                     ],
                   ),
                 ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/models/company_settings_model.dart';
+import 'package:z_ecommerce/data/models/company/company_settings_model.dart';
 
 class ReviewsTab extends StatelessWidget {
   final CompanySettingsModel store;

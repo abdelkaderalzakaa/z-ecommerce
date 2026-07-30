@@ -3,15 +3,14 @@ import 'package:z_ecommerce/presentation/pages/auth/forgot_password_page.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
 import 'package:z_ecommerce/presentation/pages/admin_store/admin_store_home.dart';
-import 'package:z_ecommerce/presentation/pages/stores_page.dart';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
-import '../../../data/models/user_model.dart';
+import '../../../data/models/auth/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
-import '../../widgets/common/footer_section.dart';
-import '../../widgets/auth/auth_card.dart';
+import '../../../data/providers/company_provider.dart';
+import '../../global/theme/theme_auth.dart';
+import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
 import '../../widgets/auth/password_field.dart';
 import '../../widgets/auth/primary_auth_button.dart';
@@ -19,10 +18,15 @@ import '../../widgets/auth/social_login_buttons.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
-
 class LoginPage extends StatefulWidget {
   final String? redirectTo;
-  const LoginPage({super.key, this.redirectTo});
+  final AuthThemeConfig? customAuthTheme;
+
+  const LoginPage({
+    super.key,
+    this.redirectTo,
+    this.customAuthTheme,
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -71,7 +75,9 @@ class _LoginPageState extends State<LoginPage> {
         }
       } else {
         setState(() {
-          _errorMessage = authProvider.errorMessage ?? TranslationKeys.loginFailed.tr(context);
+          _errorMessage =
+              authProvider.errorMessage ??
+              TranslationKeys.loginFailed.tr(context);
         });
       }
     }
@@ -79,213 +85,207 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: HeaderAuth(title: TranslationKeys.welcomeBack.tr(context)),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            AuthCard(
-              subtitle: TranslationKeys.pleaseEnterDetailsToSignIn.tr(context),
-              subtitleWidget: Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    _QuickFillButton(
-                      label: "Customer",
-                      email: 'sarah@example.com',
-                      onTap: (e) { _emailController.text = e; _passwordController.text = 'password123'; },
-                    ),
-                    _QuickFillButton(
-                      label: "Store Owner",
-                      email: 'owner@cmp1.com',
-                      onTap: (e) { _emailController.text = e; _passwordController.text = 'password123'; },
-                    ),
-                    _QuickFillButton(
-                      label: "Super Admin",
-                      email: 'admin@shop.com',
-                      onTap: (e) { _emailController.text = e; _passwordController.text = 'password123'; },
-                    ),
-                  ],
-                ),
+    final authTheme = widget.customAuthTheme ?? const AuthThemeConfig();
+    final primaryColor = authTheme.primaryColor;
+
+    return AuthSplitLayout(
+      pageTitle: authTheme.loginTitle,
+      pageSubtitle: authTheme.loginSubtitle,
+      customAuthTheme: authTheme,
+      children: [
+        Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AuthTextField(
+                controller: _emailController,
+                label: TranslationKeys.email.tr(context),
+                hintText: 'alex.jordan@gmail.com',
+                prefixIcon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
               ),
-              children: [
-                Form(
-                  key: _formKey,
-                  child: Column(
+              const SizedBox(height: 20),
+              PasswordField(
+                controller: _passwordController,
+                label: TranslationKeys.password.tr(context),
+                hintText: '••••••••••••',
+              ),
+              const SizedBox(height: 12),
+              
+              // Forgot Password Link & Remember Me Switch
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      changeScreen(context, ForgotPasswordPage(customAuthTheme: authTheme));
+                    },
+                    child: Text(
+                      TranslationKeys.forgotPassword.tr(context),
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Row(
                     children: [
-                      AuthTextField(
-                        controller: _emailController,
-                        label: TranslationKeys.email.tr(context),
-                        hintText: TranslationKeys.enterYourEmail.tr(context),
-                        prefixIcon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (v) =>
-                            v == null || v.isEmpty ? TranslationKeys.emailRequired.tr(context) : null,
-                      ),
-                      const SizedBox(height: 24),
-                      PasswordField(
-                        controller: _passwordController,
-                        label: TranslationKeys.password.tr(context),
-                        hintText: TranslationKeys.enterYourPassword.tr(context),
-                        validator: (v) => v == null || v.isEmpty
-                            ? TranslationKeys.passwordRequired.tr(context)
-                            : null,
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Checkbox(
-                                  value: _rememberMe,
-                                  onChanged: (value) {
-                                    setState(() => _rememberMe = value ?? false);
-                                  },
-                                  activeColor: Theme.of(context).primaryColor,
-                                ),
-                                Flexible(
-                                  child: Text(
-                                    TranslationKeys.rememberMe.tr(context),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Flexible(
-                            child: TextButton(
-                              onPressed: () {
-                                changeScreen(context, const ForgotPasswordPage());
-                              },
-                              child: Text(
-                                TranslationKeys.forgotPassword.tr(context),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      if (_errorMessage != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.red.withOpacity(0.5),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                color: Colors.red,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _errorMessage!,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                      Text(
+                        TranslationKeys.rememberMe.tr(context),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                      Consumer<AuthProvider>(
-                        builder: (context, auth, _) => PrimaryAuthButton(
-                          label: TranslationKeys.signIn.tr(context),
-                          onPressed: _handleLogin,
-                          isLoading: auth.isLoading,
+                      ),
+                      const SizedBox(width: 6),
+                      Transform.scale(
+                        scale: 0.8,
+                        child: Switch(
+                          value: _rememberMe,
+                          activeColor: primaryColor,
+                          onChanged: (val) {
+                            setState(() => _rememberMe = val);
+                          },
                         ),
                       ),
                     ],
                   ),
+                ],
+              ),
+              
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 13),
+                  ),
                 ),
-                const SizedBox(height: 32),
-                const SocialLoginButtons(),
-                const SizedBox(height: 32),
-                Row(
+              ],
+              
+              const SizedBox(height: 28),
+              
+              // Primary Login Button
+              SizedBox(
+                width: double.infinity,
+                child: PrimaryAuthButton(
+                  label: TranslationKeys.logIn.tr(context),
+                  onPressed: _handleLogin,
+                  isLoading: context.watch<AuthProvider>().isLoading,
+                  customAuthTheme: authTheme,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // OR Divider
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey[300])),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey[300])),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Social Login Button (Google)
+              if (authTheme.showGoogleLogin)
+                SocialLoginButtons(
+                  onGooglePressed: () async {
+                    final navigator = Navigator.of(context);
+                    final authProvider = context.read<AuthProvider>();
+                    final success = await authProvider.loginWithGoogle();
+                    if (mounted && success) {
+                      final role = authProvider.currentUser?.role;
+                      if (role == UserRole.superAdmin) {
+                        navigator.pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const SuperAdminHome()),
+                          (route) => false,
+                        );
+                      } else if (role == UserRole.companyOwner) {
+                        navigator.pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const AdminStore()),
+                          (route) => false,
+                        );
+                      } else {
+                        final destination = widget.redirectTo ?? '/';
+                        if (destination == '/') {
+                          navigator.pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => const HomePage()),
+                            (route) => false,
+                          );
+                        } else {
+                          navigator.pushReplacementNamed(destination);
+                        }
+                      }
+                    } else if (mounted && !success) {
+                      setState(() {
+                        _errorMessage = authProvider.errorMessage ?? 'فشل تسجيل الدخول عبر غوغل';
+                      });
+                    }
+                  },
+                ),
+
+              const SizedBox(height: 28),
+
+              // Sign Up Navigation Link
+              Center(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       TranslationKeys.dontHaveAccount.tr(context),
                       style: TextStyle(
+                        color: Colors.grey[600],
                         fontSize: 14,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        changeScreen(context, RegisterPage(redirectTo: widget.redirectTo));
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () {
+                        changeScreen(
+                          context,
+                          RegisterPage(
+                            redirectTo: widget.redirectTo,
+                            customAuthTheme: authTheme,
+                          ),
+                        );
                       },
-                      child: Text(TranslationKeys.signUp.tr(context)),
+                      child: Text(
+                        TranslationKeys.signUp.tr(context),
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            const FooterSection(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickFillButton extends StatelessWidget {
-  final String label;
-  final String email;
-  final Function(String) onTap;
-
-  const _QuickFillButton({
-    required this.label,
-    required this.email,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => onTap(email),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.w600,
+              ),
+            ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

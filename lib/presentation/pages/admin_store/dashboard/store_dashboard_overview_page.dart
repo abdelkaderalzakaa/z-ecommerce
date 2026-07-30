@@ -11,36 +11,40 @@ import 'package:z_ecommerce/presentation/pages/admin_store/orders/store_orders_m
 import 'package:z_ecommerce/presentation/pages/admin_store/products/store_products_management_page.dart';
 
 class StoreDashboardOverviewPage extends StatelessWidget {
-  final String companyId;
+  final String businessId;
 
-  const StoreDashboardOverviewPage({
-    super.key,
-    this.companyId = 'cmp_001',
-  });
+  const StoreDashboardOverviewPage({super.key, this.businessId = 'cmp_001'});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer2<ProductProvider, InvoiceProvider>(
         builder: (context, productProvider, invoiceProvider, child) {
           // My Store Data Filters
-          final myStoreInvoices = invoiceProvider.invoices.where((i) => i.storeId == companyId || i.storeId == 'cmp_001').toList();
+          final myStoreInvoices = invoiceProvider.invoices
+              .where((i) => i.storeId == businessId )
+              .toList();
           final myStoreProducts = productProvider.allProducts;
 
           final totalOrdersCount = myStoreInvoices.length;
-          final completedOrdersCount = myStoreInvoices.where((i) => i.status == 'Completed' || i.status == 'Paid').length;
-          final pendingOrdersCount = myStoreInvoices.where((i) => i.status == 'Pending').length;
+          final completedOrdersCount = myStoreInvoices
+              .where((i) => i.status == 'Completed' || i.status == 'Paid')
+              .length;
+          final pendingOrdersCount = myStoreInvoices
+              .where((i) => i.status == 'Pending')
+              .length;
           final totalProductsCount = myStoreProducts.length;
 
           // Average Rating for my store products
           double avgStoreRating = 4.8;
           if (myStoreProducts.isNotEmpty) {
-            final sum = myStoreProducts.fold<double>(0.0, (s, p) => s + p.rating);
+            final sum = myStoreProducts.fold<double>(
+              0.0,
+              (s, p) => s + p.rating,
+            );
             avgStoreRating = sum / myStoreProducts.length;
           }
 
@@ -74,19 +78,31 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: theme.dividerColor.withOpacity(0.15)),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.15),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.storefront_rounded, size: 16, color: theme.primaryColor),
+                          Icon(
+                            Icons.storefront_rounded,
+                            size: 16,
+                            color: theme.primaryColor,
+                          ),
                           const SizedBox(width: 8),
                           Text(
-                            '${TranslationKeys.mainStore.tr(context)} ($companyId)',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            '${TranslationKeys.mainStore.tr(context)} ($businessId)',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -113,7 +129,8 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                         _buildKpiCard(
                           context,
                           title: TranslationKeys.storeProducts.tr(context),
-                          value: '$totalProductsCount ${TranslationKeys.product.tr(context)}',
+                          value:
+                              '$totalProductsCount ${TranslationKeys.product.tr(context)}',
                           subText: TranslationKeys.allProducts.tr(context),
                           icon: Icons.inventory_2_rounded,
                           color: const Color(0xFF4F46E5),
@@ -122,8 +139,10 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                         _buildKpiCard(
                           context,
                           title: TranslationKeys.totalOrders.tr(context),
-                          value: '$totalOrdersCount ${TranslationKeys.orders.tr(context)}',
-                          subText: '$completedOrdersCount ${TranslationKeys.statusCompleted.tr(context)} • $pendingOrdersCount ${TranslationKeys.statusPending.tr(context)}',
+                          value:
+                              '$totalOrdersCount ${TranslationKeys.orders.tr(context)}',
+                          subText:
+                              '$completedOrdersCount ${TranslationKeys.statusCompleted.tr(context)} • $pendingOrdersCount ${TranslationKeys.statusPending.tr(context)}',
                           icon: Icons.shopping_cart_rounded,
                           color: const Color(0xFF10B981),
                           onTap: () {},
@@ -131,7 +150,8 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                         _buildKpiCard(
                           context,
                           title: TranslationKeys.pendingOrders.tr(context),
-                          value: '$pendingOrdersCount ${TranslationKeys.orders.tr(context)}',
+                          value:
+                              '$pendingOrdersCount ${TranslationKeys.orders.tr(context)}',
                           subText: TranslationKeys.statusPending.tr(context),
                           icon: Icons.hourglass_top_rounded,
                           color: const Color(0xFFF59E0B),
@@ -159,9 +179,18 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(flex: 3, child: _buildOrdersFlowChart(context)),
+                          Expanded(
+                            flex: 3,
+                            child: _buildOrdersFlowChart(context),
+                          ),
                           const SizedBox(width: 20),
-                          Expanded(flex: 2, child: _buildTopSellingProducts(context, productProvider)),
+                          Expanded(
+                            flex: 2,
+                            child: _buildTopSellingProducts(
+                              context,
+                              productProvider,
+                            ),
+                          ),
                         ],
                       );
                     }
@@ -199,7 +228,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: storeTheme?.surfaceColorValue ?? theme.cardColor,
+        color: theme.cardColor,
         borderRadius: storeTheme?.cardBorderRadius ?? BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.2)),
         boxShadow: [
@@ -221,7 +250,9 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.12),
-                  borderRadius: storeTheme?.buttonBorderRadius ?? BorderRadius.circular(12),
+                  borderRadius:
+                      storeTheme?.buttonBorderRadius ??
+                      BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 20),
               ),
@@ -236,7 +267,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                   fontFamily: fontFamily,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: storeTheme?.textColorValue,
+                  color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 2),
@@ -245,7 +276,9 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: fontFamily,
                   fontSize: 12,
-                  color: storeTheme?.textColorValue.withOpacity(0.6) ?? theme.textTheme.bodySmall?.color,
+                  color:
+                      storeTheme?.textColorValue.withOpacity(0.6) ??
+                      theme.textTheme.bodySmall?.color,
                 ),
               ),
             ],
@@ -259,7 +292,15 @@ class StoreDashboardOverviewPage extends StatelessWidget {
     final theme = Theme.of(context);
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final days = isArabic
-        ? ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
+        ? [
+            'السبت',
+            'الأحد',
+            'الإثنين',
+            'الثلاثاء',
+            'الأربعاء',
+            'الخميس',
+            'الجمعة',
+          ]
         : ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     final heights = [0.6, 0.85, 0.5, 0.9, 0.75, 0.8, 0.45];
 
@@ -322,7 +363,10 @@ class StoreDashboardOverviewPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTopSellingProducts(BuildContext context, ProductProvider productProvider) {
+  Widget _buildTopSellingProducts(
+    BuildContext context,
+    ProductProvider productProvider,
+  ) {
     final theme = Theme.of(context);
     final topProducts = productProvider.topSelling.take(4).toList();
 
@@ -342,7 +386,10 @@ class StoreDashboardOverviewPage extends StatelessWidget {
           ),
           Text(
             'المنتجات الفائزة بأعلى الطلبات',
-            style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color),
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
           const SizedBox(height: 16),
           ...topProducts.map((p) {
@@ -364,14 +411,21 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE6F4EA),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '⭐ ${p.rating.toStringAsFixed(1)}',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF137333)),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF137333),
+                      ),
                     ),
                   ),
                 ],

@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 
-import '../../../data/models/offer_model.dart';
+import '../../../data/models/product/offer_model.dart';
 import '../../../data/providers/offer_provider.dart';
 import '../../../data/providers/product_provider.dart';
 import '../global/core/responsive/responsive_layout.dart';
@@ -37,10 +37,10 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-      final companyId =
-          context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+      final businessId =
+          context.read<CompanyProvider>().companySettings?.id;
       final offer = context.read<OfferProvider>().getOfferById(
-        companyId,
+        businessId,
         widget.offerId,
       );
       if (offer != null) {
@@ -67,10 +67,10 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final companyId =
+    final businessId =
         context.watch<CompanyProvider>().companySettings?.id ?? 'cmp_001';
     final offer = context.watch<OfferProvider>().getOfferById(
-      companyId,
+      businessId,
       widget.offerId,
     );
 

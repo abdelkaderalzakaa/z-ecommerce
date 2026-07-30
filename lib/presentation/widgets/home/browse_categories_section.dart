@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/category_model.dart';
+import 'package:z_ecommerce/data/models/product/category_model.dart';
 import '../../../data/providers/category_provider.dart';
 import '../../../data/providers/company_provider.dart';
 import '../../global/core/constants/app_constants.dart';

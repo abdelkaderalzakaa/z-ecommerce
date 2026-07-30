@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/company_settings_model.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
-import 'package:z_ecommerce/data/models/localized_string.dart';
+import 'package:z_ecommerce/data/models/company/company_settings_model.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
 import 'package:z_ecommerce/data/providers/super_admin_stores_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -21,7 +21,6 @@ class _CreateStorePageState extends State<CreateStorePage> {
   // Store Info Controllers
   final _storeNameEnController = TextEditingController();
   final _storeNameArController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _contactEmailController = TextEditingController();
   final _contactPhoneController = TextEditingController();
 
@@ -29,6 +28,48 @@ class _CreateStorePageState extends State<CreateStorePage> {
   final _ownerNameController = TextEditingController();
   final _ownerEmailController = TextEditingController();
   final _ownerPasswordController = TextEditingController();
+
+  final List<StoreCategoryModel> _platformCategories = const [
+    StoreCategoryModel(
+      id: 'cat_restaurants',
+      name: LocalizedString(ar: 'مطاعم ومقاهي', en: 'Restaurants & Cafes'),
+    ),
+    StoreCategoryModel(
+      id: 'cat_fashion',
+      name: LocalizedString(ar: 'أزياء وملابس', en: 'Fashion & Apparel'),
+    ),
+    StoreCategoryModel(
+      id: 'cat_electronics',
+      name: LocalizedString(
+        ar: 'إلكترونيات وأجهزة',
+        en: 'Electronics & Gadgets',
+      ),
+    ),
+    StoreCategoryModel(
+      id: 'cat_home',
+      name: LocalizedString(ar: 'المنزل والديكور', en: 'Home & Decor'),
+    ),
+    StoreCategoryModel(
+      id: 'cat_beauty',
+      name: LocalizedString(
+        ar: 'عطور ومستحضرات تجميل',
+        en: 'Perfumes & Beauty',
+      ),
+    ),
+    StoreCategoryModel(
+      id: 'cat_grocery',
+      name: LocalizedString(
+        ar: 'سوبرماركت وبقالة',
+        en: 'Supermarket & Grocery',
+      ),
+    ),
+    StoreCategoryModel(
+      id: 'cat_general',
+      name: LocalizedString(ar: 'خدمات ومنتجات عامة', en: 'General Services'),
+    ),
+  ];
+
+  StoreCategoryModel? _selectedCategory;
 
   bool _isSubmitting = false;
 
@@ -50,13 +91,7 @@ class _CreateStorePageState extends State<CreateStorePage> {
         en: _storeNameEnController.text,
         ar: _storeNameArController.text,
       ),
-      category: StoreCategoryModel(
-        id: 'cat_1',
-        name: LocalizedString(
-          en: _categoryController.text,
-          ar: _categoryController.text,
-        ),
-      ),
+      category: _selectedCategory ?? _platformCategories.first,
       slogan: LocalizedString(en: '', ar: ''),
       description: LocalizedString(en: '', ar: ''),
       footerDescription: LocalizedString(en: '', ar: ''),
@@ -82,7 +117,7 @@ class _CreateStorePageState extends State<CreateStorePage> {
       name: _ownerNameController.text,
       email: _ownerEmailController.text,
       role: UserRole.companyOwner,
-      companyId: storeId,
+      businessId: storeId,
       phoneNumber: _contactPhoneController.text,
       createdAt: DateTime.now(),
     );
@@ -90,18 +125,27 @@ class _CreateStorePageState extends State<CreateStorePage> {
     final success = await provider.createStoreAndOwner(
       newStore: newStore,
       newOwner: newOwner,
+      password: _ownerPasswordController.text.isNotEmpty
+          ? _ownerPasswordController.text
+          : 'StoreOwner123!',
     );
 
     setState(() => _isSubmitting = false);
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(TranslationKeys.storeCreatedSuccessfully.tr(context))),
+        SnackBar(
+          content: Text(TranslationKeys.storeCreatedSuccessfully.tr(context)),
+        ),
       );
       Navigator.pop(context);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(provider.error ?? TranslationKeys.errorCreatingStore.tr(context))),
+        SnackBar(
+          content: Text(
+            provider.error ?? TranslationKeys.errorCreatingStore.tr(context),
+          ),
+        ),
       );
     }
   }
@@ -135,7 +179,9 @@ class _CreateStorePageState extends State<CreateStorePage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                    validator: (v) => v!.isEmpty
+                        ? TranslationKeys.required.tr(context)
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -147,19 +193,31 @@ class _CreateStorePageState extends State<CreateStorePage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                    validator: (v) => v!.isEmpty
+                        ? TranslationKeys.required.tr(context)
+                        : null,
                   ),
                 ),
               ],
             ),
-            TextFormField(
-              controller: _categoryController,
+            DropdownButtonFormField<StoreCategoryModel>(
+              value: _selectedCategory,
               decoration: InputDecoration(
                 labelText: TranslationKeys.category.tr(context),
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.category_rounded, size: 20),
               ),
-              validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+              items: _platformCategories.map((cat) {
+                return DropdownMenuItem<StoreCategoryModel>(
+                  value: cat,
+                  child: Text(cat.name.get(context)),
+                );
+              }).toList(),
+              onChanged: (val) {
+                setState(() => _selectedCategory = val);
+              },
+              validator: (v) =>
+                  v == null ? TranslationKeys.required.tr(context) : null,
             ),
             Row(
               children: [
@@ -202,7 +260,8 @@ class _CreateStorePageState extends State<CreateStorePage> {
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.badge_outlined, size: 20),
               ),
-              validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+              validator: (v) =>
+                  v!.isEmpty ? TranslationKeys.required.tr(context) : null,
             ),
             TextFormField(
               controller: _ownerEmailController,
@@ -211,7 +270,8 @@ class _CreateStorePageState extends State<CreateStorePage> {
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.email_outlined, size: 20),
               ),
-              validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+              validator: (v) =>
+                  v!.isEmpty ? TranslationKeys.required.tr(context) : null,
             ),
             TextFormField(
               controller: _ownerPasswordController,
@@ -234,7 +294,6 @@ class _CreateStorePageState extends State<CreateStorePage> {
   void dispose() {
     _storeNameEnController.dispose();
     _storeNameArController.dispose();
-    _categoryController.dispose();
     _contactEmailController.dispose();
     _contactPhoneController.dispose();
     _ownerNameController.dispose();

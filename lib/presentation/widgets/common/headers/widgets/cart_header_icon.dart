@@ -58,8 +58,9 @@ class _CartHeaderIconState extends State<CartHeaderIcon>
 
   @override
   Widget build(BuildContext context) {
-    final companyId = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-    final cartCount = context.watch<CartProvider>().cartCount(companyId);
+    final businessId =
+        context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+    final cartCount = context.watch<CartProvider>().cartCount(businessId);
 
     if (!_isFirstBuild && cartCount > _previousCount) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,7 +77,9 @@ class _CartHeaderIconState extends State<CartHeaderIcon>
       scale: _scaleAnimation,
       child: IconButtonHeader(
         icon: Icons.shopping_cart_outlined,
-        label: cartCount > 0 ? '$cartCount ${TranslationKeys.items.tr(context)}' : "",
+        label: cartCount > 0
+            ? '$cartCount ${TranslationKeys.items.tr(context)}'
+            : "",
         onTap: !widget.isActive
             ? null
             : cartCount > 0

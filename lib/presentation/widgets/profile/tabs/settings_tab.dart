@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../data/providers/settings_provider.dart';
+import '../../../global/settings_provider.dart';
 import '../../../global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:z_ecommerce/data/providers/locale_provider.dart';
+import 'package:z_ecommerce/presentation/global/locale_provider.dart';
 
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});

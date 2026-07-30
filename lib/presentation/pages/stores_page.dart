@@ -3,8 +3,8 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/fake_data/company.dart';
-import '../../data/models/company_settings_model.dart';
-import '../../data/providers/locale_provider.dart';
+import '../../data/models/company/company_settings_model.dart';
+import '../global/locale_provider.dart';
 // ignore: duplicate_import
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';

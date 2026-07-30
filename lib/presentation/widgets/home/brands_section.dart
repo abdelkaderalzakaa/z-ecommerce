@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import '../../../data/providers/company_provider.dart';
-import '../../../data/models/brand_model.dart';
+import '../../../data/models/product/brand_model.dart';
 import '../../global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/pages/categories_page.dart';
 
@@ -15,7 +15,6 @@ class BrandsSection extends StatefulWidget {
 }
 
 class _BrandsSectionState extends State<BrandsSection> {
-
   late final ScrollController _scrollController;
   Timer? _timer;
 
@@ -58,13 +57,14 @@ class _BrandsSectionState extends State<BrandsSection> {
       child: ListView.builder(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
-        physics: const NeverScrollableScrollPhysics(), // Prevent manual scroll interference
+        physics:
+            const NeverScrollableScrollPhysics(), // Prevent manual scroll interference
         itemBuilder: (context, index) {
           final brand = brands[index % brands.length];
           return Center(
             child: _BrandItem(
               brand: brand,
-              companyId: companyData?.id ?? 'cmp_001',
+              businessId: companyData?.id ?? 'cmp_001',
             ),
           );
         },
@@ -75,13 +75,15 @@ class _BrandsSectionState extends State<BrandsSection> {
 
 class _BrandItem extends StatelessWidget {
   final BrandModel brand;
-  final String companyId;
-  const _BrandItem({required this.brand, required this.companyId});
+  final String businessId;
+  const _BrandItem({required this.brand, required this.businessId});
 
   @override
   Widget build(BuildContext context) {
-    final isItalic = brand.name.toUpperCase() == 'VERSACE' || brand.name.toUpperCase() == 'GUCCI';
-    
+    final isItalic =
+        brand.name.toUpperCase() == 'VERSACE' ||
+        brand.name.toUpperCase() == 'GUCCI';
+
     return GestureDetector(
       onTap: () {
         changeScreen(context, const CategoriesPage());

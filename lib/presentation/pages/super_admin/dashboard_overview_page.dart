@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/fake_data/users.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/data/providers/offer_provider.dart';
@@ -44,9 +43,9 @@ class DashboardOverviewPage extends StatelessWidget {
         final completedOrders = invoiceProvider.invoices.where((i) => i.status == 'Completed' || i.status == 'Paid').length;
         final pendingOrders = invoiceProvider.invoices.where((i) => i.status == 'Pending').length;
 
-        final totalUsers = fakeUsers.length;
-        final customersCount = fakeUsers.where((u) => u.role == UserRole.customer).length;
-        final ownersCount = fakeUsers.where((u) => u.role == UserRole.companyOwner).length;
+        final ownersCount = storesProvider.totalStores;
+        final customersCount = 0;
+        final totalUsers = ownersCount + customersCount + 1;
 
         final totalOffers = offerProvider.allOffers.length;
         final activeOffers = offerProvider.allOffers.where((o) => o.isActive).length;
@@ -695,10 +694,11 @@ class DashboardOverviewPage extends StatelessWidget {
   // Widget: User Roles Breakdown Card
   Widget _buildUserRolesDistribution(BuildContext context) {
     final theme = Theme.of(context);
-    final total = fakeUsers.length;
-    final customers = fakeUsers.where((u) => u.role == UserRole.customer).length;
-    final owners = fakeUsers.where((u) => u.role == UserRole.companyOwner).length;
-    final admins = fakeUsers.where((u) => u.role == UserRole.superAdmin).length;
+    final storesProvider = context.watch<SuperAdminStoresProvider>();
+    final owners = storesProvider.totalStores;
+    const customers = 0;
+    const admins = 1;
+    final total = owners + customers + admins;
 
     return Container(
       padding: const EdgeInsets.all(20),

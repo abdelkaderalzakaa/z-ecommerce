@@ -1,9 +1,10 @@
-import 'localized_string.dart';
+import '../../../presentation/global/translate/localized_string.dart';
 
 class OfferModel {
   final String id;
-  final String companyId;
+  final String businessId;
   final LocalizedString name;
+  final LocalizedString? description;
   final String type; // 'product_gift', 'bundle', 'discount', 'percentage_discount', 'fixed_discount', 'free_shipping', 'coupon', 'buy_x_get_y', 'clearance', 'loyalty_points'
   final String? productId;
   final List<String>? productIds;
@@ -14,10 +15,9 @@ class OfferModel {
   final DateTime startDate;
   final DateTime endDate;
   final bool isActive;
-  final LocalizedString? description;
   final String? imageUrl;
-  
-  // New diverse fields
+
+  // الحقول الجديدة المتنوعة للعروض
   final double? discountPercent;
   final double? discountAmount;
   final double? minOrderAmount;
@@ -28,7 +28,7 @@ class OfferModel {
 
   const OfferModel({
     required this.id,
-    this.companyId = 'cmp_001',
+    required this.businessId,
     required this.name,
     required this.type,
     this.productId,
@@ -51,8 +51,21 @@ class OfferModel {
     this.pointsMultiplier,
   });
 
+  // ==========================================
+  // 🧮 Dynamic Getters & Helpers
+  // ==========================================
+
+  /// التحقق مما إذا كان العرض سارياً ومفعلاً في الوقت الحالي
   bool get isValid {
     final now = DateTime.now();
     return isActive && now.isAfter(startDate) && now.isBefore(endDate);
   }
+
+  /// هل ينتهي العرض قريباً (خلال 24 ساعة)؟
+  bool get isExpiringSoon {
+    if (!isValid) return false;
+    final remainingHours = endDate.difference(DateTime.now()).inHours;
+    return remainingHours >= 0 && remainingHours <= 24;
+  }
+
 }

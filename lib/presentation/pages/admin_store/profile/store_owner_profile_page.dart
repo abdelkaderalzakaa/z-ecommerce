@@ -12,76 +12,64 @@ class StoreOwnerProfilePage extends StatefulWidget {
   State<StoreOwnerProfilePage> createState() => _StoreOwnerProfilePageState();
 }
 
-class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
   // Personal Info Form Controllers
-  final TextEditingController _fullNameController =
-      TextEditingController(text: 'عبدالقادر الزكاء');
-  final TextEditingController _emailController =
-      TextEditingController(text: 'owner@mystore.com');
-  final TextEditingController _phoneController =
-      TextEditingController(text: '+966 50 123 4567');
-  final TextEditingController _jobTitleController =
-      TextEditingController(text: 'مالك ورئيس مجلس إدارة المتجر');
-
-  // Business Info Form Controllers
-  final TextEditingController _taxIdController =
-      TextEditingController(text: '310123456700003');
-  final TextEditingController _crNumberController =
-      TextEditingController(text: '1010887766');
-  final TextEditingController _storeAddressController =
-      TextEditingController(text: 'المملكة العربية السعودية - الرياض - حي العليا');
-
-  // Password Change Controllers
-  final TextEditingController _currentPassController = TextEditingController();
-  final TextEditingController _newPassController = TextEditingController();
-  final TextEditingController _confirmPassController = TextEditingController();
-
-  // Notification Toggles
-  bool _emailOrderAlerts = true;
-  bool _smsLowStockAlerts = true;
-  bool _weeklyReportAlerts = true;
-  bool _twoFactorAuthEnabled = true;
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _jobTitleController = TextEditingController();
 
   bool _isSaving = false;
+  bool _isInitialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final user = context.watch<AuthProvider>().currentUser;
+      if (user != null) {
+        _fullNameController.text = user.name.isNotEmpty ? user.name : 'صاحب المتجر';
+        _emailController.text = user.email;
+        _phoneController.text = (user.phoneNumber != null && user.phoneNumber!.isNotEmpty)
+            ? user.phoneNumber!
+            : '+961 70 123 456';
+      } else {
+        _fullNameController.text = 'مالك المتجر';
+        _emailController.text = 'owner@mystore.com';
+        _phoneController.text = '+961 70 123 456';
+      }
+      _jobTitleController.text = 'مالك ورئيس مجلس إدارة المتجر';
+      _isInitialized = true;
+    }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _fullNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _jobTitleController.dispose();
-    _taxIdController.dispose();
-    _crNumberController.dispose();
-    _storeAddressController.dispose();
-    _currentPassController.dispose();
-    _newPassController.dispose();
-    _confirmPassController.dispose();
     super.dispose();
   }
 
   Future<void> _handleSaveProfile() async {
     setState(() => _isSaving = true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    setState(() => _isSaving = false);
+
+    final authProvider = context.read<AuthProvider>();
+    await authProvider.updateUserProfile(
+      name: _fullNameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+    );
 
     if (mounted) {
+      setState(() => _isSaving = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
             children: [
               Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
               SizedBox(width: 8),
-              Text('تم حفظ وتحديث بيانات البروفايل الشخصي والمهني بنجاح!'),
+              Text('تم حفظ وتحديث بيانات البروفايل الشخصي بنجاح!'),
             ],
           ),
           backgroundColor: Theme.of(context).primaryColor,
@@ -101,7 +89,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
     final storeLogo = storeTheme?.logoUrl;
 
     return Scaffold(
-      backgroundColor: storeTheme?.backgroundColorValue ?? theme.scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -151,6 +139,22 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                     ],
                   ),
                   const Spacer(),
+                  // Sign Out Button
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await context.read<AuthProvider>().signOut();
+                      if (context.mounted) {
+                        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                      }
+                    },
+                    icon: const Icon(Icons.logout_rounded, size: 18, color: Colors.white),
+                    label: const Text('تسجيل الخروج', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Save Button
                   ElevatedButton.icon(
                     onPressed: _isSaving ? null : _handleSaveProfile,
                     icon: _isSaving
@@ -173,44 +177,10 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                   children: [
                     // Top Owner Card & Quick Stats Banner
                     _buildOwnerCardHeader(theme, storeName, storeLogo),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
-                    // Custom Tab Header Bar
-                    Container(
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        labelColor: theme.primaryColor,
-                        unselectedLabelColor: theme.textTheme.bodyMedium?.color,
-                        indicatorColor: theme.primaryColor,
-                        indicatorWeight: 3,
-                        tabs: [
-                          Tab(icon: const Icon(Icons.person_rounded, size: 18), text: TranslationKeys.personalInfoTab.tr(context)),
-                          Tab(icon: const Icon(Icons.business_center_rounded, size: 18), text: TranslationKeys.ownershipInfoTab.tr(context)),
-                          Tab(icon: const Icon(Icons.security_rounded, size: 18), text: TranslationKeys.securityTab.tr(context)),
-                          Tab(icon: const Icon(Icons.notifications_active_rounded, size: 18), text: TranslationKeys.notificationsTab.tr(context)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Tab Views Box
-                    SizedBox(
-                      height: 520,
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildPersonalInfoTab(theme),
-                          _buildOwnershipInfoTab(theme),
-                          _buildSecurityTab(theme),
-                          _buildNotificationsTab(theme),
-                        ],
-                      ),
-                    ),
+                    // Single Main Tab: Personal Info
+                    _buildPersonalInfoTab(theme),
                   ],
                 ),
               ),
@@ -252,12 +222,12 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                 bottom: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor,
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.verified_user_rounded, size: 14, color: Colors.white),
+                  child: const Icon(Icons.check_rounded, size: 12, color: Colors.white),
                 ),
               ),
             ],
@@ -270,7 +240,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                 Row(
                   children: [
                     Text(
-                      _fullNameController.text,
+                      _fullNameController.text.isNotEmpty ? _fullNameController.text : 'صاحب المتجر',
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 10),
@@ -300,7 +270,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'اسم المتجر المرتبط: $storeName | عضو منذ 2024',
+                  'اسم المتجر المرتبط: $storeName | عضو معتمد في المنصة',
                   style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color),
                 ),
               ],
@@ -322,7 +292,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('البيانات الشخصية ورابط التواصل', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const Text('البيانات الشخصية ورابط التواصل', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -353,9 +323,12 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
               Expanded(
                 child: TextField(
                   controller: _emailController,
+                  readOnly: true,
+                  enabled: false,
                   decoration: const InputDecoration(
-                    labelText: 'البريد الإلكتروني للإدارة',
+                    labelText: 'البريد الإلكتروني للإدارة (غير قابل للتعديل)',
                     prefixIcon: Icon(Icons.email_outlined),
+                    helperText: 'لا يمكن تغيير البريد الإلكتروني لمنع فقدان الوصول للمتجر',
                   ),
                 ),
               ),
@@ -363,153 +336,15 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage>
               Expanded(
                 child: TextField(
                   controller: _phoneController,
+                  keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
-                    labelText: 'رقم الجوال للتواصل الإداري',
+                    labelText: 'رقم الجوال للتواصل الإداري (لبناني +961)',
+                    hintText: '+961 70 123 456',
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOwnershipInfoTab(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('بيانات السجل التجاري والملكية القانونية للمتجر', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _crNumberController,
-                  decoration: const InputDecoration(
-                    labelText: 'رقم السجل التجاري (CR Number)',
-                    prefixIcon: Icon(Icons.verified_rounded),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextField(
-                  controller: _taxIdController,
-                  decoration: const InputDecoration(
-                    labelText: 'الرقم الضريبي (Vat Tax ID)',
-                    prefixIcon: Icon(Icons.receipt_long_rounded),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _storeAddressController,
-            decoration: const InputDecoration(
-              labelText: 'عنوان مقر الإدارة الرئيسي',
-              prefixIcon: Icon(Icons.location_on_outlined),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSecurityTab(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('إعدادات الأمان وتغيير كلمة المرور', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('تفعيل التحقق بخطوتين (2FA Security)'),
-            subtitle: const Text('إرسال رمز تحقق لجوالك عند تسجيل الدخول من أجهزة جديدة'),
-            value: _twoFactorAuthEnabled,
-            onChanged: (val) => setState(() => _twoFactorAuthEnabled = val),
-            activeColor: theme.primaryColor,
-          ),
-          const Divider(),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _currentPassController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'كلمة المرور الحالية',
-                    prefixIcon: Icon(Icons.lock_outline_rounded),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextField(
-                  controller: _newPassController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'كلمة المرور الجديدة',
-                    prefixIcon: Icon(Icons.lock_reset_rounded),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNotificationsTab(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('إعدادات الإشعارات والتنبيهات المباشرة', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: const Text('إشعارات الطلبات الجديدة الفورية'),
-            subtitle: const Text('تنبيه فوري عبر البريد واللوحة عند إتمام عميل لطلب جديد'),
-            value: _emailOrderAlerts,
-            onChanged: (val) => setState(() => _emailOrderAlerts = val),
-            activeColor: theme.primaryColor,
-          ),
-          SwitchListTile(
-            title: const Text('تنبيهات استنفاد كميات المنتجات'),
-            subtitle: const Text('إرسال إشعار عندما تقل كمية أي منتج عن 5 قطع في المخزن'),
-            value: _smsLowStockAlerts,
-            onChanged: (val) => setState(() => _smsLowStockAlerts = val),
-            activeColor: theme.primaryColor,
-          ),
-          SwitchListTile(
-            title: const Text('التقرير الأسبوعي للأداء والمبيعات'),
-            subtitle: const Text('ملخص أسبوعي شامل لإجمالي الإيرادات والنمو عبر البريد'),
-            value: _weeklyReportAlerts,
-            onChanged: (val) => setState(() => _weeklyReportAlerts = val),
-            activeColor: theme.primaryColor,
           ),
         ],
       ),

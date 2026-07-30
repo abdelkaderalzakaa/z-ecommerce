@@ -2,19 +2,21 @@ import 'package:z_ecommerce/presentation/pages/auth/reset_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
 import '../../../data/providers/company_provider.dart';
-import '../../widgets/common/headers/header_home.dart';
-import '../../widgets/common/footer_section.dart';
-import '../../widgets/auth/auth_card.dart';
+import '../../global/theme/theme_auth.dart';
+import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
 import '../../widgets/auth/primary_auth_button.dart';
-import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({super.key});
+  final AuthThemeConfig? customAuthTheme;
+
+  const ForgotPasswordPage({
+    super.key,
+    this.customAuthTheme,
+  });
 
   @override
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
@@ -28,53 +30,54 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() => _isLoading = false);
-        changeScreen(context, const ResetPasswordPage());
+        changeScreen(
+          context,
+          ResetPasswordPage(customAuthTheme: widget.customAuthTheme),
+        );
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: HeaderAuth(title: TranslationKeys.forgotPassword.tr(context)),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            AuthCard(
-              subtitle: TranslationKeys.noWorriesResetInstructions.tr(context),
-              children: [
-                AuthTextField(
-                  label: TranslationKeys.email.tr(context),
-                  hintText: TranslationKeys.enterYourEmail.tr(context),
-                  prefixIcon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 32),
-                const SizedBox(height: 32),
-                PrimaryAuthButton(
-                  label: TranslationKeys.sendResetLink.tr(context),
-                  onPressed: _handleReset,
-                  isLoading: _isLoading,
-                ),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context); // Back to login
-                      },
-                      icon: const Icon(Icons.arrow_back, size: 16),
-                      label: Text(TranslationKeys.backToLogin.tr(context)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const FooterSection(),
-          ],
+    final authTheme = widget.customAuthTheme ?? const AuthThemeConfig();
+    final primaryColor = authTheme.primaryColor;
+
+    return AuthSplitLayout(
+      pageTitle: authTheme.forgotPasswordTitle,
+      pageSubtitle: authTheme.forgotPasswordSubtitle,
+      customAuthTheme: authTheme,
+      children: [
+        AuthTextField(
+          label: TranslationKeys.email.tr(context),
+          hintText: 'alex.jordan@gmail.com',
+          prefixIcon: Icons.email_outlined,
+          keyboardType: TextInputType.emailAddress,
         ),
-      ),
+        const SizedBox(height: 32),
+        SizedBox(
+          width: double.infinity,
+          child: PrimaryAuthButton(
+            label: TranslationKeys.sendResetLink.tr(context),
+            onPressed: _handleReset,
+            isLoading: _isLoading,
+            customAuthTheme: authTheme,
+          ),
+        ),
+        const SizedBox(height: 28),
+        Center(
+          child: TextButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back, size: 16, color: primaryColor),
+            label: Text(
+              TranslationKeys.backToLogin.tr(context),
+              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

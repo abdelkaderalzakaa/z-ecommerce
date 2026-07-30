@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import '../../../data/models/offer_model.dart';
-import '../../../data/models/product_model.dart';
+import '../../../data/models/product/offer_model.dart';
+import '../../../data/models/product/product_model.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/company_provider.dart';
@@ -22,7 +22,8 @@ class OfferCard extends StatefulWidget {
   State<OfferCard> createState() => _OfferCardState();
 }
 
-class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMixin {
+class _OfferCardState extends State<OfferCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isHovered = false;
@@ -78,16 +79,25 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
 
   String _getTagText(String type) {
     switch (type) {
-      case 'bundle': return 'Bundle Deal';
-      case 'coupon': return 'Coupon';
-      case 'clearance': return 'Clearance';
+      case 'bundle':
+        return 'Bundle Deal';
+      case 'coupon':
+        return 'Coupon';
+      case 'clearance':
+        return 'Clearance';
       case 'percentage_discount':
-      case 'fixed_discount': return 'Discount';
-      case 'free_shipping': return 'Free Shipping';
-      case 'product_gift': return 'Free Gift';
-      case 'buy_x_get_y': return 'BOGO';
-      case 'loyalty_points': return 'Rewards';
-      default: return 'Special Offer';
+      case 'fixed_discount':
+        return 'Discount';
+      case 'free_shipping':
+        return 'Free Shipping';
+      case 'product_gift':
+        return 'Free Gift';
+      case 'buy_x_get_y':
+        return 'BOGO';
+      case 'loyalty_points':
+        return 'Rewards';
+      default:
+        return 'Special Offer';
     }
   }
 
@@ -95,7 +105,7 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final offer = widget.offer;
-    
+
     // Format time
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(_timeLeft.inHours);
@@ -112,7 +122,9 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
         child: ScaleTransition(
           scale: _scaleAnimation,
           child: Container(
-            width: widget.fullWidth ? double.infinity : 380, // Made wider to match the provided layout proportions
+            width: widget.fullWidth
+                ? double.infinity
+                : 380, // Made wider to match the provided layout proportions
             margin: EdgeInsets.only(right: widget.fullWidth ? 0 : 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
@@ -136,7 +148,8 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                     Image.network(
                       offer.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => _buildFallbackBackground(theme),
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildFallbackBackground(theme),
                     )
                   else
                     _buildFallbackBackground(theme),
@@ -172,7 +185,10 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                             children: [
                               // Top Tag (Pill shape)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withOpacity(0.6),
                                   borderRadius: BorderRadius.circular(20),
@@ -180,7 +196,11 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.local_offer, color: Colors.amber, size: 14),
+                                    const Icon(
+                                      Icons.local_offer,
+                                      color: Colors.amber,
+                                      size: 14,
+                                    ),
                                     const SizedBox(width: 6),
                                     Text(
                                       _getTagText(offer.type),
@@ -194,7 +214,7 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              
+
                               // Title
                               Text(
                                 offer.name.get(context),
@@ -207,7 +227,7 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
-                              
+
                               // Description
                               Text(
                                 offer.description?.get(context) ?? '',
@@ -218,72 +238,116 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              
+
                               // Action Button (White Pill)
-                              Consumer<CartProvider>(builder: (context, cart, child) {
-                                if (offer.type == 'bundle' || offer.type == 'product_gift' || offer.type == 'buy_x_get_y') {
-                                  String? mainIdToCheck;
-                                  if (offer.type == 'bundle') {
-                                    mainIdToCheck = offer.id;
-                                  } else if (offer.type == 'product_gift') {
-                                    mainIdToCheck = offer.productId;
-                                  } else if (offer.type == 'buy_x_get_y') {
-                                    mainIdToCheck = offer.productIds?.first;
+                              Consumer<CartProvider>(
+                                builder: (context, cart, child) {
+                                  if (offer.type == 'bundle' ||
+                                      offer.type == 'product_gift' ||
+                                      offer.type == 'buy_x_get_y') {
+                                    String? mainIdToCheck;
+                                    if (offer.type == 'bundle') {
+                                      mainIdToCheck = offer.id;
+                                    } else if (offer.type == 'product_gift') {
+                                      mainIdToCheck = offer.productId;
+                                    } else if (offer.type == 'buy_x_get_y') {
+                                      mainIdToCheck = offer.productIds?.first;
+                                    }
+
+                                    final businessId =
+                                        context
+                                            .read<CompanyProvider>()
+                                            .companySettings
+                                            ?.id ??
+                                        'cmp_001';
+                                    final isInCart =
+                                        mainIdToCheck != null &&
+                                        cart
+                                            .items(businessId)
+                                            .any(
+                                              (item) =>
+                                                  item.product.id ==
+                                                  mainIdToCheck,
+                                            );
+
+                                    return _buildActionBtn(
+                                      text: isInCart
+                                          ? 'In Cart'
+                                          : 'Add to Cart',
+                                      icon: isInCart
+                                          ? Icons.check_circle
+                                          : Icons.shopping_cart,
+                                      onTap: () {
+                                        if (isInCart) {
+                                          changeScreen(
+                                            context,
+                                            const CartPage(),
+                                          );
+                                        } else {
+                                          _addToCart(context);
+                                        }
+                                      },
+                                    );
+                                  } else if (offer.type == 'coupon' &&
+                                      offer.couponCode != null) {
+                                    return _buildActionBtn(
+                                      text: 'Copy: ${offer.couponCode}',
+                                      icon: Icons.copy,
+                                      onTap: () {
+                                        Clipboard.setData(
+                                          ClipboardData(
+                                            text: offer.couponCode!,
+                                          ),
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Coupon code copied!',
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    return _buildActionBtn(
+                                      text: 'Shop Now',
+                                      icon: Icons.visibility,
+                                      onTap: () {
+                                        changeScreen(
+                                          context,
+                                          OfferDetailsPage(
+                                            offerId: widget.offer.id,
+                                          ),
+                                        );
+                                      },
+                                    );
                                   }
-
-                                  final companyId = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-                                  final isInCart = mainIdToCheck != null && 
-                                                   cart.items(companyId).any((item) => item.product.id == mainIdToCheck);
-
-                                  return _buildActionBtn(
-                                    text: isInCart ? 'In Cart' : 'Add to Cart',
-                                    icon: isInCart ? Icons.check_circle : Icons.shopping_cart,
-                                    onTap: () {
-                                      if (isInCart) {
-                                        changeScreen(context, const CartPage());
-                                      } else {
-                                        _addToCart(context);
-                                      }
-                                    },
-                                  );
-                                } else if (offer.type == 'coupon' && offer.couponCode != null) {
-                                  return _buildActionBtn(
-                                    text: 'Copy: ${offer.couponCode}',
-                                    icon: Icons.copy,
-                                    onTap: () {
-                                      Clipboard.setData(ClipboardData(text: offer.couponCode!));
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Coupon code copied!')),
-                                      );
-                                    },
-                                  );
-                                } else {
-                                  return _buildActionBtn(
-                                    text: 'Shop Now',
-                                    icon: Icons.visibility,
-                                    onTap: () {
-                                      changeScreen(context, OfferDetailsPage(offerId: widget.offer.id));
-                                    },
-                                  );
-                                }
-                              }),
+                                },
+                              ),
                             ],
                           ),
                         ),
-                        
+
                         const SizedBox(width: 16),
-                        
+
                         // Right Side (Glassmorphism Timer)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: BackdropFilter(
                             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
                               ),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -340,10 +404,7 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
         ),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 8,
-          ),
+          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 8),
         ),
       ],
     );
@@ -382,7 +443,7 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
               color: Colors.white.withOpacity(0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Row(
@@ -413,20 +474,18 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            theme.primaryColor,
-            theme.primaryColor.withOpacity(0.5),
-          ],
+          colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.5)],
         ),
       ),
     );
   }
 
   void _addToCart(BuildContext context) {
-    final companyId = context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+    final businessId =
+        context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
     final cart = context.read<CartProvider>();
     final products = context.read<ProductProvider>().allProducts;
-    
+
     if (widget.offer.type == 'bundle') {
       final bundleProduct = Product(
         id: widget.offer.id,
@@ -436,25 +495,26 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
         category: 'Bundle',
         colors: [],
         sizes: [],
-        images: widget.offer.imageUrl != null ? [widget.offer.imageUrl!] : [], 
+        images: widget.offer.imageUrl != null ? [widget.offer.imageUrl!] : [],
         rating: 0,
         reviewsCount: 0,
         isNewArrival: false,
         isTopSelling: false,
         cardBgColor: Colors.white,
       );
-      
-      cart.addToCart(companyId, bundleProduct, isBundle: true);
-      
+
+      cart.addToCart(businessId, bundleProduct, isBundle: true);
     } else if (widget.offer.type == 'product_gift') {
       final mainProduct = products.firstWhere(
         (p) => p.id == widget.offer.productId,
         orElse: () => products.first,
       );
-      
+
       Product? giftProduct;
       try {
-        giftProduct = products.firstWhere((p) => p.id == widget.offer.giftProductId);
+        giftProduct = products.firstWhere(
+          (p) => p.id == widget.offer.giftProductId,
+        );
       } catch (_) {
         giftProduct = Product(
           id: widget.offer.giftProductId ?? 'gift_1',
@@ -464,7 +524,9 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
           category: 'Gift',
           colors: [],
           sizes: [],
-          images: widget.offer.giftImageUrl != null ? [widget.offer.giftImageUrl!] : [],
+          images: widget.offer.giftImageUrl != null
+              ? [widget.offer.giftImageUrl!]
+              : [],
           rating: 0,
           reviewsCount: 0,
           isNewArrival: false,
@@ -472,18 +534,29 @@ class _OfferCardState extends State<OfferCard> with SingleTickerProviderStateMix
           cardBgColor: Colors.white,
         );
       }
-      
-      cart.addToCart(companyId, mainProduct);
-      cart.addToCart(companyId, giftProduct, isGift: true);
-    } else if (widget.offer.type == 'buy_x_get_y' && widget.offer.productIds != null && widget.offer.productIds!.isNotEmpty) {
+
+      cart.addToCart(businessId, mainProduct);
+      cart.addToCart(businessId, giftProduct, isGift: true);
+    } else if (widget.offer.type == 'buy_x_get_y' &&
+        widget.offer.productIds != null &&
+        widget.offer.productIds!.isNotEmpty) {
       final mainProduct = products.firstWhere(
         (p) => p.id == widget.offer.productIds!.first,
         orElse: () => products.first,
       );
-      cart.addToCart(companyId, mainProduct, quantity: widget.offer.buyQuantity ?? 1);
-      cart.addToCart(companyId, mainProduct, quantity: widget.offer.getQuantity ?? 1, isGift: true);
+      cart.addToCart(
+        businessId,
+        mainProduct,
+        quantity: widget.offer.buyQuantity ?? 1,
+      );
+      cart.addToCart(
+        businessId,
+        mainProduct,
+        quantity: widget.offer.getQuantity ?? 1,
+        isGift: true,
+      );
     }
-    
+
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final offerTitle = widget.offer.name.get(context);
     ScaffoldMessenger.of(context).showSnackBar(

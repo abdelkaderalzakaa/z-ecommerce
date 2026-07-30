@@ -41,20 +41,26 @@ class _OrderSummaryState extends State<OrderSummary> {
     final companyData = context.watch<CompanyProvider>().companySettings;
     final currency = companyData?.currency ?? '\$';
 
-    final companyId = companyData?.id ?? 'cmp_001';
+    final businessId = companyData?.id ?? 'cmp_001';
     final cartProvider = context.watch<CartProvider>();
     final offerProvider = context.watch<OfferProvider>();
 
-    final baseSubtotal = cartProvider.subTotal(companyId);
-    final cartProductIds = cartProvider.items(companyId).map((e) => e.product.id).toList();
+    final baseSubtotal = cartProvider.subTotal(businessId);
+    final cartProductIds = cartProvider
+        .items(businessId)
+        .map((e) => e.product.id)
+        .toList();
 
     final baseDiscount = offerProvider.calculateDiscount(
-      companyId,
+      businessId,
       baseSubtotal,
       cartProductIds,
-      cartProvider.couponCode(companyId),
+      cartProvider.couponCode(businessId),
     );
-    final isFreeShipping = offerProvider.hasFreeShipping(companyId, baseSubtotal);
+    final isFreeShipping = offerProvider.hasFreeShipping(
+      businessId,
+      baseSubtotal,
+    );
 
     final baseDeliveryFee = (baseSubtotal > 0 && !isFreeShipping)
         ? (companyData?.deliveryFee ?? 15.0)
@@ -120,7 +126,10 @@ class _OrderSummaryState extends State<OrderSummary> {
                 ),
                 onPressed: () {
                   if (_couponController.text.isNotEmpty) {
-                    cartProvider.applyCoupon(companyId, _couponController.text);
+                    cartProvider.applyCoupon(
+                      businessId,
+                      _couponController.text,
+                    );
                   }
                 },
                 child: Text(
@@ -131,7 +140,7 @@ class _OrderSummaryState extends State<OrderSummary> {
               ),
             ],
           ),
-          if (cartProvider.couponCode(companyId) != null)
+          if (cartProvider.couponCode(businessId) != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Row(
@@ -139,13 +148,13 @@ class _OrderSummaryState extends State<OrderSummary> {
                   Icon(Icons.check_circle, color: Colors.green, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    'Coupon ${cartProvider.couponCode(companyId)} applied',
+                    'Coupon ${cartProvider.couponCode(businessId)} applied',
                     style: TextStyle(color: Colors.green, fontSize: 12),
                   ),
                   const Spacer(),
                   InkWell(
                     onTap: () {
-                      cartProvider.applyCoupon(companyId, null);
+                      cartProvider.applyCoupon(businessId, null);
                       _couponController.clear();
                     },
                     child: const Icon(Icons.close, color: Colors.red, size: 16),
@@ -235,12 +244,12 @@ class _OrderSummaryState extends State<OrderSummary> {
           const SizedBox(height: 24),
           _CheckoutButton(
             isCheckoutPage: widget.isCheckoutPage,
-            onTap: cartProvider.items(companyId).isEmpty
+            onTap: cartProvider.items(businessId).isEmpty
                 ? null
                 : (widget.onCheckout ??
-                    () {
-                      changeScreen(context, const CheckoutPage());
-                    }),
+                      () {
+                        changeScreen(context, const CheckoutPage());
+                      }),
           ),
         ],
       ),

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/company_settings_model.dart';
 import '../models/user_model.dart';
 import '../fake_data/company.dart';
-import '../fake_data/users.dart';
+import '../services/store_service.dart';
 
 class SuperAdminStoresProvider extends ChangeNotifier {
+  final StoreService _storeService = StoreService();
   List<CompanySettingsModel> _stores = [];
   List<UserModel> _storeOwners = [];
   bool _isLoading = false;
@@ -28,18 +29,14 @@ class SuperAdminStoresProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // Load from fake data initially
-      _stores = List.from(fakeCompanies);
-      
-      // Load store owners from fake users
-      _storeOwners = fakeUsers.where((u) => u.role == UserRole.companyOwner).toList();
-      
+      final realStores = await _storeService.getAllStores();
+      _stores = realStores;
+      _storeOwners = [];
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      debugPrint('Error loading stores: $e');
+      _stores = [];
       _isLoading = false;
       _error = e.toString();
       notifyListeners();
@@ -49,14 +46,20 @@ class SuperAdminStoresProvider extends ChangeNotifier {
   Future<bool> createStoreAndOwner({
     required CompanySettingsModel newStore,
     required UserModel newOwner,
+    required String password,
   }) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-      
+      await _storeService.createStoreWithOwner(
+        store: newStore,
+        ownerName: newOwner.name,
+        ownerEmail: newOwner.email,
+        ownerPassword: password,
+        ownerPhone: newOwner.phoneNumber,
+      );
+
       _stores.add(newStore);
       _storeOwners.add(newOwner);
       
@@ -72,41 +75,15 @@ class SuperAdminStoresProvider extends ChangeNotifier {
   }
 
   Future<void> updateStoreStatus(String storeId, String newStatus) async {
-    final index = _stores.indexWhere((s) => s.id == storeId);
-    if (index >= 0) {
-      final oldStore = _stores[index];
-      final updatedStore = CompanySettingsModel(
-        id: oldStore.id,
-        category: oldStore.category,
-        name: oldStore.name,
-        addresses: oldStore.addresses,
-        slogan: oldStore.slogan,
-        description: oldStore.description,
-        footerDescription: oldStore.footerDescription,
-        orders: oldStore.orders,
-        followers: oldStore.followers,
-        followersUsers: oldStore.followersUsers,
-        visitor: oldStore.visitor,
-        heroCards: oldStore.heroCards,
-        ratingStore: oldStore.ratingStore,
-        theme: oldStore.theme,
-        brands: oldStore.brands,
-        currency: oldStore.currency,
-        deliveryFee: oldStore.deliveryFee,
-        aboutUs: oldStore.aboutUs,
-        termsAndConditions: oldStore.termsAndConditions,
-        privacyPolicy: oldStore.privacyPolicy,
-        socials: oldStore.socials,
-        paymentMethods: oldStore.paymentMethods,
-        logoUrl: oldStore.logoUrl,
-        coverUrl: oldStore.coverUrl,
-        status: newStatus,
-        createdAt: oldStore.createdAt,
-        updatedAt: DateTime.now(),
-        contactEmail: oldStore.contactEmail,
-        contactPhone: oldStore.contactPhone,
-      );
-      _stores[index] = updatedStore;
+    try {
+      await _storeService.updateStoreStatus(storeId, newStatus);
+      final index = _stores.indexWhere((s) => s.id == storeId);
+      if (index >= 0) {
+        _stores[index] = _stores[index].copyWith(status: newStatus);
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = e.toString();
       notifyListeners();
     }
   }

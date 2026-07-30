@@ -30,6 +30,10 @@ class StoreOwnerSidebar extends StatelessWidget {
       icon: Icons.inventory_2_rounded,
     ),
     const StoreOwnerSidebarItem(
+      titleKey: 'الفئات والعلامات',
+      icon: Icons.category_rounded,
+    ),
+    const StoreOwnerSidebarItem(
       titleKey: TranslationKeys.ordersManagement,
       icon: Icons.shopping_cart_rounded,
     ),
@@ -69,7 +73,7 @@ class StoreOwnerSidebar extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       width: width,
       decoration: BoxDecoration(
-        color: storeTheme?.backgroundColorValue.withOpacity(0.95) ?? theme.cardColor,
+        color: theme.cardColor,
         border: Border(
           left: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
           right: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
@@ -130,7 +134,7 @@ class StoreOwnerSidebar extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              item.titleKey.tr(context),
+                              item.titleKey.contains(' ') ? item.titleKey : item.titleKey.tr(context),
                               style: TextStyle(
                                 fontFamily: fontFamily,
                                 fontSize: 13,

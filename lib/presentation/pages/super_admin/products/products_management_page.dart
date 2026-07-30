@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/product_model.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';

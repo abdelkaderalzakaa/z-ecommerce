@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/providers/super_admin_stores_provider.dart';
 
 class OwnerStoreTab extends StatelessWidget {
@@ -15,7 +15,7 @@ class OwnerStoreTab extends StatelessWidget {
     return Consumer<SuperAdminStoresProvider>(
       builder: (context, provider, child) {
         final store = provider.stores.firstWhere(
-          (s) => s.id == user.companyId,
+          (s) => s.id == user.businessId,
           orElse: () => provider.stores.first,
         );
 
@@ -38,13 +38,18 @@ class OwnerStoreTab extends StatelessWidget {
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: theme.primaryColor.withOpacity(0.1),
-                    child: Icon(Icons.storefront_rounded, color: theme.primaryColor),
+                    child: Icon(
+                      Icons.storefront_rounded,
+                      color: theme.primaryColor,
+                    ),
                   ),
                   title: Text(
                     store.name.get(context),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('رمز المتجر: ${store.id} • القسم: ${store.category.name.get(context)}'),
+                  subtitle: Text(
+                    'رمز المتجر: ${store.id} • القسم: ${store.category.name.get(context)}',
+                  ),
                   trailing: Chip(
                     label: Text(store.status ?? 'Active'),
                     backgroundColor: Colors.green.withOpacity(0.1),

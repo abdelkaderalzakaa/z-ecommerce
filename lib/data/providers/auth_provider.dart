@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/address_model.dart';
-import '../fake_data/users.dart';
+import '../services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
+  final AuthService _authService = AuthService();
   UserModel? _currentUser;
-  bool _isLoading = false;
+  bool _isLoading = true;
   String? _errorMessage;
 
   UserModel? get currentUser => _currentUser;
@@ -19,23 +20,17 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> _loadStoredUser() async {
+    _isLoading = true;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedEmail = prefs.getString('saved_email');
-      if (savedEmail != null) {
-        // Try to find the fake user, otherwise create a mock one to restore session. 
-        // For security in a real app, we'd validate session token.
-        _currentUser = authenticateFakeUser(savedEmail, 'password123') ?? UserModel(
-          id: 'usr_restored',
-          name: savedEmail.split('@').first,
-          email: savedEmail,
-          role: UserRole.customer, // Fallback to customer
-          createdAt: DateTime.now(),
-        );
-        notifyListeners();
+      final firebaseUser = _authService.currentUser;
+      if (firebaseUser != null) {
+        _currentUser = await _authService.getUserProfile(firebaseUser.uid);
       }
     } catch (e) {
       debugPrint('Error loading user session: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -44,76 +39,96 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // Mock network delay
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      // 1. Try Real Firebase Login
+      _currentUser = await _authService.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    if (email.isNotEmpty && password.isNotEmpty) {
-      // Check against fake users first
-      final fakeUser = authenticateFakeUser(email, password);
-      if (fakeUser != null) {
-        _currentUser = fakeUser;
-        _isLoading = false;
-        
-        if (rememberMe) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('saved_email', email);
-        }
-        
-        notifyListeners();
-        return true;
+      if (rememberMe) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('saved_email', email);
       }
-      
-      // If not a fake user, but password is >= 6, we just mock login successfully
-      // ONLY ALLOW THIS FOR CUSTOMERS to prevent fake admin access
-      if (password.length >= 6) {
-        _currentUser = UserModel(
-          id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
-          name: email.split('@').first,
-          email: email,
-          role: UserRole.customer,
-          createdAt: DateTime.now(),
-        );
-        _isLoading = false;
 
-        if (rememberMe) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('saved_email', email);
-        }
-
-        notifyListeners();
-        return true;
-      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (firebaseError) {
+      _isLoading = false;
+      _errorMessage = firebaseError.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
     }
-    
-    _isLoading = false;
-    _errorMessage = 'Invalid email, password, or unauthorized role.';
-    notifyListeners();
-    return false;
   }
 
-  Future<bool> register(String name, String email, String password) async {
+  /// Login or Register with Google Account
+  Future<bool> loginWithGoogle() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    // Mock network delay
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      _currentUser = await _authService.signInWithGoogle();
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
 
-    if (name.isNotEmpty && email.isNotEmpty && password.length >= 6) {
-      // REGISTRATION IS ONLY FOR CUSTOMERS
-      _currentUser = UserModel(
-        id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
+  /// Customer Registration Priority
+  Future<bool> register(String name, String email, String password, {String? phoneNumber}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Create Customer in Firebase Auth & Firestore
+      _currentUser = await _authService.signUpCustomer(
         name: name,
         email: email,
-        role: UserRole.customer, 
-        createdAt: DateTime.now(),
+        password: password,
+        phoneNumber: phoneNumber,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Create Super Admin Account
+  Future<bool> createSuperAdminAccount({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _currentUser = await _authService.createSuperAdminAccount(
+        name: name,
+        email: email,
+        password: password,
       );
       _isLoading = false;
       notifyListeners();
       return true;
-    } else {
+    } catch (e) {
       _isLoading = false;
-      _errorMessage = 'Please fill all fields and ensure password is 6+ chars';
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
       return false;
     }
@@ -123,9 +138,8 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 500));
-
     try {
+      await _authService.signOut();
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('saved_email');
     } catch (e) {
@@ -135,6 +149,44 @@ class AuthProvider extends ChangeNotifier {
     _currentUser = null;
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> signOut() => logout();
+
+  Future<bool> updateUserProfile({
+    required String name,
+    String? phoneNumber,
+    Map<String, String>? socialLinks,
+  }) async {
+    if (_currentUser == null) return false;
+    _isLoading = true;
+    notifyListeners();
+
+    final updatedUser = _currentUser!.copyWith(
+      name: name,
+      phoneNumber: phoneNumber,
+      socialLinks: socialLinks,
+    );
+
+    try {
+      final Map<String, dynamic> updateData = {
+        'name': name,
+        'phoneNumber': phoneNumber,
+      };
+      if (socialLinks != null) {
+        updateData['socialLinks'] = socialLinks;
+      }
+      await _authService.updateUserProfile(_currentUser!.id, updateData);
+      _currentUser = updatedUser;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _currentUser = updatedUser;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    }
   }
 
   void updateProfile(UserModel updatedUser) {

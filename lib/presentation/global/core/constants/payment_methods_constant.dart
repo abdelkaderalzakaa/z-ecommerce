@@ -1,61 +1,118 @@
-import '../../../../../data/models/localized_string.dart';
+import '../../translate/localized_string.dart';
 
-class ModelPaymenttype {
+/// 1. الـ Enum يمثل كافة وسائل الدفع المدعومة في التطبيق
+enum PaymentMethodType {
+  cashOnDelivery,
+  wishMoney,
+  omt,
+  creditCard,
+  paypal,
+  bankTransfer;
+
+  /// تحويل من String قادم من قواعد البيانات (Json) إلى Enum
+  static PaymentMethodType fromString(String value) {
+    return PaymentMethodType.values.firstWhere(
+      (e) => e.name == value || e.id == value,
+      orElse: () => PaymentMethodType.cashOnDelivery,
+    );
+  }
+
+  /// المعرّف المباشر لكل وسيلة (مفيد للـ JSON أو التعامل مع الـ Backend)
+  String get id {
+    switch (this) {
+      case PaymentMethodType.cashOnDelivery:
+        return 'cod';
+      case PaymentMethodType.wishMoney:
+        return 'wish';
+      case PaymentMethodType.omt:
+        return 'omt';
+      case PaymentMethodType.creditCard:
+        return 'credit_card';
+      case PaymentMethodType.paypal:
+        return 'paypal';
+      case PaymentMethodType.bankTransfer:
+        return 'bank_transfer';
+    }
+  }
+}
+
+/// 2. كلاس تفاصيل وسيلة الدفع (PaymentMethodModel)
+class PaymentMethodModel {
   final String id;
+  final PaymentMethodType type;
   final LocalizedString title;
   final String icon;
-  final String? description;
+  final LocalizedString? description;
 
-  const ModelPaymenttype({
+  const PaymentMethodModel({
     required this.id,
+    required this.type,
     required this.title,
     required this.icon,
     this.description,
   });
 
-  static const List<ModelPaymenttype> availableMethods = [
-    ModelPaymenttype(
+  /// القائمة الجاهزة لوسائل الدفع المدعومة في التطبيق
+  static final List<PaymentMethodModel> availableMethods = [
+    const PaymentMethodModel(
       id: 'cod',
+      type: PaymentMethodType.cashOnDelivery,
       title: LocalizedString(ar: 'الدفع عند الاستلام', en: 'Cash on Delivery'),
       icon: 'assets/images/cod.png',
-      description: 'الدفع نقداً عند استلام الطلب',
+      description: LocalizedString(
+        ar: 'الدفع نقداً عند استلام الطلب',
+        en: 'Pay in cash upon delivery',
+      ),
     ),
-    ModelPaymenttype(
+    const PaymentMethodModel(
       id: 'wish',
-      title: LocalizedString(ar: 'تحويل عبر ويش', en: 'Wish Transfer'),
+      type: PaymentMethodType.wishMoney,
+      title: LocalizedString(ar: 'تحويل عبر ويش', en: 'Wish Money'),
       icon: 'assets/images/wish.png',
-      description: 'تحويل الأموال عبر شركة ويش',
+      description: LocalizedString(
+        ar: 'تحويل الأموال عبر تطبيق Wish Money',
+        en: 'Transfer funds via Wish Money app',
+      ),
     ),
-    ModelPaymenttype(
+    const PaymentMethodModel(
       id: 'omt',
+      type: PaymentMethodType.omt,
       title: LocalizedString(ar: 'تحويل عبر OMT', en: 'OMT Transfer'),
       icon: 'assets/images/omt.png',
-      description: 'تحويل الأموال عبر شركة OMT',
+      description: LocalizedString(
+        ar: 'تحويل الأموال عبر شركة OMT',
+        en: 'Money transfer via OMT',
+      ),
     ),
-    ModelPaymenttype(
-      id: 'creditCard',
+    const PaymentMethodModel(
+      id: 'credit_card',
+      type: PaymentMethodType.creditCard,
       title: LocalizedString(ar: 'بطاقة ائتمان', en: 'Credit Card'),
       icon: 'assets/images/credit_card.png',
-      description: 'الدفع عبر البطاقة الائتمانية',
+      description: LocalizedString(
+        ar: 'الدفع الإلكتروني الآمن عبر البطاقات',
+        en: 'Secure payment via Credit/Debit card',
+      ),
     ),
-    ModelPaymenttype(
+    const PaymentMethodModel(
       id: 'paypal',
+      type: PaymentMethodType.paypal,
       title: LocalizedString(ar: 'باي بال', en: 'PayPal'),
       icon: 'assets/images/paypal.png',
-      description: 'الدفع عبر حساب باي بال',
+      description: LocalizedString(
+        ar: 'الدفع عبر حساب باي بال',
+        en: 'Pay securely using PayPal account',
+      ),
+    ),
+    const PaymentMethodModel(
+      id: 'bank_transfer',
+      type: PaymentMethodType.bankTransfer,
+      title: LocalizedString(ar: 'تحويل بنكي', en: 'Bank Transfer'),
+      icon: 'assets/images/bank_transfer.png',
+      description: LocalizedString(
+        ar: 'الدفع عن طريق تحويل بنكي مباشر',
+        en: 'Direct bank transfer payment',
+      ),
     ),
   ];
-}
-
-enum PaymentMethodType {
-  /// نقدي عند الاستلام 
-  cod,
-  /// تحويل عبر ويش 
-  wish,
-  /// تحويل عبر omt 
-  omt,
-  /// visa card
-  creditCard,
-  /// paypal
-  paypal,
 }

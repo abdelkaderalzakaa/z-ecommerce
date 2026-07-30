@@ -7,7 +7,7 @@ import '../global/core/responsive/responsive_layout.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import '../widgets/common/headers/header_details.dart';
-import '../../../data/models/localized_string.dart';
+import '../global/translate/localized_string.dart';
 import '../widgets/common/footer_section.dart';
 import '../widgets/offers/offer_card.dart';
 import 'package:z_ecommerce/presentation/pages/offers_page.dart';
@@ -72,10 +72,9 @@ class OffersPage extends StatelessWidget {
             // Offers Grid
             Consumer<OfferProvider>(
               builder: (context, provider, child) {
-                final companyId =
-                    context.watch<CompanyProvider>().companySettings?.id ??
-                    'cmp_001';
-                var offers = provider.getActiveOffers(companyId);
+                final businessId =
+                    context.watch<CompanyProvider>().companySettings?.id;
+                var offers = provider.getActiveOffers(businessId);
 
                 // Filter by offerType if provided
                 if (offerType != null) {

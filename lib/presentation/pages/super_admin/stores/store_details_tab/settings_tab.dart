@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/models/company_settings_model.dart';
+import 'package:z_ecommerce/data/models/company/company_settings_model.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 

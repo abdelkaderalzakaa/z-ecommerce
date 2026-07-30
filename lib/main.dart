@@ -6,17 +6,32 @@ import 'data/providers/category_provider.dart';
 import 'data/providers/cart_provider.dart';
 import 'data/providers/invoice_provider.dart';
 import 'data/providers/auth_provider.dart';
-import 'data/providers/settings_provider.dart';
+import 'presentation/global/settings_provider.dart';
 import 'data/providers/company_provider.dart';
-import 'data/providers/locale_provider.dart';
+import 'presentation/global/locale_provider.dart';
 import 'data/providers/user_visits_provider.dart';
 import 'data/providers/offer_provider.dart';
 import 'data/providers/super_admin_stores_provider.dart';
+import 'data/providers/brand_provider.dart';
 import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_colors.dart';
 import 'presentation/global/theme/app_theme.dart';
 import 'presentation/pages/store_entry_page.dart';
-void main() {
+import 'presentation/pages/super_admin/super_admin_home.dart';
+import 'presentation/pages/admin_store/admin_store_home.dart';
+import 'data/models/auth/user_model.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization notice: $e');
+  }
   runApp(const ZEcommerceApp());
 }
 
@@ -38,6 +53,7 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserVisitsProvider()),
         ChangeNotifierProvider(create: (_) => OfferProvider()),
         ChangeNotifierProvider(create: (_) => SuperAdminStoresProvider()),
+        ChangeNotifierProvider(create: (_) => BrandProvider()),
       ],
       child: Consumer3<SettingsProvider, LocaleProvider, CompanyProvider>(
         builder: (context, settings, localeProvider, companyProvider, child) {
@@ -84,7 +100,7 @@ class ZEcommerceApp extends StatelessWidget {
               primaryColor: primaryColor,
               secondaryColor: secondaryColor,
             ),
-            home: const StoreEntryPage(),
+            home: const AppRootRouter(),
           );
         },
       ),
@@ -92,3 +108,35 @@ class ZEcommerceApp extends StatelessWidget {
   }
 }
 
+class AppRootRouter extends StatelessWidget {
+  const AppRootRouter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        if (authProvider.isLoading) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        final user = authProvider.currentUser;
+        if (user == null) {
+          return const StoreEntryPage();
+        }
+
+        switch (user.role) {
+          case UserRole.superAdmin:
+            return const SuperAdminHome();
+          case UserRole.companyOwner:
+            return const AdminStore();
+          case UserRole.customer:
+            return const StoreEntryPage();
+        }
+      },
+    );
+  }
+}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
 
 class AdminPermissionsTab extends StatelessWidget {
   final UserModel user;

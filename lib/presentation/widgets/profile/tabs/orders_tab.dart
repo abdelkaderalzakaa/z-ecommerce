@@ -7,7 +7,7 @@ import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dar
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import '../../../../data/providers/invoice_provider.dart';
 import '../../../../data/providers/company_provider.dart';
-import '../../../../data/models/invoice_model.dart';
+import '../../../../data/models/order/invoice_model.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/company_settings_model.dart';
 import '../fake_data/company.dart';
+import '../services/store_service.dart';
 
 class CompanyProvider extends ChangeNotifier {
+  final StoreService _storeService = StoreService();
   CompanySettingsModel? _companySettings;
   bool _isLoading = false;
   String? _error;
@@ -21,26 +23,28 @@ class CompanyProvider extends ChangeNotifier {
     Future.microtask(notifyListeners);
 
     try {
-      // Simulating network delay
-      await Future.delayed(const Duration(milliseconds: 800));
-      
       if (storeId != null) {
-        final found = fakeCompanies.where((company) => company.id == storeId).toList();
-        if (found.isNotEmpty) {
-          _companySettings = found.first;
+        final realStore = await _storeService.getStoreById(storeId);
+        if (realStore != null) {
+          _companySettings = realStore;
         } else {
-          _companySettings = null;
-          _error = "Store not found";
+          final found = fakeCompanies.where((company) => company.id == storeId).toList();
+          _companySettings = found.isNotEmpty ? found.first : fakeCompanies.first;
         }
       } else {
-        _companySettings = fakeCompanies.first;
+        final activeStores = await _storeService.getActiveStores();
+        if (activeStores.isNotEmpty) {
+          _companySettings = activeStores.first;
+        } else {
+          _companySettings = fakeCompanies.first;
+        }
       }
-      
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      _companySettings = fakeCompanies.first;
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
     }
   }
@@ -60,3 +64,4 @@ class CompanyProvider extends ChangeNotifier {
     return fakeCompanies.any((c) => c.id == id);
   }
 }
+

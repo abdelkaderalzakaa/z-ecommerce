@@ -50,6 +50,10 @@ class SuperAdminSidebar extends StatelessWidget {
       icon: Icons.category_rounded,
     ),
     SuperAdminSidebarItem(
+      titleKey: 'تخصيص واجهات الدخول',
+      icon: Icons.lock_reset_rounded,
+    ),
+    SuperAdminSidebarItem(
       titleKey: TranslationKeys.settingsTab,
       icon: Icons.settings_rounded,
     ),

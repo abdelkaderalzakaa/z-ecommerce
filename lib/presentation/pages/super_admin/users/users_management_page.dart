@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/fake_data/users.dart';
-import 'package:z_ecommerce/data/models/user_model.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/providers/super_admin_stores_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
@@ -27,8 +29,15 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final authUser = context.watch<AuthProvider>().currentUser;
+    final storeOwners = context.watch<SuperAdminStoresProvider>().storeOwners;
 
-    final filteredUsers = fakeUsers.where((user) {
+    final List<UserModel> allUsers = [
+      ...?authUser != null ? [authUser] : null,
+      ...storeOwners,
+    ];
+
+    final filteredUsers = allUsers.where((user) {
       final matchesQuery =
           _searchQuery.isEmpty ||
           user.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -117,17 +126,8 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
               },
               onBulkDelete: () {
                 setState(() {
-                  for (var u in _selectedUsers) {
-                    fakeUsers.removeWhere((item) => item.id == u.id);
-                  }
                   _selectedUsers.clear();
                 });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedUsers.length})'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
               },
               searchQuery: _searchQuery,
               onSearchChanged: (val) {
@@ -234,9 +234,6 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                       CreateEditUserPage(user: u),
                     ),
                     onDelete: () {
-                      setState(() {
-                        fakeUsers.removeWhere((item) => item.id == u.id);
-                      });
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('تم حذف حساب المستخدم "${u.name}" بنجاح'),

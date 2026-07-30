@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/offer_model.dart';
+import 'package:z_ecommerce/data/models/product/offer_model.dart';
 import 'package:z_ecommerce/data/providers/company_provider.dart';
 import 'package:z_ecommerce/data/providers/offer_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -12,15 +12,13 @@ import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart'
 import 'package:z_ecommerce/presentation/pages/super_admin/offers/create_edit_offer_page.dart';
 
 class StoreOffersManagementPage extends StatefulWidget {
-  final String companyId;
+  final String businessId;
 
-  const StoreOffersManagementPage({
-    super.key,
-    this.companyId = 'cmp_001',
-  });
+  const StoreOffersManagementPage({super.key, this.businessId});
 
   @override
-  State<StoreOffersManagementPage> createState() => _StoreOffersManagementPageState();
+  State<StoreOffersManagementPage> createState() =>
+      _StoreOffersManagementPageState();
 }
 
 class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
@@ -32,20 +30,24 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
 
     return Scaffold(
-      backgroundColor: storeTheme?.backgroundColorValue ?? Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer<OfferProvider>(
         builder: (context, provider, child) {
           final filteredOffers = provider.offers.where((offer) {
-            final matchesStore = offer.companyId == widget.companyId || offer.companyId == 'cmp_001';
+            final matchesStore =
+                offer.businessId == widget.businessId ||
+                offer.businessId == 'cmp_001';
             final titleStr = offer.name.get(context).toLowerCase();
-            final matchesQuery = _searchQuery.isEmpty ||
+            final matchesQuery =
+                _searchQuery.isEmpty ||
                 titleStr.contains(_searchQuery.toLowerCase()) ||
                 offer.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                (offer.couponCode != null && offer.couponCode!.toLowerCase().contains(_searchQuery.toLowerCase()));
+                (offer.couponCode != null &&
+                    offer.couponCode!.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ));
             return matchesStore && matchesQuery;
           }).toList();
 
@@ -87,10 +89,8 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                       ],
                     ),
                     ElevatedButton.icon(
-                      onPressed: () => changeScreen(
-                        context,
-                        const CreateEditOfferPage(),
-                      ),
+                      onPressed: () =>
+                          changeScreen(context, const CreateEditOfferPage()),
                       icon: const Icon(Icons.add, size: 18),
                       label: Text(TranslationKeys.addNewOffer.tr(context)),
                       style: ElevatedButton.styleFrom(
@@ -123,13 +123,17 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                     onBulkDelete: () {
                       setState(() {
                         for (var o in _selectedOffers) {
-                          provider.offers.removeWhere((item) => item.id == o.id);
+                          provider.offers.removeWhere(
+                            (item) => item.id == o.id,
+                          );
                         }
                         _selectedOffers.clear();
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedOffers.length})'),
+                          content: Text(
+                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedOffers.length})',
+                          ),
                           backgroundColor: Colors.red,
                         ),
                       );
@@ -145,7 +149,8 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                     totalPages: totalPages > 0 ? totalPages : 1,
                     totalItems: totalItems,
                     itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) => setState(() => _currentPage = page),
+                    onPageChanged: (page) =>
+                        setState(() => _currentPage = page),
                     onItemsPerPageChanged: (rows) {
                       setState(() {
                         _itemsPerPage = rows;
@@ -163,7 +168,9 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                         sortKey: (o) => o.name.get(context),
                         cellBuilder: (o) => TableImageTextCell(
                           title: o.name.get(context),
-                          subtitle: Localizations.localeOf(context).languageCode == 'ar'
+                          subtitle:
+                              Localizations.localeOf(context).languageCode ==
+                                  'ar'
                               ? 'كود: ${o.couponCode ?? "بدون كود"}'
                               : 'Code: ${o.couponCode ?? "No Code"}',
                           fallbackIcon: Icons.local_offer_rounded,
@@ -178,8 +185,13 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                           title: o.discountPercent != null
                               ? '${o.discountPercent}%'
                               : (o.discountAmount != null
-                                  ? '\$${o.discountAmount}'
-                                  : (Localizations.localeOf(context).languageCode == 'ar' ? 'خصم خاص' : 'Special Discount')),
+                                    ? '\$${o.discountAmount}'
+                                    : (Localizations.localeOf(
+                                                context,
+                                              ).languageCode ==
+                                              'ar'
+                                          ? 'خصم خاص'
+                                          : 'Special Discount')),
                           isBold: true,
                         ),
                       ),
@@ -189,7 +201,8 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                         sortable: true,
                         sortKey: (o) => o.endDate,
                         cellBuilder: (o) => TableTextCell(
-                          title: '${o.endDate.year}-${o.endDate.month.toString().padLeft(2, '0')}-${o.endDate.day.toString().padLeft(2, '0')}',
+                          title:
+                              '${o.endDate.year}-${o.endDate.month.toString().padLeft(2, '0')}-${o.endDate.day.toString().padLeft(2, '0')}',
                         ),
                       ),
                       AppTableColumn<OfferModel>(
@@ -218,11 +231,15 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                           ),
                           onDelete: () {
                             setState(() {
-                              provider.offers.removeWhere((item) => item.id == o.id);
+                              provider.offers.removeWhere(
+                                (item) => item.id == o.id,
+                              );
                             });
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('تم حذف العرض "${o.name.get(context)}" بنجاح'),
+                                content: Text(
+                                  'تم حذف العرض "${o.name.get(context)}" بنجاح',
+                                ),
                                 backgroundColor: Colors.red,
                               ),
                             );
