@@ -43,25 +43,39 @@ class OrderShippingTab extends StatelessWidget {
                           color: theme.primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.location_on_rounded, color: theme.primaryColor),
+                        child: Icon(
+                          Icons.location_on_rounded,
+                          color: theme.primaryColor,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        address.label ?? 'عنوان الشحن',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        address.details ?? 'عنوان الشحن',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _buildAddressRow(context, TranslationKeys.streetAddress.tr(context), address.street),
+                  _buildAddressRow(
+                    context,
+                    TranslationKeys.streetAddress.tr(context),
+                    address.street,
+                  ),
                   const Divider(),
-                  _buildAddressRow(context, TranslationKeys.city.tr(context), address.city),
+                  _buildAddressRow(
+                    context,
+                    TranslationKeys.city.tr(context),
+                    address.city.get(context),
+                  ),
                   const Divider(),
-                  _buildAddressRow(context, TranslationKeys.state.tr(context), address.state),
-                  const Divider(),
-                  _buildAddressRow(context, TranslationKeys.zipCode.tr(context), address.zipCode),
-                  const Divider(),
-                  _buildAddressRow(context, TranslationKeys.country.tr(context), address.country),
+                  _buildAddressRow(
+                    context,
+                    TranslationKeys.country.tr(context),
+                    address.country.get(context),
+                  ),
                 ],
               ),
             ),
@@ -81,7 +95,10 @@ class OrderShippingTab extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: theme.textTheme.bodySmall?.color),
+            style: TextStyle(
+              fontSize: 13,
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
           Text(
             value,

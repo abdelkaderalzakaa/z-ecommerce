@@ -50,17 +50,17 @@ class ProductOverviewTab extends StatelessWidget {
                                 color: Colors.green,
                               ),
                             ),
-                            if (product.originalPrice != null) ...[
-                              const SizedBox(width: 10),
-                              Text(
-                                '\$${product.originalPrice!.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.grey,
-                                ),
+                            ...[
+                            const SizedBox(width: 10),
+                            Text(
+                              '\$${product.originalPrice.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                decoration: TextDecoration.lineThrough,
+                                color: Colors.grey,
                               ),
-                            ],
+                            ),
+                          ],
                             if (product.discountPercent != null) ...[
                               const SizedBox(width: 10),
                               Chip(

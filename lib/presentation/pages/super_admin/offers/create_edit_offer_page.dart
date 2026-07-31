@@ -37,9 +37,7 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
 
     _titleArController = TextEditingController(text: o?.name.ar ?? '');
     _titleEnController = TextEditingController(text: o?.name.en ?? '');
-    _businessIdController = TextEditingController(
-      text: o?.businessId ?? 'cmp_001',
-    );
+    _businessIdController = TextEditingController(text: o?.businessId);
     _couponCodeController = TextEditingController(text: o?.couponCode ?? '');
     _discountPercentController = TextEditingController(
       text: o?.discountPercent != null ? o!.discountPercent.toString() : '',

@@ -31,16 +31,29 @@ class OrderOverviewTab extends StatelessWidget {
                 children: [
                   Text(
                     TranslationKeys.orderSummary.tr(context),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 14),
-                  _buildPriceRow(context, TranslationKeys.subtotal.tr(context), invoice.subTotal),
+                  _buildPriceRow(
+                    context,
+                    TranslationKeys.subtotal.tr(context),
+                    invoice.subtotal,
+                  ),
                   const Divider(),
-                  _buildPriceRow(context, TranslationKeys.discount.tr(context), -invoice.discount),
+                  _buildPriceRow(
+                    context,
+                    TranslationKeys.discount.tr(context),
+                    -invoice.discount,
+                  ),
                   const Divider(),
-                  _buildPriceRow(context, TranslationKeys.tax.tr(context), invoice.tax),
-                  const Divider(),
-                  _buildPriceRow(context, TranslationKeys.deliveryFee.tr(context), invoice.shippingCost),
+                  _buildPriceRow(
+                    context,
+                    TranslationKeys.deliveryFee.tr(context),
+                    invoice.shippingCost,
+                  ),
                   const Divider(),
                   const SizedBox(height: 4),
                   Row(
@@ -48,7 +61,10 @@ class OrderOverviewTab extends StatelessWidget {
                     children: [
                       Text(
                         TranslationKeys.total.tr(context),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         '\$${invoice.total.toStringAsFixed(2)}',
@@ -83,9 +99,17 @@ class OrderOverviewTab extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 14),
-                  _buildMetaRow(context, TranslationKeys.orderNumber.tr(context), invoice.invoiceId),
+                  _buildMetaRow(
+                    context,
+                    TranslationKeys.orderNumber.tr(context),
+                    invoice.id,
+                  ),
                   const Divider(),
-                  _buildMetaRow(context, TranslationKeys.associatedStore.tr(context), 'متجر ${invoice.storeId}'),
+                  _buildMetaRow(
+                    context,
+                    TranslationKeys.associatedStore.tr(context),
+                    'متجر ${invoice.storeId}',
+                  ),
                   const Divider(),
                   _buildMetaRow(
                     context,
@@ -93,7 +117,11 @@ class OrderOverviewTab extends StatelessWidget {
                     '${invoice.date.year}-${invoice.date.month.toString().padLeft(2, '0')}-${invoice.date.day.toString().padLeft(2, '0')}',
                   ),
                   const Divider(),
-                  _buildMetaRow(context, TranslationKeys.statusActive.tr(context), invoice.status),
+                  _buildMetaRow(
+                    context,
+                    TranslationKeys.statusActive.tr(context),
+                    invoice.status,
+                  ),
                 ],
               ),
             ),
@@ -117,7 +145,10 @@ class OrderOverviewTab extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: theme.textTheme.bodySmall?.color),
+            style: TextStyle(
+              fontSize: 13,
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
           Text(
             formatted,
@@ -142,7 +173,10 @@ class OrderOverviewTab extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: theme.textTheme.bodySmall?.color),
+            style: TextStyle(
+              fontSize: 13,
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
           Text(
             value,

@@ -62,8 +62,8 @@ class StoreOwnerSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
+    final businessProvider = Provider.of<BusinessProvider>(context);
+    final storeTheme = businessProvider.selectedBusiness?.theme;
     final primaryColor = storeTheme?.primaryColorValue ?? theme.primaryColor;
     final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
     final width = isCollapsed ? 70.0 : 240.0;

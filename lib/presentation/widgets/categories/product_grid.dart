@@ -24,7 +24,7 @@ class ProductGrid extends StatelessWidget {
 
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
-        final products = provider.getPaginatedProducts(category?.label, brand: brand?.name, onSale: onSale);
+        final products = provider.allProducts;
 
         if (products.isEmpty) {
           return Center(

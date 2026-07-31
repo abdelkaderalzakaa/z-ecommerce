@@ -37,8 +37,8 @@ class CartItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
     final imageSize = isMobile ? 100.0 : 124.0;
-    final companyData = context.watch<CompanyProvider>().companySettings;
-    final currency = companyData?.currency ?? '\$';
+    final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final currency = selectedBusiness?.currency.symbol ?? '\$';
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

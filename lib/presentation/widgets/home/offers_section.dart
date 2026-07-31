@@ -1,4 +1,4 @@
-import 'package:z_ecommerce/presentation/pages/offers_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/offer/offers_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';

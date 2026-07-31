@@ -6,7 +6,7 @@ import '../../../../../../data/providers/cart_provider.dart';
 import '../../../../../data/providers/business_provider.dart';
 import '../../../../global/translate/app_localizations.dart';
 import '../../../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/cart_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/cart/cart_page.dart';
 
 class CartHeaderIcon extends StatefulWidget {
   final bool isActive;
@@ -59,7 +59,7 @@ class _CartHeaderIconState extends State<CartHeaderIcon>
   @override
   Widget build(BuildContext context) {
     final businessId =
-        context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+        context.read<BusinessProvider>().selectedBusiness?.id;
     final cartCount = context.watch<CartProvider>().cartCount(businessId);
 
     if (!_isFirstBuild && cartCount > _previousCount) {

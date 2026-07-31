@@ -31,7 +31,7 @@ void showFilterModal(BuildContext context, {String? categoryLabel, String? brand
               Expanded(
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  child: FilterSidebar(isMobile: true, categoryLabel: categoryLabel, brandName: brandName),
+                  child: FilterSidebar( categoryLabel: categoryLabel, brandName: brandName),
                 ),
               ),
             ],

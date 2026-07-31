@@ -28,17 +28,10 @@ class CategoriesHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<ProductProvider, CategoryProvider>(
       builder: (context, provider, categoryProvider, child) {
-        final totalItems = provider.getFilteredAndSortedProducts(categoryLabel, brand: brandName, onSale: onSale).length;
-        final startIndex = totalItems == 0 ? 0 : ((provider.currentPage - 1) * provider.itemsPerPage) + 1;
-        final endIndex = totalItems == 0 ? 0 : (startIndex + provider.itemsPerPage - 1).clamp(0, totalItems);
-        final showingText = TranslationKeys.showingProductsTemplate
-            .tr(context)
-            .replaceAll('{start}', '$startIndex')
-            .replaceAll('{end}', '$endIndex')
-            .replaceAll('{total}', '$totalItems');
+        final totalItems = provider.allProducts.length;
+        final showingText = '$totalItems items';
 
         final searchField = TextField(
-          onChanged: (value) => provider.setSearchQuery(value),
           decoration: InputDecoration(
             hintText: TranslationKeys.search.tr(context),
             prefixIcon: const Icon(Icons.search),

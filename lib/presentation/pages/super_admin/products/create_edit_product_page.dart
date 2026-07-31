@@ -140,12 +140,15 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
     final int? discount = int.tryParse(_discountController.text);
 
     final List<String> imagesList = [];
-    if (_image1Controller.text.trim().isNotEmpty)
+    if (_image1Controller.text.trim().isNotEmpty) {
       imagesList.add(_image1Controller.text.trim());
-    if (_image2Controller.text.trim().isNotEmpty)
+    }
+    if (_image2Controller.text.trim().isNotEmpty) {
       imagesList.add(_image2Controller.text.trim());
-    if (_image3Controller.text.trim().isNotEmpty)
+    }
+    if (_image3Controller.text.trim().isNotEmpty) {
       imagesList.add(_image3Controller.text.trim());
+    }
 
     final authUser = context.read<AuthProvider>().currentUser;
     final effectivebusinessId =

@@ -6,7 +6,7 @@ import '../../global/core/responsive/responsive_layout.dart';
 import '../../../data/models/product/product_model.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/business_provider.dart';
-import '../../pages/cart_page.dart';
+import '../../pages/customer/cart/cart_page.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
@@ -27,28 +27,15 @@ class _ProductInfoState extends State<ProductInfo> {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
     final product = widget.product;
-    final colors = product.colors.isEmpty
-        ? const [Color(0xFF4F4631), Color(0xFF314F4A), Color(0xFF31344F)]
-        : product.colors;
-    final sizes = product.sizes.isEmpty
-        ? const ['Small', 'Medium', 'Large', 'X-Large']
-        : product.sizes;
-
-    final selectedColor = colors[_selectedColorIndex];
-    final selectedSize = sizes[_selectedSizeIndex];
-
     final cartProvider = context.watch<CartProvider>();
-    final companyData = context.watch<CompanyProvider>().companySettings;
-    final currency = companyData?.currency ?? '\$';
-    final businessId = companyData?.id ?? 'cmp_001';
+    final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final currency = selectedBusiness?.currency.symbol ?? '\$';
+    final businessId = selectedBusiness?.id;
 
     final cartItemIndex = cartProvider
         .items(businessId)
         .indexWhere(
-          (item) =>
-              item.product.id == product.id &&
-              item.selectedColor?.value == selectedColor.value &&
-              item.selectedSize == selectedSize,
+          (item) => item.product?.id == product.id,
         );
     final cartItem = cartItemIndex >= 0
         ? cartProvider.items(businessId)[cartItemIndex]
@@ -78,20 +65,20 @@ class _ProductInfoState extends State<ProductInfo> {
         Row(
           children: [
             Text(
-              '$currency${product.price.toStringAsFixed(0)}',
+              '$currency${product.basePrice.toStringAsFixed(0)}',
               style: AppTextStyles.priceStyle(
                 context,
               ).copyWith(fontSize: isMobile ? 24 : 32),
             ),
-            if (product.originalPrice != null) ...[
-              const SizedBox(width: 12),
-              Text(
-                '$currency${product.originalPrice!.toStringAsFixed(0)}',
-                style: AppTextStyles.priceStrike(
-                  context,
-                ).copyWith(fontSize: isMobile ? 24 : 32),
-              ),
-            ],
+            ...[
+            const SizedBox(width: 12),
+            Text(
+              '$currency${product.originalPrice.toStringAsFixed(0)}',
+              style: AppTextStyles.priceStrike(
+                context,
+              ).copyWith(fontSize: isMobile ? 24 : 32),
+            ),
+          ],
             if (product.discountPercent != null) ...[
               const SizedBox(width: 12),
               Container(
@@ -156,7 +143,7 @@ class _ProductInfoState extends State<ProductInfo> {
           buttonText: buttonText,
           onQuantityChanged: (val) {
             if (isInCart) {
-              cartProvider.updateQuantity(businessId, cartItem.id, val);
+              cartProvider.updateQuantity(businessId: businessId, itemId: cartItem.id, newQuantity: val);
             } else {
               setState(() => _localQuantity = val);
             }
@@ -164,13 +151,11 @@ class _ProductInfoState extends State<ProductInfo> {
           onPrimaryAction: () {
             if (isInCart) {
               changeScreen(context, const CartPage());
-            } else {
-              cartProvider.addToCart(
-                businessId,
-                product,
+            } else if (businessId != null) {
+              cartProvider.addProductToCart(
+                businessId: businessId,
+                product: product,
                 quantity: displayQuantity,
-                selectedColor: selectedColor,
-                selectedSize: selectedSize,
               );
               setState(() => _localQuantity = null);
             }

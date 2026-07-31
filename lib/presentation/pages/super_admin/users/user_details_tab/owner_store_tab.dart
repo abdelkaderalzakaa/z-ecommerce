@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
-import 'package:z_ecommerce/data/providers/super_admin_stores_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 
 class OwnerStoreTab extends StatelessWidget {
   final UserModel user;
@@ -12,11 +13,11 @@ class OwnerStoreTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Consumer<SuperAdminStoresProvider>(
+    return Consumer<BusinessProvider>(
       builder: (context, provider, child) {
-        final store = provider.stores.firstWhere(
+        final store = provider.businesses.firstWhere(
           (s) => s.id == user.businessId,
-          orElse: () => provider.stores.first,
+          orElse: () => provider.businesses.first,
         );
 
         return SingleChildScrollView(
@@ -44,11 +45,11 @@ class OwnerStoreTab extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    store.name.get(context),
+                    store.localization.name.get(context),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    'رمز المتجر: ${store.id} • القسم: ${store.category.name.get(context)}',
+                    'رمز المتجر: ${store.id} • القسم: ${store.businessType.name}',
                   ),
                   trailing: Chip(
                     label: Text(store.status ?? 'Active'),

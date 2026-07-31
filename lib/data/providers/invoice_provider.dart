@@ -69,7 +69,9 @@ class InvoiceProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final customerOrders = await _orderService.getOrdersByCustomer(customerId);
+      final customerOrders = await _orderService.getOrdersByCustomer(
+        customerId,
+      );
       for (var order in customerOrders) {
         final index = _invoices.indexWhere((i) => i.id == order.id);
         if (index >= 0) {
@@ -89,45 +91,49 @@ class InvoiceProvider with ChangeNotifier {
   /// الاستماع التلقائي المباشر لطلبات المتجر (Real-time Stream)
   void listenToStoreOrders(String storeId) {
     _storeOrdersSubscription?.cancel();
-    _storeOrdersSubscription = _orderService.streamOrdersByStore(storeId).listen(
-      (storeOrders) {
-        for (var order in storeOrders) {
-          final index = _invoices.indexWhere((i) => i.id == order.id);
-          if (index >= 0) {
-            _invoices[index] = order;
-          } else {
-            _invoices.add(order);
-          }
-        }
-        notifyListeners();
-      },
-      onError: (error) {
-        _errorMessage = error.toString();
-        notifyListeners();
-      },
-    );
+    _storeOrdersSubscription = _orderService
+        .streamOrdersByStore(storeId)
+        .listen(
+          (storeOrders) {
+            for (var order in storeOrders) {
+              final index = _invoices.indexWhere((i) => i.id == order.id);
+              if (index >= 0) {
+                _invoices[index] = order;
+              } else {
+                _invoices.add(order);
+              }
+            }
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = error.toString();
+            notifyListeners();
+          },
+        );
   }
 
   /// الاستماع التلقائي المباشر لطلبات العميل (Real-time Stream)
   void listenToCustomerOrders(String customerId) {
     _customerOrdersSubscription?.cancel();
-    _customerOrdersSubscription = _orderService.streamOrdersByCustomer(customerId).listen(
-      (customerOrders) {
-        for (var order in customerOrders) {
-          final index = _invoices.indexWhere((i) => i.id == order.id);
-          if (index >= 0) {
-            _invoices[index] = order;
-          } else {
-            _invoices.add(order);
-          }
-        }
-        notifyListeners();
-      },
-      onError: (error) {
-        _errorMessage = error.toString();
-        notifyListeners();
-      },
-    );
+    _customerOrdersSubscription = _orderService
+        .streamOrdersByCustomer(customerId)
+        .listen(
+          (customerOrders) {
+            for (var order in customerOrders) {
+              final index = _invoices.indexWhere((i) => i.id == order.id);
+              if (index >= 0) {
+                _invoices[index] = order;
+              } else {
+                _invoices.add(order);
+              }
+            }
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = error.toString();
+            notifyListeners();
+          },
+        );
   }
 
   /// Create and add a new invoice (Order creation via OrderService)
@@ -147,7 +153,7 @@ class InvoiceProvider with ChangeNotifier {
     notifyListeners();
 
     final now = DateTime.now();
-    final invoiceId = 'inv_${now.millisecondsSinceEpoch}';
+    final id = 'inv_${now.millisecondsSinceEpoch}';
 
     final initialHistory = OrderStatusHistoryModel(
       id: 'hist_${now.millisecondsSinceEpoch}',
@@ -159,7 +165,7 @@ class InvoiceProvider with ChangeNotifier {
     );
 
     final newInvoice = InvoiceModel(
-      id: invoiceId,
+      id: id,
       storeId: storeId,
       customerId: customerId,
       items: items,
@@ -184,13 +190,13 @@ class InvoiceProvider with ChangeNotifier {
 
   /// Update invoice status and sync with OrderService
   Future<bool> updateInvoiceStatus({
-    required String invoiceId,
+    required String id,
     required OrderStatus newStatus,
     required String userId,
     required UserRole userRole,
     String? note,
   }) async {
-    final invoice = getInvoiceById(invoiceId);
+    final invoice = getInvoiceById(id);
     if (invoice != null) {
       // 1. تحديث محلي بالسجل
       invoice.updateStatus(newStatus, userId, userRole, note: note);
@@ -198,7 +204,7 @@ class InvoiceProvider with ChangeNotifier {
 
       // 2. تحديث في السيرفس
       return await _orderService.updateOrderStatus(
-        orderId: invoiceId,
+        orderId: id,
         newStatus: newStatus,
         changedByUserId: userId,
         userRole: userRole,
@@ -210,13 +216,13 @@ class InvoiceProvider with ChangeNotifier {
 
   /// Delete or cancel an invoice via OrderService
   Future<bool> cancelInvoice(
-    String invoiceId,
+    String id,
     String userId,
     UserRole role, {
     String? reason,
   }) async {
     return await updateInvoiceStatus(
-      invoiceId: invoiceId,
+      id: id,
       newStatus: OrderStatus.cancelled,
       userId: userId,
       userRole: role,
@@ -230,4 +236,13 @@ class InvoiceProvider with ChangeNotifier {
     _customerOrdersSubscription?.cancel();
     super.dispose();
   }
+
+  void generateInvoice({
+    String? storeId,
+    required List<CartItemModel> items,
+    required discount,
+    required int tax,
+    required double shippingCost,
+    required AddressModel shippingAddress,
+  }) {}
 }

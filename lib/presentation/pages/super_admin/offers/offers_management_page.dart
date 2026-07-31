@@ -29,7 +29,7 @@ class _OffersManagementPageState extends State<OffersManagementPage> {
 
     return Consumer<OfferProvider>(
       builder: (context, provider, child) {
-        final filteredOffers = provider.offers.where((offer) {
+        final filteredOffers = provider.activeOffers.where((offer) {
           final titleStr = offer.name.get(context).toLowerCase();
           final matchesQuery =
               _searchQuery.isEmpty ||

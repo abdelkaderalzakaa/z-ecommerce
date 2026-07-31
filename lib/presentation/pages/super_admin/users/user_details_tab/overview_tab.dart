@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -17,7 +18,7 @@ class UserOverviewTab extends StatelessWidget {
       case UserRole.superAdmin:
         roleText = TranslationKeys.superAdminRole.tr(context);
         break;
-      case UserRole.companyOwner:
+      case UserRole.businessOwner:
         roleText = TranslationKeys.storeOwnerRole.tr(context);
         break;
       case UserRole.customer:
@@ -67,7 +68,7 @@ class UserOverviewTab extends StatelessWidget {
                   _buildInfoRow(
                     context,
                     TranslationKeys.phone.tr(context),
-                    user.phoneNumber ?? 'غير محدد',
+                    user.phoneNumber,
                     Icons.phone_outlined,
                   ),
                   const Divider(),

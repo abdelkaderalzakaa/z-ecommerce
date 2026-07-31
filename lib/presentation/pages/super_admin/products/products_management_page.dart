@@ -189,7 +189,7 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
                         TranslationKeys.statusActive.tr(context),
                       ),
                     ),
-                    AppTableColumn<Product>(
+                    AppTableColumn<ProductModel>(
                       title: TranslationKeys.actions.tr(context),
                       width: 70,
                       alignment: Alignment.center,

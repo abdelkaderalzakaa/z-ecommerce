@@ -1,8 +1,9 @@
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/forgot_password_page.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
-import 'package:z_ecommerce/presentation/pages/admin_store/admin_store_home.dart';
+import 'package:z_ecommerce/presentation/pages/business/admin_business_home.dart';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
@@ -22,11 +23,7 @@ class LoginPage extends StatefulWidget {
   final String? redirectTo;
   final AuthThemeConfig? customAuthTheme;
 
-  const LoginPage({
-    super.key,
-    this.redirectTo,
-    this.customAuthTheme,
-  });
+  const LoginPage({super.key, this.redirectTo, this.customAuthTheme});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -62,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
         final role = authProvider.currentUser?.role;
         if (role == UserRole.superAdmin) {
           changeScreenUntill(context, const SuperAdminHome());
-        } else if (role == UserRole.companyOwner) {
+        } else if (role == UserRole.businessOwner) {
           changeScreenUntill(context, const AdminStore());
         } else {
           final destination = widget.redirectTo ?? '/';
@@ -111,14 +108,17 @@ class _LoginPageState extends State<LoginPage> {
                 hintText: '••••••••••••',
               ),
               const SizedBox(height: 12),
-              
+
               // Forgot Password Link & Remember Me Switch
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
                     onTap: () {
-                      changeScreen(context, ForgotPasswordPage(customAuthTheme: authTheme));
+                      changeScreen(
+                        context,
+                        ForgotPasswordPage(customAuthTheme: authTheme),
+                      );
                     },
                     child: Text(
                       TranslationKeys.forgotPassword.tr(context),
@@ -153,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ],
               ),
-              
+
               if (_errorMessage != null) ...[
                 const SizedBox(height: 16),
                 Container(
@@ -169,9 +169,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ],
-              
+
               const SizedBox(height: 28),
-              
+
               // Primary Login Button
               SizedBox(
                 width: double.infinity,
@@ -217,10 +217,12 @@ class _LoginPageState extends State<LoginPage> {
                       final role = authProvider.currentUser?.role;
                       if (role == UserRole.superAdmin) {
                         navigator.pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const SuperAdminHome()),
+                          MaterialPageRoute(
+                            builder: (_) => const SuperAdminHome(),
+                          ),
                           (route) => false,
                         );
-                      } else if (role == UserRole.companyOwner) {
+                      } else if (role == UserRole.businessOwner) {
                         navigator.pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const AdminStore()),
                           (route) => false,
@@ -238,7 +240,9 @@ class _LoginPageState extends State<LoginPage> {
                       }
                     } else if (mounted && !success) {
                       setState(() {
-                        _errorMessage = authProvider.errorMessage ?? 'فشل تسجيل الدخول عبر غوغل';
+                        _errorMessage =
+                            authProvider.errorMessage ??
+                            'فشل تسجيل الدخول عبر غوغل';
                       });
                     }
                   },
@@ -253,10 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Text(
                       TranslationKeys.dontHaveAccount.tr(context),
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     const SizedBox(width: 4),
                     GestureDetector(

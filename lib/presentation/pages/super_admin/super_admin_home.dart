@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/super_admin/super_admin_app_bar.dart';
 import '../../widgets/super_admin/super_admin_sidebar.dart';
 import 'dashboard_overview_page.dart';
-import 'stores/stores_management_page.dart';
+import 'business/businessess_management_page.dart';
 import 'products/products_management_page.dart';
 import 'orders/orders_management_page.dart';
 import 'users/users_management_page.dart';
@@ -25,7 +25,7 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
 
   final List<Widget> _pages = const [
     DashboardOverviewPage(),
-    StoresManagementPage(),
+    BusinessessManagementPage(),
     ProductsManagementPage(),
     OrdersManagementPage(),
     UsersManagementPage(),
@@ -85,10 +85,7 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
 
           // Main View Area
           Expanded(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: _pages,
-            ),
+            child: IndexedStack(index: _selectedIndex, children: _pages),
           ),
         ],
       ),

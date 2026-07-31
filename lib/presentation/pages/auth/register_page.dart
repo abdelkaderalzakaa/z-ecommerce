@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/auth_provider.dart';
@@ -15,17 +16,13 @@ import '../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
-import 'package:z_ecommerce/presentation/pages/admin_store/admin_store_home.dart';
+import 'package:z_ecommerce/presentation/pages/business/admin_business_home.dart';
 
 class RegisterPage extends StatefulWidget {
   final String? redirectTo;
   final AuthThemeConfig? customAuthTheme;
 
-  const RegisterPage({
-    super.key,
-    this.redirectTo,
-    this.customAuthTheme,
-  });
+  const RegisterPage({super.key, this.redirectTo, this.customAuthTheme});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -61,17 +58,22 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (!_agreeToTerms) {
-      setState(() => _errorMessage = TranslationKeys.pleaseAgreeToTerms.tr(context));
+      setState(
+        () => _errorMessage = TranslationKeys.pleaseAgreeToTerms.tr(context),
+      );
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() => _errorMessage = TranslationKeys.passwordsDoNotMatch.tr(context));
+      setState(
+        () => _errorMessage = TranslationKeys.passwordsDoNotMatch.tr(context),
+      );
       return;
     }
 
     final authProvider = context.read<AuthProvider>();
-    final fullName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
+    final fullName =
+        '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
 
     final bool success;
     if (_isBusinessAccount) {
@@ -96,7 +98,8 @@ class _RegisterPageState extends State<RegisterPage> {
         final role = authProvider.currentUser?.role;
         if (role == UserRole.superAdmin) {
           changeScreenUntill(context, const SuperAdminHome());
-        } else if (role == UserRole.businessOwner || role == UserRole.companyOwner) {
+        } else if (role == UserRole.businessOwner ||
+            role == UserRole.businessOwner) {
           changeScreenUntill(context, const AdminStore());
         } else {
           final destination = widget.redirectTo ?? '/';
@@ -108,7 +111,9 @@ class _RegisterPageState extends State<RegisterPage> {
         }
       } else {
         setState(() {
-          _errorMessage = authProvider.errorMessage ?? TranslationKeys.registrationFailed.tr(context);
+          _errorMessage =
+              authProvider.errorMessage ??
+              TranslationKeys.registrationFailed.tr(context);
         });
       }
     }
@@ -147,14 +152,18 @@ class _RegisterPageState extends State<RegisterPage> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: !_isBusinessAccount ? primaryColor : Colors.transparent,
+                            color: !_isBusinessAccount
+                                ? primaryColor
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             'حساب عميل',
                             style: TextStyle(
-                              color: !_isBusinessAccount ? Colors.white : Colors.grey[700],
+                              color: !_isBusinessAccount
+                                  ? Colors.white
+                                  : Colors.grey[700],
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -168,14 +177,18 @@ class _RegisterPageState extends State<RegisterPage> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            color: _isBusinessAccount ? primaryColor : Colors.transparent,
+                            color: _isBusinessAccount
+                                ? primaryColor
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             'حساب نشاط تجاري (متجر)',
                             style: TextStyle(
-                              color: _isBusinessAccount ? Colors.white : Colors.grey[700],
+                              color: _isBusinessAccount
+                                  ? Colors.white
+                                  : Colors.grey[700],
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -192,28 +205,29 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: InputDecoration(
                     labelText: 'نوع النشاط التجاري',
                     prefixIcon: const Icon(Icons.storefront_outlined),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  items: const [
-                    DropdownMenuItem(
+                  items: [
+                    const DropdownMenuItem(
                       value: BusinessType.retailStore,
                       child: Text('متجر تجزئة / إلكتروني'),
                     ),
-                    DropdownMenuItem(
+                    const DropdownMenuItem(
                       value: BusinessType.restaurant,
                       child: Text('مطعم / كافيه'),
                     ),
                     DropdownMenuItem(
-                      value: BusinessType.serviceProvider,
-                      child: Text('مزود خدمات'),
+                      value: BusinessType.service,
+                      child: const Text('مزود خدمات'),
                     ),
-                    DropdownMenuItem(
-                      value: BusinessType.wholesaler,
-                      child: Text('تاجر جملة'),
-                    ),
+                    // todo:اكمال حسب الانيم
                   ],
                   onChanged: (val) {
-                    if (val != null) setState(() => _selectedBusinessType = val);
+                    if (val != null) {
+                      setState(() => _selectedBusinessType = val);
+                    }
                   },
                 ),
                 const SizedBox(height: 16),
@@ -273,7 +287,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Checkbox(
                     value: _agreeToTerms,
                     activeColor: primaryColor,
-                    onChanged: (val) => setState(() => _agreeToTerms = val ?? false),
+                    onChanged: (val) =>
+                        setState(() => _agreeToTerms = val ?? false),
                   ),
                   Expanded(
                     child: Text(
@@ -317,10 +332,12 @@ class _RegisterPageState extends State<RegisterPage> {
                       final role = authProvider.currentUser?.role;
                       if (role == UserRole.superAdmin) {
                         navigator.pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const SuperAdminHome()),
+                          MaterialPageRoute(
+                            builder: (_) => const SuperAdminHome(),
+                          ),
                           (route) => false,
                         );
-                      } else if (role == UserRole.companyOwner) {
+                      } else if (role == UserRole.businessOwner) {
                         navigator.pushAndRemoveUntil(
                           MaterialPageRoute(builder: (_) => const AdminStore()),
                           (route) => false,
@@ -338,7 +355,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       }
                     } else if (mounted && !success) {
                       setState(() {
-                        _errorMessage = authProvider.errorMessage ?? 'فشل إنشاء الحساب عبر غوغل';
+                        _errorMessage =
+                            authProvider.errorMessage ??
+                            'فشل إنشاء الحساب عبر غوغل';
                       });
                     }
                   },

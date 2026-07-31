@@ -11,10 +11,10 @@ class Logo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final companyData = context.watch<CompanyProvider>().companySettings;
+    final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
 
     return Text(
-      companyData?.name.get(context) ?? 'Z - Ecommerce',
+      selectedBusiness?.localization.name.get(context) ?? 'Z - Ecommerce',
       style: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w900,
@@ -31,13 +31,13 @@ class Copyright extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hPad = ResponsiveLayout.horizontalPadding(context);
-    final companyData = context.watch<CompanyProvider>().companySettings;
+    final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
       child: Center(
         child: Text(
-          '©${DateTime.now().year} ${companyData?.name.get(context) ?? "Z - Ecommerce"} ${TranslationKeys.byAlzakaaSimpleSolutionsAllRightsReserved.tr(context)}',
+          '©${DateTime.now().year} ${selectedBusiness?.localization.name.get(context) ?? "Z - Ecommerce"} ${TranslationKeys.byAlzakaaSimpleSolutionsAllRightsReserved.tr(context)}',
           style: TextStyle(
             fontSize: 13,
             color: Theme.of(context).textTheme.bodyMedium?.color,

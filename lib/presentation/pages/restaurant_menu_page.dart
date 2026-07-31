@@ -167,9 +167,10 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final themeInfo = companyProvider.companySettings?.theme;
-    final storeName = companyProvider.companySettings?.name.ar ?? 'مطعم وكافيه السعادة';
+    final businessProvider = Provider.of<BusinessProvider>(context);
+    final business = businessProvider.selectedBusiness;
+    final themeInfo = business?.theme;
+    final storeName = business?.localization.name.ar ?? 'مطعم وكافيه السعادة';
     final themeStyle = themeInfo?.restaurantMenuThemeStyle ?? 'chalkboard';
 
     Color primaryColor = themeInfo?.primaryColorValue ?? const Color(0xFF4F46E5);

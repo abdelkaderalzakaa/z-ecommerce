@@ -17,7 +17,7 @@ class RelatedProducts extends StatelessWidget {
 
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
-        final products = provider.topSelling.take(4).toList();
+        final products = provider.allProducts.take(4).toList();
 
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: hPad),

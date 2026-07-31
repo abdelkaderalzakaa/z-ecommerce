@@ -3,7 +3,6 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/business_provider.dart';
-import '../../../data/fake_data/company.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
@@ -13,19 +12,9 @@ class StoreSelectorSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    final companyProvider = context.watch<CompanyProvider>();
-    final user = authProvider.currentUser;
-
-    if (user == null || user.storeIds.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Text(TranslationKeys.noStoresAvailable.tr(context)),
-      );
-    }
-
-    final availableStores = fakeCompanies.where((company) => user.storeIds.contains(company.id)).toList();
-    final currentStoreId = companyProvider.companySettings?.id;
+    final businessProvider = context.watch<BusinessProvider>();
+    final businesses = businessProvider.businesses;
+    final currentStoreId = businessProvider.selectedBusiness?.id;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
@@ -47,12 +36,12 @@ class StoreSelectorSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...availableStores.map((store) {
+          ...businesses.map((store) {
             final isSelected = store.id == currentStoreId;
             return ListTile(
               onTap: () {
                 if (!isSelected) {
-                  companyProvider.switchStore(store.id);
+                  businessProvider.selectBusiness(store.id);
                 }
                 Navigator.pop(context);
               },
@@ -63,7 +52,7 @@ class StoreSelectorSheet extends StatelessWidget {
                     : Icon(Icons.store, color: Theme.of(context).iconTheme.color, size: 20),
               ),
               title: Text(
-                store.name.get(context),
+                store.localization.name.get(context),
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge?.color,

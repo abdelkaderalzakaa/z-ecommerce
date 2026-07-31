@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -22,20 +23,22 @@ class UserDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authUser = context.watch<AuthProvider>().currentUser;
-    final user = authUser ?? UserModel(
-      id: userId,
-      name: 'Super Admin',
-      email: 'alzakaasimplesolutions@gmail.com',
-      role: UserRole.superAdmin,
-      createdAt: DateTime.now(),
-    );
+    final user =
+        authUser ??
+        UserModel(
+          id: userId,
+          name: 'Super Admin',
+          email: 'alzakaasimplesolutions@gmail.com',
+          role: UserRole.superAdmin,
+          createdAt: DateTime.now(),
+        );
 
     String roleText = '';
     switch (user.role) {
       case UserRole.superAdmin:
         roleText = TranslationKeys.superAdminRole.tr(context);
         break;
-      case UserRole.companyOwner:
+      case UserRole.businessOwner:
         roleText = TranslationKeys.storeOwnerRole.tr(context);
         break;
       case UserRole.customer:
@@ -55,7 +58,7 @@ class UserDetailsPage extends StatelessWidget {
       // Super Admin Tabs
       tabs.add(const Tab(text: 'الصلاحيات والسجلات'));
       tabViews.add(AdminPermissionsTab(user: user));
-    } else if (user.role == UserRole.companyOwner) {
+    } else if (user.role == UserRole.businessOwner) {
       // Company Owner Tabs
       tabs.add(const Tab(text: 'المتجر التابع'));
       tabViews.add(OwnerStoreTab(user: user));
@@ -80,7 +83,11 @@ class UserDetailsPage extends StatelessWidget {
       statusBadge: TableStatusBadge.fromStatus(roleText),
       headerMetrics: [
         Chip(
-          avatar: const Icon(Icons.admin_panel_settings_rounded, size: 16, color: Colors.indigo),
+          avatar: const Icon(
+            Icons.admin_panel_settings_rounded,
+            size: 16,
+            color: Colors.indigo,
+          ),
           label: Text(roleText),
           padding: EdgeInsets.zero,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -100,13 +107,19 @@ class UserDetailsPage extends StatelessWidget {
       },
       onEdit: () {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${TranslationKeys.editAddress.tr(context)} "${user.name}"')),
+          SnackBar(
+            content: Text(
+              '${TranslationKeys.editAddress.tr(context)} "${user.name}"',
+            ),
+          ),
         );
       },
       onDelete: () {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${TranslationKeys.deleteSelected.tr(context)} "${user.name}"'),
+            content: Text(
+              '${TranslationKeys.deleteSelected.tr(context)} "${user.name}"',
+            ),
             backgroundColor: Colors.red,
           ),
         );

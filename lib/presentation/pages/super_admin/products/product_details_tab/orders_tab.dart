@@ -29,8 +29,9 @@ class _ProductOrdersTabState extends State<ProductOrdersTab> {
     return Consumer<InvoiceProvider>(
       builder: (context, provider, child) {
         final productInvoices = provider.invoices.where((inv) {
-          final matchesQuery = _searchQuery.isEmpty ||
-              inv.invoiceId.toLowerCase().contains(_searchQuery.toLowerCase());
+          final matchesQuery =
+              _searchQuery.isEmpty ||
+              inv.id.toLowerCase().contains(_searchQuery.toLowerCase());
           return matchesQuery;
         }).toList();
 
@@ -57,7 +58,9 @@ class _ProductOrdersTabState extends State<ProductOrdersTab> {
             onBulkDelete: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${TranslationKeys.deleteSelected.tr(context)} (${_selectedOrders.length})'),
+                  content: Text(
+                    '${TranslationKeys.deleteSelected.tr(context)} (${_selectedOrders.length})',
+                  ),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -91,10 +94,11 @@ class _ProductOrdersTabState extends State<ProductOrdersTab> {
                 title: TranslationKeys.orderId.tr(context),
                 flex: 2,
                 sortable: true,
-                sortKey: (inv) => inv.invoiceId,
+                sortKey: (inv) => inv.id,
                 cellBuilder: (inv) => TableTextCell(
-                  title: inv.invoiceId,
-                  subtitle: '${inv.date.year}-${inv.date.month.toString().padLeft(2, '0')}-${inv.date.day.toString().padLeft(2, '0')}',
+                  title: inv.id,
+                  subtitle:
+                      '${inv.date.year}-${inv.date.month.toString().padLeft(2, '0')}-${inv.date.day.toString().padLeft(2, '0')}',
                   isBold: true,
                 ),
               ),
@@ -103,9 +107,7 @@ class _ProductOrdersTabState extends State<ProductOrdersTab> {
                 flex: 1,
                 sortable: true,
                 sortKey: (inv) => inv.total,
-                cellBuilder: (inv) => TablePriceCell(
-                  amount: inv.total,
-                ),
+                cellBuilder: (inv) => TablePriceCell(amount: inv.total),
               ),
               AppTableColumn<InvoiceModel>(
                 title: TranslationKeys.statusActive.tr(context),

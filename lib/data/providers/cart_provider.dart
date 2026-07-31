@@ -146,4 +146,8 @@ class CartProvider with ChangeNotifier {
     _cartItemsByStore.clear();
     notifyListeners();
   }
+/// TODO 
+  subTotal(String? businessId) {}
+
+  void clearCart(String? businessId) {}
 }

@@ -9,7 +9,7 @@ import '../common/product_card.dart';
 import '../../../data/models/product/product_model.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/categories_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 
 class TopSellingSection extends StatelessWidget {
   const TopSellingSection({super.key});
@@ -21,7 +21,7 @@ class TopSellingSection extends StatelessWidget {
 
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
-        final products = provider.topSelling.take(4).toList();
+        final products = provider.allProducts.take(4).toList();
 
         return Container(
           color: Theme.of(context).scaffoldBackgroundColor,
@@ -49,7 +49,7 @@ class TopSellingSection extends StatelessWidget {
 }
 
 class _DesktopProductGrid extends StatelessWidget {
-  final List<Product> products;
+  final List<ProductModel> products;
   const _DesktopProductGrid({required this.products});
 
   @override
@@ -72,7 +72,7 @@ class _DesktopProductGrid extends StatelessWidget {
 }
 
 class _MobileProductGrid extends StatelessWidget {
-  final List<Product> products;
+  final List<ProductModel> products;
   const _MobileProductGrid({required this.products});
 
   @override

@@ -160,7 +160,7 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
                   child: Text(TranslationKeys.customerRole.tr(context)),
                 ),
                 DropdownMenuItem(
-                  value: UserRole.companyOwner,
+                  value: UserRole.businessOwner,
                   child: Text(TranslationKeys.storeOwnerRole.tr(context)),
                 ),
                 DropdownMenuItem(
@@ -174,7 +174,7 @@ class _CreateEditUserPageState extends State<CreateEditUserPage> {
                 }
               },
             ),
-            if (_selectedRole == UserRole.companyOwner) ...[
+            if (_selectedRole == UserRole.businessOwner) ...[
               const SizedBox(height: 12),
               TextFormField(
                 controller: _businessIdController,

@@ -2,15 +2,7 @@ import 'package:z_ecommerce/data/models/order/cart_model.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
-enum OrderStatus {
-  pending,
-  confirmed,
-  preparing,
-  ready,
-  shipped,
-  delivered,
-  cancelled,
-}
+
 
 class InvoiceModel {
   final String id;

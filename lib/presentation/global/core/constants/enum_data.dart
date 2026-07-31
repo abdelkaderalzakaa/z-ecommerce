@@ -33,3 +33,12 @@ enum CartItemType {
   product,
   offer,
 }
+enum OrderStatus {
+  pending,
+  confirmed,
+  preparing,
+  ready,
+  shipped,
+  delivered,
+  cancelled;
+}

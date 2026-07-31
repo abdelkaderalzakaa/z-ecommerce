@@ -21,8 +21,8 @@ class OrderDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
     final hPad = ResponsiveLayout.horizontalPadding(context);
-    final companyData = context.watch<CompanyProvider>().companySettings;
-    final currency = companyData?.currency ?? '\$';
+    final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final currency = selectedBusiness?.currency.symbol ?? '\$';
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -63,7 +63,7 @@ class OrderDetailsPage extends StatelessWidget {
                             Text(
                               TranslationKeys.orderNumber
                                   .tr(context)
-                                  .replaceAll('{id}', invoice.invoiceId),
+                                  .replaceAll('{id}', invoice.id),
                               style: AppTextStyles.heroTitle(
                                 context,
                                 isMobile,
@@ -80,7 +80,7 @@ class OrderDetailsPage extends StatelessWidget {
                                 '{date}',
                                 DateFormat(
                                   'MMMM d, yyyy - h:mm a',
-                                ).format(invoice.date),
+                                ).format(invoice.createdAt),
                               ),
                           style: TextStyle(
                             color: AppColors.textSecondary,

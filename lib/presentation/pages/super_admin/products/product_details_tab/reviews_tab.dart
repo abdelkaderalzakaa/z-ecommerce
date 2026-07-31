@@ -26,7 +26,9 @@ class ProductReviewsTab extends StatelessWidget {
               ),
               Chip(
                 avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
-                label: Text('${product.rating.toStringAsFixed(1)} / 5.0 (${product.reviewsCount})'),
+                label: Text(
+                  '${product.rating.toStringAsFixed(1)} / 5.0 (${product.reviewsCount})',
+                ),
               ),
             ],
           ),
@@ -51,12 +53,18 @@ class ProductReviewsTab extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text(
                       'إجمالي المراجعات المسجلة: ${product.reviewsCount}',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'متوسط تقييم العملاء للمنتج: ${product.rating.toStringAsFixed(1)} من 5 نجوم',
-                      style: TextStyle(fontSize: 13, color: theme.textTheme.bodySmall?.color),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
                     ),
                   ],
                 ),

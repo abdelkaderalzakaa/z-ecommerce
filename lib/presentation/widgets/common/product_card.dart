@@ -1,5 +1,5 @@
-import 'package:z_ecommerce/presentation/pages/cart_page.dart';
-import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/cart/cart_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart';
 import 'package:flutter/material.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
@@ -42,14 +42,14 @@ class _ProductCardState extends State<ProductCard> {
             children: [
               _ProductImagePlaceholder(
                 product: widget.product,
-                bgColor: widget.product.cardBgColor,
+                bgColor: Theme.of(context).cardColor,
                 hovered: _hovered,
                 discountPercent: widget.product.discountPercent,
               ),
               const SizedBox(height: 12),
               _ProductInfo(
                 name: widget.product.name,
-                price: widget.product.price,
+                price: widget.product.basePrice,
                 originalPrice: widget.product.originalPrice,
               ),
             ],
@@ -131,13 +131,12 @@ class _ProductImagePlaceholder extends StatelessWidget {
             child: Consumer<AuthProvider>(
               builder: (context, authProvider, child) {
                 final isFavorite =
-                    authProvider.currentUser?.wishlist.contains(product.id) ??
+                    authProvider.currentCustomer?.wishlist.contains(product.id) ??
                     false;
 
                 return GestureDetector(
                   onTap: () {
                     if (authProvider.isAuthenticated) {
-                      authProvider.toggleWishlist(product.id);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -176,27 +175,21 @@ class _ProductImagePlaceholder extends StatelessWidget {
           Positioned(
             bottom: 12,
             right: 12,
-            child: Consumer2<CartProvider, CompanyProvider>(
-              builder: (context, cartProvider, companyProvider, child) {
+            child: Consumer2<CartProvider, BusinessProvider>(
+              builder: (context, cartProvider, businessProvider, child) {
                 final businessId =
-                    companyProvider.companySettings?.id ?? 'cmp_001';
+                    businessProvider.selectedBusiness?.id;
                 final isInCart = cartProvider
                     .items(businessId)
-                    .any((item) => item.product.id == product.id);
+                    .any((item) => item.product?.id == product.id);
                 return GestureDetector(
                   onTap: () {
                     if (isInCart) {
                       changeScreen(context, const CartPage());
-                    } else {
-                      cartProvider.addToCart(
-                        businessId,
-                        product,
-                        selectedColor: product.colors.isNotEmpty
-                            ? product.colors.first
-                            : null,
-                        selectedSize: product.sizes.isNotEmpty
-                            ? product.sizes.first
-                            : null,
+                    } else if (businessId != null) {
+                      cartProvider.addProductToCart(
+                        businessId: businessId,
+                        product: product,
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -282,8 +275,8 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final companyData = context.watch<CompanyProvider>().companySettings;
-    final currency = companyData?.currency ?? '\$';
+    final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final currency = selectedBusiness?.currency.symbol ?? '\$';
 
     return Row(
       children: [

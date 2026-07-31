@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../global/core/constants/app_constants.dart';
 import '../../../../global/core/responsive/responsive_layout.dart';
 import '../../../../pages/home_page.dart';
-import '../../../../pages/categories_page.dart';
+import '../../../../pages/customer/categories_page.dart';
 import '../../../../../data/providers/category_provider.dart';
 import 'package:provider/provider.dart';
 

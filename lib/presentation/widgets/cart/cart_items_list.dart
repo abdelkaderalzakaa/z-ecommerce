@@ -10,15 +10,10 @@ import '../../../data/providers/business_provider.dart';
 class CartItemsList extends StatelessWidget {
   const CartItemsList({super.key});
 
-  String _colorToHex(BuildContext context, Color? color) {
-    if (color == null) return TranslationKeys.notAvailable.tr(context);
-    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
-  }
-
+  
   @override
   Widget build(BuildContext context) {
-    final businessId =
-        context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+    final businessId = context.read<BusinessProvider>().selectedBusiness?.id;
     final cartProvider = context.watch<CartProvider>();
     final items = cartProvider.items(businessId);
 
@@ -66,24 +61,26 @@ class CartItemsList extends StatelessWidget {
             return Column(
               children: [
                 CartItemWidget(
-                  title: item.product.name,
-                  size:
-                      item.selectedSize ??
-                      TranslationKeys.notAvailable.tr(context),
-                  color: _colorToHex(context, item.selectedColor),
-                  price: item.isGift ? 0.0 : item.product.price,
+                  title:
+                      item.product?.name ?? item.offer?.name.get(context) ?? '',
+                  size: TranslationKeys.notAvailable.tr(context),
+                  color: '',
+                  price: item.totalPrice,
                   quantity: item.quantity,
-                  isGift: item.isGift,
-                  isBundle: item.isBundle,
+                  isGift: false,
+                  isBundle: false,
                   onQuantityChanged: (newQuantity) {
                     cartProvider.updateQuantity(
-                      businessId,
-                      item.id,
-                      newQuantity,
+                      businessId: businessId,
+                      itemId: item.id,
+                      newQuantity: newQuantity,
                     );
                   },
                   onRemove: () {
-                    cartProvider.removeFromCart(businessId, item.id);
+                    cartProvider.removeItem(
+                      businessId: businessId,
+                      itemId: item.id,
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(

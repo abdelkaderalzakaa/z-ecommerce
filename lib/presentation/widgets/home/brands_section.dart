@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import '../../../data/providers/business_provider.dart';
+import '../../../data/providers/brand_provider.dart';
 import '../../../data/models/product/brand_model.dart';
 import '../../global/core/constants/app_constants.dart';
-import 'package:z_ecommerce/presentation/pages/categories_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 
 class BrandsSection extends StatefulWidget {
   const BrandsSection({super.key});
@@ -46,8 +47,7 @@ class _BrandsSectionState extends State<BrandsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final companyData = context.watch<CompanyProvider>().companySettings;
-    final brands = companyData?.brands ?? [];
+    final brands = context.watch<BrandProvider>().brands;
 
     if (brands.isEmpty) return const SizedBox();
 
@@ -62,10 +62,7 @@ class _BrandsSectionState extends State<BrandsSection> {
         itemBuilder: (context, index) {
           final brand = brands[index % brands.length];
           return Center(
-            child: _BrandItem(
-              brand: brand,
-              businessId: companyData?.id ?? 'cmp_001',
-            ),
+            child: _BrandItem(brand: brand, businessId: companyData?.id),
           );
         },
       ),

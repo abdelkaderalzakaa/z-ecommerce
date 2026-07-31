@@ -1,4 +1,4 @@
-import 'package:z_ecommerce/presentation/pages/offer_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/offer/offer_details_page.dart';
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import '../../../data/models/product/product_model.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/business_provider.dart';
-import 'package:z_ecommerce/presentation/pages/cart_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/cart/cart_page.dart';
 
 class OfferCard extends StatefulWidget {
   final OfferModel offer;
@@ -256,17 +256,16 @@ class _OfferCardState extends State<OfferCard>
 
                                     final businessId =
                                         context
-                                            .read<CompanyProvider>()
-                                            .companySettings
-                                            ?.id ??
-                                        'cmp_001';
+                                            .read<BusinessProvider>()
+                                            .selectedBusiness
+                                            ?.id;
                                     final isInCart =
                                         mainIdToCheck != null &&
                                         cart
                                             .items(businessId)
                                             .any(
                                               (item) =>
-                                                  item.product.id ==
+                                                  item.product!.id ==
                                                   mainIdToCheck,
                                             );
 
@@ -482,79 +481,17 @@ class _OfferCardState extends State<OfferCard>
 
   void _addToCart(BuildContext context) {
     final businessId =
-        context.read<CompanyProvider>().companySettings?.id ?? 'cmp_001';
+        context.read<BusinessProvider>().selectedBusiness?.id;
+    if (businessId == null) return;
     final cart = context.read<CartProvider>();
     final products = context.read<ProductProvider>().allProducts;
 
-    if (widget.offer.type == 'bundle') {
-      final bundleProduct = Product(
-        id: widget.offer.id,
-        name: widget.offer.name.get(context),
-        price: widget.offer.price ?? 0.0,
-        description: widget.offer.description?.get(context) ?? '',
-        category: 'Bundle',
-        colors: [],
-        sizes: [],
-        images: widget.offer.imageUrl != null ? [widget.offer.imageUrl!] : [],
-        rating: 0,
-        reviewsCount: 0,
-        isNewArrival: false,
-        isTopSelling: false,
-        cardBgColor: Colors.white,
-      );
-
-      cart.addToCart(businessId, bundleProduct, isBundle: true);
-    } else if (widget.offer.type == 'product_gift') {
-      final mainProduct = products.firstWhere(
+    if (products.isNotEmpty) {
+      final targetProduct = products.firstWhere(
         (p) => p.id == widget.offer.productId,
         orElse: () => products.first,
       );
-
-      Product? giftProduct;
-      try {
-        giftProduct = products.firstWhere(
-          (p) => p.id == widget.offer.giftProductId,
-        );
-      } catch (_) {
-        giftProduct = Product(
-          id: widget.offer.giftProductId ?? 'gift_1',
-          name: widget.offer.giftName ?? 'Free Gift',
-          price: 0,
-          description: '',
-          category: 'Gift',
-          colors: [],
-          sizes: [],
-          images: widget.offer.giftImageUrl != null
-              ? [widget.offer.giftImageUrl!]
-              : [],
-          rating: 0,
-          reviewsCount: 0,
-          isNewArrival: false,
-          isTopSelling: false,
-          cardBgColor: Colors.white,
-        );
-      }
-
-      cart.addToCart(businessId, mainProduct);
-      cart.addToCart(businessId, giftProduct, isGift: true);
-    } else if (widget.offer.type == 'buy_x_get_y' &&
-        widget.offer.productIds != null &&
-        widget.offer.productIds!.isNotEmpty) {
-      final mainProduct = products.firstWhere(
-        (p) => p.id == widget.offer.productIds!.first,
-        orElse: () => products.first,
-      );
-      cart.addToCart(
-        businessId,
-        mainProduct,
-        quantity: widget.offer.buyQuantity ?? 1,
-      );
-      cart.addToCart(
-        businessId,
-        mainProduct,
-        quantity: widget.offer.getQuantity ?? 1,
-        isGift: true,
-      );
+      cart.addProductToCart(businessId: businessId, product: targetProduct);
     }
 
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';

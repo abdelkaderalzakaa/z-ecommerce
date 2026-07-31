@@ -8,7 +8,7 @@ import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/checkout_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/cart/checkout_page.dart';
 
 class OrderSummary extends StatefulWidget {
   final bool isCheckoutPage;
@@ -38,33 +38,16 @@ class _OrderSummaryState extends State<OrderSummary> {
   @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
-    final companyData = context.watch<CompanyProvider>().companySettings;
-    final currency = companyData?.currency ?? '\$';
+    final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final currency = selectedBusiness?.currency.symbol ?? '\$';
 
-    final businessId = companyData?.id ?? 'cmp_001';
+    final businessId = selectedBusiness?.id;
     final cartProvider = context.watch<CartProvider>();
-    final offerProvider = context.watch<OfferProvider>();
 
     final baseSubtotal = cartProvider.subTotal(businessId);
-    final cartProductIds = cartProvider
-        .items(businessId)
-        .map((e) => e.product.id)
-        .toList();
 
-    final baseDiscount = offerProvider.calculateDiscount(
-      businessId,
-      baseSubtotal,
-      cartProductIds,
-      cartProvider.couponCode(businessId),
-    );
-    final isFreeShipping = offerProvider.hasFreeShipping(
-      businessId,
-      baseSubtotal,
-    );
-
-    final baseDeliveryFee = (baseSubtotal > 0 && !isFreeShipping)
-        ? (companyData?.deliveryFee ?? 15.0)
-        : 0.0;
+    final baseDiscount = 0.0;
+    final baseDeliveryFee = 15.0;
 
     final subtotal = baseSubtotal * widget.multiplier;
     var discount = baseDiscount * widget.multiplier;
@@ -124,14 +107,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                     borderRadius: BorderRadius.circular(AppRadius.input),
                   ),
                 ),
-                onPressed: () {
-                  if (_couponController.text.isNotEmpty) {
-                    cartProvider.applyCoupon(
-                      businessId,
-                      _couponController.text,
-                    );
-                  }
-                },
+                onPressed: () {},
                 child: Text(
                   TranslationKeys.notAvailable.tr(context) == 'not_available'
                       ? 'Apply'
@@ -140,28 +116,6 @@ class _OrderSummaryState extends State<OrderSummary> {
               ),
             ],
           ),
-          if (cartProvider.couponCode(businessId) != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Coupon ${cartProvider.couponCode(businessId)} applied',
-                    style: TextStyle(color: Colors.green, fontSize: 12),
-                  ),
-                  const Spacer(),
-                  InkWell(
-                    onTap: () {
-                      cartProvider.applyCoupon(businessId, null);
-                      _couponController.clear();
-                    },
-                    child: const Icon(Icons.close, color: Colors.red, size: 16),
-                  ),
-                ],
-              ),
-            ),
           const SizedBox(height: 24),
           if (widget.multiplier > 1) ...[
             Container(
@@ -211,10 +165,8 @@ class _OrderSummaryState extends State<OrderSummary> {
           const SizedBox(height: 20),
           _SummaryRow(
             label: TranslationKeys.deliveryFee.tr(context),
-            value: isFreeShipping
-                ? 'Free'
-                : '$currency${deliveryFee.toStringAsFixed(0)}',
-            isValueRed: isFreeShipping,
+            value: '$currency${deliveryFee.toStringAsFixed(0)}',
+            isValueRed: false,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),

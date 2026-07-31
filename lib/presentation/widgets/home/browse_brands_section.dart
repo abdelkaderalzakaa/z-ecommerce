@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/business_provider.dart';
+import '../../../data/providers/brand_provider.dart';
 import '../../../data/models/product/brand_model.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../common/product_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/categories_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 
 class BrowseBrandsSection extends StatelessWidget {
   const BrowseBrandsSection({super.key});
@@ -18,9 +19,9 @@ class BrowseBrandsSection extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return Consumer<CompanyProvider>(
+    return Consumer<BrandProvider>(
       builder: (context, provider, child) {
-        final brands = provider.companySettings?.brands ?? [];
+        final brands = provider.brands;
         if (brands.isEmpty) return const SizedBox.shrink();
 
         return Container(

@@ -23,49 +23,40 @@ class OrderDetailsPage extends StatelessWidget {
       builder: (context, provider, child) {
         final allInvoices = provider.invoices.isNotEmpty
             ? provider.invoices
-            : List.generate(
-                8,
-                (index) => InvoiceModel(
-                  invoiceId: 'ORD-2026-${1000 + index}',
-                  storeId: 'cmp_00${(index % 3) + 1}',
-                  items: [],
-                  tax: 15.0,
-                  shippingCost: 10.0,
-                  date: DateTime.now().subtract(Duration(days: index * 2)),
-                  status: index == 0 ? 'Pending' : (index == 1 ? 'Paid' : 'Completed'),
-                  shippingAddress: AddressModel(
-                    id: 'addr_default',
-                    label: 'العنوان الرئيسي',
-                    street: 'شارع الملك فهد',
-                    city: 'الرياض',
-                    state: 'الرياض',
-                    zipCode: '11564',
-                    country: 'المملكة العربية السعودية',
-                  ),
-                ),
-              );
+            : null;
 
-        final invoice = allInvoices.firstWhere(
-          (inv) => inv.invoiceId == orderId,
+        final invoice = allInvoices!.firstWhere(
+          (inv) => inv.id == orderId,
           orElse: () => allInvoices.first,
         );
 
         return DetailsTemplate(
           title: TranslationKeys.orderDetails.tr(context),
-          name: '${TranslationKeys.orderId.tr(context)}: ${invoice.invoiceId}',
-          subtitle: '${TranslationKeys.associatedStore.tr(context)}: متجر ${invoice.storeId} • ${invoice.date.year}-${invoice.date.month.toString().padLeft(2, '0')}-${invoice.date.day.toString().padLeft(2, '0')}',
+          name: '${TranslationKeys.orderId.tr(context)}: ${invoice.id}',
+          subtitle:
+              '${TranslationKeys.associatedStore.tr(context)}: متجر ${invoice.storeId} • ${invoice.date.year}-${invoice.date.month.toString().padLeft(2, '0')}-${invoice.date.day.toString().padLeft(2, '0')}',
           fallbackIcon: Icons.receipt_long_rounded,
           statusBadge: TableStatusBadge.fromStatus(invoice.status),
           headerMetrics: [
             Chip(
-              avatar: const Icon(Icons.attach_money_rounded, size: 16, color: Colors.green),
+              avatar: const Icon(
+                Icons.attach_money_rounded,
+                size: 16,
+                color: Colors.green,
+              ),
               label: Text('\$${invoice.total.toStringAsFixed(2)}'),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             Chip(
-              avatar: const Icon(Icons.shopping_bag_outlined, size: 16, color: Colors.blue),
-              label: Text('${invoice.items.length} ${TranslationKeys.items.tr(context)}'),
+              avatar: const Icon(
+                Icons.shopping_bag_outlined,
+                size: 16,
+                color: Colors.blue,
+              ),
+              label: Text(
+                '${invoice.items.length} ${TranslationKeys.items.tr(context)}',
+              ),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -77,13 +68,19 @@ class OrderDetailsPage extends StatelessWidget {
           },
           onEdit: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${TranslationKeys.editAddress.tr(context)} "${invoice.invoiceId}"')),
+              SnackBar(
+                content: Text(
+                  '${TranslationKeys.editAddress.tr(context)} "${invoice.id}"',
+                ),
+              ),
             );
           },
           onDelete: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('${TranslationKeys.deleteSelected.tr(context)} "${invoice.invoiceId}"'),
+                content: Text(
+                  '${TranslationKeys.deleteSelected.tr(context)} "${invoice.id}"',
+                ),
                 backgroundColor: Colors.red,
               ),
             );

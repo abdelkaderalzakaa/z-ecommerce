@@ -6,7 +6,7 @@ import '../../global/settings_provider.dart';
 import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../pages/admin_store/profile/store_owner_profile_page.dart';
+import '../../pages/business/profile/store_owner_profile_page.dart';
 
 class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isMobile;
@@ -25,12 +25,12 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final localeProvider = Provider.of<LocaleProvider>(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
+    final businessProvider = Provider.of<BusinessProvider>(context);
     final isArabic = localeProvider.locale.languageCode == 'ar';
-    final storeTheme = companyProvider.companySettings?.theme;
+    final storeTheme = businessProvider.selectedBusiness?.theme;
     final primaryColor = storeTheme?.primaryColorValue ?? theme.primaryColor;
     final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
-    final nameObj = companyProvider.companySettings?.name;
+    final nameObj = businessProvider.selectedBusiness?.localization.name;
     final storeName = nameObj != null
         ? (isArabic ? nameObj.ar : nameObj.en)
         : TranslationKeys.mainStore.tr(context);

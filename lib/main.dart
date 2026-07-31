@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'data/providers/product_provider.dart';
 import 'data/providers/category_provider.dart';
 import 'data/providers/cart_provider.dart';
@@ -9,16 +10,14 @@ import 'data/providers/auth_provider.dart';
 import 'presentation/global/settings_provider.dart';
 import 'data/providers/business_provider.dart';
 import 'presentation/global/locale_provider.dart';
-import 'data/providers/user_visits_provider.dart';
 import 'data/providers/offer_provider.dart';
-import 'data/providers/super_admin_stores_provider.dart';
 import 'data/providers/brand_provider.dart';
 import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_colors.dart';
 import 'presentation/global/theme/app_theme.dart';
-import 'presentation/pages/store_entry_page.dart';
+import 'presentation/pages/customer/business_entry_page.dart';
 import 'presentation/pages/super_admin/super_admin_home.dart';
-import 'presentation/pages/admin_store/admin_store_home.dart';
+import 'presentation/pages/business/admin_business_home.dart';
 import 'data/models/auth/user_model.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -42,7 +41,6 @@ class ZEcommerceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
@@ -51,19 +49,17 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => BusinessProvider()),
-        ChangeNotifierProvider(create: (_) => UserVisitsProvider()),
         ChangeNotifierProvider(create: (_) => OfferProvider()),
-        ChangeNotifierProvider(create: (_) => SuperAdminStoresProvider()),
         ChangeNotifierProvider(create: (_) => BrandProvider()),
       ],
       child: Consumer3<SettingsProvider, LocaleProvider, BusinessProvider>(
         builder: (context, settings, localeProvider, businessProvider, child) {
           final themeInfo = companyProvider.companySettings?.theme;
-          final primaryColor = themeInfo?.primaryColor != null 
-              ? HexColor.fromHex(themeInfo!.primaryColor) 
+          final primaryColor = themeInfo?.primaryColor != null
+              ? HexColor.fromHex(themeInfo!.primaryColor)
               : null;
-          final secondaryColor = themeInfo?.secondaryColor != null 
-              ? HexColor.fromHex(themeInfo!.secondaryColor) 
+          final secondaryColor = themeInfo?.secondaryColor != null
+              ? HexColor.fromHex(themeInfo!.secondaryColor)
               : null;
           final backgroundColor = themeInfo?.backgroundColor != null
               ? HexColor.fromHex(themeInfo!.backgroundColor)
@@ -77,10 +73,7 @@ class ZEcommerceApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             themeMode: settings.themeMode,
             locale: localeProvider.locale,
-            supportedLocales: const [
-              Locale('en', ''),
-              Locale('ar', ''),
-            ],
+            supportedLocales: const [Locale('en', ''), Locale('ar', '')],
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
@@ -118,24 +111,22 @@ class AppRootRouter extends StatelessWidget {
       builder: (context, authProvider, _) {
         if (authProvider.isLoading) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         final user = authProvider.currentUser;
         if (user == null) {
-          return const StoreEntryPage();
+          return const BusinessEntryPage();
         }
 
         switch (user.role) {
           case UserRole.superAdmin:
             return const SuperAdminHome();
-          case UserRole.companyOwner:
+          case UserRole.businessOwner:
             return const AdminStore();
           case UserRole.customer:
-            return const StoreEntryPage();
+            return const BusinessEntryPage();
         }
       },
     );

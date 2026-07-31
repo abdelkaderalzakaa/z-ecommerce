@@ -7,9 +7,9 @@ class UserModel {
   final String name;
   final String email;
   final UserRole role;
-  final String? businessId; // Required only for companyOwner
+  final String? businessId; // Required only for businessOwner
   final String phoneNumber;
-  final String avatarUrl ;
+  final String avatarUrl;
   final DateTime createdAt;
 
   UserModel({
@@ -18,7 +18,7 @@ class UserModel {
     required this.email,
     this.role = UserRole.customer,
     this.businessId,
-   required this.phoneNumber,
+    required this.phoneNumber,
     this.avatarUrl = "",
     required this.createdAt,
   });

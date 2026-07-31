@@ -1,4 +1,4 @@
-import 'package:z_ecommerce/presentation/pages/offers_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/offer/offers_page.dart';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +15,7 @@ import '../../../global/locale_provider.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
-import 'package:z_ecommerce/presentation/pages/categories_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 
 class HeaderHome extends StatefulWidget implements PreferredSizeWidget {
   final void Function(String section) onNavTap;

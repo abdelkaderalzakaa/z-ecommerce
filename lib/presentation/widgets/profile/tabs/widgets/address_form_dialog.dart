@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
 import '../../../../../../data/models/common/address_model.dart';
+import '../../../../../../data/providers/customer_provider.dart';
 import '../../../../../../data/providers/auth_provider.dart';
 import '../../../../global/translate/app_localizations.dart';
 import '../../../../global/translate/translation_keys.dart';
+import '../../../../global/translate/localized_string.dart';
 
 class AddressFormDialog extends StatefulWidget {
   final AddressModel? initialAddress;
@@ -29,12 +31,12 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
   @override
   void initState() {
     super.initState();
-    _labelController = TextEditingController(text: widget.initialAddress?.label ?? '');
+    _labelController = TextEditingController(text: widget.initialAddress?.title ?? '');
     _streetController = TextEditingController(text: widget.initialAddress?.street ?? '');
-    _cityController = TextEditingController(text: widget.initialAddress?.city ?? '');
-    _stateController = TextEditingController(text: widget.initialAddress?.state ?? '');
-    _zipController = TextEditingController(text: widget.initialAddress?.zipCode ?? '');
-    _countryController = TextEditingController(text: widget.initialAddress?.country ?? '');
+    _cityController = TextEditingController(text: widget.initialAddress?.city.ar ?? '');
+    _stateController = TextEditingController(text: widget.initialAddress?.region.ar ?? '');
+    _zipController = TextEditingController(text: widget.initialAddress?.postalCode ?? '');
+    _countryController = TextEditingController(text: widget.initialAddress?.country.ar ?? '');
   }
 
   @override
@@ -50,21 +52,38 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
 
   void _saveAddress() {
     if (_formKey.currentState!.validate()) {
+      final titleStr = _labelController.text.trim().isEmpty ? 'العنوان' : _labelController.text.trim();
+      final streetStr = _streetController.text.trim();
+      final cityStr = _cityController.text.trim();
+      final regionStr = _stateController.text.trim();
+      final postalStr = _zipController.text.trim();
+      final countryStr = _countryController.text.trim();
+
       final newAddress = AddressModel(
-        id: widget.initialAddress?.id,
-        label: _labelController.text.trim().isEmpty ? null : _labelController.text.trim(),
-        street: _streetController.text.trim(),
-        city: _cityController.text.trim(),
-        state: _stateController.text.trim(),
-        zipCode: _zipController.text.trim(),
-        country: _countryController.text.trim(),
+        id: widget.initialAddress?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        title: titleStr,
+        street: streetStr,
+        building: widget.initialAddress?.building ?? '',
+        city: LocalizedString(ar: cityStr, en: cityStr),
+        region: LocalizedString(ar: regionStr, en: regionStr),
+        country: LocalizedString(ar: countryStr, en: countryStr),
+        postalCode: postalStr,
       );
 
-      final authProvider = context.read<AuthProvider>();
-      if (widget.initialAddress == null) {
-        authProvider.addAddress(newAddress);
-      } else {
-        authProvider.updateAddress(newAddress);
+      final customer = context.read<AuthProvider>().currentCustomer;
+      if (customer != null) {
+        final currentAddresses = List<AddressModel>.from(customer.addresses);
+        if (widget.initialAddress == null) {
+          currentAddresses.add(newAddress);
+        } else {
+          final idx = currentAddresses.indexWhere((a) => a.id == newAddress.id);
+          if (idx >= 0) {
+            currentAddresses[idx] = newAddress;
+          } else {
+            currentAddresses.add(newAddress);
+          }
+        }
+        context.read<CustomerProvider>().updateAddresses(customer.id, currentAddresses);
       }
       
       Navigator.pop(context);

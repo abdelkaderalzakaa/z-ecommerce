@@ -6,7 +6,7 @@ import '../../../data/providers/category_provider.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
-import '../../pages/categories_page.dart';
+import '../../pages/customer/categories_page.dart';
 import '../common/product_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';

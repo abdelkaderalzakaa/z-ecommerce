@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/company/company_settings_model.dart';
+
 import 'package:z_ecommerce/data/models/order/invoice_model.dart';
+import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
-import 'package:z_ecommerce/data/providers/super_admin_stores_provider.dart';
+import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -18,12 +19,14 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
         final theme = Theme.of(context);
 
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               Icon(Icons.sync_alt_rounded, color: theme.primaryColor),
               const SizedBox(width: 10),
-              Text('تغيير حالة الطلب #${invoice.invoiceId}'),
+              Text('تغيير حالة الطلب #${invoice.id}'),
             ],
           ),
           content: Column(
@@ -67,10 +70,12 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
             ElevatedButton.icon(
               onPressed: () {
                 final provider = context.read<InvoiceProvider>();
-                final index = provider.invoices.indexWhere((inv) => inv.invoiceId == invoice.invoiceId);
+                final index = provider.invoices.indexWhere(
+                  (inv) => inv.id == invoice.id,
+                );
                 if (index != -1) {
                   final updated = InvoiceModel(
-                    invoiceId: invoice.invoiceId,
+                    id: invoice.id,
                     storeId: invoice.storeId,
                     items: invoice.items,
                     tax: invoice.tax,
@@ -83,7 +88,11 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
                 }
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('تم تحديث حالة الطلب إلى "$selectedStatus" بنجاح')),
+                  SnackBar(
+                    content: Text(
+                      'تم تحديث حالة الطلب إلى "$selectedStatus" بنجاح',
+                    ),
+                  ),
                 );
               },
               icon: const Icon(Icons.check, size: 18),
@@ -97,7 +106,7 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
 }
 
 /// Interactive Store Status Update Dialog
-void showStoreStatusDialog(BuildContext context, CompanySettingsModel store) {
+void showStoreStatusDialog(BuildContext context, BusinessModel store) {
   String selectedStatus = store.status ?? 'Active';
 
   showDialog(
@@ -107,12 +116,14 @@ void showStoreStatusDialog(BuildContext context, CompanySettingsModel store) {
         final theme = Theme.of(context);
 
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: Row(
             children: [
               Icon(Icons.storefront_rounded, color: theme.primaryColor),
               const SizedBox(width: 10),
-              Text('تحديث حالة المتجر "${store.name.get(context)}"'),
+              Text('تحديث حالة المتجر "${store.localization.name.get(context)}"'),
             ],
           ),
           content: Column(
@@ -148,11 +159,15 @@ void showStoreStatusDialog(BuildContext context, CompanySettingsModel store) {
             ),
             ElevatedButton.icon(
               onPressed: () {
-                final provider = context.read<SuperAdminStoresProvider>();
+                final provider = context.read<SuperAdminProvider>();
                 provider.updateStoreStatus(store.id, selectedStatus);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('تم تحديث حالة المتجر إلى "$selectedStatus" بنجاح')),
+                  SnackBar(
+                    content: Text(
+                      'تم تحديث حالة المتجر إلى "$selectedStatus" بنجاح',
+                    ),
+                  ),
                 );
               },
               icon: const Icon(Icons.check, size: 18),

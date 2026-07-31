@@ -8,7 +8,7 @@ import '../../../../global/core/constants/app_constants.dart';
 import '../../../../global/translate/app_localizations.dart';
 import '../../../../global/translate/translation_keys.dart';
 import '../../../../global/core/responsive/responsive_layout.dart';
-import 'package:z_ecommerce/presentation/pages/profile_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/profile_customer/profile_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 
 class AccountHeaderIcon extends StatelessWidget {
