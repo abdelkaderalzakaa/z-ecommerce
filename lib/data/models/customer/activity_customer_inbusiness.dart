@@ -58,4 +58,17 @@ class ActivityCustomerInBusiness {
       lastSeen: lastSeen ?? this.lastSeen,
     );
   }
+
+  /// إنشاء كائن ActivityCustomerInBusiness فارغ بقيم افتراضية
+  factory ActivityCustomerInBusiness.empty() {
+    final now = DateTime.now();
+    return ActivityCustomerInBusiness(
+      businessId: '',
+      visitsCount: 0,
+      ordersCount: 0,
+      timeSpentSeconds: 0,
+      createdAt: now,
+      lastSeen: now,
+    );
+  }
 }

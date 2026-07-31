@@ -1,113 +1,202 @@
-import 'package:flutter/material.dart';
-import '../models/offer_model.dart';
-import '../fake_data/offers.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:z_ecommerce/data/models/product/offer_model.dart';
+import 'package:z_ecommerce/data/services/offer_service.dart';
 
+/// 🎁 OfferProvider - إدارة العروض والخصومات والبنرات الترويجية في التطبيق
 class OfferProvider extends ChangeNotifier {
-  List<OfferModel> _offers = [];
+  final OfferService _offerService = OfferService();
 
-  OfferProvider() {
-    _loadOffers();
-  }
+  List<OfferModel> _activeOffers = [];
+  List<OfferModel> _storeOffers = [];
+  OfferModel? _appliedCoupon;
 
-  void _loadOffers() {
-    _offers = fakeOffers;
+  bool _isLoading = false;
+  String? _errorMessage;
+  StreamSubscription<List<OfferModel>>? _offersSubscription;
+
+  // Getters
+  List<OfferModel> get activeOffers => _activeOffers;
+  List<OfferModel> get storeOffers => _storeOffers;
+  OfferModel? get appliedCoupon => _appliedCoupon;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  // ==========================================
+  // ⚡ 1. Real-time Streams Setup
+  // ==========================================
+
+  /// الاستماع لكافة العروض النشطة في المنصة (للبنرات الترويجية)
+  void listenToActiveOffers() {
+    _isLoading = true;
     notifyListeners();
-  }
 
-  List<OfferModel> get allOffers => _offers;
-  List<OfferModel> get offers => _offers;
-
-  // ==================== CRUD OPERATIONS ====================
-
-  void addOffer(OfferModel offer) {
-    _offers.insert(0, offer);
-    notifyListeners();
-  }
-
-  void updateOffer(OfferModel offer) {
-    final index = _offers.indexWhere((o) => o.id == offer.id);
-    if (index != -1) {
-      _offers[index] = offer;
-      notifyListeners();
-    }
-  }
-
-  void deleteOffer(String offerId) {
-    _offers.removeWhere((o) => o.id == offerId);
-    notifyListeners();
-  }
-
-  List<OfferModel> getActiveOffers(String businessId) {
-    return _offers
-        .where((o) => o.isValid && o.businessId == businessId)
-        .toList();
-  }
-
-  OfferModel? getOfferById(String businessId, String offerId) {
-    try {
-      return getActiveOffers(businessId).firstWhere((o) => o.id == offerId);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  OfferModel? getOfferForProduct(String businessId, String productId) {
-    try {
-      return getActiveOffers(businessId).firstWhere(
-        (o) =>
-            (o.type == 'product_gift' || o.type == 'buy_x_get_y') &&
-            (o.productId == productId ||
-                (o.productIds != null && o.productIds!.contains(productId))),
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  double calculateDiscount(
-    String businessId,
-    double subtotal,
-    List<String> cartProductIds,
-    String? couponCode,
-  ) {
-    double totalDiscount = 0;
-
-    for (var offer in getActiveOffers(businessId)) {
-      if (offer.type == 'percentage_discount' || offer.type == 'clearance') {
-        if (offer.productIds != null &&
-            offer.productIds!.any((id) => cartProductIds.contains(id))) {
-          // For simplicity, applying discount to the whole subtotal if any product matches. In a real app, calculate per item.
-          totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
-        } else if (offer.productIds == null) {
-          totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
-        }
-      } else if (offer.type == 'fixed_discount') {
-        if (offer.minOrderAmount != null && subtotal >= offer.minOrderAmount!) {
-          totalDiscount += offer.discountAmount ?? 0;
-        } else if (offer.minOrderAmount == null) {
-          totalDiscount += offer.discountAmount ?? 0;
-        }
-      } else if (offer.type == 'coupon' &&
-          couponCode != null &&
-          offer.couponCode == couponCode) {
-        if (offer.discountPercent != null) {
-          totalDiscount += subtotal * ((offer.discountPercent ?? 0) / 100);
-        } else if (offer.discountAmount != null) {
-          if (offer.minOrderAmount == null ||
-              subtotal >= offer.minOrderAmount!) {
-            totalDiscount += offer.discountAmount ?? 0;
-          }
-        }
-      }
-    }
-    return totalDiscount;
-  }
-
-  bool hasFreeShipping(String businessId, double subtotal) {
-    return getActiveOffers(businessId).any(
-      (offer) =>
-          offer.type == 'free_shipping' &&
-          (offer.minOrderAmount == null || subtotal >= offer.minOrderAmount!),
+    _offersSubscription?.cancel();
+    _offersSubscription = _offerService.streamActiveOffers().listen(
+      (offers) {
+        _activeOffers = offers;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
     );
+  }
+
+  /// الاستماع لعروض متجر محدد (`businessId`)
+  void listenToStoreOffers(String businessId) {
+    _isLoading = true;
+    notifyListeners();
+
+    _offersSubscription?.cancel();
+    _offersSubscription = _offerService.streamOffersByStore(businessId).listen(
+      (offers) {
+        _storeOffers = offers;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  // ==========================================
+  // 🏷️ 2. Coupon Validation & Business Logic
+  // ==========================================
+
+  /// تطبيق كود الخصم (Coupon Code) على السلة
+  Future<bool> applyCouponCode(String code, String businessId, double cartTotal) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final offer = await _offerService.getOfferByCouponCode(code, businessId);
+      if (offer != null) {
+        if (offer.minOrderAmount != null && cartTotal < offer.minOrderAmount!) {
+          _errorMessage = 'الحد الأدنى لاستخدام الكوبون هو ${offer.minOrderAmount}';
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        }
+        _appliedCoupon = offer;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'كوبون الخصم غير صحيح أو منتهي الصلاحية';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// إزالة الكوبون المطبق
+  void removeCoupon() {
+    _appliedCoupon = null;
+    notifyListeners();
+  }
+
+  // ==========================================
+  // ✏️ 3. CRUD Actions for Business Owners
+  // ==========================================
+
+  /// ➕ إضافة عرض جديد
+  Future<bool> addOffer(OfferModel offer) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final docId = await _offerService.addOffer(offer);
+      if (docId != null) {
+        final newOffer = OfferModel.fromMap({...offer.toMap(), 'id': docId});
+        _storeOffers.add(newOffer);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// ✏️ تحديث عرض قائم
+  Future<bool> updateOffer(OfferModel offer) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final success = await _offerService.updateOffer(offer);
+      if (success) {
+        final index = _storeOffers.indexWhere((o) => o.id == offer.id);
+        if (index != -1) _storeOffers[index] = offer;
+
+        final activeIndex = _activeOffers.indexWhere((o) => o.id == offer.id);
+        if (activeIndex != -1) _activeOffers[activeIndex] = offer;
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// 🗑️ حذف عرض
+  Future<bool> deleteOffer(String offerId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final success = await _offerService.deleteOffer(offerId);
+      if (success) {
+        _storeOffers.removeWhere((o) => o.id == offerId);
+        _activeOffers.removeWhere((o) => o.id == offerId);
+        if (_appliedCoupon?.id == offerId) {
+          _appliedCoupon = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _offersSubscription?.cancel();
+    super.dispose();
   }
 }

@@ -7,7 +7,7 @@ import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/logo.dar
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/cart_header_icon.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/account_header_icon.dart';
 import '../../../../data/providers/cart_provider.dart';
-import '../../../../data/providers/company_provider.dart';
+import '../../../../data/providers/business_provider.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../global/settings_provider.dart';

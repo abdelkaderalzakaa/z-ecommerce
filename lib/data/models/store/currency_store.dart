@@ -36,4 +36,16 @@ class CurrencyStore {
       'isPrimary': isPrimary,
     };
   }
+
+  /// إنشاء كائن CurrencyStore فارغ بقيم افتراضية
+  factory CurrencyStore.empty() {
+    return CurrencyStore(
+      id: 'curr_usd',
+      code: 'USD',
+      symbol: '\$',
+      name: 'US Dollar',
+      exchangeRate: 1.0,
+      isPrimary: true,
+    );
+  }
 }

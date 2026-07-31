@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../data/providers/cart_provider.dart';
 import '../../data/providers/invoice_provider.dart';
 import '../../data/providers/auth_provider.dart';
-import '../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 import '../../data/models/common/address_model.dart';
 import '../../data/models/company/company_settings_model.dart';
 import '../global/core/constants/app_constants.dart';

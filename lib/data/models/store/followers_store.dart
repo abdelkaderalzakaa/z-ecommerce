@@ -34,4 +34,13 @@ class FollowersStore {
       'followedAt': followedAt.toIso8601String(),
     };
   }
+
+  /// إنشاء كائن FollowersStore فارغ بقيم افتراضية
+  factory FollowersStore.empty() {
+    return FollowersStore(
+      id: '',
+      userId: '',
+      followedAt: DateTime.now(),
+    );
+  }
 }

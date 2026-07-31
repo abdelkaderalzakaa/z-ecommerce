@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/providers/company_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import '../../../data/providers/offer_provider.dart';
 import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
@@ -73,8 +73,11 @@ class OffersPage extends StatelessWidget {
             Consumer<OfferProvider>(
               builder: (context, provider, child) {
                 final businessId =
-                    context.watch<CompanyProvider>().companySettings?.id;
-                var offers = provider.getActiveOffers(businessId);
+                    context.watch<BusinessProvider>().selectedBusiness?.id;
+                var offers = provider.activeOffers;
+                if (businessId != null) {
+                  offers = offers.where((o) => o.businessId == businessId).toList();
+                }
 
                 // Filter by offerType if provided
                 if (offerType != null) {

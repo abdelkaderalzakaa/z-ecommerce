@@ -5,7 +5,7 @@ import 'package:z_ecommerce/data/models/product/category_model.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/data/providers/brand_provider.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
-import 'package:z_ecommerce/data/providers/company_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';

@@ -1,103 +1,185 @@
-import 'package:flutter/material.dart';
-import '../models/category_model.dart';
-import '../services/product_category_service.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:z_ecommerce/data/models/product/category_model.dart';
+import 'package:z_ecommerce/data/services/category_and_brand_service.dart';
 
+/// 📁 CategoryProvider - إدارة فئات/تصنيفات المنتجات وربطها بالبزنس والمنصة
 class CategoryProvider extends ChangeNotifier {
-  final ProductCategoryService _categoryService = ProductCategoryService();
+  final CategoryAndBrandService _service = CategoryAndBrandService();
 
   List<CategoryModel> _categories = [];
+  CategoryModel? _selectedCategory;
   bool _isLoading = false;
-  String? _error;
+  String? _errorMessage;
 
+  StreamSubscription<List<CategoryModel>>? _categoriesSubscription;
+
+  // Getters
   List<CategoryModel> get categories => _categories;
+  CategoryModel? get selectedCategory => _selectedCategory;
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  String? get errorMessage => _errorMessage;
 
-  CategoryProvider() {
-    fetchCategories();
+  // ==========================================
+  // ⚡ 1. Real-time Streams Setup
+  // ==========================================
+
+  /// الاستماع لفئات متجر محدد (`businessId`)
+  void listenToCategoriesByStore(String businessId) {
+    _isLoading = true;
+    notifyListeners();
+
+    _categoriesSubscription?.cancel();
+    _categoriesSubscription = _service.streamCategoriesByStore(businessId).listen(
+      (categoriesList) {
+        _categories = categoriesList;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
-  Future<void> fetchCategories([String? businessId]) async {
+  /// الاستماع لجميع الفئات في المنصة
+  void listenToAllCategories() {
     _isLoading = true;
-    _error = null;
+    notifyListeners();
+
+    _categoriesSubscription?.cancel();
+    _categoriesSubscription = _service.streamAllCategories().listen(
+      (categoriesList) {
+        _categories = categoriesList;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  // ==========================================
+  // 🔍 2. Queries & Actions
+  // ==========================================
+
+  /// جلب الفئات لمتجر معين أو المنصة عامة
+  Future<void> fetchCategories({String? businessId}) async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
-      final realCategories = businessId != null
-          ? await _categoryService.getCategoriesBybusinessId(businessId)
-          : await _categoryService.getAllCategories();
-
-      _categories = realCategories;
-      _isLoading = false;
-      notifyListeners();
+      _categories = await _service.getCategories(businessId: businessId);
     } catch (e) {
-      debugPrint('Error fetching categories: $e');
-      _error = e.toString();
-      _categories = [];
+      _errorMessage = e.toString();
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  CategoryModel? getCategoryById(String id) {
-    try {
-      return _categories.firstWhere((c) => c.id == id);
-    } catch (e) {
-      return null;
-    }
+  /// تحديد الفئة المختارة حالياً
+  void selectCategory(CategoryModel? category) {
+    _selectedCategory = category;
+    notifyListeners();
   }
 
+  /// ➕ إضافة فئة جديدة
   Future<bool> addCategory(CategoryModel category) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
     try {
-      final created = await _categoryService.createCategory(category);
-      _categories.insert(0, created);
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      final id = await _service.addCategory(category);
+      if (id != null) {
+        final newCategory = CategoryModel(
+          id: id,
+          businessId: category.businessId,
+          label: category.label,
+          bgColor: category.bgColor,
+          icon: category.icon,
+        );
+        _categories.add(newCategory);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
   }
 
+  /// ✏️ تحديث فئة قائمة
   Future<bool> updateCategory(CategoryModel category) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
     try {
-      await _categoryService.updateCategory(category.id, category.toJson());
-      final index = _categories.indexWhere((c) => c.id == category.id);
-      if (index != -1) {
-        _categories[index] = category;
+      final success = await _service.updateCategory(category);
+      if (success) {
+        final index = _categories.indexWhere((c) => c.id == category.id);
+        if (index != -1) {
+          _categories[index] = category;
+        }
+        if (_selectedCategory?.id == category.id) {
+          _selectedCategory = category;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
       }
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
   }
 
+  /// 🗑️ حذف فئة
   Future<bool> deleteCategory(String categoryId) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
     try {
-      await _categoryService.deleteCategory(categoryId);
-      _categories.removeWhere((c) => c.id == categoryId);
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      final success = await _service.deleteCategory(categoryId);
+      if (success) {
+        _categories.removeWhere((c) => c.id == categoryId);
+        if (_selectedCategory?.id == categoryId) {
+          _selectedCategory = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
+  }
+
+  @override
+  void dispose() {
+    _categoriesSubscription?.cancel();
+    super.dispose();
   }
 }

@@ -18,7 +18,7 @@ class UserModel {
     required this.email,
     this.role = UserRole.customer,
     this.businessId,
-    this.phoneNumber,
+   required this.phoneNumber,
     this.avatarUrl = "",
     required this.createdAt,
   });
@@ -81,5 +81,16 @@ class UserModel {
 
   Map<String, dynamic> toMap() => toJson();
 
-  avatarUrl اذا لم يكن هناك صورة  فستكون صورةافتراضيةحسب الدور 
+  /// إنشاء كائن UserModel فارغ بقيم افتراضية
+  factory UserModel.empty() {
+    return UserModel(
+      id: '',
+      name: '',
+      email: '',
+      role: UserRole.customer,
+      phoneNumber: '',
+      avatarUrl: '',
+      createdAt: DateTime.now(),
+    );
+  }
 }

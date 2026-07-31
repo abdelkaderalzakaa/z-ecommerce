@@ -6,7 +6,7 @@ import '../widgets/common/footer_section.dart';
 import '../widgets/common/headers/widgets/top_title.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 import '../widgets/product_details/product_gallery.dart';
 import '../widgets/product_details/product_info.dart';
 import '../global/translate/app_localizations.dart';
@@ -17,7 +17,7 @@ import '../../../data/models/product/product_model.dart';
 import 'package:z_ecommerce/presentation/pages/product_details_page.dart';
 
 class ProductDetailsPage extends StatelessWidget {
-  final Product product;
+  final ProductModel product;
   const ProductDetailsPage({super.key, required this.product});
 
   @override

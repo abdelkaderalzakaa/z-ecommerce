@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+
 //// هذا المودل الذي يستقبل معلومات الثيم من الداتا بيز
-/// وتاثر على جميع واجهات السوبر ادمن وايضا على واجهة الرئيسية وايضا واجهات المصادقة 
+/// وتاثر على جميع واجهات السوبر ادمن وايضا على واجهة الرئيسية وايضا واجهات المصادقة
 /// هذا المودل يجب ان يكون موجود في جميع التطبيقات التي تعمل في النظام
 /// ويكون موجود في الداتا بيز
 /// ويكون موجود في العرض
 /// ويكون موجود في المعالجة
-class ThemeSuperAdmin {
+class ThemeAdmin {
   final String primaryColor;
   final String secondaryColor;
   final String backgroundColor;
@@ -21,10 +22,8 @@ class ThemeSuperAdmin {
 
   final String? logoUrl;
   final String? coverBannerUrl;
-  final bool isDarkModeEnabled;
 
-
-  const ThemeSuperAdmin({
+  const ThemeAdmin({
     required this.primaryColor,
     required this.secondaryColor,
     this.backgroundColor = '#F9FAFB',
@@ -37,7 +36,6 @@ class ThemeSuperAdmin {
     this.inputRadius = 10.0,
     this.logoUrl,
     this.coverBannerUrl,
-    this.isDarkModeEnabled = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -54,12 +52,11 @@ class ThemeSuperAdmin {
       'inputRadius': inputRadius,
       'logoUrl': logoUrl,
       'coverBannerUrl': coverBannerUrl,
-      'isDarkModeEnabled': isDarkModeEnabled,
     };
   }
 
-  factory ThemeSuperAdmin.fromJson(Map<String, dynamic> json) {
-    return ThemeSuperAdmin(
+  factory ThemeAdmin.fromJson(Map<String, dynamic> json) {
+    return ThemeAdmin(
       primaryColor: json['primaryColor'] ?? '#4F46E5',
       secondaryColor: json['secondaryColor'] ?? '#10B981',
       backgroundColor: json['backgroundColor'] ?? '#F9FAFB',
@@ -72,7 +69,6 @@ class ThemeSuperAdmin {
       inputRadius: (json['inputRadius'] ?? 10.0).toDouble(),
       logoUrl: json['logoUrl'],
       coverBannerUrl: json['coverBannerUrl'],
-      isDarkModeEnabled: json['isDarkModeEnabled'] ?? false,
     );
   }
 
@@ -81,10 +77,14 @@ class ThemeSuperAdmin {
   double get raduisCard => cardRadius;
 
   // Flutter Helper Getters
-  Color get primaryColorValue => _parseColor(primaryColor, const Color(0xFF4F46E5));
-  Color get secondaryColorValue => _parseColor(secondaryColor, const Color(0xFF10B981));
-  Color get backgroundColorValue => _parseColor(backgroundColor, const Color(0xFFF9FAFB));
-  Color get surfaceColorValue => _parseColor(surfaceColor, const Color(0xFFFFFFFF));
+  Color get primaryColorValue =>
+      _parseColor(primaryColor, const Color(0xFF4F46E5));
+  Color get secondaryColorValue =>
+      _parseColor(secondaryColor, const Color(0xFF10B981));
+  Color get backgroundColorValue =>
+      _parseColor(backgroundColor, const Color(0xFFF9FAFB));
+  Color get surfaceColorValue =>
+      _parseColor(surfaceColor, const Color(0xFFFFFFFF));
   Color get textColorValue => _parseColor(textColor, const Color(0xFF111827));
 
   BorderRadius get buttonBorderRadius => BorderRadius.circular(buttonRadius);
@@ -102,7 +102,26 @@ class ThemeSuperAdmin {
     }
   }
 
-  factory ThemeSuperAdmin.fromMap(Map<String, dynamic> map) => ThemeSuperAdmin.fromJson(map);
+  factory ThemeAdmin.fromMap(Map<String, dynamic> map) =>
+      ThemeAdmin.fromJson(map);
 
   Map<String, dynamic> toMap() => toJson();
+
+  /// إنشاء كائن ThemeAdmin فارغ بقيم افتراضية
+  factory ThemeAdmin.empty() {
+    return const ThemeAdmin(
+      primaryColor: '',
+      secondaryColor: '',
+      backgroundColor: '',
+      surfaceColor: '',
+      textColor: '',
+      fontFamily: '',
+      fontScale: 0,
+      buttonRadius: 0,
+      cardRadius: 0,
+      inputRadius: 0,
+      logoUrl: '',
+      coverBannerUrl: '',
+    );
+  }
 }

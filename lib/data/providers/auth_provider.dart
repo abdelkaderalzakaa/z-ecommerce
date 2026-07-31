@@ -1,116 +1,68 @@
 import 'package:flutter/material.dart';
-import '../models/user_model.dart';
-import '../models/address_model.dart';
-import '../services/auth_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
+import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
+import 'package:z_ecommerce/data/models/store/business_model.dart';
+import 'package:z_ecommerce/data/models/store/currency_store.dart';
+import 'package:z_ecommerce/data/models/super_admin/super_admin_model.dart';
+import 'package:z_ecommerce/data/models/customer/customer_model.dart';
+import 'package:z_ecommerce/data/models/common/address_model.dart';
+import 'package:z_ecommerce/data/services/auth_service.dart';
+import 'package:z_ecommerce/data/services/user_service.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
-class AuthProvider extends ChangeNotifier {
+class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
+
   UserModel? _currentUser;
-  bool _isLoading = true;
+  BusinessModel? _currentBusiness;
+  SuperAdminModel? _currentSuperAdmin;
+  CustomerModel? _currentCustomer;
+
+  bool _isLoading = false;
   String? _errorMessage;
 
+  // Getters
   UserModel? get currentUser => _currentUser;
-  bool get isAuthenticated => _currentUser != null;
+  BusinessModel? get currentBusiness => _currentBusiness;
+  SuperAdminModel? get currentSuperAdmin => _currentSuperAdmin;
+  CustomerModel? get currentCustomer => _currentCustomer;
+
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool get isAuthenticated => _currentUser != null;
 
   AuthProvider() {
-    _loadStoredUser();
+    _initAuthStateListener();
   }
 
-  Future<void> _loadStoredUser() async {
-    _isLoading = true;
-    try {
-      final firebaseUser = _authService.currentUser;
+  /// الاستماع لمظلة حالة المصادقة من Firebase (Auto Sync)
+  void _initAuthStateListener() {
+    FirebaseAuth.instance.authStateChanges().listen((User? firebaseUser) async {
       if (firebaseUser != null) {
-        _currentUser = await _authService.getUserProfile(firebaseUser.uid);
+        final existingUser = await _userService.getUserById(firebaseUser.uid);
+        if (existingUser != null) {
+          await setCurrentUser(existingUser);
+        } else {
+          final newUser = _authService.mapFirebaseUserToUserModel(firebaseUser);
+          await _userService.saveUser(newUser);
+          await setCurrentUser(newUser);
+        }
+      } else {
+        _currentUser = null;
+        _currentBusiness = null;
+        _currentSuperAdmin = null;
+        _currentCustomer = null;
+        notifyListeners();
       }
-    } catch (e) {
-      debugPrint('Error loading user session: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    });
   }
 
-  Future<bool> login(String email, String password, {bool rememberMe = false}) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      // 1. Try Real Firebase Login
-      _currentUser = await _authService.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      if (rememberMe) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('saved_email', email);
-      }
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (firebaseError) {
-      _isLoading = false;
-      _errorMessage = firebaseError.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false;
-    }
-  }
-
-  /// Login or Register with Google Account
-  Future<bool> loginWithGoogle() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      _currentUser = await _authService.signInWithGoogle();
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false;
-    }
-  }
-
-  /// Customer Registration Priority
-  Future<bool> register(String name, String email, String password, {String? phoneNumber}) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      // Create Customer in Firebase Auth & Firestore
-      _currentUser = await _authService.signUpCustomer(
-        name: name,
-        email: email,
-        password: password,
-        phoneNumber: phoneNumber,
-      );
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
-      notifyListeners();
-      return false;
-    }
-  }
-
-  /// Create Super Admin Account
-  Future<bool> createSuperAdminAccount({
-    required String name,
-    required String email,
+  /// 1. تسجيل الدخول بواسطة البريد الإلكتروني وكلمة المرور عبر Firebase
+  Future<bool> login({
+    required String emailOrPhone,
     required String password,
   }) async {
     _isLoading = true;
@@ -118,120 +70,350 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _currentUser = await _authService.createSuperAdminAccount(
-        name: name,
-        email: email,
+      final credential = await _authService.loginWithEmailAndPassword(
+        email: emailOrPhone,
         password: password,
       );
+
+      if (credential?.user != null) {
+        final existingUser = await _userService.getUserById(credential!.user!.uid);
+        if (existingUser != null) {
+          await setCurrentUser(existingUser);
+        }
+      }
+
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
       return false;
     }
   }
 
-  Future<void> logout() async {
+  /// 2. تسجيل حساب عميل جديد بالبريد الإلكتروني وكلمة المرور
+  Future<bool> registerCustomer({
+    required String name,
+    required String email,
+    required String password,
+    required String phoneNumber,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final credential = await _authService.registerWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (credential?.user != null) {
+        final now = DateTime.now();
+        final user = UserModel(
+          id: credential!.user!.uid,
+          name: name,
+          email: email,
+          phoneNumber: phoneNumber,
+          role: UserRole.customer,
+          createdAt: now,
+        );
+
+        final customer = CustomerModel(
+          user: user,
+          addresses: [],
+          businessActivities: [],
+          createdAt: now,
+        );
+
+        await _userService.saveCustomer(customer);
+        await setCurrentUser(user);
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// 2.1 تسجيل حساب نشاط تجاري/متجر جديد بالبريد الإلكتروني وكلمة المرور
+  Future<bool> registerBusiness({
+    required String ownerName,
+    required String email,
+    required String password,
+    required String phoneNumber,
+    required BusinessType businessType,
+    List<AddressModel> addresses = const [],
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final credential = await _authService.registerWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (credential?.user != null) {
+        final now = DateTime.now();
+        final ownerUser = UserModel(
+          id: credential!.user!.uid,
+          name: ownerName,
+          email: email,
+          phoneNumber: phoneNumber,
+          role: UserRole.businessOwner,
+          businessId: credential.user!.uid,
+          createdAt: now,
+        );
+
+        final business = BusinessModel(
+          owner: ownerUser,
+          businessType: businessType,
+          addAddress: addresses,
+          theme: ThemeAdmin.empty(),
+          localization: LocalizationAdmin.empty(),
+          currency: CurrencyStore.empty(),
+          status: 'بانتظار التفعيل',
+          createdAt: now,
+        );
+
+        await _userService.saveBusiness(business);
+        await setCurrentUser(ownerUser);
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// 3. تسجيل الدخول بواسطة حساب Google (Google Sign-In)
+  Future<bool> signInWithGoogle() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final credential = await _authService.signInWithGoogle();
+      if (credential?.user != null) {
+        final firebaseUser = credential!.user!;
+        var user = await _userService.getUserById(firebaseUser.uid);
+
+        if (user == null) {
+          user = _authService.mapFirebaseUserToUserModel(firebaseUser);
+          final customer = CustomerModel(
+            user: user,
+            addresses: [],
+            businessActivities: [],
+            createdAt: DateTime.now(),
+          );
+          await _userService.saveCustomer(customer);
+        }
+
+        await setCurrentUser(user);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// 4. إرسال رابط إعادة تعيين كلمة المرور
+  Future<bool> sendPasswordResetEmail(String email) async {
+    try {
+      await _authService.sendPasswordResetEmail(email);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// تعيين المستخدم الحالي وتحديث بياناته التخصصية حسب الدور
+  Future<void> setCurrentUser(UserModel user) async {
+    _currentUser = user;
     _isLoading = true;
     notifyListeners();
 
     try {
-      await _authService.signOut();
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('saved_email');
+      if (user.role == UserRole.businessOwner && user.businessId != null) {
+        _currentBusiness = await _userService.getBusinessById(user.businessId!);
+      } else if (user.role == UserRole.superAdmin) {
+        _currentSuperAdmin = await _userService.getSuperAdminById(user.id);
+      } else if (user.role == UserRole.customer) {
+        _currentCustomer = await _userService.getCustomerById(user.id);
+      }
     } catch (e) {
-      debugPrint('Error removing user session: $e');
+      debugPrint('Error setting detailed user: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _currentUser = null;
-    _isLoading = false;
-    notifyListeners();
   }
 
-  Future<void> signOut() => logout();
+  /// إضافة عنوان جديد للعميل الحالي
+  Future<void> addAddress(AddressModel address) async {
+    if (_currentCustomer == null && _currentUser != null) {
+      _currentCustomer = CustomerModel(user: _currentUser!, addresses: [address]);
+    } else if (_currentCustomer != null) {
+      final updatedAddresses = List<AddressModel>.from(_currentCustomer!.addresses)..add(address);
+      _currentCustomer = _currentCustomer!.copyWith(addresses: updatedAddresses);
+    }
 
-  Future<bool> updateUserProfile({
-    required String name,
+    if (_currentCustomer != null) {
+      await _userService.saveCustomer(_currentCustomer!);
+      notifyListeners();
+    }
+  }
+
+  /// حذف عنوان للعميل الحالي
+  Future<void> deleteAddress(String addressId) async {
+    if (_currentCustomer != null) {
+      final updatedAddresses = _currentCustomer!.addresses.where((a) => a.id != addressId).toList();
+      _currentCustomer = _currentCustomer!.copyWith(addresses: updatedAddresses);
+      await _userService.saveCustomer(_currentCustomer!);
+      notifyListeners();
+    }
+  }
+
+  /// إضافة أو إزالة منتج من قائمة المفضلة للعميل الحالي
+  Future<void> toggleWishlist(String productId) async {
+    if (_currentCustomer != null) {
+      final currentWishlist = List<String>.from(_currentCustomer!.wishlist);
+      if (currentWishlist.contains(productId)) {
+        currentWishlist.remove(productId);
+      } else {
+        currentWishlist.add(productId);
+      }
+      _currentCustomer = _currentCustomer!.copyWith(wishlist: currentWishlist);
+      notifyListeners();
+      await _userService.updateCustomerWishlist(
+        customerId: _currentCustomer!.id,
+        wishlist: currentWishlist,
+      );
+    }
+  }
+
+  /// 5. تعديل بيانات المستخدم الحالية (تعديل الملف الشخصي)
+  Future<bool> updateProfile({
+    String? name,
     String? phoneNumber,
-    Map<String, String>? socialLinks,
+    String? avatarUrl,
   }) async {
     if (_currentUser == null) return false;
     _isLoading = true;
     notifyListeners();
 
-    final updatedUser = _currentUser!.copyWith(
-      name: name,
-      phoneNumber: phoneNumber,
-      socialLinks: socialLinks,
-    );
-
     try {
-      final Map<String, dynamic> updateData = {
-        'name': name,
-        'phoneNumber': phoneNumber,
-      };
-      if (socialLinks != null) {
-        updateData['socialLinks'] = socialLinks;
-      }
-      await _authService.updateUserProfile(_currentUser!.id, updateData);
+      final updatedUser = _currentUser!.copyWith(
+        name: name,
+        phoneNumber: phoneNumber,
+        avatarUrl: avatarUrl,
+      );
+
+      await _userService.saveUser(updatedUser);
       _currentUser = updatedUser;
+
+      if (_currentCustomer != null) {
+        _currentCustomer = _currentCustomer!.copyWith(user: updatedUser);
+        await _userService.saveCustomer(_currentCustomer!);
+      }
+
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
-      _currentUser = updatedUser;
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// 6. تحديث كلمة المرور
+  Future<bool> updatePassword(String newPassword) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _authService.updatePassword(newPassword);
       _isLoading = false;
       notifyListeners();
       return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 
-  void updateProfile(UserModel updatedUser) {
-    if (_currentUser?.id == updatedUser.id) {
-      _currentUser = updatedUser;
+  /// 7. حذف حساب المستخدم نهائياً من Firebase Auth و Firestore
+  Future<bool> deleteAccount() async {
+    if (_currentUser == null) return false;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final userId = _currentUser!.id;
+      final role = _currentUser!.role;
+
+      // 1. حذف من Firestore
+      await _userService.deleteUserFromFirestore(userId, role);
+
+      // 2. حذف من Firebase Auth
+      await _authService.deleteAccount();
+
+      // 3. مسح الحالة المحلية
+      _currentUser = null;
+      _currentBusiness = null;
+      _currentSuperAdmin = null;
+      _currentCustomer = null;
+
+      _isLoading = false;
       notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 
-  void addAddress(AddressModel address) {
-    if (_currentUser != null) {
-      final updatedAddresses = List<AddressModel>.from(_currentUser!.addresses)..add(address);
-      _currentUser = _currentUser!.copyWith(addresses: updatedAddresses);
-      notifyListeners();
-    }
+  /// تسجيل الخروج
+  Future<void> logout() async {
+    await _authService.signOut();
+    _currentUser = null;
+    _currentBusiness = null;
+    _currentSuperAdmin = null;
+    _currentCustomer = null;
+    notifyListeners();
   }
 
-  void updateAddress(AddressModel updatedAddress) {
-    if (_currentUser != null) {
-      final updatedAddresses = _currentUser!.addresses.map((address) {
-        return address.id == updatedAddress.id ? updatedAddress : address;
-      }).toList();
-      _currentUser = _currentUser!.copyWith(addresses: updatedAddresses);
-      notifyListeners();
-    }
-  }
-
-  void deleteAddress(String addressId) {
-    if (_currentUser != null) {
-      final updatedAddresses = _currentUser!.addresses.where((addr) => addr.id != addressId).toList();
-      _currentUser = _currentUser!.copyWith(addresses: updatedAddresses);
-      notifyListeners();
-    }
-  }
-
-  void toggleWishlist(String productId) {
-    if (_currentUser != null) {
-      final wishlist = List<String>.from(_currentUser!.wishlist);
-      if (wishlist.contains(productId)) {
-        wishlist.remove(productId);
-      } else {
-        wishlist.add(productId);
-      }
-      _currentUser = _currentUser!.copyWith(wishlist: wishlist);
-      notifyListeners();
-    }
-  }
+  /// Alias for signOut
+  Future<void> signOut() => logout();
 }

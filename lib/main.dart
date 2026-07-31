@@ -7,7 +7,7 @@ import 'data/providers/cart_provider.dart';
 import 'data/providers/invoice_provider.dart';
 import 'data/providers/auth_provider.dart';
 import 'presentation/global/settings_provider.dart';
-import 'data/providers/company_provider.dart';
+import 'data/providers/business_provider.dart';
 import 'presentation/global/locale_provider.dart';
 import 'data/providers/user_visits_provider.dart';
 import 'data/providers/offer_provider.dart';
@@ -42,21 +42,22 @@ class ZEcommerceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        ChangeNotifierProvider(create: (_) => CompanyProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => BusinessProvider()),
         ChangeNotifierProvider(create: (_) => UserVisitsProvider()),
         ChangeNotifierProvider(create: (_) => OfferProvider()),
         ChangeNotifierProvider(create: (_) => SuperAdminStoresProvider()),
         ChangeNotifierProvider(create: (_) => BrandProvider()),
       ],
-      child: Consumer3<SettingsProvider, LocaleProvider, CompanyProvider>(
-        builder: (context, settings, localeProvider, companyProvider, child) {
+      child: Consumer3<SettingsProvider, LocaleProvider, BusinessProvider>(
+        builder: (context, settings, localeProvider, businessProvider, child) {
           final themeInfo = companyProvider.companySettings?.theme;
           final primaryColor = themeInfo?.primaryColor != null 
               ? HexColor.fromHex(themeInfo!.primaryColor) 

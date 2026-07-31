@@ -4,7 +4,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
 class ProductOverviewTab extends StatelessWidget {
-  final Product product;
+  final ProductModel product;
 
   const ProductOverviewTab({super.key, required this.product});
 

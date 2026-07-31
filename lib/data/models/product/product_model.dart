@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:z_ecommerce/data/models/product/product_variant.dart';
 import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 
+/// Represents a product in the e-commerce store with dynamic variants.
 class ProductModel {
   // 1. المعرفات والروابط
   final String id;
@@ -22,13 +23,10 @@ class ProductModel {
   final double originalPrice; // السعر الأصلي قبل الخصم
   final int? discountPercent; // نسبة الخصم المئوية (مثل 15%)
 
-  // 5. الخيارات والمتغيرات (Variants)
-  final List<Color> colors; // الألوان المتاحة
-  final List<String> sizes; // المقاسات المتاحة
-  final List<String> attributes; // خصائص إضافية (مثل: ['128GB', 'Leather'])
+  // 5. المتغيرات والخيارات الديناميكية (Variants)
+  final List<ProductVariant> variants;
 
-  // 6. المخزون وحالة المنتج
-  final int stock; // الكمية المتوفرة
+  // 6. حالة المنتج والتفضيل
   final bool isFeatured; // هل المنتج مميز؟
   final bool isTopSelling; // هل المنتج من الأكثر مبيعاً؟
 
@@ -52,10 +50,7 @@ class ProductModel {
     this.thumbnail,
     required this.originalPrice,
     this.discountPercent,
-    this.colors = const [],
-    this.sizes = const [],
-    this.attributes = const [],
-    this.stock = 0,
+    this.variants = const [],
     this.isFeatured = false,
     this.isTopSelling = false,
     this.ratings = const [],
@@ -67,6 +62,32 @@ class ProductModel {
   // 🧮 Dynamic Getters & Helpers
   // ==========================================
 
+  /// إجمالي مخزون المنتج المجمع من كافة المتغيرات
+  int get totalStock {
+    if (variants.isEmpty) return 0;
+    return variants.fold<int>(0, (sum, variant) => sum + variant.stock);
+  }
+
+  /// هل المنتج متوفر (إجمالي المخزون أكبر من 0)
+  bool get isAvailable => totalStock > 0;
+
+  /// السعر الأساسي للمنتج بعد تطبيق الخصم (في حال عدم تحديد متغيّر)
+  double get basePrice {
+    if (!hasDiscount) return originalPrice;
+    return originalPrice * (1 - (discountPercent! / 100));
+  }
+
+  /// حساب السعر لمتغير محدد وتطبيق الخصم عليه إذا كان للمنتج خصم
+  double getPriceForVariant(ProductVariant variant) {
+    if (!hasDiscount) return variant.price;
+    return variant.price * (1 - (discountPercent! / 100));
+  }
+
+  /// قائمة المتغيرات المتوفرة فقط (التي كميتها أكبر من 0)
+  List<ProductVariant> get availableVariants {
+    return variants.where((variant) => variant.stock > 0).toList();
+  }
+
   /// الحصول على الصورة الرئيسية للعرض
   String get displayImage {
     if (thumbnail != null && thumbnail!.isNotEmpty) return thumbnail!;
@@ -76,15 +97,6 @@ class ProductModel {
 
   /// هل يوجد خصم فعلي على المنتج؟
   bool get hasDiscount => discountPercent != null && discountPercent! > 0;
-
-  /// حساب السعر النهائي بعد تطبيق الخصم تلقائياً
-  double get price {
-    if (!hasDiscount) return originalPrice;
-    return originalPrice * (1 - (discountPercent! / 100));
-  }
-
-  /// هل المنتج متاح للبيع حالياً (بناءً على المخزون)
-  bool get isAvailable => stock >= 0;
 
   /// هل المنتج وصل حديثاً؟ (إذا تم إنشاؤه خلال آخر 30 يوماً)
   bool get isNewArrival {
@@ -103,7 +115,7 @@ class ProductModel {
   int get reviewsCount => ratings.length;
 
   // ==========================================
-  // 🔄 Serialization (fromMap, toMap & JSON)
+  // 🔄 Serialization (fromMap & toMap)
   // ==========================================
 
   factory ProductModel.fromMap(Map<String, dynamic> map, {String? docId}) {
@@ -118,19 +130,16 @@ class ProductModel {
       brand: map['brand'],
       images: List<String>.from(map['images'] ?? []),
       thumbnail: map['thumbnail'],
-      originalPrice: (map['originalPrice'] ?? 0.0).toDouble(),
+      originalPrice: (map['originalPrice'] as num? ?? 0.0).toDouble(),
       discountPercent: map['discountPercent'],
-      colors: (map['colors'] as List?)
-              ?.map((c) => Color(c is int ? c : int.parse(c.toString())))
+      variants: (map['variants'] as List<dynamic>?)
+              ?.map((e) => ProductVariant.fromMap(Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
-      sizes: List<String>.from(map['sizes'] ?? []),
-      attributes: List<String>.from(map['attributes'] ?? []),
-      stock: map['stock'] ?? 0,
       isFeatured: map['isFeatured'] ?? false,
       isTopSelling: map['isTopSelling'] ?? false,
       ratings: (map['ratings'] as List<dynamic>?)
-              ?.map((e) => RatedUser.fromMap(e))
+              ?.map((e) => RatedUser.fromMap(Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
       createdAt: map['createdAt'] != null
@@ -156,10 +165,7 @@ class ProductModel {
       'thumbnail': thumbnail,
       'originalPrice': originalPrice,
       'discountPercent': discountPercent,
-      'colors': colors.map((c) => c.value).toList(),
-      'sizes': sizes,
-      'attributes': attributes,
-      'stock': stock,
+      'variants': variants.map((v) => v.toMap()).toList(),
       'isFeatured': isFeatured,
       'isTopSelling': isTopSelling,
       'ratings': ratings.map((r) => r.toMap()).toList(),
@@ -189,10 +195,7 @@ class ProductModel {
     String? thumbnail,
     double? originalPrice,
     int? discountPercent,
-    List<Color>? colors,
-    List<String>? sizes,
-    List<String>? attributes,
-    int? stock,
+    List<ProductVariant>? variants,
     bool? isFeatured,
     bool? isTopSelling,
     List<RatedUser>? ratings,
@@ -212,15 +215,25 @@ class ProductModel {
       thumbnail: thumbnail ?? this.thumbnail,
       originalPrice: originalPrice ?? this.originalPrice,
       discountPercent: discountPercent ?? this.discountPercent,
-      colors: colors ?? this.colors,
-      sizes: sizes ?? this.sizes,
-      attributes: attributes ?? this.attributes,
-      stock: stock ?? this.stock,
+      variants: variants ?? this.variants,
       isFeatured: isFeatured ?? this.isFeatured,
       isTopSelling: isTopSelling ?? this.isTopSelling,
       ratings: ratings ?? this.ratings,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  /// إنشاء كائن ProductModel فارغ بقيم افتراضية
+  factory ProductModel.empty() {
+    return const ProductModel(
+      id: '',
+      businessId: '',
+      categoryId: '',
+      name: '',
+      description: '',
+      category: '',
+      originalPrice: 0.0,
     );
   }
 }

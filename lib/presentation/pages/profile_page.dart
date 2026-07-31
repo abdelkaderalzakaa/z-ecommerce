@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import '../../../../data/providers/auth_provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 import '../widgets/common/headers/header_details.dart';
 import '../widgets/common/footer_section.dart';
 import '../widgets/common/headers/widgets/top_title.dart';

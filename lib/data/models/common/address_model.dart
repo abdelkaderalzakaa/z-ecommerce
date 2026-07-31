@@ -120,4 +120,17 @@ class AddressModel {
       isDefault: isDefault ?? this.isDefault,
     );
   }
+
+  /// إنشاء كائن AddressModel فارغ بقيم افتراضية
+  factory AddressModel.empty() {
+    return AddressModel(
+      id: '',
+      title: '',
+      country: const LocalizedString(ar: '', en: ''),
+      city: const LocalizedString(ar: '', en: ''),
+      region: const LocalizedString(ar: '', en: ''),
+      street: '',
+      building: '',
+    );
+  }
 }

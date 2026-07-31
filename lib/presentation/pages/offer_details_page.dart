@@ -13,7 +13,7 @@ import '../global/translate/translation_keys.dart';
 import '../widgets/common/product_card.dart';
 import '../widgets/common/footer_section.dart';
 import '../widgets/common/headers/header_details.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 
 class OfferDetailsPage extends StatefulWidget {
   final String offerId;
@@ -37,13 +37,12 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-      final businessId =
-          context.read<CompanyProvider>().companySettings?.id;
-      final offer = context.read<OfferProvider>().getOfferById(
-        businessId,
-        widget.offerId,
+      final activeOffers = context.read<OfferProvider>().activeOffers;
+      final offer = activeOffers.firstWhere(
+        (o) => o.id == widget.offerId,
+        orElse: () => OfferModel.empty(),
       );
-      if (offer != null) {
+      if (offer.id.isNotEmpty) {
         final now = DateTime.now();
         if (offer.endDate.isAfter(now)) {
           setState(() {
@@ -67,14 +66,13 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final businessId =
-        context.watch<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-    final offer = context.watch<OfferProvider>().getOfferById(
-      businessId,
-      widget.offerId,
+    final activeOffers = context.watch<OfferProvider>().activeOffers;
+    final offer = activeOffers.firstWhere(
+      (o) => o.id == widget.offerId,
+      orElse: () => OfferModel.empty(),
     );
 
-    if (offer == null) {
+    if (offer.id.isEmpty) {
       return Scaffold(
         appBar: AppBar(),
         body: const Center(child: Text('Offer not found or expired.')),

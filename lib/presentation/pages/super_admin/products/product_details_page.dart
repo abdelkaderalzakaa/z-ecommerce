@@ -38,13 +38,13 @@ class ProductDetailsPage extends StatelessWidget {
           headerMetrics: [
             Chip(
               avatar: const Icon(Icons.attach_money_rounded, size: 16, color: Colors.green),
-              label: Text('\$${product.price.toStringAsFixed(2)}'),
+              label: Text('\$${product.basePrice.toStringAsFixed(2)}'),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             Chip(
               avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
-              label: Text('⭐ ${product.rating.toStringAsFixed(1)}'),
+              label: Text('⭐ ${product.ratings.isNotEmpty ? (product.ratings.map((e) => e.rating).reduce((a, b) => a + b) / product.ratings.length).toStringAsFixed(1) : '0.0'}'),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -62,8 +62,9 @@ class ProductDetailsPage extends StatelessWidget {
             );
           },
           onEdit: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${TranslationKeys.editAddress.tr(context)} "${product.name}"')),
+            changeScreen(
+              context,
+              CreateEditProductPage(product: product),
             );
           },
           onDelete: () {

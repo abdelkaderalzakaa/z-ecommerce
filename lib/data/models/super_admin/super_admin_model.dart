@@ -1,4 +1,5 @@
 import 'package:z_ecommerce/data/models/common/social_media.dart';
+import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
 import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
 import '../auth/user_model.dart';
 
@@ -8,7 +9,7 @@ class SuperAdminModel {
 
   final List<SocialModel> socials;
   final List<BusinessVisitModel> visits; // businessId = "super_admin_system"
-
+  final LocalizationAdmin localizationAdmin;
   // 2. التواريخ
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -19,6 +20,7 @@ class SuperAdminModel {
     this.updatedAt,
     required this.socials,
     required this.visits,
+    required this.localizationAdmin,
   });
 
   // ==========================================
@@ -51,6 +53,9 @@ class SuperAdminModel {
       updatedAt: map['updatedAt'] != null
           ? DateTime.tryParse(map['updatedAt'])
           : null,
+      localizationAdmin: LocalizationAdmin.fromMap(
+        map['localizationAdmin'] ?? {},
+      ),
     );
   }
 
@@ -62,6 +67,7 @@ class SuperAdminModel {
       'visits': visits.map((e) => e.toMap()).toList(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'localizationAdmin': localizationAdmin.toMap(),
     };
   }
 
@@ -71,6 +77,7 @@ class SuperAdminModel {
     List<BusinessVisitModel>? visits,
     DateTime? createdAt,
     DateTime? updatedAt,
+    LocalizationAdmin? localizationAdmin,
   }) {
     return SuperAdminModel(
       user: user ?? this.user,
@@ -78,6 +85,17 @@ class SuperAdminModel {
       visits: visits ?? this.visits,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      localizationAdmin: localizationAdmin ?? this.localizationAdmin,
+    );
+  }
+
+  /// إنشاء كائن SuperAdminModel فارغ بقيم افتراضية
+  factory SuperAdminModel.empty() {
+    return SuperAdminModel(
+      user: UserModel.empty(),
+      socials: const [],
+      visits: const [],
+      localizationAdmin: LocalizationAdmin.empty(),
     );
   }
 }

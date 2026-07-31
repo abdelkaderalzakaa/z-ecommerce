@@ -9,7 +9,7 @@ import 'package:z_ecommerce/presentation/widgets/templates/add_edit_template.dar
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
 
 class CreateEditProductPage extends StatefulWidget {
-  final Product? product;
+  final ProductModel? product;
   final String? businessId;
 
   const CreateEditProductPage({super.key, this.product, this.businessId});
@@ -80,10 +80,10 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
     _descriptionController = TextEditingController(text: p?.description ?? '');
 
     _priceController = TextEditingController(
-      text: p != null ? p.price.toString() : '',
+      text: p != null ? p.basePrice.toString() : '',
     );
     _originalPriceController = TextEditingController(
-      text: p?.originalPrice != null ? p!.originalPrice.toString() : '',
+      text: p != null ? p.originalPrice.toString() : '',
     );
     _discountController = TextEditingController(
       text: p?.discountPercent != null ? p!.discountPercent.toString() : '',
@@ -99,7 +99,7 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
       text: (p != null && p.images.length > 2) ? p.images[2] : '',
     );
 
-    _isNewArrival = p?.isNewArrival ?? false;
+    _isNewArrival = p?.isFeatured ?? false;
     _isTopSelling = p?.isTopSelling ?? false;
 
     if (p != null) {
@@ -157,25 +157,23 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
         ? widget.product!.id
         : 'prd_${timestamp.substring(timestamp.length - 6)}';
 
-    final updatedProduct = Product(
+    final updatedProduct = ProductModel(
       id: productId,
-      businessId: effectivebusinessId,
+      businessId: effectivebusinessId ?? '',
+      categoryId: _categoryController.text.trim(),
       name: _nameController.text.trim(),
-      price: price,
-      originalPrice: origPrice,
-      discountPercent: discount,
       description: _descriptionController.text.trim(),
       category: _categoryController.text.trim(),
       brand: _brandController.text.trim().isNotEmpty
           ? _brandController.text.trim()
           : null,
-      colors: _selectedColors,
-      sizes: _selectedSizes,
       images: imagesList,
-      rating: widget.product?.rating ?? 0.0,
-      reviewsCount: widget.product?.reviewsCount ?? 0,
-      isNewArrival: _isNewArrival,
+      originalPrice: origPrice ?? price,
+      discountPercent: discount,
+      isFeatured: _isNewArrival,
       isTopSelling: _isTopSelling,
+      ratings: widget.product?.ratings ?? [],
+      createdAt: widget.product?.createdAt ?? DateTime.now(),
     );
 
     if (isEdit) {

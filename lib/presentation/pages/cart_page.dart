@@ -11,7 +11,7 @@ import '../../data/providers/cart_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 
 import '../widgets/cart/cart_items_list.dart';
 import '../widgets/cart/order_summary.dart';

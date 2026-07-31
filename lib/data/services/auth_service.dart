@@ -1,406 +1,130 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../models/user_model.dart';
+import 'package:flutter/foundation.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 class AuthService {
-  FirebaseAuth? get _auth =>
-      Firebase.apps.isNotEmpty ? FirebaseAuth.instance : null;
-  FirebaseFirestore? get _firestore =>
-      Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // Collection reference
-  CollectionReference? get _usersRef => _firestore?.collection('users');
+  /// الحصول على المستخدم الحالي في Firebase Auth
+  User? get currentFirebaseUser => _auth.currentUser;
 
-  /// Get current Firebase Auth user
-  User? get currentUser => _auth?.currentUser;
-
-  /// Stream of Auth State changes
-  Stream<User?>? get authStateChanges => _auth?.authStateChanges();
-
-  /// 1. Customer Sign Up Priority
-  /// Creates user in Firebase Auth and adds document in Firestore with role: customer
-  Future<UserModel> signUpCustomer({
-    required String name,
-    required String email,
-    required String password,
-    String? phoneNumber,
-  }) async {
-    if (_auth == null || _usersRef == null) {
-      throw Exception('لم يتم تهيئة الفايربيس بعد.');
-    }
-    try {
-      // 1. Create account in Firebase Auth
-      final UserCredential credential = await _auth!
-          .createUserWithEmailAndPassword(
-            email: email.trim(),
-            password: password,
-          );
-
-      final User? firebaseUser = credential.user;
-      if (firebaseUser == null) {
-        throw Exception('فشل إنشاء الحساب في الفايربيس.');
-      }
-
-      // Update Firebase Auth Display Name
-      await firebaseUser.updateDisplayName(name.trim());
-
-      final DateTime now = DateTime.now();
-
-      // 2. Build Customer UserModel
-      final UserModel newCustomer = UserModel(
-        id: firebaseUser.uid,
-        name: name.trim(),
-        email: email.trim(),
-        role: UserRole.customer,
-        phoneNumber: phoneNumber?.trim(),
-        addresses: const [],
-        wishlist: const [],
-        storeIds: const [],
-        createdAt: now,
-      );
-
-      // 3. Save to Firestore users collection
-      await _usersRef!.doc(firebaseUser.uid).set(newCustomer.toJson());
-
-      return newCustomer;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw Exception('حدث خطأ أثناء إنشاء الحساب: $e');
-    }
-  }
-
-  /// 2. Sign In for Customer & All Roles
-  /// Authenticates user and checks role directly from Firestore document
-  Future<UserModel> signInWithEmailAndPassword({
+  /// 1. تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور
+  Future<UserCredential?> loginWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    if (_auth == null) {
-      throw Exception('لم يتم تهيئة الفايربيس بعد.');
-    }
     try {
-      final UserCredential credential = await _auth!.signInWithEmailAndPassword(
-        email: email.trim(),
+      final credential = await _auth.signInWithEmailAndPassword(
+        email: email,
         password: password,
       );
-
-      final User? firebaseUser = credential.user;
-      if (firebaseUser == null) {
-        throw Exception('فشل تسجيل الدخول.');
-      }
-
-      // Fetch User document from Firestore to verify Role & details
-      return await getUserProfile(firebaseUser.uid);
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+      return credential;
     } catch (e) {
-      throw Exception('خطأ في تسجيل الدخول: $e');
+      debugPrint('Error logging in with email/password: $e');
+      rethrow;
     }
   }
 
-  /// 3. Get User Profile & Verify Role directly from Firestore
-  Future<UserModel> getUserProfile(String uid) async {
-    final User? firebaseUser = _auth?.currentUser;
-    final String userEmail = firebaseUser?.email?.toLowerCase() ?? '';
-
-    // Determine default role based on email if Firestore is locked
-    UserRole defaultRole = UserRole.customer;
-    if (userEmail == 'alzakaasimplesolutions@gmail.com' ||
-        userEmail.contains('superadmin')) {
-      defaultRole = UserRole.superAdmin;
-    } else if (userEmail.contains('owner')) {
-      defaultRole = UserRole.companyOwner;
-    }
-
-    try {
-      if (_usersRef == null) {
-        return UserModel(
-          id: uid,
-          name:
-              firebaseUser?.displayName ??
-              (defaultRole == UserRole.superAdmin ? 'Super Admin' : 'عميل'),
-          email: firebaseUser?.email ?? '',
-          role: defaultRole,
-          createdAt: DateTime.now(),
-        );
-      }
-
-      final DocumentSnapshot doc = await _usersRef!.doc(uid).get();
-
-      if (!doc.exists || doc.data() == null) {
-        return UserModel(
-          id: uid,
-          name:
-              firebaseUser?.displayName ??
-              (defaultRole == UserRole.superAdmin
-                  ? 'Super Admin'
-                  : 'مستخدم جديد'),
-          email: firebaseUser?.email ?? '',
-          role: defaultRole,
-          createdAt: DateTime.now(),
-        );
-      }
-
-      final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      data['id'] = uid;
-
-      return UserModel.fromJson(data);
-    } catch (e) {
-      // Graceful fallback on Firestore permission-denied / offline rules
-      return UserModel(
-        id: uid,
-        name:
-            firebaseUser?.displayName ??
-            (defaultRole == UserRole.superAdmin ? 'Super Admin' : 'مستخدم'),
-        email: firebaseUser?.email ?? '',
-        role: defaultRole,
-        createdAt: DateTime.now(),
-      );
-    }
-  }
-
-  /// 4. Create Store Owner Account (Called by Super Admin)
-  Future<UserModel> createStoreOwnerAccount({
-    required String name,
-    required String email,
-    required String password,
-    required String businessId,
-    String? phoneNumber,
-  }) async {
-    if (_auth == null || _usersRef == null) {
-      throw Exception('لم يتم تهيئة الفايربيس بعد.');
-    }
-    try {
-      FirebaseApp secondaryApp;
-      try {
-        secondaryApp = Firebase.app('SecondaryApp');
-      } catch (e) {
-        secondaryApp = await Firebase.initializeApp(
-          name: 'SecondaryApp',
-          options: Firebase.app().options,
-        );
-      }
-
-      final FirebaseAuth secondaryAuth = FirebaseAuth.instanceFor(
-        app: secondaryApp,
-      );
-
-      final UserCredential credential = await secondaryAuth
-          .createUserWithEmailAndPassword(
-            email: email.trim(),
-            password: password,
-          );
-
-      final User? firebaseUser = credential.user;
-      if (firebaseUser == null) {
-        throw Exception('فشل إنشاء حساب صاحب المتجر.');
-      }
-
-      await firebaseUser.updateDisplayName(name.trim());
-
-      final UserModel storeOwner = UserModel(
-        id: firebaseUser.uid,
-        name: name.trim(),
-        email: email.trim(),
-        role: UserRole.companyOwner,
-        businessId: businessId,
-        phoneNumber: phoneNumber?.trim(),
-        storeIds: [businessId],
-        createdAt: DateTime.now(),
-      );
-
-      await _usersRef!.doc(firebaseUser.uid).set(storeOwner.toJson());
-
-      await secondaryAuth.signOut();
-      await secondaryApp.delete();
-
-      return storeOwner;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw Exception('حدث خطأ أثناء إنشاء حساب التاجر: $e');
-    }
-  }
-
-  /// 4.b Create Super Admin Account
-  Future<UserModel> createSuperAdminAccount({
-    required String name,
+  /// 2. إنشاء حساب جديد بالبريد الإلكتروني وكلمة المرور
+  Future<UserCredential?> registerWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    if (_auth == null || _usersRef == null) {
-      throw Exception('لم يتم تهيئة الفايربيس بعد.');
-    }
     try {
-      final UserCredential credential = await _auth!
-          .createUserWithEmailAndPassword(
-            email: email.trim(),
-            password: password,
-          );
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return credential;
+    } catch (e) {
+      debugPrint('Error registering with email/password: $e');
+      rethrow;
+    }
+  }
 
-      final User? firebaseUser = credential.user;
-      if (firebaseUser == null) {
-        throw Exception('فشل إنشاء حساب السوبر أدمن.');
-      }
+  /// 3. تسجيل الدخول بواسطة حساب Google (Google Sign-In)
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      // 1. فتح نافذة اختيار حساب Google
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return null; // قام المستخدم بإلغاء التسجيل
 
-      await firebaseUser.updateDisplayName(name.trim());
+      // 2. الحصول على تفاصيل المصادقة من Google
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      final UserModel superAdmin = UserModel(
-        id: firebaseUser.uid,
-        name: name.trim(),
-        email: email.trim(),
-        role: UserRole.superAdmin,
-        createdAt: DateTime.now(),
+      // 3. إنشاء اعتمادات Firebase من خلال توكنات Google
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
-      try {
-        await _usersRef!.doc(firebaseUser.uid).set(superAdmin.toJson());
-      } catch (firestoreErr) {
-        // Firestore rules might be locked, but Auth account is created successfully
-      }
-
-      return superAdmin;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+      // 4. تسجيل الدخول في Firebase Auth
+      return await _auth.signInWithCredential(credential);
     } catch (e) {
-      throw Exception('حدث خطأ أثناء إنشاء حساب السوبر أدمن: $e');
+      debugPrint('Error signing in with Google: $e');
+      rethrow;
     }
   }
 
-  /// 5. Check Role directly
-  Future<UserRole> getUserRole(String uid) async {
+  /// 4. إعادة تعيين كلمة المرور عبر البريد الإلكتروني
+  Future<void> sendPasswordResetEmail(String email) async {
     try {
-      if (_usersRef == null) return UserRole.customer;
-      final DocumentSnapshot doc = await _usersRef!.doc(uid).get();
-      if (doc.exists && doc.data() != null) {
-        final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        final String? roleStr = data['role'];
-        if (roleStr != null) {
-          return UserRole.values.firstWhere(
-            (r) => r.name == roleStr,
-            orElse: () => UserRole.customer,
-          );
-        }
-      }
-      return UserRole.customer;
-    } catch (_) {
-      return UserRole.customer;
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      debugPrint('Error sending password reset email: $e');
+      rethrow;
     }
   }
 
-  /// Update user profile in Firestore
-  Future<void> updateUserProfile(String uid, Map<String, dynamic> data) async {
+  /// 6. حذف حساب المستخدم الحار من Firebase Auth
+  Future<void> deleteAccount() async {
     try {
-      if (_usersRef != null) {
-        await _usersRef!.doc(uid).update(data);
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.delete();
       }
     } catch (e) {
-      // Ignore if Firestore is restricted
+      debugPrint('Error deleting Firebase Auth user: $e');
+      rethrow;
     }
   }
 
-  /// 6. Google Sign-In & Registration (Supports Web & Mobile)
-  Future<UserModel> signInWithGoogle() async {
-    if (_auth == null) {
-      throw Exception('لم يتم تهيئة الفايربيس بعد.');
-    }
+  /// 7. تحديث كلمة المرور للمستخدم الحالي
+  Future<void> updatePassword(String newPassword) async {
     try {
-      UserCredential userCredential;
-
-      if (kIsWeb) {
-        // Direct Firebase Web Provider Popup (Does not rely on native plugin initialization)
-        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        googleProvider.addScope('email');
-        googleProvider.addScope('profile');
-        userCredential = await _auth!.signInWithPopup(googleProvider);
-      } else {
-        // Mobile / Native Google Sign-In
-        final GoogleSignIn googleSignIn = GoogleSignIn();
-        final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-        if (googleUser == null) {
-          throw Exception('تم إلغاء عملية تسجيل الدخول عبر غوغل.');
-        }
-
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-        userCredential = await _auth!.signInWithCredential(credential);
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.updatePassword(newPassword);
       }
-
-      final User? firebaseUser = userCredential.user;
-      if (firebaseUser == null) {
-        throw Exception('فشل المصادقة مع الفايربيس عبر غوغل.');
-      }
-
-      // Check if user already exists in Firestore
-      if (_usersRef != null) {
-        final DocumentSnapshot doc = await _usersRef!
-            .doc(firebaseUser.uid)
-            .get();
-        if (doc.exists && doc.data() != null) {
-          return UserModel.fromJson(doc.data() as Map<String, dynamic>);
-        }
-      }
-
-      // If New Account via Google -> Create Document in Firestore
-      final DateTime now = DateTime.now();
-      final UserModel googleUserAccount = UserModel(
-        id: firebaseUser.uid,
-        name: firebaseUser.displayName ?? 'Google User',
-        email: firebaseUser.email ?? '',
-        role: UserRole.customer,
-        phoneNumber: firebaseUser.phoneNumber,
-        addresses: const [],
-        wishlist: const [],
-        storeIds: const [],
-        createdAt: now,
-      );
-
-      if (_usersRef != null) {
-        await _usersRef!.doc(firebaseUser.uid).set(googleUserAccount.toJson());
-      }
-
-      return googleUserAccount;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
     } catch (e) {
-      throw Exception('حدث خطأ أثناء تسجيل الدخول عبر غوغل: $e');
+      debugPrint('Error updating password in Firebase Auth: $e');
+      rethrow;
     }
   }
 
-  /// 7. Sign Out
+  /// 8. تسجيل الخروج من Firebase و Google
   Future<void> signOut() async {
-    await GoogleSignIn().signOut();
-    await _auth?.signOut();
+    try {
+      await _googleSignIn.signOut();
+      await _auth.signOut();
+    } catch (e) {
+      debugPrint('Error signing out: $e');
+    }
   }
 
-  /// Helper to convert Firebase Exception messages to Arabic user-friendly text
-  String _handleAuthException(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'user-not-found':
-        return 'عذراً، لم يتم العثور على حساب بهذا البريد الإلكتروني.';
-      case 'wrong-password':
-      case 'invalid-credential':
-      case 'invalid-auth-credential':
-        return 'البريد الإلكتروني أو كلمة المرور غير صحيحة، يرجى التأكد وإعادة المحاولة.';
-      case 'email-already-in-use':
-        return 'البريد الإلكتروني مستخدم بالفعل بحساب آخر.';
-      case 'invalid-email':
-        return 'البريد الإلكتروني المدخل غير صالح.';
-      case 'weak-password':
-        return 'كلمة المرور ضعيفة جداً. يرجى استخدام 6 أحرف/أرقام على الأقل.';
-      case 'network-request-failed':
-        return 'فشل الاتصال بالشبكة. يرجى التحقق من اتصال الإنترنت.';
-      default:
-        return e.message ?? 'حدث خطأ في المصادقة.';
-    }
+  /// تحويل كائن Firebase User إلى UserModel
+  UserModel mapFirebaseUserToUserModel(User firebaseUser, {UserRole role = UserRole.customer}) {
+    return UserModel(
+      id: firebaseUser.uid,
+      name: firebaseUser.displayName ?? 'مستخدم',
+      email: firebaseUser.email ?? '',
+      phoneNumber: firebaseUser.phoneNumber ?? '',
+      avatarUrl: firebaseUser.photoURL ?? '',
+      role: role,
+      createdAt: DateTime.now(),
+    );
   }
 }

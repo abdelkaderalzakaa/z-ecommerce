@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../widgets/common/headers/header_details.dart';

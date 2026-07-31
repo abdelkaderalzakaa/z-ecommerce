@@ -5,7 +5,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import '../../../data/models/product/offer_model.dart';
 import '../../../data/providers/offer_provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../offers/offer_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
@@ -20,8 +20,11 @@ class OffersSection extends StatelessWidget {
     return Consumer<OfferProvider>(
       builder: (context, provider, child) {
         final businessId =
-            context.watch<CompanyProvider>().companySettings?.id ?? 'cmp_001';
-        final activeOffers = provider.getActiveOffers(businessId);
+            context.watch<BusinessProvider>().selectedBusiness?.id;
+        var activeOffers = provider.activeOffers;
+        if (businessId != null) {
+          activeOffers = activeOffers.where((o) => o.businessId == businessId).toList();
+        }
         if (activeOffers.isEmpty) return const SizedBox.shrink();
 
         final bundles = activeOffers.where((o) => o.type == 'bundle').toList();

@@ -7,13 +7,13 @@ import '../../../data/models/product/product_model.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/auth_provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 
 class ProductCard extends StatefulWidget {
-  final Product product;
+  final ProductModel product;
 
   const ProductCard({super.key, required this.product});
 
@@ -61,7 +61,7 @@ class _ProductCardState extends State<ProductCard> {
 }
 
 class _ProductImagePlaceholder extends StatelessWidget {
-  final Product product;
+  final ProductModel product;
   final Color bgColor;
   final bool hovered;
   final int? discountPercent;

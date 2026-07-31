@@ -46,8 +46,8 @@ class _PlatformSettingsPageState extends State<PlatformSettingsPage> {
         if (user.email.isNotEmpty) {
           _contactEmailController.text = user.email;
         }
-        if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
-          _supportPhoneController.text = user.phoneNumber!;
+        if (user.phoneNumber.isNotEmpty) {
+          _supportPhoneController.text = user.phoneNumber;
         }
       }
       _isInitialized = true;

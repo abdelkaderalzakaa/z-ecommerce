@@ -42,4 +42,15 @@ class RatedUser {
       'createdAt': createdAt.toIso8601String(),
     };
   }
+
+  /// إنشاء كائن RatedUser فارغ بقيم افتراضية
+  factory RatedUser.empty() {
+    return RatedUser(
+      id: '',
+      userId: '',
+      rating: 5.0,
+      createdAt: DateTime.now(),
+      userName: '',
+    );
+  }
 }

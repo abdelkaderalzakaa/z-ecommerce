@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/providers/company_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
@@ -24,16 +24,14 @@ class StoreProductsManagementPage extends StatefulWidget {
 class _StoreProductsManagementPageState
     extends State<StoreProductsManagementPage> {
   String _searchQuery = '';
-  List<Product> _selectedProducts = [];
+  List<ProductModel> _selectedProducts = [];
   int _currentPage = 1;
   int _itemsPerPage = 10;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final currentStoreId =
-        companyProvider.companySettings?.id ??
+    final currentStoreId = context.watch<BusinessProvider>().selectedBusiness?.id ??
         context.read<AuthProvider>().currentUser?.businessId;
 
     return Scaffold(
@@ -43,7 +41,6 @@ class _StoreProductsManagementPageState
           final filteredProducts = provider.allProducts.where((product) {
             final belongsToStore =
                 currentStoreId == null ||
-                product.businessId == null ||
                 product.businessId == currentStoreId;
             final titleStr = product.name.toLowerCase();
             final matchesQuery =
@@ -59,7 +56,7 @@ class _StoreProductsManagementPageState
           final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
           final paginatedProducts = (startIndex < totalItems)
               ? filteredProducts.sublist(startIndex, endIndex)
-              : <Product>[];
+              : <ProductModel>[];
 
           return Padding(
             padding: const EdgeInsets.all(24.0),
@@ -114,7 +111,7 @@ class _StoreProductsManagementPageState
 
                 // AppDataTable for Store Products
                 Expanded(
-                  child: AppDataTable<Product>(
+                  child: AppDataTable<ProductModel>(
                     items: paginatedProducts,
                     selectable: true,
                     showIndexColumn: true,
@@ -167,7 +164,7 @@ class _StoreProductsManagementPageState
                       ProductDetailsPage(productId: product.id),
                     ),
                     columns: [
-                      AppTableColumn<Product>(
+                      AppTableColumn<ProductModel>(
                         title: TranslationKeys.product.tr(context),
                         flex: 2,
                         sortable: true,
@@ -178,21 +175,23 @@ class _StoreProductsManagementPageState
                           imageUrl: (p.images.isNotEmpty)
                               ? p.images.first
                               : null,
-                          fallbackIcon: Icons.shopping_bag_outlined,
+                          fallbackIcon: Icons.inventory_2_rounded,
                         ),
                       ),
-                      AppTableColumn<Product>(
+                      AppTableColumn<ProductModel>(
+                        title: TranslationKeys.category.tr(context),
+                        flex: 1,
+                        sortable: true,
+                        sortKey: (p) => p.category,
+                        cellBuilder: (p) => Text(
+                          p.category,
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      AppTableColumn<ProductModel>(
                         title: TranslationKeys.price.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (p) => p.price,
-                        cellBuilder: (p) => TablePriceCell(amount: p.price),
-                      ),
-                      AppTableColumn<Product>(
-                        title: TranslationKeys.rating.tr(context),
-                        flex: 1,
-                        sortable: true,
-                        sortKey: (p) => p.rating,
                         cellBuilder: (p) => TableTextCell(
                           title: '⭐ ${p.rating.toStringAsFixed(1)}',
                           subtitle:

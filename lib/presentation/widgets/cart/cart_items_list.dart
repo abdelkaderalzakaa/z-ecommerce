@@ -5,7 +5,7 @@ import '../../global/core/constants/app_constants.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import 'cart_item.dart';
-import '../../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 
 class CartItemsList extends StatelessWidget {
   const CartItemsList({super.key});

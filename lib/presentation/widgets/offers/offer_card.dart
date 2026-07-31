@@ -9,7 +9,7 @@ import '../../../data/models/product/offer_model.dart';
 import '../../../data/models/product/product_model.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/cart_provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/pages/cart_page.dart';
 
 class OfferCard extends StatefulWidget {

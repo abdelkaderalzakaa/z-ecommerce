@@ -1,6 +1,6 @@
 import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
 
-class LocalizationSuperAdmin {
+class LocalizationAdmin {
   final LocalizedString name;
   final LocalizedString slogan;
   final LocalizedString description;
@@ -9,7 +9,7 @@ class LocalizationSuperAdmin {
   final LocalizedString termsAndConditions;
   final LocalizedString privacyPolicy;
 
-  LocalizationSuperAdmin({
+  LocalizationAdmin({
     required this.name,
     required this.slogan,
     required this.description,
@@ -19,8 +19,8 @@ class LocalizationSuperAdmin {
     required this.privacyPolicy,
   });
 
-  factory LocalizationSuperAdmin.fromMap(Map<String, dynamic> map) {
-    return LocalizationSuperAdmin(
+  factory LocalizationAdmin.fromMap(Map<String, dynamic> map) {
+    return LocalizationAdmin(
       name: map['name'] != null ? LocalizedString.fromJson(map['name']) : const LocalizedString(ar: '', en: ''),
       slogan: map['slogan'] != null ? LocalizedString.fromJson(map['slogan']) : const LocalizedString(ar: '', en: ''),
       description: map['description'] != null ? LocalizedString.fromJson(map['description']) : const LocalizedString(ar: '', en: ''),
@@ -41,5 +41,18 @@ class LocalizationSuperAdmin {
       'termsAndConditions': termsAndConditions.toJson(),
       'privacyPolicy': privacyPolicy.toJson(),
     };
+  }
+
+  /// إنشاء كائن LocalizationAdmin فارغ بقيم افتراضية
+  factory LocalizationAdmin.empty() {
+    return LocalizationAdmin(
+      name: const LocalizedString(ar: '', en: ''),
+      slogan: const LocalizedString(ar: '', en: ''),
+      description: const LocalizedString(ar: '', en: ''),
+      footerDescription: const LocalizedString(ar: '', en: ''),
+      aboutUs: const LocalizedString(ar: '', en: ''),
+      termsAndConditions: const LocalizedString(ar: '', en: ''),
+      privacyPolicy: const LocalizedString(ar: '', en: ''),
+    );
   }
 }

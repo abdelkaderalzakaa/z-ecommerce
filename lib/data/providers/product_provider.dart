@@ -1,350 +1,252 @@
-import 'package:flutter/material.dart';
-import '../models/product_model.dart';
-import '../services/product_service.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/models/shared/rating_store.dart';
+import 'package:z_ecommerce/data/services/product_service.dart';
 
+/// 🛍️ ProductProvider - إدارة حالة المنتجات والربط بالواجهات والبزنس
 class ProductProvider extends ChangeNotifier {
   final ProductService _productService = ProductService();
 
-  List<Product> _allProducts = [];
-  List<Product> _newArrivals = [];
-  List<Product> _topSelling = [];
-  List<Product> _discountedProducts = [];
+  List<ProductModel> _allProducts = [];
+  List<ProductModel> _storeProducts = [];
+  ProductModel? _selectedProduct;
 
   bool _isLoading = false;
-  String? _error;
+  String? _errorMessage;
+  StreamSubscription<List<ProductModel>>? _productsSubscription;
 
+  // Getters
+  List<ProductModel> get allProducts => _allProducts;
+  List<ProductModel> get storeProducts => _storeProducts;
+  ProductModel? get selectedProduct => _selectedProduct;
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  String? get errorMessage => _errorMessage;
 
-  ProductProvider() {
-    fetchProducts();
-  }
+  // ==========================================
+  // ⚡ 1. Real-time Streams Setup
+  // ==========================================
 
-  Future<void> fetchProducts([String? businessId]) async {
+  /// الاستماع للمنتجات بحسب البزنس/المتجر (`businessId`)
+  void listenToProductsByStore(String businessId) {
     _isLoading = true;
-    _error = null;
+    notifyListeners();
+
+    _productsSubscription?.cancel();
+    _productsSubscription = _productService.streamProductsByStore(businessId).listen(
+      (products) {
+        _storeProducts = products;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  /// الاستماع لكافة المنتجات في المنصة
+  void listenToAllProducts() {
+    _isLoading = true;
+    notifyListeners();
+
+    _productsSubscription?.cancel();
+    _productsSubscription = _productService.streamAllProducts().listen(
+      (products) {
+        _allProducts = products;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  // ==========================================
+  // 🔍 2. Filter & Fetch Helpers
+  // ==========================================
+
+  /// جلب جميع المنتجات دفعة واحدة
+  Future<void> fetchAllProducts() async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
-      final realProducts = businessId != null
-          ? await _productService.getProductsBybusinessId(businessId)
-          : await _productService.getAllProducts();
-
-      _allProducts = realProducts;
-
-      _updateSubLists();
-      _isLoading = false;
-      notifyListeners();
+      _allProducts = await _productService.getAllProducts();
     } catch (e) {
-      debugPrint('Error loading products: $e');
-      _error = e.toString();
-      _allProducts = [];
-      _updateSubLists();
+      _errorMessage = e.toString();
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  void _updateSubLists() {
-    _newArrivals = _allProducts.where((p) => p.isNewArrival).toList();
-    _topSelling = _allProducts.where((p) => p.isTopSelling).toList();
-    _discountedProducts = _allProducts
-        .where((p) => p.discountPercent != null && p.discountPercent! > 0)
-        .toList();
-  }
-
-  // Getters للوصول إلى القوائم
-  List<Product> get allProducts => _allProducts;
-  List<Product> get newArrivals => _newArrivals;
-  List<Product> get topSelling => _topSelling;
-  List<Product> get discountedProducts => _discountedProducts;
-
-  // ==================== FILTER, SORT & PAGINATION STATE ====================
-  double _minPrice = 0;
-  double _maxPrice = 500;
-  List<Color> _selectedColors = [];
-  List<String> _selectedSizes = [];
-  List<String> _selectedStyles = []; // from Figma "Dress Style"
-  List<String> _selectedBrands = [];
-
-  String _sortBy = 'Most Popular';
-  int _currentPage = 1;
-  final int _itemsPerPage = 9;
-  String _searchQuery = '';
-
-  // Getters for current filter state (useful for FilterSidebar to initialize sliders/checkboxes)
-  double get minPrice => _minPrice;
-  double get maxPrice => _maxPrice;
-  List<Color> get selectedColors => _selectedColors;
-  List<String> get selectedSizes => _selectedSizes;
-  List<String> get selectedStyles => _selectedStyles;
-  List<String> get selectedBrands => _selectedBrands;
-  String get sortBy => _sortBy;
-  int get currentPage => _currentPage;
-  int get itemsPerPage => _itemsPerPage;
-  String get searchQuery => _searchQuery;
-
-  // ==================== DYNAMIC GETTERS ====================
-
-  List<Product> getFilteredAndSortedProducts(
-    String? category, {
-    String? brand,
-    bool onSale = false,
-  }) {
-    var list = _allProducts.where((p) {
-      // 1. Category check
-      if (category != null && category.isNotEmpty) {
-        if (p.category.toLowerCase() != category.toLowerCase()) return false;
-      }
-
-      // 1.2. Brand check (Route level)
-      if (brand != null && brand.isNotEmpty) {
-        if (p.brand?.toLowerCase() != brand.toLowerCase()) return false;
-      }
-
-      // 1.5. Search Query check
-      if (_searchQuery.isNotEmpty) {
-        if (!p.name.toLowerCase().contains(_searchQuery.toLowerCase()))
-          return false;
-      }
-
-      // 1.6 On Sale check
-      if (onSale) {
-        if (p.discountPercent == null || p.discountPercent! <= 0) return false;
-      }
-
-      // 2. Price check
-      if (p.price < _minPrice || p.price > _maxPrice) return false;
-
-      // 3. Colors check (Product must have at least one of the selected colors)
-      if (_selectedColors.isNotEmpty) {
-        bool hasColor = false;
-        for (var c in p.colors) {
-          if (_selectedColors.contains(c)) {
-            hasColor = true;
-            break;
-          }
-        }
-        if (!hasColor) return false;
-      }
-
-      // 4. Sizes check
-      if (_selectedSizes.isNotEmpty) {
-        bool hasSize = false;
-        for (var s in p.sizes) {
-          if (_selectedSizes.contains(s)) {
-            hasSize = true;
-            break;
-          }
-        }
-        if (!hasSize) return false;
-      }
-
-      // 5. Brands check (Sidebar filter level)
-      if (_selectedBrands.isNotEmpty) {
-        if (p.brand == null || !_selectedBrands.contains(p.brand)) return false;
-      }
-
-      return true;
-    }).toList();
-
-    // Sort
-    if (_sortBy == 'Price: Low to High') {
-      list.sort((a, b) => a.price.compareTo(b.price));
-    } else if (_sortBy == 'Price: High to Low') {
-      list.sort((a, b) => b.price.compareTo(a.price));
-    } else if (_sortBy == 'Newest') {
-      list.sort((a, b) => a.isNewArrival ? -1 : (b.isNewArrival ? 1 : 0));
-    } else {
-      // Default: Most Popular
-      list.sort((a, b) => b.rating.compareTo(a.rating));
-    }
-
-    return list;
-  }
-
-  List<Product> getPaginatedProducts(
-    String? category, {
-    String? brand,
-    bool onSale = false,
-  }) {
-    final list = getFilteredAndSortedProducts(
-      category,
-      brand: brand,
-      onSale: onSale,
-    );
-    final startIndex = (_currentPage - 1) * _itemsPerPage;
-    if (startIndex >= list.length) return [];
-    return list.skip(startIndex).take(_itemsPerPage).toList();
-  }
-
-  int getTotalPages(String? category, {String? brand, bool onSale = false}) {
-    final list = getFilteredAndSortedProducts(
-      category,
-      brand: brand,
-      onSale: onSale,
-    );
-    return (list.length / _itemsPerPage).ceil();
-  }
-
-  // ==================== DYNAMIC FILTERS DATA ====================
-
-  List<Color> getAvailableColors(String? category) {
-    final Set<Color> colors = {};
-    final products = category != null
-        ? _allProducts.where(
-            (p) => p.category.toLowerCase() == category.toLowerCase(),
-          )
-        : _allProducts;
-    for (var p in products) {
-      colors.addAll(p.colors);
-    }
-    return colors.toList();
-  }
-
-  List<String> getAvailableSizes(String? category) {
-    final Set<String> sizes = {};
-    final products = category != null
-        ? _allProducts.where(
-            (p) => p.category.toLowerCase() == category.toLowerCase(),
-          )
-        : _allProducts;
-    for (var p in products) {
-      sizes.addAll(p.sizes);
-    }
-    return sizes.toList();
-  }
-
-  // ==================== ACTIONS ====================
-
-  void applyFilters({
-    required double minP,
-    required double maxP,
-    required List<Color> colors,
-    required List<String> sizes,
-    required List<String> styles,
-    required List<String> brands,
-  }) {
-    _minPrice = minP;
-    _maxPrice = maxP;
-    _selectedColors = colors;
-    _selectedSizes = sizes;
-    _selectedStyles = styles;
-    _selectedBrands = brands;
-    _currentPage = 1; // Reset to page 1 on new filters
+  /// جلب منتجات متجر محدد (`businessId`)
+  Future<List<ProductModel>> fetchProductsByBusiness(String businessId) async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
-  }
 
-  void setSortBy(String sort) {
-    _sortBy = sort;
-    _currentPage = 1; // Reset to page 1 on new sort
-    notifyListeners();
-  }
-
-  void setSearchQuery(String query) {
-    _searchQuery = query;
-    _currentPage = 1; // Reset to page 1 on new search
-    notifyListeners();
-  }
-
-  void setPage(
-    int page,
-    String? category, {
-    String? brand,
-    bool onSale = false,
-  }) {
-    final total = getTotalPages(category, brand: brand, onSale: onSale);
-    if (page > 0 && page <= total) {
-      _currentPage = page;
-      notifyListeners();
-    }
-  }
-
-  // دالة لجلب المنتجات بناءً على الفئة (Original)
-  List<Product> getProductsByCategory(String category) {
-    return _allProducts
-        .where((p) => p.category.toLowerCase() == category.toLowerCase())
-        .toList();
-  }
-
-  // دالة لجلب تفاصيل منتج معين بواسطة الـ ID
-  Product? getProductById(String id) {
     try {
-      return _allProducts.firstWhere((p) => p.id == id);
+      _storeProducts = await _productService.getProductsByStore(businessId);
+      return _storeProducts;
     } catch (e) {
+      _errorMessage = e.toString();
+      return [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// البحث عن منتج بواسطة المعرف `productId`
+  Future<ProductModel?> fetchProductById(String productId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _selectedProduct = await _productService.getProductById(productId);
+      return _selectedProduct;
+    } catch (e) {
+      _errorMessage = e.toString();
       return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  // دالة لجلب مجموعة منتجات بواسطة قائمة من الـ IDs (مثل الويش ليست)
-  List<Product> getProductsByIds(List<String> ids) {
-    return _allProducts.where((p) => ids.contains(p.id)).toList();
+  /// التصفية بحسب التصنيف `categoryId`
+  List<ProductModel> getProductsByCategory(String categoryId) {
+    return _allProducts.where((p) => p.categoryId == categoryId).toList();
   }
 
-  // دالة لجلب منتجات ذات صلة (نفس الفئة مثلاً)
-  List<Product> getRelatedProducts(Product product) {
-    return _allProducts
-        .where((p) => p.category == product.category && p.id != product.id)
-        .take(4) // أخذ 4 منتجات كحد أقصى للـ Related Products
-        .toList();
+  /// المنتجات المميزة `isFeatured`
+  List<ProductModel> get featuredProducts {
+    return _allProducts.where((p) => p.isFeatured).toList();
   }
 
-  // ==================== CRUD OPERATIONS ====================
+  /// المنتجات الأكثر مبيعاً `isTopSelling`
+  List<ProductModel> get topSellingProducts {
+    return _allProducts.where((p) => p.isTopSelling).toList();
+  }
 
-  Future<bool> addProduct(Product product) async {
+  // ==========================================
+  // ✏️ 3. CRUD Actions (إضافة، تعديل، حذف)
+  // ==========================================
+
+  /// ➕ إضافة منتج جديد
+  Future<bool> addProduct(ProductModel product) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
-    try {
-      final createdProduct = await _productService.createProduct(product);
-      _allProducts.insert(0, createdProduct);
-      _updateSubLists();
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      _error = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
 
-  Future<bool> updateProduct(Product product) async {
-    _isLoading = true;
-    notifyListeners();
     try {
-      await _productService.updateProduct(product.id, product.toJson());
-      final index = _allProducts.indexWhere((p) => p.id == product.id);
-      if (index != -1) {
-        _allProducts[index] = product;
-        _updateSubLists();
+      final docId = await _productService.addProduct(product);
+      if (docId != null) {
+        final newProduct = product.copyWith(id: docId);
+        _allProducts.add(newProduct);
+        _storeProducts.add(newProduct);
+        _isLoading = false;
+        notifyListeners();
+        return true;
       }
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
   }
 
+  /// ✏️ تحديث منتج قائم
+  Future<bool> updateProduct(ProductModel product) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final success = await _productService.updateProduct(product);
+      if (success) {
+        final index = _allProducts.indexWhere((p) => p.id == product.id);
+        if (index != -1) _allProducts[index] = product;
+
+        final storeIndex = _storeProducts.indexWhere((p) => p.id == product.id);
+        if (storeIndex != -1) _storeProducts[storeIndex] = product;
+
+        if (_selectedProduct?.id == product.id) {
+          _selectedProduct = product;
+        }
+
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// 🗑️ حذف منتج
   Future<bool> deleteProduct(String productId) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
     try {
-      await _productService.deleteProduct(productId);
-      _allProducts.removeWhere((p) => p.id == productId);
-      _updateSubLists();
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      final success = await _productService.deleteProduct(productId);
+      if (success) {
+        _allProducts.removeWhere((p) => p.id == productId);
+        _storeProducts.removeWhere((p) => p.id == productId);
+        if (_selectedProduct?.id == productId) {
+          _selectedProduct = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
+  }
+
+  /// ⭐ إضافة تقييم ومراجعة للمنتج (`RatedUser`)
+  Future<bool> addRatingToProduct(String productId, RatedUser rating) async {
+    final success = await _productService.addRatingToProduct(
+      productId: productId,
+      rating: rating,
+    );
+    if (success) {
+      final index = _allProducts.indexWhere((p) => p.id == productId);
+      if (index != -1) {
+        final currentRatings = List<RatedUser>.from(_allProducts[index].ratings)..add(rating);
+        _allProducts[index] = _allProducts[index].copyWith(ratings: currentRatings);
+        notifyListeners();
+      }
+    }
+    return success;
+  }
+
+  @override
+  void dispose() {
+    _productsSubscription?.cancel();
+    super.dispose();
   }
 }

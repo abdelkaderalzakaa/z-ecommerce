@@ -7,7 +7,8 @@ class CustomerModel {
   final UserModel user;
   final List<AddressModel> addresses;
 
-  // 2. أنشطة العميل مع الأنشطة التجارية
+  // 2. المفضلة والأنشطة
+  final List<String> wishlist; // معرّفات المنتجات المفضلة (Product IDs)
   final List<ActivityCustomerInBusiness> businessActivities;
 
   // 3. التواريخ
@@ -17,6 +18,7 @@ class CustomerModel {
   CustomerModel({
     required this.user,
     this.addresses = const [],
+    this.wishlist = const [],
     this.businessActivities = const [],
     this.createdAt,
     this.updatedAt,
@@ -44,6 +46,11 @@ class CustomerModel {
     return businessActivities.fold(0, (sum, item) => sum + item.ordersCount);
   }
 
+  /// التحقق مما إذا كان المنتج موجد في المفضلة
+  bool isInWishlist(String productId) {
+    return wishlist.contains(productId);
+  }
+
   /// البحث عن نشاط العميل لبزنس معين
   ActivityCustomerInBusiness? getActivityForBusiness(String businessId) {
     try {
@@ -61,9 +68,13 @@ class CustomerModel {
 
   factory CustomerModel.fromMap(Map<String, dynamic> map, {String? docId}) {
     return CustomerModel(
-      user: UserModel.fromMap(map['user'] ?? {}, ),
+      user: UserModel.fromMap(map['user'] ?? {}),
       addresses: (map['addresses'] as List<dynamic>?)
               ?.map((e) => AddressModel.fromMap(e))
+              .toList() ??
+          [],
+      wishlist: (map['wishlist'] as List<dynamic>?)
+              ?.map((e) => e.toString())
               .toList() ??
           [],
       businessActivities: (map['businessActivities'] as List<dynamic>?)
@@ -84,6 +95,7 @@ class CustomerModel {
       'id': id,
       'user': user.toMap(),
       'addresses': addresses.map((e) => e.toMap()).toList(),
+      'wishlist': wishlist,
       'businessActivities': businessActivities.map((e) => e.toMap()).toList(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -93,6 +105,7 @@ class CustomerModel {
   CustomerModel copyWith({
     UserModel? user,
     List<AddressModel>? addresses,
+    List<String>? wishlist,
     List<ActivityCustomerInBusiness>? businessActivities,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -100,9 +113,20 @@ class CustomerModel {
     return CustomerModel(
       user: user ?? this.user,
       addresses: addresses ?? this.addresses,
+      wishlist: wishlist ?? this.wishlist,
       businessActivities: businessActivities ?? this.businessActivities,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  /// إنشاء كائن CustomerModel فارغ بقيم افتراضية
+  factory CustomerModel.empty() {
+    return CustomerModel(
+      user: UserModel.empty(),
+      addresses: const [],
+      wishlist: const [],
+      businessActivities: const [],
     );
   }
 }

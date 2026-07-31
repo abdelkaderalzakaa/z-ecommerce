@@ -8,7 +8,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/models/auth/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/theme/theme_auth.dart';
 import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
@@ -53,9 +53,8 @@ class _LoginPageState extends State<LoginPage> {
     final authProvider = context.read<AuthProvider>();
 
     final success = await authProvider.login(
-      _emailController.text.trim(),
-      _passwordController.text,
-      rememberMe: _rememberMe,
+      emailOrPhone: _emailController.text.trim(),
+      password: _passwordController.text,
     );
 
     if (mounted) {
@@ -213,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                   onGooglePressed: () async {
                     final navigator = Navigator.of(context);
                     final authProvider = context.read<AuthProvider>();
-                    final success = await authProvider.loginWithGoogle();
+                    final success = await authProvider.signInWithGoogle();
                     if (mounted && success) {
                       final role = authProvider.currentUser?.role;
                       if (role == UserRole.superAdmin) {

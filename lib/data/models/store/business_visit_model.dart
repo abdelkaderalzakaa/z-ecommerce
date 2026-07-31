@@ -44,4 +44,13 @@ class BusinessVisitModel {
       'source': source,
     };
   }
+
+  /// إنشاء كائن BusinessVisitModel فارغ بقيم افتراضية
+  factory BusinessVisitModel.empty() {
+    return BusinessVisitModel(
+      id: '',
+      businessId: '',
+      visitDate: DateTime.now(),
+    );
+  }
 }

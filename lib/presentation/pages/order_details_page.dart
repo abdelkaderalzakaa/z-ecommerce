@@ -7,7 +7,7 @@ import '../widgets/common/headers/header_details.dart';
 import '../widgets/common/footer_section.dart';
 import '../widgets/cart/cart_item.dart';
 import 'package:provider/provider.dart';
-import '../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/order_details_page.dart';

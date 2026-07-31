@@ -20,7 +20,7 @@ class ProductsManagementPage extends StatefulWidget {
 
 class _ProductsManagementPageState extends State<ProductsManagementPage> {
   String _searchQuery = '';
-  List<Product> _selectedProducts = [];
+  List<ProductModel> _selectedProducts = [];
   int _currentPage = 1;
   int _itemsPerPage = 10;
 
@@ -44,7 +44,7 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
         final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
         final paginatedProducts = (startIndex < totalItems)
             ? filteredProducts.sublist(startIndex, endIndex)
-            : <Product>[];
+            : <ProductModel>[];
 
         return Scaffold(
           backgroundColor: Colors.transparent,
@@ -99,9 +99,9 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
               ),
               const SizedBox(height: 20),
 
-              // Full Height Expanded AppDataTable for Product
+              // Full Height Expanded AppDataTable for ProductModel
               Expanded(
-                child: AppDataTable<Product>(
+                child: AppDataTable<ProductModel>(
                   items: paginatedProducts,
                   selectable: true,
                   showIndexColumn: true,
@@ -151,7 +151,7 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
                     ProductDetailsPage(productId: product.id),
                   ),
                   columns: [
-                    AppTableColumn<Product>(
+                    AppTableColumn<ProductModel>(
                       title: TranslationKeys.product.tr(context),
                       flex: 2,
                       sortable: true,
@@ -160,29 +160,29 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
                         title: p.name,
                         subtitle: p.id,
                         imageUrl: (p.images.isNotEmpty) ? p.images.first : null,
-                        fallbackIcon: Icons.shopping_bag_outlined,
+                        fallbackIcon: Icons.inventory_2_rounded,
                       ),
                     ),
-                    AppTableColumn<Product>(
+                    AppTableColumn<ProductModel>(
                       title: TranslationKeys.price.tr(context),
                       flex: 1,
                       sortable: true,
-                      sortKey: (p) => p.price,
+                      sortKey: (p) => p.basePrice,
                       cellBuilder: (p) => TablePriceCell(
-                        amount: p.price,
+                        amount: p.basePrice,
                       ),
                     ),
-                    AppTableColumn<Product>(
-                      title: TranslationKeys.rating.tr(context),
+                    AppTableColumn<ProductModel>(
+                      title: TranslationKeys.category.tr(context),
                       flex: 1,
                       sortable: true,
-                      sortKey: (p) => p.rating,
-                      cellBuilder: (p) => TableTextCell(
-                        title: '⭐ ${p.rating.toStringAsFixed(1)}',
-                        subtitle: '${p.reviewsCount}',
+                      sortKey: (p) => p.category,
+                      cellBuilder: (p) => Text(
+                        p.category,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ),
-                    AppTableColumn<Product>(
+                    AppTableColumn<ProductModel>(
                       title: TranslationKeys.statusActive.tr(context),
                       flex: 1,
                       cellBuilder: (p) => TableStatusBadge.fromStatus(

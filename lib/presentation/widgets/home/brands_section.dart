@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../../data/models/product/brand_model.dart';
 import '../../global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/pages/categories_page.dart';

@@ -1,5 +1,7 @@
 import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/models/common/social_media.dart';
+import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
+import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
 import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
 import 'package:z_ecommerce/data/models/store/followers_store.dart';
 import 'package:z_ecommerce/data/models/shared/rating_store.dart';
@@ -7,18 +9,16 @@ import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_constant.dart';
 import '../auth/user_model.dart';
 import 'currency_store.dart';
-import 'localization_store.dart';
-import 'theme_store.dart';
 
 class BusinessModel {
   // 1. البيانات التعريفية للمالك والنشاط
   final UserModel owner;
   final BusinessType businessType;
   final List<AddressModel> addAddress;
-
+  final int likes;
   // 2. الهوية والإعدادات البصرية والمالية
-  final StoreTheme theme;
-  final LocalizationStore localization;
+  final ThemeAdmin theme;
+  final LocalizationAdmin localization;
   final CurrencyStore currency;
 
   // 3. وسائل التواصل وطرق الدفع
@@ -40,6 +40,7 @@ class BusinessModel {
     required this.owner,
     this.addAddress = const [],
     this.businessType = BusinessType.retailStore,
+    this.likes = 0,
     required this.theme,
     required this.localization,
     required this.currency,
@@ -98,8 +99,9 @@ class BusinessModel {
               .toList() ??
           [],
       businessType: BusinessType.fromString(map['businessType']),
-      theme: StoreTheme.fromMap(map['theme'] ?? {}),
-      localization: LocalizationStore.fromMap(map['localization'] ?? {}),
+      likes: map['likes'] ?? 0,
+      theme: ThemeAdmin.fromMap(map['theme'] ?? {}),
+      localization: LocalizationAdmin.fromMap(map['localization'] ?? {}),
       currency: CurrencyStore.fromMap(map['currency'] ?? {}),
       socials:
           (map['socials'] as List<dynamic>?)
@@ -143,6 +145,7 @@ class BusinessModel {
       'owner': owner.toMap(),
       'addAddress': addAddress.map((e) => e.toMap()).toList(),
       'businessType': businessType.name,
+      'likes': likes,
       'theme': theme.toMap(),
       'localization': localization.toMap(),
       'currency': currency.toMap(),
@@ -156,5 +159,15 @@ class BusinessModel {
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
+  }
+
+  /// إنشاء كائن BusinessModel فارغ بقيم افتراضية
+  factory BusinessModel.empty() {
+    return BusinessModel(
+      owner: UserModel.empty(),
+      theme: ThemeAdmin.empty(),
+      localization: LocalizationAdmin.empty(),
+      currency: CurrencyStore.empty(),
+    );
   }
 }

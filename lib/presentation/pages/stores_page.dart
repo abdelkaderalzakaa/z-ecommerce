@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/fake_data/company.dart';
-import '../../data/models/company/company_settings_model.dart';
+import '../../data/models/store/business_model.dart';
+import '../../data/providers/business_provider.dart';
 import '../global/locale_provider.dart';
 // ignore: duplicate_import
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -42,90 +42,102 @@ class _StoresPageState extends State<StoresPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(isAr ? 'جميع المتاجر' : 'All Stores'),
+        title: Text(isAr ? 'جميع الأعمال والمتاجر' : 'All Businesses & Stores'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Search Bar
-                TextField(
-                  controller: _searchController,
-                  onChanged: (value) => setState(() => _searchQuery = value),
-                  decoration: InputDecoration(
-                    hintText: isAr ? 'ابحث عن متجر...' : 'Search for a store...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                
-                if (filteredStores.isEmpty)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Column(
-                        children: [
-                          Icon(Icons.storefront_outlined, size: 64, color: Colors.grey[400]),
-                          const SizedBox(height: 16),
-                          Text(
-                            isAr ? 'عذراً، لم يتم العثور على أي متجر يطابق بحثك.' : 'Sorry, no stores found matching your criteria.',
-                            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                          ),
-                        ],
+      body: Consumer<BusinessProvider>(
+        builder: (context, businessProvider, child) {
+          final businesses = businessProvider.businesses;
+          final filteredStores = businesses.where((b) {
+            final nameAr = b.localization.name.ar.toLowerCase();
+            final nameEn = b.localization.name.en.toLowerCase();
+            final q = _searchQuery.toLowerCase();
+            return nameAr.contains(q) || nameEn.contains(q);
+          }).toList();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search Bar
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) => setState(() => _searchQuery = value),
+                      decoration: InputDecoration(
+                        hintText: isAr ? 'ابحث عن متجر أو نشاط تجاري...' : 'Search for a store or business...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                  )
-                else
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      int crossAxisCount = 1;
-                      if (constraints.maxWidth > 900) {
-                        crossAxisCount = 3;
-                      } else if (constraints.maxWidth > 600) {
-                        crossAxisCount = 2;
-                      }
-
-                      return GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          childAspectRatio: 0.85,
-                          crossAxisSpacing: 32,
-                          mainAxisSpacing: 32,
+                    const SizedBox(height: 32),
+                    
+                    if (filteredStores.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          child: Column(
+                            children: [
+                              Icon(Icons.storefront_outlined, size: 64, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text(
+                                isAr ? 'عذراً، لم يتم العثور على أي متجر يطابق بحثك.' : 'Sorry, no stores found matching your criteria.',
+                                style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
                         ),
-                        itemCount: filteredStores.length,
-                        itemBuilder: (context, index) {
-                          return StoreCard(
-                            company: filteredStores[index],
-                            isAr: isAr,
+                      )
+                    else
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          int crossAxisCount = 1;
+                          if (constraints.maxWidth > 900) {
+                            crossAxisCount = 3;
+                          } else if (constraints.maxWidth > 600) {
+                            crossAxisCount = 2;
+                          }
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              childAspectRatio: 0.85,
+                              crossAxisSpacing: 32,
+                              mainAxisSpacing: 32,
+                            ),
+                            itemCount: filteredStores.length,
+                            itemBuilder: (context, index) {
+                              return StoreCard(
+                                business: filteredStores[index],
+                                isAr: isAr,
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                  ),
-              ],
+                      ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 }
 
 class StoreCard extends StatefulWidget {
-  final CompanySettingsModel company;
+  final BusinessModel business;
   final bool isAr;
 
-  const StoreCard({super.key, required this.company, required this.isAr});
+  const StoreCard({super.key, required this.business, required this.isAr});
 
   @override
   State<StoreCard> createState() => _StoreCardState();
@@ -137,7 +149,7 @@ class _StoreCardState extends State<StoreCard> {
 
   @override
   Widget build(BuildContext context) {
-    final mockRating = (4.0 + (widget.company.id.hashCode % 10) / 10).toStringAsFixed(1);
+    final mockRating = (4.0 + (widget.business.owner.id.hashCode % 10) / 10).toStringAsFixed(1);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -254,7 +266,7 @@ class _StoreCardState extends State<StoreCard> {
                       children: [
                         const SizedBox(height: 12),
                         Text(
-                          widget.isAr ? widget.company.name.ar : widget.company.name.en,
+                          widget.isAr ? widget.business.localization.name.ar : widget.business.localization.name.en,
                           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -266,9 +278,11 @@ class _StoreCardState extends State<StoreCard> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                widget.isAr
-                                    ? (widget.company.addresses?.firstOrNull?.address.ar ?? '')
-                                    : (widget.company.addresses?.firstOrNull?.address.en ?? ''),
+                                widget.business.addAddress.isNotEmpty
+                                    ? (widget.isAr
+                                        ? widget.business.addAddress.first.street
+                                        : widget.business.addAddress.first.street)
+                                    : '',
                                 style: TextStyle(color: Colors.grey[600]),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -279,12 +293,10 @@ class _StoreCardState extends State<StoreCard> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.delivery_dining, size: 16, color: Colors.grey[600]),
+                            Icon(Icons.store, size: 16, color: Colors.grey[600]),
                             const SizedBox(width: 4),
                             Text(
-                              widget.isAr
-                                  ? 'رسوم التوصيل: \$${widget.company.deliveryFee}'
-                                  : 'Delivery Fee: \$${widget.company.deliveryFee}',
+                              widget.business.businessType.name,
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                           ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/providers/company_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
+import '../../data/providers/product_provider.dart';
+import '../../data/providers/category_provider.dart';
+import '../../data/providers/brand_provider.dart';
+import '../../data/providers/offer_provider.dart';
 import '../widgets/common/headers/header_home.dart';
 import '../widgets/home/hero_section.dart';
 import '../widgets/home/brands_section.dart';
@@ -28,6 +32,18 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey _topSellingKey = GlobalKey();
   final GlobalKey _browseCategoriesKey = GlobalKey();
   final GlobalKey _newsletterKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // بدء البث المباشر الموحد لبيانات الصفحة الرئيسية
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().listenToAllProducts();
+      context.read<CategoryProvider>().listenToAllCategories();
+      context.read<BrandProvider>().listenToAllBrands();
+      context.read<OfferProvider>().listenToActiveOffers();
+    });
+  }
 
   @override
   void dispose() {
@@ -61,13 +77,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
+    final businessProvider = Provider.of<BusinessProvider>(context);
+    final storeTheme = businessProvider.selectedBusiness?.theme;
 
     final primaryColor = storeTheme?.primaryColorValue ?? Theme.of(context).primaryColor;
     final secondaryColor = storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
     final bgColor = storeTheme?.backgroundColorValue ?? Theme.of(context).scaffoldBackgroundColor;
-    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
+    final fontFamily = storeTheme?.fontFamily != null && storeTheme!.fontFamily.isNotEmpty 
+        ? storeTheme.fontFamily 
+        : 'Cairo';
 
     final dynamicTheme = Theme.of(context).copyWith(
       primaryColor: primaryColor,

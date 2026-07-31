@@ -4,13 +4,11 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
 
-import '../../data/fake_data/company.dart';
-import '../../data/fake_data/offers.dart';
-import '../../data/models/company/company_settings_model.dart';
+import '../../data/models/store/business_model.dart';
 import '../../data/models/product/offer_model.dart';
 import '../../data/models/product/product_model.dart';
 import '../../data/providers/auth_provider.dart';
-import '../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 import '../../data/providers/product_provider.dart';
 import '../global/locale_provider.dart';
 import '../global/translate/app_localizations.dart';
@@ -80,14 +78,16 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final companyProvider = Provider.of<CompanyProvider>(context);
-    final storeTheme = companyProvider.companySettings?.theme;
+    final businessProvider = Provider.of<BusinessProvider>(context);
+    final storeTheme = businessProvider.selectedBusiness?.theme;
 
     final primaryColor = storeTheme?.primaryColorValue ?? Colors.black;
     final secondaryColor =
         storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
     final bgColor = storeTheme?.backgroundColorValue ?? Colors.white;
-    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
+    final fontFamily = storeTheme?.fontFamily != null && storeTheme!.fontFamily.isNotEmpty
+        ? storeTheme.fontFamily
+        : 'Cairo';
 
     final dynamicTheme = ThemeData(
       primaryColor: primaryColor,
@@ -701,11 +701,8 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
 
   Widget _buildRecommendedStoresSection(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-    // App determines recommended stores by highest rating
-    final List<CompanySettingsModel> recommendedStores = List.from(
-      fakeCompanies,
-    )..sort((a, b) => b.rate.compareTo(a.rate));
-    final displayStores = recommendedStores.take(3).toList();
+    final businessProvider = Provider.of<BusinessProvider>(context);
+    final displayStores = businessProvider.businesses.take(3).toList();
 
     if (displayStores.isEmpty) return const SizedBox.shrink();
 
@@ -747,7 +744,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                           Expanded(
                             flex: 2,
                             child: _PremiumRecommendedCard(
-                              company: displayStores[0],
+                              business: displayStores[0],
                               isAr: isAr,
                               isHero: true,
                               rank: 1,
@@ -761,7 +758,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                               children: [
                                 Expanded(
                                   child: _PremiumRecommendedCard(
-                                    company: displayStores[1],
+                                    business: displayStores[1],
                                     isAr: isAr,
                                     isHero: false,
                                     rank: 2,
@@ -770,7 +767,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                                 const SizedBox(height: 24),
                                 Expanded(
                                   child: _PremiumRecommendedCard(
-                                    company: displayStores[2],
+                                    business: displayStores[2],
                                     isAr: isAr,
                                     isHero: false,
                                     rank: 3,
@@ -796,7 +793,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                         return SizedBox(
                           width: constraints.maxWidth * 0.8,
                           child: _PremiumRecommendedCard(
-                            company: displayStores[index],
+                            business: displayStores[index],
                             isAr: isAr,
                             isHero: true,
                             rank: index + 1,
@@ -850,20 +847,13 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
               const SizedBox(height: 40),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Filter logic
-                  final filteredStores = fakeCompanies.where((company) {
-                    final matchesSearch =
-                        company.name.en.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        ) ||
-                        company.name.ar.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        );
-                    final matchesCategory =
-                        _selectedCategory == null ||
-                        company.category.id == _selectedCategory;
-
-                    return matchesSearch && matchesCategory;
+                  final businessProvider = Provider.of<BusinessProvider>(context);
+                  final businesses = businessProvider.businesses;
+                  final filteredStores = businesses.where((b) {
+                    final nameAr = b.localization.name.ar.toLowerCase();
+                    final nameEn = b.localization.name.en.toLowerCase();
+                    final q = _searchQuery.toLowerCase();
+                    return nameAr.contains(q) || nameEn.contains(q);
                   }).toList();
 
                   if (filteredStores.isEmpty) {
@@ -911,7 +901,7 @@ class _StoreEntryPageState extends State<StoreEntryPage> {
                     itemCount: filteredStores.length,
                     itemBuilder: (context, index) {
                       return _StoreCard(
-                        company: filteredStores[index],
+                        business: filteredStores[index],
                         isAr: isAr,
                       );
                     },
@@ -1313,10 +1303,10 @@ class _FeatureCard extends StatelessWidget {
 }
 
 class _StoreCard extends StatefulWidget {
-  final CompanySettingsModel company;
+  final BusinessModel business;
   final bool isAr;
 
-  const _StoreCard({required this.company, required this.isAr});
+  const _StoreCard({required this.business, required this.isAr});
 
   @override
   State<_StoreCard> createState() => _StoreCardState();
@@ -1329,7 +1319,7 @@ class _StoreCardState extends State<_StoreCard> {
   @override
   Widget build(BuildContext context) {
     // Generate a mock rating between 4.0 and 5.0
-    final mockRating = (4.0 + (widget.company.id.hashCode % 10) / 10)
+    final mockRating = (4.0 + (widget.business.owner.id.hashCode % 10) / 10)
         .toStringAsFixed(1);
 
     return MouseRegion(
@@ -1480,8 +1470,8 @@ class _StoreCardState extends State<_StoreCard> {
                         const SizedBox(height: 12),
                         Text(
                           widget.isAr
-                              ? widget.company.name.ar
-                              : widget.company.name.en,
+                              ? widget.business.localization.name.ar
+                              : widget.business.localization.name.en,
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -1500,21 +1490,9 @@ class _StoreCardState extends State<_StoreCard> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                widget.isAr
-                                    ? (widget
-                                              .company
-                                              .addresses
-                                              ?.firstOrNull
-                                              ?.address
-                                              .ar ??
-                                          '')
-                                    : (widget
-                                              .company
-                                              .addresses
-                                              ?.firstOrNull
-                                              ?.address
-                                              .en ??
-                                          ''),
+                                widget.business.addAddress.isNotEmpty
+                                    ? widget.business.addAddress.first.street
+                                    : '',
                                 style: TextStyle(color: Colors.grey[600]),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1526,15 +1504,13 @@ class _StoreCardState extends State<_StoreCard> {
                         Row(
                           children: [
                             Icon(
-                              Icons.delivery_dining,
+                              Icons.store,
                               size: 16,
                               color: Colors.grey[600],
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              widget.isAr
-                                  ? 'رسوم التوصيل: \$${widget.company.deliveryFee}'
-                                  : 'Delivery Fee: \$${widget.company.deliveryFee}',
+                              widget.business.businessType.name,
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                           ],
@@ -1578,7 +1554,7 @@ class _StoreCardState extends State<_StoreCard> {
 }
 
 class _TrendingProductCard extends StatelessWidget {
-  final Product product;
+  final ProductModel product;
   final String businessId;
   final bool isAr;
 
@@ -2358,13 +2334,13 @@ class _TrendingOfferCard extends StatelessWidget {
 }
 
 class _PremiumRecommendedCard extends StatefulWidget {
-  final CompanySettingsModel company;
+  final BusinessModel business;
   final bool isAr;
   final bool isHero;
   final int rank;
 
   const _PremiumRecommendedCard({
-    required this.company,
+    required this.business,
     required this.isAr,
     required this.isHero,
     required this.rank,
@@ -2380,14 +2356,14 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
 
   @override
   Widget build(BuildContext context) {
-    // Generate gradient based on company id
+    // Generate gradient based on owner id
     final colors = [
       [const Color(0xFF6A11CB), const Color(0xFF2575FC)],
       [const Color(0xFFFF416C), const Color(0xFFFF4B2B)],
       [const Color(0xFF11998E), const Color(0xFF38EF7D)],
       [const Color(0xFFF7971E), const Color(0xFFFFD200)],
     ];
-    final colorIdx = widget.company.id.hashCode % colors.length;
+    final colorIdx = widget.business.owner.id.hashCode % colors.length;
     final gradient = LinearGradient(
       colors: colors[colorIdx],
       begin: Alignment.topLeft,
@@ -2486,8 +2462,8 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                       // Store Name
                       Text(
                         widget.isAr
-                            ? widget.company.name.ar
-                            : widget.company.name.en,
+                            ? widget.business.localization.name.ar
+                            : widget.business.localization.name.en,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: widget.isHero ? 32 : 24,
@@ -2508,21 +2484,9 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              widget.isAr
-                                  ? (widget
-                                            .company
-                                            .addresses
-                                            ?.firstOrNull
-                                            ?.address
-                                            .ar ??
-                                        'عنوان غير متوفر')
-                                  : (widget
-                                            .company
-                                            .addresses
-                                            ?.firstOrNull
-                                            ?.address
-                                            .en ??
-                                        'Address not available'),
+                              widget.business.addAddress.isNotEmpty
+                                  ? widget.business.addAddress.first.street
+                                  : (widget.isAr ? 'عنوان غير متوفر' : 'Address not available'),
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 14,

@@ -2,7 +2,7 @@ import 'package:z_ecommerce/presentation/pages/auth/auth_success_page.dart';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/theme/theme_auth.dart';
 import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/password_field.dart';
@@ -23,13 +23,38 @@ class ResetPasswordPage extends StatefulWidget {
 }
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  String? _errorMessage;
 
-  void _handleReset() {
-    setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _handleReset() async {
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (password.isEmpty || password != confirmPassword) {
+      setState(() => _errorMessage = TranslationKeys.passwordsDoNotMatch.tr(context));
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.updatePassword(password);
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (success) {
         changeScreen(
           context,
           AuthSuccessPage(
@@ -38,8 +63,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             buttonLabel: TranslationKeys.continueToLogin.tr(context),
           ),
         );
+      } else {
+        setState(() {
+          _errorMessage = authProvider.errorMessage ?? 'فشل تحديث كلمة المرور';
+        });
       }
-    });
+    }
   }
 
   @override
@@ -53,13 +82,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       customAuthTheme: authTheme,
       children: [
         PasswordField(
+          controller: _passwordController,
           label: TranslationKeys.password.tr(context),
           hintText: TranslationKeys.mustBeAtLeast8.tr(context),
         ),
         const SizedBox(height: 20),
         PasswordField(
+          controller: _confirmPasswordController,
           label: TranslationKeys.confirmPassword.tr(context),
-          hintText: TranslationKeys.bothPasswordsMustMatch.tr(context),
+          hintText: TranslationKeys.mustBeAtLeast8.tr(context),
         ),
         const SizedBox(height: 32),
         SizedBox(

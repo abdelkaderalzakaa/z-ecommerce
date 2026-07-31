@@ -32,4 +32,12 @@ class BrandModel {
       description: json['description'],
     );
   }
+
+  /// إنشاء كائن BrandModel فارغ بقيم افتراضية
+  factory BrandModel.empty() {
+    return const BrandModel(
+      id: '',
+      name: '',
+    );
+  }
 }

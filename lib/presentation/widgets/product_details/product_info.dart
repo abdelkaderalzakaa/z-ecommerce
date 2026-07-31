@@ -5,13 +5,13 @@ import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../../data/models/product/product_model.dart';
 import '../../../data/providers/cart_provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../pages/cart_page.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
 class ProductInfo extends StatefulWidget {
-  final Product product;
+  final ProductModel product;
   const ProductInfo({super.key, required this.product});
 
   @override

@@ -1,172 +1,149 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/cart_model.dart';
-import '../models/product_model.dart';
+import 'package:z_ecommerce/data/models/order/cart_model.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/models/product/offer_model.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
-class CartProvider extends ChangeNotifier {
-  final Map<String, List<CartItemModel>> _companyCarts = {};
-  Map<String, String> _companyCoupons = {};
+import 'package:z_ecommerce/data/models/product/product_variant.dart';
 
-  CartProvider() {
-    _loadCartFromPrefs();
+class CartProvider with ChangeNotifier {
+  // Key: businessId (storeId), Value: List of CartItemModel
+  final Map<String, List<CartItemModel>> _cartItemsByStore = {};
+
+  Map<String, List<CartItemModel>> get cartItemsByStore => _cartItemsByStore;
+
+  /// Get list of items in cart for a specific store/business
+  List<CartItemModel> getItems(String? businessId) {
+    if (businessId == null) return [];
+    return _cartItemsByStore[businessId] ?? [];
   }
 
-  List<CartItemModel> items(String businessId) =>
-      _companyCarts[businessId] ?? [];
-  String? couponCode(String businessId) => _companyCoupons[businessId];
+  /// Alias for `getItems` to maintain compatibility with existing callers
+  List<CartItemModel> items(String? businessId) => getItems(businessId);
 
-  void addToCart(
-    String businessId,
-    Product product, {
+  /// Get total item count in cart for a specific store
+  int cartCount(String? businessId) {
+    if (businessId == null) return 0;
+    final storeItems = getItems(businessId);
+    return storeItems.fold(0, (sum, item) => sum + item.quantity);
+  }
+
+  /// Get subtotal price for a store's cart
+  double getSubtotal(String? businessId) {
+    if (businessId == null) return 0.0;
+    final storeItems = getItems(businessId);
+    return storeItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+  }
+
+  /// Add a Product to cart for a specific store
+  void addProductToCart({
+    required String businessId,
+    required ProductModel product,
     int quantity = 1,
-    Color? selectedColor,
-    String? selectedSize,
-    bool isGift = false,
-    bool isBundle = false,
+    ProductVariant? selectedVariant,
   }) {
-    final cart = List<CartItemModel>.from(items(businessId));
-    final index = cart.indexWhere(
+    if (!_cartItemsByStore.containsKey(businessId)) {
+      _cartItemsByStore[businessId] = [];
+    }
+
+    final storeList = _cartItemsByStore[businessId]!;
+    final existingIndex = storeList.indexWhere(
       (item) =>
-          item.product.id == product.id &&
-          item.selectedColor?.value == selectedColor?.value &&
-          item.selectedSize == selectedSize &&
-          item.isGift == isGift &&
-          item.isBundle == isBundle,
+          item.type == CartItemType.product &&
+          item.product?.id == product.id &&
+          item.selectedVariant == selectedVariant,
     );
 
-    if (index >= 0) {
-      cart[index].quantity += quantity;
+    if (existingIndex >= 0) {
+      storeList[existingIndex].quantity += quantity;
     } else {
-      cart.add(
+      storeList.add(
         CartItemModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: 'cart_${DateTime.now().millisecondsSinceEpoch}',
+          type: CartItemType.product,
           product: product,
           quantity: quantity,
-          selectedColor: selectedColor,
-          selectedSize: selectedSize,
-          isGift: isGift,
-          isBundle: isBundle,
+          selectedVariant: selectedVariant,
         ),
       );
     }
-    _companyCarts[businessId] = cart;
-    _saveCartToPrefs();
     notifyListeners();
   }
 
-  void removeFromCart(String businessId, String id) {
-    if (_companyCarts.containsKey(businessId)) {
-      _companyCarts[businessId]!.removeWhere((item) => item.id == id);
-      _saveCartToPrefs();
+  /// Add an Offer (e.g. Bundle or Gift) to cart for a specific store
+  void addOfferToCart({
+    required String businessId,
+    required OfferModel offer,
+    ProductModel? product,
+    int quantity = 1,
+  }) {
+    if (!_cartItemsByStore.containsKey(businessId)) {
+      _cartItemsByStore[businessId] = [];
+    }
+
+    final storeList = _cartItemsByStore[businessId]!;
+    final existingIndex = storeList.indexWhere(
+      (item) =>
+          item.type == CartItemType.offer && item.offer?.id == offer.id,
+    );
+
+    if (existingIndex >= 0) {
+      storeList[existingIndex].quantity += quantity;
+    } else {
+      storeList.add(
+        CartItemModel(
+          id: 'cart_offer_${DateTime.now().millisecondsSinceEpoch}',
+          type: CartItemType.offer,
+          offer: offer,
+          product: product,
+          quantity: quantity,
+        ),
+      );
+    }
+    notifyListeners();
+  }
+
+  /// Update item quantity
+  void updateQuantity({
+    required String businessId,
+    required String itemId,
+    required int newQuantity,
+  }) {
+    final storeList = _cartItemsByStore[businessId];
+    if (storeList == null) return;
+
+    final index = storeList.indexWhere((item) => item.id == itemId);
+    if (index >= 0) {
+      if (newQuantity <= 0) {
+        storeList.removeAt(index);
+      } else {
+        storeList[index].quantity = newQuantity;
+      }
       notifyListeners();
     }
   }
 
-  void updateQuantity(String businessId, String id, int newQuantity) {
-    if (newQuantity <= 0) {
-      removeFromCart(businessId, id);
-      return;
-    }
-    if (_companyCarts.containsKey(businessId)) {
-      final cart = _companyCarts[businessId]!;
-      final index = cart.indexWhere((item) => item.id == id);
-      if (index >= 0) {
-        cart[index].quantity = newQuantity;
-        _saveCartToPrefs();
-        notifyListeners();
-      }
-    }
-  }
+  /// Remove single item from cart
+  void removeItem({
+    required String businessId,
+    required String itemId,
+  }) {
+    final storeList = _cartItemsByStore[businessId];
+    if (storeList == null) return;
 
-  void clearCart(String businessId) {
-    _companyCarts[businessId]?.clear();
-    _companyCoupons.remove(businessId);
-    _saveCartToPrefs();
+    storeList.removeWhere((item) => item.id == itemId);
     notifyListeners();
   }
 
-  void applyCoupon(String businessId, String? code) {
-    if (code == null || code.isEmpty) {
-      _companyCoupons.remove(businessId);
-    } else {
-      _companyCoupons[businessId] = code;
-    }
+  /// Clear entire cart for a specific store
+  void clearStoreCart(String businessId) {
+    _cartItemsByStore.remove(businessId);
     notifyListeners();
   }
 
-  double subTotal(String businessId) {
-    return items(businessId).fold(
-      0,
-      (sum, item) =>
-          sum + ((item.isGift ? 0.0 : item.product.price) * item.quantity),
-    );
-  }
-
-  int cartCount(String businessId) {
-    return items(businessId).fold(0, (sum, item) => sum + item.quantity);
-  }
-
-  Future<void> _saveCartToPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // Save carts
-    final Map<String, dynamic> cartJsonMap = {};
-    _companyCarts.forEach((key, value) {
-      cartJsonMap[key] = value.map((e) => e.toJson()).toList();
-    });
-    await prefs.setString('company_carts', jsonEncode(cartJsonMap));
-
-    // Save coupons
-    await prefs.setString('company_coupons', jsonEncode(_companyCoupons));
-  }
-
-  Future<void> _loadCartFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // Load carts
-    final String? cartJson = prefs.getString('company_carts');
-    if (cartJson != null) {
-      try {
-        final Map<String, dynamic> decodedMap = jsonDecode(cartJson);
-        decodedMap.forEach((businessId, list) {
-          if (list is List) {
-            _companyCarts[businessId] = list.map((itemMap) {
-              final isGiftOrBundle =
-                  itemMap['isGift'] == true || itemMap['isBundle'] == true;
-              Product? product;
-
-              if (!isGiftOrBundle && itemMap['product'] != null) {
-                product = Product.fromJson(
-                  itemMap['product'] as Map<String, dynamic>,
-                );
-              }
-
-              return CartItemModel.fromJson(
-                itemMap as Map<String, dynamic>,
-                product: product,
-              );
-            }).toList();
-          }
-        });
-      } catch (e) {
-        debugPrint('Error loading carts: $e');
-      }
-    }
-
-    // Load coupons
-    final String? couponJson = prefs.getString('company_coupons');
-    if (couponJson != null) {
-      try {
-        final Map<String, dynamic> decodedCoupons = jsonDecode(couponJson);
-        _companyCoupons = decodedCoupons.map(
-          (key, value) => MapEntry(key, value.toString()),
-        );
-      } catch (e) {
-        debugPrint('Error loading coupons: $e');
-      }
-    }
-
+  /// Clear all carts across all stores
+  void clearAll() {
+    _cartItemsByStore.clear();
     notifyListeners();
   }
 }

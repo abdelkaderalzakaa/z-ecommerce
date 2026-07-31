@@ -3,7 +3,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/models/auth/user_model.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/theme/theme_auth.dart';
 import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
@@ -38,6 +38,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _phoneController = TextEditingController();
+
+  bool _isBusinessAccount = false;
+  BusinessType _selectedBusinessType = BusinessType.retailStore;
   bool _agreeToTerms = false;
   String? _errorMessage;
 
@@ -46,6 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -68,18 +73,30 @@ class _RegisterPageState extends State<RegisterPage> {
     final authProvider = context.read<AuthProvider>();
     final fullName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
 
-    final success = await authProvider.register(
-      fullName,
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
+    final bool success;
+    if (_isBusinessAccount) {
+      success = await authProvider.registerBusiness(
+        ownerName: fullName,
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        phoneNumber: _phoneController.text.trim(),
+        businessType: _selectedBusinessType,
+      );
+    } else {
+      success = await authProvider.registerCustomer(
+        name: fullName,
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        phoneNumber: _phoneController.text.trim(),
+      );
+    }
 
     if (mounted) {
       if (success) {
         final role = authProvider.currentUser?.role;
         if (role == UserRole.superAdmin) {
           changeScreenUntill(context, const SuperAdminHome());
-        } else if (role == UserRole.companyOwner) {
+        } else if (role == UserRole.businessOwner || role == UserRole.companyOwner) {
           changeScreenUntill(context, const AdminStore());
         } else {
           final destination = widget.redirectTo ?? '/';
@@ -112,6 +129,96 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // اختيار نوع الحساب (عميل أو نشاط تجاري)
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isBusinessAccount = false),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: !_isBusinessAccount ? primaryColor : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'حساب عميل',
+                            style: TextStyle(
+                              color: !_isBusinessAccount ? Colors.white : Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isBusinessAccount = true),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: _isBusinessAccount ? primaryColor : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'حساب نشاط تجاري (متجر)',
+                            style: TextStyle(
+                              color: _isBusinessAccount ? Colors.white : Colors.grey[700],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              if (_isBusinessAccount) ...[
+                DropdownButtonFormField<BusinessType>(
+                  value: _selectedBusinessType,
+                  decoration: InputDecoration(
+                    labelText: 'نوع النشاط التجاري',
+                    prefixIcon: const Icon(Icons.storefront_outlined),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: BusinessType.retailStore,
+                      child: Text('متجر تجزئة / إلكتروني'),
+                    ),
+                    DropdownMenuItem(
+                      value: BusinessType.restaurant,
+                      child: Text('مطعم / كافيه'),
+                    ),
+                    DropdownMenuItem(
+                      value: BusinessType.serviceProvider,
+                      child: Text('مزود خدمات'),
+                    ),
+                    DropdownMenuItem(
+                      value: BusinessType.wholesaler,
+                      child: Text('تاجر جملة'),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedBusinessType = val);
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+
               Row(
                 children: [
                   Expanded(
@@ -138,6 +245,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 hintText: 'alex.jordan@gmail.com',
                 prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              AuthTextField(
+                controller: _phoneController,
+                label: 'رقم الهاتف',
+                hintText: '+966 50 123 4567',
+                prefixIcon: Icons.phone_outlined,
+                keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
               PasswordField(
@@ -197,7 +312,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   onGooglePressed: () async {
                     final navigator = Navigator.of(context);
                     final authProvider = context.read<AuthProvider>();
-                    final success = await authProvider.loginWithGoogle();
+                    final success = await authProvider.signInWithGoogle();
                     if (mounted && success) {
                       final role = authProvider.currentUser?.role;
                       if (role == UserRole.superAdmin) {

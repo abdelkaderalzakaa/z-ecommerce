@@ -85,10 +85,9 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
       'website': _websiteController.text.trim(),
     };
 
-    await authProvider.updateUserProfile(
+    await authProvider.updateProfile(
       name: _adminNameController.text.trim(),
       phoneNumber: _adminPhoneController.text.trim(),
-      socialLinks: socialLinks,
     );
 
     if (mounted) {

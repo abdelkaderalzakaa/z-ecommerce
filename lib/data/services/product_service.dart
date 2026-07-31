@@ -1,127 +1,170 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
-import '../models/product_model.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 
+/// 🛍️ ProductService - إدارة المنتجات في Firestore
+///
+/// مجموعة Firestore: `products`
+/// ترتبط المنتجات بالمتجر عبر `businessId` وبالتصنيف عبر `categoryId` والماركة عبر `brandId`
 class ProductService {
-  FirebaseFirestore? get _firestore =>
-      Firebase.apps.isNotEmpty ? FirebaseFirestore.instance : null;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String _collection = 'products';
 
-  CollectionReference? get _productsRef => _firestore?.collection('products');
+  // ==========================================
+  // 📥 1. Real-time Streams (البث المباشر للمنتجات)
+  // ==========================================
 
-  /// 1. Create a new product in Firestore
-  Future<Product> createProduct(Product product) async {
-    if (_productsRef == null) {
-      debugPrint('ProductService: Firestore is not initialized.');
-      return product;
-    }
-    try {
-      final docRef = _productsRef!.doc(
-        product.id.isNotEmpty ? product.id : null,
-      );
-      final finalId = docRef.id;
-      final newProduct = Product(
-        id: finalId,
-        businessId: product.businessId,
-        name: product.name,
-        price: product.price,
-        originalPrice: product.originalPrice,
-        discountPercent: product.discountPercent,
-        description: product.description,
-        category: product.category,
-        brand: product.brand,
-        colors: product.colors,
-        sizes: product.sizes,
-        images: product.images,
-        rating: product.rating,
-        reviewsCount: product.reviewsCount,
-        isNewArrival: product.isNewArrival,
-        isTopSelling: product.isTopSelling,
-        cardBgColor: product.cardBgColor,
-      );
-
-      await docRef.set(newProduct.toJson());
-      return newProduct;
-    } catch (e) {
-      debugPrint('Error creating product in Firestore: $e');
-      throw Exception('فشل إنشاء المنتج: $e');
-    }
+  /// البث المباشر لجميع المنتجات في المنصة
+  Stream<List<ProductModel>> streamAllProducts() {
+    return _firestore.collection(_collection).snapshots().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data(), docId: doc.id))
+          .toList();
+    });
   }
 
-  /// 2. Get all products across all stores
-  Future<List<Product>> getAllProducts() async {
-    if (_productsRef == null) return [];
+  /// البث المباشر لمنتجات متجر/بزنس محدد (`businessId`)
+  Stream<List<ProductModel>> streamProductsByStore(String businessId) {
+    return _firestore
+        .collection(_collection)
+        .where('businessId', isEqualTo: businessId)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data(), docId: doc.id))
+          .toList();
+    });
+  }
+
+  /// البث المباشر لمنتجات قسم/تصنيف محدد (`categoryId`)
+  Stream<List<ProductModel>> streamProductsByCategory(String categoryId) {
+    return _firestore
+        .collection(_collection)
+        .where('categoryId', isEqualTo: categoryId)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data(), docId: doc.id))
+          .toList();
+    });
+  }
+
+  /// البث المباشر للمنتجات المميزة (`isFeatured = true`)
+  Stream<List<ProductModel>> streamFeaturedProducts() {
+    return _firestore
+        .collection(_collection)
+        .where('isFeatured', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data(), docId: doc.id))
+          .toList();
+    });
+  }
+
+  // ==========================================
+  // 🔍 2. Queries & CRUD Operations (الاستعلامات والعمليات)
+  // ==========================================
+
+  /// جلب جميع المنتجات دفعة واحدة
+  Future<List<ProductModel>> getAllProducts() async {
     try {
-      final querySnapshot = await _productsRef!.get();
-      return querySnapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return Product.fromJson(data);
-      }).toList();
+      final snapshot = await _firestore.collection(_collection).get();
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data(), docId: doc.id))
+          .toList();
     } catch (e) {
-      debugPrint('Error fetching products from Firestore: $e');
+      debugPrint('Error getting all products: $e');
       return [];
     }
   }
 
-  /// 3. Get products by store (businessId)
-  Future<List<Product>> getProductsBybusinessId(String businessId) async {
-    if (_productsRef == null) return [];
+  /// جلب منتج محدد عبر المعرف `productId`
+  Future<ProductModel?> getProductById(String productId) async {
     try {
-      final querySnapshot = await _productsRef!
+      final doc = await _firestore.collection(_collection).doc(productId).get();
+      if (doc.exists && doc.data() != null) {
+        return ProductModel.fromMap(doc.data()!, docId: doc.id);
+      }
+    } catch (e) {
+      debugPrint('Error getting product by ID ($productId): $e');
+    }
+    return null;
+  }
+
+  /// جلب منتجات متجر محدد (`businessId`)
+  Future<List<ProductModel>> getProductsByStore(String businessId) async {
+    try {
+      final snapshot = await _firestore
+          .collection(_collection)
           .where('businessId', isEqualTo: businessId)
           .get();
-
-      return querySnapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return Product.fromJson(data);
-      }).toList();
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data(), docId: doc.id))
+          .toList();
     } catch (e) {
-      debugPrint('Error fetching products for businessId $businessId: $e');
+      debugPrint('Error getting products for business ($businessId): $e');
       return [];
     }
   }
 
-  /// 4. Get product by ID
-  Future<Product?> getProductById(String productId) async {
-    if (_productsRef == null) return null;
+  /// ➕ إضافة منتج جديد وإرجاع المعرف المُنشأ
+  Future<String?> addProduct(ProductModel product) async {
     try {
-      final doc = await _productsRef!.doc(productId).get();
-      if (doc.exists && doc.data() != null) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return Product.fromJson(data);
-      }
-      return null;
+      final docRef = await _firestore.collection(_collection).add(product.toMap());
+      debugPrint('Product added successfully with ID: ${docRef.id}');
+      return docRef.id;
     } catch (e) {
-      debugPrint('Error fetching product $productId: $e');
+      debugPrint('Error adding product: $e');
       return null;
     }
   }
 
-  /// 5. Update product data
-  Future<void> updateProduct(
-    String productId,
-    Map<String, dynamic> data,
-  ) async {
-    if (_productsRef == null) return;
+  /// ✏️ تحديث بيانات منتج قائم
+  Future<bool> updateProduct(ProductModel product) async {
     try {
-      await _productsRef!.doc(productId).update(data);
+      final updatedData = product.toMap();
+      updatedData['updatedAt'] = DateTime.now().toIso8601String();
+      await _firestore.collection(_collection).doc(product.id).update(updatedData);
+      debugPrint('Product updated successfully: ${product.id}');
+      return true;
     } catch (e) {
-      debugPrint('Error updating product $productId: $e');
-      throw Exception('فشل تعديل المنتج: $e');
+      debugPrint('Error updating product (${product.id}): $e');
+      return false;
     }
   }
 
-  /// 6. Delete product
-  Future<void> deleteProduct(String productId) async {
-    if (_productsRef == null) return;
+  /// 🗑️ حذف منتج من Firestore
+  Future<bool> deleteProduct(String productId) async {
     try {
-      await _productsRef!.doc(productId).delete();
+      await _firestore.collection(_collection).doc(productId).delete();
+      debugPrint('Product deleted successfully: $productId');
+      return true;
     } catch (e) {
-      debugPrint('Error deleting product $productId: $e');
-      throw Exception('فشل حذف المنتج: $e');
+      debugPrint('Error deleting product ($productId): $e');
+      return false;
+    }
+  }
+
+  // ==========================================
+  // ⭐ 3. Sub-Operations (التقييمات والتفاعل)
+  // ==========================================
+
+  /// ⭐ إضافة تقييم ومراجعة جديدة للمنتج (`RatedUser`)
+  Future<bool> addRatingToProduct({
+    required String productId,
+    required RatedUser rating,
+  }) async {
+    try {
+      await _firestore.collection(_collection).doc(productId).update({
+        'ratings': FieldValue.arrayUnion([rating.toMap()]),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      debugPrint('Error adding rating to product ($productId): $e');
+      return false;
     }
   }
 }

@@ -10,7 +10,7 @@ import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/account_
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 import '../../../../data/providers/cart_provider.dart';
-import '../../../../data/providers/company_provider.dart';
+import '../../../../data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class HeaderDetails extends StatefulWidget implements PreferredSizeWidget {

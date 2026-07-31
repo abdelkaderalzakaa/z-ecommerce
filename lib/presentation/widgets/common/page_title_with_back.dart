@@ -3,7 +3,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
 
 class TopTitle extends StatelessWidget {

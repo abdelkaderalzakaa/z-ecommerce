@@ -42,4 +42,13 @@ class CategoryModel {
           : null,
     );
   }
+
+  /// إنشاء كائن CategoryModel فارغ بقيم افتراضية
+  factory CategoryModel.empty() {
+    return const CategoryModel(
+      id: '',
+      label: '',
+      bgColor: Color(0xFFF3F4F6),
+    );
+  }
 }

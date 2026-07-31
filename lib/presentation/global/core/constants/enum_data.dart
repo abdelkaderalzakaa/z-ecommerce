@@ -28,3 +28,8 @@ enum SocialPlatform {
   contactPhoneSecond,
   contactEmail,
 }
+
+enum CartItemType {
+  product,
+  offer,
+}

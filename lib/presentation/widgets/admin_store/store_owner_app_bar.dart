@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../global/locale_provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/settings_provider.dart';
 import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';

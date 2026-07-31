@@ -50,4 +50,16 @@ class SocialModel {
       'isVisible': isVisible,
     };
   }
+
+  /// إنشاء كائن SocialModel فارغ بقيم افتراضية
+  factory SocialModel.empty() {
+    return const SocialModel(
+      title: LocalizedString(ar: '', en: ''),
+      url: '',
+      icon: '',
+      color: Colors.grey,
+      platform: SocialPlatform.instagram,
+      isVisible: true,
+    );
+  }
 }

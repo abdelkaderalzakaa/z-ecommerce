@@ -1,95 +1,185 @@
-import 'package:flutter/material.dart';
-import '../models/brand_model.dart';
-import '../services/brand_service.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:z_ecommerce/data/models/product/brand_model.dart';
+import 'package:z_ecommerce/data/services/category_and_brand_service.dart';
 
+/// 🏷️ BrandProvider - إدارة الماركات والبراندات وربطها بالبزنس والمنصة
 class BrandProvider extends ChangeNotifier {
-  final BrandService _brandService = BrandService();
+  final CategoryAndBrandService _service = CategoryAndBrandService();
 
   List<BrandModel> _brands = [];
+  BrandModel? _selectedBrand;
   bool _isLoading = false;
-  String? _error;
+  String? _errorMessage;
 
+  StreamSubscription<List<BrandModel>>? _brandsSubscription;
+
+  // Getters
   List<BrandModel> get brands => _brands;
+  BrandModel? get selectedBrand => _selectedBrand;
   bool get isLoading => _isLoading;
-  String? get error => _error;
+  String? get errorMessage => _errorMessage;
 
-  BrandProvider() {
-    fetchBrands();
+  // ==========================================
+  // ⚡ 1. Real-time Streams Setup
+  // ==========================================
+
+  /// الاستماع لماركات متجر محدد (`businessId`)
+  void listenToBrandsByStore(String businessId) {
+    _isLoading = true;
+    notifyListeners();
+
+    _brandsSubscription?.cancel();
+    _brandsSubscription = _service.streamBrandsByStore(businessId).listen(
+      (brandsList) {
+        _brands = brandsList;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
-  Future<void> fetchBrands([String? businessId]) async {
+  /// الاستماع لجميع الماركات في المنصة
+  void listenToAllBrands() {
     _isLoading = true;
-    _error = null;
+    notifyListeners();
+
+    _brandsSubscription?.cancel();
+    _brandsSubscription = _service.streamAllBrands().listen(
+      (brandsList) {
+        _brands = brandsList;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _errorMessage = error.toString();
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  // ==========================================
+  // 🔍 2. Queries & Actions
+  // ==========================================
+
+  /// جلب الماركات لمتجر معين أو المنصة عامة
+  Future<void> fetchBrands({String? businessId}) async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
-      final realBrands = businessId != null
-          ? await _brandService.getBrandsBybusinessId(businessId)
-          : await _brandService.getAllBrands();
-
-      _brands = realBrands;
-      _isLoading = false;
-      notifyListeners();
+      _brands = await _service.getBrands(businessId: businessId);
     } catch (e) {
-      debugPrint('Error fetching brands: $e');
-      _error = e.toString();
-      _brands = [];
+      _errorMessage = e.toString();
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  /// تحديد الماركة المختارة حالياً
+  void selectBrand(BrandModel? brand) {
+    _selectedBrand = brand;
+    notifyListeners();
+  }
+
+  /// ➕ إضافة ماركة جديدة
   Future<bool> addBrand(BrandModel brand) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
     try {
-      final created = await _brandService.createBrand(brand);
-      _brands.insert(0, created);
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      final id = await _service.addBrand(brand);
+      if (id != null) {
+        final newBrand = BrandModel(
+          id: id,
+          businessId: brand.businessId,
+          name: brand.name,
+          logoUrl: brand.logoUrl,
+          description: brand.description,
+        );
+        _brands.add(newBrand);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
   }
 
+  /// ✏️ تحديث ماركة قائمة
   Future<bool> updateBrand(BrandModel brand) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
     try {
-      await _brandService.updateBrand(brand.id, brand.toJson());
-      final index = _brands.indexWhere((b) => b.id == brand.id);
-      if (index != -1) {
-        _brands[index] = brand;
+      final success = await _service.updateBrand(brand);
+      if (success) {
+        final index = _brands.indexWhere((b) => b.id == brand.id);
+        if (index != -1) {
+          _brands[index] = brand;
+        }
+        if (_selectedBrand?.id == brand.id) {
+          _selectedBrand = brand;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
       }
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
   }
 
+  /// 🗑️ حذف ماركة
   Future<bool> deleteBrand(String brandId) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
     try {
-      await _brandService.deleteBrand(brandId);
-      _brands.removeWhere((b) => b.id == brandId);
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      final success = await _service.deleteBrand(brandId);
+      if (success) {
+        _brands.removeWhere((b) => b.id == brandId);
+        if (_selectedBrand?.id == brandId) {
+          _selectedBrand = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+      return false;
     } catch (e) {
+      _errorMessage = e.toString();
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
       return false;
     }
+  }
+
+  @override
+  void dispose() {
+    _brandsSubscription?.cancel();
+    super.dispose();
   }
 }

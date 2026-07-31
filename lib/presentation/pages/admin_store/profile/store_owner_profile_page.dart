@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/auth_provider.dart';
-import '../../../../data/providers/company_provider.dart';
+import '../../../../data/providers/business_provider.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
 
@@ -56,7 +56,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
     setState(() => _isSaving = true);
 
     final authProvider = context.read<AuthProvider>();
-    await authProvider.updateUserProfile(
+    await authProvider.updateProfile(
       name: _fullNameController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
     );

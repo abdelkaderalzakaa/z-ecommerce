@@ -47,15 +47,13 @@ class _AccountInfoTabState extends State<AccountInfoTab> {
     super.dispose();
   }
 
-  void _saveChanges() {
+  void _saveChanges() async {
     final authProvider = context.read<AuthProvider>();
-    final user = authProvider.currentUser;
-    if (user != null) {
-      final updatedUser = user.copyWith(
-        name: '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim(),
-        phoneNumber: _phoneController.text.trim().isNotEmpty ? _phoneController.text.trim() : null,
-      );
-      authProvider.updateProfile(updatedUser);
+    final success = await authProvider.updateProfile(
+      name: '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim(),
+      phoneNumber: _phoneController.text.trim(),
+    );
+    if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(TranslationKeys.profileUpdatedSuccessfully.tr(context))),
       );
@@ -168,20 +166,66 @@ class _SaveButton extends StatelessWidget {
 class _LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: () {
-        context.read<AuthProvider>().logout();
-        changeScreenReplacement(context, const StoreEntryPage());
-      },
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-        foregroundColor: Colors.red,
-        side: const BorderSide(color: Colors.red),
-      ),
-      child: Text(
-        TranslationKeys.logout.tr(context),
-        textAlign: TextAlign.center,
-      ),
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: () {
+              context.read<AuthProvider>().logout();
+              changeScreenReplacement(context, const StoreEntryPage());
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+            ),
+            child: Text(
+              TranslationKeys.logout.tr(context),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('حذف الحساب'),
+                  content: const Text('هل أنت تأكد من أنك تريد حذف حسابك نهائياً؟ لا يمكن التراجع عن هذا الإجراء.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('إلغاء'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('حذف الحساب', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true && context.mounted) {
+                final success = await context.read<AuthProvider>().deleteAccount();
+                if (success && context.mounted) {
+                  changeScreenReplacement(context, const StoreEntryPage());
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[700],
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text(
+              'حذف الحساب',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/company_provider.dart';
+import '../../data/providers/business_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import '../widgets/common/headers/header_details.dart';
