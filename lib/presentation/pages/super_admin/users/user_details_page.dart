@@ -31,6 +31,7 @@ class UserDetailsPage extends StatelessWidget {
           email: 'alzakaasimplesolutions@gmail.com',
           role: UserRole.superAdmin,
           createdAt: DateTime.now(),
+          phoneNumber: '',
         );
 
     String roleText = '';
@@ -92,10 +93,10 @@ class UserDetailsPage extends StatelessWidget {
           padding: EdgeInsets.zero,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        if (user.phoneNumber != null)
+        if (user.phoneNumber.isNotEmpty)
           Chip(
             avatar: const Icon(Icons.phone, size: 16, color: Colors.green),
-            label: Text(user.phoneNumber!),
+            label: Text(user.phoneNumber),
             padding: EdgeInsets.zero,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),

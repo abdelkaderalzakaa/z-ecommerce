@@ -177,7 +177,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
     if (mounted) {
       final business = context.read<BusinessProvider>().selectedBusiness;
       if (business != null) {
-        context.read<BusinessProvider>().updateBusinessTheme(
+        context.read<BusinessProvider>().updateTheme(
           business.id,
           _currentTheme,
         );

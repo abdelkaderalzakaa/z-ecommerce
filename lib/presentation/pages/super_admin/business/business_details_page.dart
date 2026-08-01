@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
-import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -32,13 +31,13 @@ class BusinessDetailsPage extends StatelessWidget {
           name: store.localization.name.get(context),
           subtitle:
               '${TranslationKeys.category.tr(context)}: ${store.businessType.name} • ${store.id}',
-          avatarUrl: store.logoUrl,
+          avatarUrl: store.theme.logoUrl,
           fallbackIcon: Icons.storefront_rounded,
           statusBadge: TableStatusBadge.fromStatus(store.status ?? 'Active'),
           headerMetrics: [
             Chip(
               avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
-              label: Text('⭐ ${store.rate.toStringAsFixed(1)}'),
+              label: Text('⭐ ${store.rating.toStringAsFixed(1)}'),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -49,15 +48,15 @@ class BusinessDetailsPage extends StatelessWidget {
                 color: Colors.blue,
               ),
               label: Text(
-                '${store.orders ?? 0} ${TranslationKeys.orders.tr(context)}',
+                '${store.orders} ${TranslationKeys.orders.tr(context)}',
               ),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            if (store.contactPhone != null)
+            if (store.owner.phoneNumber.isNotEmpty)
               Chip(
                 avatar: const Icon(Icons.phone, size: 16, color: Colors.green),
-                label: Text(store.contactPhone!),
+                label: Text(store.owner.phoneNumber),
                 padding: EdgeInsets.zero,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),

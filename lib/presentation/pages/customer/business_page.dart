@@ -4,9 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../data/models/store/business_model.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../global/locale_provider.dart';
-import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
-import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 
 class BusinessPage extends StatefulWidget {
   const BusinessPage({super.key});
@@ -18,7 +16,6 @@ class BusinessPage extends StatefulWidget {
 class _BusinessPageState extends State<BusinessPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String? _selectedCategory;
 
   @override
   void dispose() {
@@ -30,15 +27,6 @@ class _BusinessPageState extends State<BusinessPage> {
   Widget build(BuildContext context) {
     final isAr = context.watch<LocaleProvider>().locale.languageCode == 'ar';
 
-    final filteredStores = fakeCompanies.where((company) {
-      final matchesSearch =
-          company.name.en.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          company.name.ar.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCategory =
-          _selectedCategory == null || company.category.id == _selectedCategory;
-      return matchesSearch && matchesCategory;
-    }).toList();
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -48,6 +36,32 @@ class _BusinessPageState extends State<BusinessPage> {
       body: Consumer<BusinessProvider>(
         builder: (context, businessProvider, child) {
           final businesses = businessProvider.businesses;
+
+          if (businessProvider.isLoading && businesses.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (businessProvider.errorMessage != null && businesses.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    isAr ? 'حدث خطأ في تحميل البيانات' : 'Error loading data',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () => businessProvider.fetchBusinesses(),
+                    child: Text(isAr ? 'إعادة المحاولة' : 'Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
           final filteredStores = businesses.where((b) {
             final nameAr = b.localization.name.ar.toLowerCase();
             final nameEn = b.localization.name.en.toLowerCase();
@@ -328,17 +342,7 @@ class _StoreCardState extends State<StoreCard> {
                             Expanded(
                               child: Text(
                                 widget.business.addAddress.isNotEmpty
-                                    ? (widget.isAr
-                                          ? widget
-                                                .business
-                                                .addAddress
-                                                .first
-                                                .street
-                                          : widget
-                                                .business
-                                                .addAddress
-                                                .first
-                                                .street)
+                                    ? widget.business.addAddress.first.street
                                     : '',
                                 style: TextStyle(color: Colors.grey[600]),
                                 maxLines: 1,

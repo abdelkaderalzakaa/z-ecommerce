@@ -112,6 +112,17 @@ class BusinessProvider with ChangeNotifier {
     }
   }
 
+  /// 🔄 تحديث حالة المتجر (نشط/غير نشط)
+  Future<void> updateStoreStatus(String businessId, String newStatus) async {
+    final index = _businesses.indexWhere((b) => b.id == businessId);
+    if (index >= 0) {
+      final businessMap = _businesses[index].toMap();
+      businessMap['status'] = newStatus;
+      final updatedBusiness = BusinessModel.fromMap(businessMap, businessId);
+      await saveBusiness(updatedBusiness);
+    }
+  }
+
   // ==========================================
   // 🧩 Sub-Models Operations for Business
   // ==========================================

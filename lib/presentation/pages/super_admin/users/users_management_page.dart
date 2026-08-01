@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
+import 'package:z_ecommerce/data/services/user_service.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
@@ -21,6 +22,9 @@ class UsersManagementPage extends StatefulWidget {
 }
 
 class _UsersManagementPageState extends State<UsersManagementPage> {
+  final UserService _userService = UserService();
+  bool _isLoading = true;
+  List<UserModel> _allFetchedUsers = [];
   String _searchQuery = '';
   String _selectedRoleFilter = 'all';
   List<UserModel> _selectedUsers = [];
@@ -28,15 +32,33 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
   int _itemsPerPage = 10;
 
   @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    final users = await _userService.getAllUsers();
+    if (mounted) {
+      setState(() {
+        _allFetchedUsers = users;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authUser = context.watch<AuthProvider>().currentUser;
-    final storeOwners = context.watch<SuperAdminProvider>().storeOwners;
 
-    final List<UserModel> allUsers = [
-      ...?authUser != null ? [authUser] : null,
-      ...storeOwners,
-    ];
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('إدارة المستخدمين')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final List<UserModel> allUsers = _allFetchedUsers;
 
     final filteredUsers = allUsers.where((user) {
       final matchesQuery =

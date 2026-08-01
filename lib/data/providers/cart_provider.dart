@@ -146,8 +146,15 @@ class CartProvider with ChangeNotifier {
     _cartItemsByStore.clear();
     notifyListeners();
   }
-/// TODO 
-  subTotal(String? businessId) {}
+  double subTotal(String? businessId) {
+    return getSubtotal(businessId);
+  }
 
-  void clearCart(String? businessId) {}
+  void clearCart(String? businessId) {
+    if (businessId != null) {
+      clearStoreCart(businessId);
+    } else {
+      clearAll();
+    }
+  }
 }

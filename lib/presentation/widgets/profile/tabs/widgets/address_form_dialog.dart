@@ -21,42 +21,42 @@ class AddressFormDialog extends StatefulWidget {
 
 class _AddressFormDialogState extends State<AddressFormDialog> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _labelController;
+  late TextEditingController _titleController;
   late TextEditingController _streetController;
   late TextEditingController _cityController;
-  late TextEditingController _stateController;
-  late TextEditingController _zipController;
+  late TextEditingController _regionController;
+  late TextEditingController _postalCodeController;
   late TextEditingController _countryController;
 
   @override
   void initState() {
     super.initState();
-    _labelController = TextEditingController(text: widget.initialAddress?.title ?? '');
+    _titleController = TextEditingController(text: widget.initialAddress?.title ?? '');
     _streetController = TextEditingController(text: widget.initialAddress?.street ?? '');
     _cityController = TextEditingController(text: widget.initialAddress?.city.ar ?? '');
-    _stateController = TextEditingController(text: widget.initialAddress?.region.ar ?? '');
-    _zipController = TextEditingController(text: widget.initialAddress?.postalCode ?? '');
+    _regionController = TextEditingController(text: widget.initialAddress?.region.ar ?? '');
+    _postalCodeController = TextEditingController(text: widget.initialAddress?.postalCode ?? '');
     _countryController = TextEditingController(text: widget.initialAddress?.country.ar ?? '');
   }
 
   @override
   void dispose() {
-    _labelController.dispose();
+    _titleController.dispose();
     _streetController.dispose();
     _cityController.dispose();
-    _stateController.dispose();
-    _zipController.dispose();
+    _regionController.dispose();
+    _postalCodeController.dispose();
     _countryController.dispose();
     super.dispose();
   }
 
   void _saveAddress() {
     if (_formKey.currentState!.validate()) {
-      final titleStr = _labelController.text.trim().isEmpty ? 'العنوان' : _labelController.text.trim();
+      final titleStr = _titleController.text.trim().isEmpty ? 'العنوان' : _titleController.text.trim();
       final streetStr = _streetController.text.trim();
       final cityStr = _cityController.text.trim();
-      final regionStr = _stateController.text.trim();
-      final postalStr = _zipController.text.trim();
+      final regionStr = _regionController.text.trim();
+      final postalStr = _postalCodeController.text.trim();
       final countryStr = _countryController.text.trim();
 
       final newAddress = AddressModel(
@@ -125,7 +125,7 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
                 ),
                 const SizedBox(height: 32),
                 AuthTextField(
-                  controller: _labelController,
+                  controller: _titleController,
                   label: TranslationKeys.addressLabelOptional.tr(context),
                   hintText: TranslationKeys.egHomeWork.tr(context),
                 ),
@@ -150,7 +150,7 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: AuthTextField(
-                        controller: _stateController,
+                        controller: _regionController,
                         label: TranslationKeys.state.tr(context),
                         hintText: TranslationKeys.state.tr(context),
                         validator: (val) => val == null || val.isEmpty ? TranslationKeys.requiredValidation.tr(context) : null,
@@ -163,7 +163,7 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
                   children: [
                     Expanded(
                       child: AuthTextField(
-                        controller: _zipController,
+                        controller: _postalCodeController,
                         label: TranslationKeys.zipCode.tr(context),
                         hintText: TranslationKeys.zipCode.tr(context),
                         validator: (val) => val == null || val.isEmpty ? TranslationKeys.requiredValidation.tr(context) : null,

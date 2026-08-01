@@ -113,19 +113,19 @@ class _OffersManagementPageState extends State<OffersManagementPage> {
                         _selectedOffers = selected;
                       });
                     },
-                    onBulkDelete: () {
+                    onBulkDelete: () async {
+                      final count = _selectedOffers.length;
+                      for (var o in _selectedOffers) {
+                        await provider.deleteOffer(o.id);
+                      }
+                      if (!mounted) return;
                       setState(() {
-                        for (var o in _selectedOffers) {
-                          provider.offers.removeWhere(
-                            (item) => item.id == o.id,
-                          );
-                        }
                         _selectedOffers.clear();
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedOffers.length})',
+                            '${TranslationKeys.deleteSelected.tr(context)} ($count)',
                           ),
                           backgroundColor: Colors.red,
                         ),
@@ -223,12 +223,9 @@ class _OffersManagementPageState extends State<OffersManagementPage> {
                             context,
                             CreateEditOfferPage(offer: o),
                           ),
-                          onDelete: () {
-                            setState(() {
-                              provider.offers.removeWhere(
-                                (item) => item.id == o.id,
-                              );
-                            });
+                          onDelete: () async {
+                            await provider.deleteOffer(o.id);
+                            if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

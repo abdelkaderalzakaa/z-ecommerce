@@ -24,6 +24,7 @@ enum SocialPlatform {
   tiktok,
   linkedin,
   youtube,
+  website,
   contactPhoneFirst,
   contactPhoneSecond,
   contactEmail,

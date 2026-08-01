@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/data/models/customer/customer_model.dart';
+import 'package:z_ecommerce/data/services/user_service.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -11,9 +13,21 @@ class UserWishlistTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final wishlist = user.wishlist;
 
-    return SingleChildScrollView(
+    return FutureBuilder<CustomerModel?>(
+      future: UserService().getCustomerById(user.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        final wishlist = snapshot.data?.wishlist ?? [];
+
+        return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,6 +66,8 @@ class UserWishlistTab extends StatelessWidget {
             ),
         ],
       ),
+    );
+      },
     );
   }
 }

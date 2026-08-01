@@ -28,7 +28,7 @@ class DashboardOverviewPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Consumer5<
-      SuperAdminProvider,
+      BusinessProvider,
       ProductProvider,
       InvoiceProvider,
       OfferProvider,
@@ -49,11 +49,11 @@ class DashboardOverviewPage extends StatelessWidget {
             }
 
             // Calculations & Summaries across all providers
-            final totalStores = storesProvider.totalStores;
-            final activeStores = storesProvider.activeStores;
+            final totalStores = storesProvider.businesses.length;
+            final activeStores = storesProvider.businesses.where((b) => b.status == 'مفعل من السوبر ادمن' || b.status == 'Active').length;
 
             final totalProducts = productProvider.allProducts.length;
-            final topSellingProductsCount = productProvider.topSelling.length;
+            final topSellingProductsCount = productProvider.allProducts.length;
 
             final totalOrders = invoiceProvider.invoices.length;
             final completedOrders = invoiceProvider.invoices
@@ -63,12 +63,12 @@ class DashboardOverviewPage extends StatelessWidget {
                 .where((i) => i.status == 'Pending')
                 .length;
 
-            final ownersCount = storesProvider.totalStores;
+            final ownersCount = storesProvider.businesses.length;
             final customersCount = 0;
             final totalUsers = ownersCount + customersCount + 1;
 
-            final totalOffers = offerProvider.allOffers.length;
-            final activeOffers = offerProvider.allOffers
+            final totalOffers = offerProvider.activeOffers.length;
+            final activeOffers = offerProvider.activeOffers
                 .where((o) => o.isActive)
                 .length;
 
@@ -791,14 +791,7 @@ class DashboardOverviewPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ...businesses.map((s) {
-            double rating = 4.8;
-            if (s.ratingStore != null && s.ratingStore!.isNotEmpty) {
-              final sum = s.ratingStore!.fold<int>(
-                0,
-                (prev, r) => prev + r.rating,
-              );
-              rating = sum / s.ratingStore!.length;
-            }
+            double rating = s.rating;
 
             return InkWell(
               onTap: () =>
@@ -835,14 +828,14 @@ class DashboardOverviewPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            s.name.get(context),
+                            s.localization.name.get(context),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
                           ),
                           Text(
-                            '${s.category} • ${s.orders} طلب',
+                            '${s.businessType.name} • ${s.orders} طلب',
                             style: TextStyle(
                               fontSize: 11,
                               color: theme.textTheme.bodySmall?.color,
@@ -892,8 +885,8 @@ class DashboardOverviewPage extends StatelessWidget {
   // Widget: User Roles Breakdown Card
   Widget _buildUserRolesDistribution(BuildContext context) {
     final theme = Theme.of(context);
-    final storesProvider = context.watch<SuperAdminProvider>();
-    final owners = storesProvider.totalStores;
+    final storesProvider = context.watch<BusinessProvider>();
+    final owners = storesProvider.businesses.length;
     const customers = 0;
     const admins = 1;
     final total = owners + customers + admins;

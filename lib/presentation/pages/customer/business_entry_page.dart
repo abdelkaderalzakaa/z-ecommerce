@@ -9,6 +9,7 @@ import '../../../data/models/product/offer_model.dart';
 import '../../../data/models/product/product_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/business_provider.dart';
+import '../../../data/providers/offer_provider.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../global/locale_provider.dart';
 import '../../global/translate/app_localizations.dart';
@@ -16,7 +17,6 @@ import '../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/home_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/profile_customer/profile_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
-import 'package:z_ecommerce/presentation/pages/customer/business_entry_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/offer/offer_details_page.dart';
@@ -64,6 +64,13 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
               (_currentHeroImageIndex + 1) % _heroImages.length;
         });
       }
+    });
+
+    // تهيئة البيانات الحقيقية من الـ Providers
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<OfferProvider>().listenToActiveOffers();
+      context.read<ProductProvider>().listenToAllProducts();
     });
   }
 
@@ -920,144 +927,194 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
 
   Widget _buildOffersSection(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-    final List<OfferModel> trendingOffers = List.from(fakeOffers)
-      ..shuffle(Random(42));
-    final displayOffers = trendingOffers.take(6).toList();
 
-    return Container(
-      color: Colors.grey[50],
-      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<OfferProvider>(
+      builder: (context, offerProvider, child) {
+        final List<OfferModel> displayOffers =
+            offerProvider.activeOffers.take(6).toList();
+
+        return Container(
+          color: Colors.grey[50],
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    isAr ? 'العروض المميزة' : 'Special Offers',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        isAr ? 'العروض المميزة' : 'Special Offers',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => _showSnackBar(
+                          isAr
+                              ? 'سيتم عرض جميع العروض قريباً'
+                              : 'Will show all offers soon',
+                        ),
+                        child: Text(
+                          isAr ? 'الجميع' : 'See All',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () => _showSnackBar(
-                      isAr
-                          ? 'سيتم عرض جميع العروض قريباً'
-                          : 'Will show all offers soon',
-                    ),
-                    child: Text(
-                      isAr ? 'الجميع' : 'See All',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                  const SizedBox(height: 40),
+                  if (offerProvider.isLoading)
+                    const SizedBox(
+                      height: 350,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (displayOffers.isEmpty)
+                    SizedBox(
+                      height: 200,
+                      child: Center(
+                        child: Text(
+                          isAr
+                              ? 'لا توجد عروض متاحة حالياً'
+                              : 'No offers available at the moment',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: 350,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: displayOffers.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 24),
+                        itemBuilder: (context, index) {
+                          final offer = displayOffers[index];
+                          return _TrendingOfferCard(
+                            offer: offer,
+                            businessId: offer.businessId,
+                            isAr: isAr,
+                          );
+                        },
                       ),
                     ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 40),
-              SizedBox(
-                height: 350,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: displayOffers.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 24),
-                  itemBuilder: (context, index) {
-                    final offer = displayOffers[index];
-                    final assignedbusinessId = offer.businessId;
-                    return _TrendingOfferCard(
-                      offer: offer,
-                      businessId: assignedbusinessId,
-                      isAr: isAr,
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildTrendingProducts(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-    final productProvider = context.watch<ProductProvider>();
-    final productsList = productProvider.allProducts;
-    final List<ProductModel> trending = List.from(productsList)
-      ..shuffle(Random(42));
-    final displayProducts = trending.take(6).toList();
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer2<ProductProvider, BusinessProvider>(
+      builder: (context, productProvider, businessProvider, child) {
+        final productsList = productProvider.allProducts;
+        final List<ProductModel> trending = List.from(productsList)
+          ..shuffle(Random(42));
+        final displayProducts = trending.take(6).toList();
+        final businesses = businessProvider.businesses;
+
+        return Container(
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    isAr ? 'المنتجات الشائعة' : 'Trending Products',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        isAr ? 'المنتجات الشائعة' : 'Trending Products',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => _showSnackBar(
+                          isAr
+                              ? 'سيتم عرض جميع المنتجات قريباً'
+                              : 'Will show all products soon',
+                        ),
+                        child: Text(
+                          isAr ? 'الجميع' : 'See All',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () => _showSnackBar(
-                      isAr
-                          ? 'سيتم عرض جميع المنتجات قريباً'
-                          : 'Will show all products soon',
-                    ),
-                    child: Text(
-                      isAr ? 'الجميع' : 'See All',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                  const SizedBox(height: 40),
+                  if (productProvider.isLoading)
+                    const SizedBox(
+                      height: 350,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (displayProducts.isEmpty)
+                    SizedBox(
+                      height: 200,
+                      child: Center(
+                        child: Text(
+                          isAr
+                              ? 'لا توجد منتجات متاحة حالياً'
+                              : 'No products available at the moment',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: 350,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: displayProducts.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 24),
+                        itemBuilder: (context, index) {
+                          final product = displayProducts[index];
+                          // استخدام businesses الحقيقية من الـ Provider
+                          final assignedBusinessId = businesses.isNotEmpty
+                              ? businesses[index % businesses.length].id
+                              : '';
+                          return _TrendingProductCard(
+                            product: product,
+                            businessId: assignedBusinessId,
+                            isAr: isAr,
+                          );
+                        },
                       ),
                     ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 40),
-              SizedBox(
-                height: 350,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: displayProducts.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 24),
-                  itemBuilder: (context, index) {
-                    final product = displayProducts[index];
-                    // We randomly assign a company ID for the routing just for demonstration
-                    // In a real app, products would have a businessId field
-                    final assignedbusinessId =
-                        fakeCompanies[index % fakeCompanies.length].id;
-                    return _TrendingProductCard(
-                      product: product,
-                      businessId: assignedbusinessId,
-                      isAr: isAr,
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -1573,7 +1630,7 @@ class _TrendingProductCard extends StatelessWidget {
     return Container(
       width: 250,
       decoration: BoxDecoration(
-        color: product.cardBgColor,
+      color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -1629,7 +1686,7 @@ class _TrendingProductCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '\$${product.price.toStringAsFixed(2)}',
+                          '\$${product.basePrice.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/models/order/invoice_model.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
@@ -43,7 +44,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
               order.storeId.toLowerCase().contains(_searchQuery.toLowerCase());
           final matchesStatus =
               _selectedStatusFilter == 'all' ||
-              order.status.toLowerCase() == _selectedStatusFilter.toLowerCase();
+              order.status.name.toLowerCase() == _selectedStatusFilter.toLowerCase();
           return matchesQuery && matchesStatus;
         }).toList();
 
@@ -175,24 +176,24 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                         title: TranslationKeys.orderDate.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (order) => order.date,
+                        sortKey: (order) => order.createdAt,
                         cellBuilder: (order) => TableTextCell(
                           title:
-                              '${order.date.year}-${order.date.month.toString().padLeft(2, '0')}-${order.date.day.toString().padLeft(2, '0')}',
+                              '${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
                         ),
                       ),
                       AppTableColumn<InvoiceModel>(
                         title: TranslationKeys.statusActive.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (order) => order.status,
+                        sortKey: (order) => order.status.index,
                         cellBuilder: (order) => InkWell(
                           onTap: () => showOrderStatusDialog(context, order),
                           borderRadius: BorderRadius.circular(16),
                           child: TableStatusBadge.fromStatus(
-                            order.status == 'Pending'
+                            order.status == OrderStatus.pending
                                 ? TranslationKeys.statusPending.tr(context)
-                                : (order.status == 'Paid'
+                                : (order.status == OrderStatus.confirmed
                                       ? TranslationKeys.statusPaid.tr(context)
                                       : TranslationKeys.statusCompleted.tr(
                                           context,

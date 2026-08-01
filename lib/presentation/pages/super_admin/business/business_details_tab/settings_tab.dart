@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_constant.dart';
 
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -68,33 +69,33 @@ class SettingsTab extends StatelessWidget {
                 _buildDetailRow(
                   context,
                   TranslationKeys.category.tr(context),
-                  store.category.name.get(context),
+                  store.businessType.name,
                   Icons.category_rounded,
                 ),
-                if (store.slogan.get(context).isNotEmpty) ...[
+                if (store.localization.slogan.get(context).isNotEmpty) ...[
                   const Divider(),
                   _buildDetailRow(
                     context,
                     'الشعار اللفظي (Slogan)',
-                    store.slogan.get(context),
+                    store.localization.slogan.get(context),
                     Icons.format_quote_rounded,
                   ),
                 ],
-                if (store.description.get(context).isNotEmpty) ...[
+                if (store.localization.description.get(context).isNotEmpty) ...[
                   const Divider(),
                   _buildDetailRow(
                     context,
                     'وصف المتجر',
-                    store.description.get(context),
+                    store.localization.description.get(context),
                     Icons.description_rounded,
                   ),
                 ],
-                if (store.footerDescription.get(context).isNotEmpty) ...[
+                if (store.localization.footerDescription.get(context).isNotEmpty) ...[
                   const Divider(),
                   _buildDetailRow(
                     context,
                     'وصف الفوتر',
-                    store.footerDescription.get(context),
+                    store.localization.footerDescription.get(context),
                     Icons.subtitles_rounded,
                   ),
                 ],
@@ -164,15 +165,8 @@ class SettingsTab extends StatelessWidget {
                 _buildDetailRow(
                   context,
                   TranslationKeys.currency.tr(context),
-                  store.currency,
+                  '${store.currency.code} (${store.currency.symbol})',
                   Icons.attach_money_rounded,
-                ),
-                const Divider(),
-                _buildDetailRow(
-                  context,
-                  TranslationKeys.deliveryFee.tr(context),
-                  '\$${store.deliveryFee.toStringAsFixed(2)}',
-                  Icons.local_shipping_rounded,
                 ),
                 const Divider(),
                 const SizedBox(height: 6),
@@ -206,6 +200,9 @@ class SettingsTab extends StatelessWidget {
                           context,
                         );
                         break;
+                      case PaymentMethodType.bankTransfer:
+                        pmName = 'تحويل بنكي';
+                        break;
                     }
                     return Chip(
                       avatar: const Icon(Icons.payment_rounded, size: 16),
@@ -233,14 +230,14 @@ class SettingsTab extends StatelessWidget {
                 _buildDetailRow(
                   context,
                   TranslationKeys.storeContactEmail.tr(context),
-                  store.contactEmail ?? 'غير محدد',
+                  store.owner.email,
                   Icons.email_rounded,
                 ),
                 const Divider(),
                 _buildDetailRow(
                   context,
                   TranslationKeys.storeContactPhone.tr(context),
-                  store.contactPhone ?? 'غير محدد',
+                  store.owner.phoneNumber,
                   Icons.phone_rounded,
                 ),
                 if (store.socials.isNotEmpty) ...[
@@ -262,7 +259,7 @@ class SettingsTab extends StatelessWidget {
                           color: social.color,
                         ),
                         label: Text(
-                          '${social.title.get(context)} (${social.link})',
+                          '${social.title.get(context)} (${social.url})',
                         ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -278,13 +275,13 @@ class SettingsTab extends StatelessWidget {
           const SizedBox(height: 20),
 
           // 4. Store Addresses & Branches
-          if (store.addresses != null && store.addresses!.isNotEmpty) ...[
+          if (store.addAddress.isNotEmpty) ...[
             _buildSectionCard(
               context,
               title: 'فروع وعناوين المتجر',
               icon: Icons.location_city_rounded,
               child: Column(
-                children: store.addresses!.map((addr) {
+                children: store.addAddress.map((addr) {
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(
@@ -292,11 +289,11 @@ class SettingsTab extends StatelessWidget {
                       color: Colors.redAccent,
                     ),
                     title: Text(
-                      addr.address.get(context),
+                      addr.title.isNotEmpty ? addr.title : addr.getFormattedAddress(),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      'خريطة: ${addr.linkMap} (${addr.latitude}, ${addr.longitude})',
+                      addr.getFormattedAddress(langCode: Localizations.localeOf(context).languageCode),
                     ),
                   );
                 }).toList(),
@@ -316,19 +313,19 @@ class SettingsTab extends StatelessWidget {
                 _buildExpandablePolicy(
                   context,
                   'من نحن (About Us)',
-                  store.aboutUs.get(context),
+                  store.localization.aboutUs.get(context),
                 ),
                 const Divider(),
                 _buildExpandablePolicy(
                   context,
                   TranslationKeys.termsConditions.tr(context),
-                  store.termsAndConditions.get(context),
+                  store.localization.termsAndConditions.get(context),
                 ),
                 const Divider(),
                 _buildExpandablePolicy(
                   context,
                   TranslationKeys.privacyPolicy.tr(context),
-                  store.privacyPolicy.get(context),
+                  store.localization.privacyPolicy.get(context),
                 ),
               ],
             ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/product_enums.dart';
+import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -11,6 +14,28 @@ class ProductInventoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final availableColors = product.variants
+        .map((v) => v.color)
+        .whereType<ProductColor>()
+        .map((c) {
+          switch (c) {
+            case ProductColor.red: return Colors.red;
+            case ProductColor.blue: return Colors.blue;
+            case ProductColor.black: return Colors.black;
+            case ProductColor.white: return Colors.white;
+            case ProductColor.green: return Colors.green;
+            case ProductColor.yellow: return Colors.yellow;
+          }
+        })
+        .toSet()
+        .toList();
+
+    final availableSizes = product.variants
+        .map((v) => v.size)
+        .whereType<ProductSize>()
+        .map((s) => s.name.toUpperCase())
+        .toSet()
+        .toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -46,7 +71,7 @@ class ProductInventoryTab extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  if (product.colors.isEmpty)
+                  if (availableColors.isEmpty)
                     Text(
                       TranslationKeys.noColorsAvailable.tr(context),
                       style: TextStyle(color: theme.textTheme.bodySmall?.color),
@@ -55,7 +80,7 @@ class ProductInventoryTab extends StatelessWidget {
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
-                      children: product.colors.map((c) {
+                      children: availableColors.map((c) {
                         return Container(
                           width: 36,
                           height: 36,
@@ -103,7 +128,7 @@ class ProductInventoryTab extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  if (product.sizes.isEmpty)
+                  if (availableSizes.isEmpty)
                     Text(
                       TranslationKeys.noSizesAvailable.tr(context),
                       style: TextStyle(color: theme.textTheme.bodySmall?.color),
@@ -112,7 +137,7 @@ class ProductInventoryTab extends StatelessWidget {
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: product.sizes.map((s) {
+                      children: availableSizes.map((s) {
                         return Chip(
                           label: Text(s, style: const TextStyle(fontWeight: FontWeight.bold)),
                           backgroundColor: theme.primaryColor.withOpacity(0.08),

@@ -61,8 +61,9 @@ class _BrandsSectionState extends State<BrandsSection> {
             const NeverScrollableScrollPhysics(), // Prevent manual scroll interference
         itemBuilder: (context, index) {
           final brand = brands[index % brands.length];
+          final businessSettings = context.read<BusinessProvider>().businessSettings;
           return Center(
-            child: _BrandItem(brand: brand, businessId: companyData?.id),
+            child: _BrandItem(brand: brand, businessId: businessSettings?.id ?? ''),
           );
         },
       ),

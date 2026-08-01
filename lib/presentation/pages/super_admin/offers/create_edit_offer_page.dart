@@ -93,12 +93,9 @@ class _CreateEditOfferPageState extends State<CreateEditOfferPage> {
     );
 
     if (isEdit) {
-      final index = provider.offers.indexWhere((o) => o.id == offerId);
-      if (index != -1) {
-        provider.offers[index] = updatedOffer;
-      }
+      await provider.updateOffer(updatedOffer);
     } else {
-      provider.offers.insert(0, updatedOffer);
+      await provider.addOffer(updatedOffer);
     }
 
     setState(() => _isSubmitting = false);

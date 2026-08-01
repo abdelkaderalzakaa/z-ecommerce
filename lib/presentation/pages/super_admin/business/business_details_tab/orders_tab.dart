@@ -100,7 +100,7 @@ class _OrdersTabState extends State<OrdersTab> {
                 cellBuilder: (inv) => TableTextCell(
                   title: inv.id,
                   subtitle:
-                      '${inv.date.year}-${inv.date.month.toString().padLeft(2, '0')}-${inv.date.day.toString().padLeft(2, '0')}',
+                      '${inv.createdAt.year}-${inv.createdAt.month.toString().padLeft(2, '0')}-${inv.createdAt.day.toString().padLeft(2, '0')}',
                   isBold: true,
                 ),
               ),
@@ -115,8 +115,8 @@ class _OrdersTabState extends State<OrdersTab> {
                 title: TranslationKeys.statusActive.tr(context),
                 flex: 1,
                 sortable: true,
-                sortKey: (inv) => inv.status,
-                cellBuilder: (inv) => TableStatusBadge.fromStatus(inv.status),
+                sortKey: (inv) => inv.status.name,
+                cellBuilder: (inv) => TableStatusBadge.fromStatus(inv.status.name),
               ),
               AppTableColumn<InvoiceModel>(
                 title: TranslationKeys.actions.tr(context),

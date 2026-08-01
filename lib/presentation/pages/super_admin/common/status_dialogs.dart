@@ -5,12 +5,14 @@ import 'package:z_ecommerce/data/models/order/invoice_model.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 /// Interactive Order Status Update Dialog
 void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
-  String selectedStatus = invoice.status;
+  OrderStatus selectedStatus = invoice.status;
 
   showDialog(
     context: context,
@@ -32,31 +34,31 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadioListTile<String>(
+              RadioListTile<OrderStatus>(
                 title: Text(TranslationKeys.statusPending.tr(context)),
                 subtitle: const Text('الطلب قيد المراجعة والانتظار'),
-                value: 'Pending',
+                value: OrderStatus.pending,
                 groupValue: selectedStatus,
                 onChanged: (val) => setState(() => selectedStatus = val!),
               ),
-              RadioListTile<String>(
+              RadioListTile<OrderStatus>(
                 title: Text(TranslationKeys.statusPaid.tr(context)),
                 subtitle: const Text('تم استلام مبلغ الطلب بنجاح'),
-                value: 'Paid',
+                value: OrderStatus.confirmed,
                 groupValue: selectedStatus,
                 onChanged: (val) => setState(() => selectedStatus = val!),
               ),
-              RadioListTile<String>(
+              RadioListTile<OrderStatus>(
                 title: Text(TranslationKeys.statusCompleted.tr(context)),
                 subtitle: const Text('تم توصيل واستكمال الطلب بنجاح'),
-                value: 'Completed',
+                value: OrderStatus.delivered,
                 groupValue: selectedStatus,
                 onChanged: (val) => setState(() => selectedStatus = val!),
               ),
-              RadioListTile<String>(
+              RadioListTile<OrderStatus>(
                 title: const Text('مرفوض / ملغي (Cancelled)'),
                 subtitle: const Text('تم إلغاء أو رفض الطلب'),
-                value: 'Cancelled',
+                value: OrderStatus.cancelled,
                 groupValue: selectedStatus,
                 onChanged: (val) => setState(() => selectedStatus = val!),
               ),
@@ -69,28 +71,12 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
             ),
             ElevatedButton.icon(
               onPressed: () {
-                final provider = context.read<InvoiceProvider>();
-                final index = provider.invoices.indexWhere(
-                  (inv) => inv.id == invoice.id,
-                );
-                if (index != -1) {
-                  final updated = InvoiceModel(
-                    id: invoice.id,
-                    storeId: invoice.storeId,
-                    items: invoice.items,
-                    tax: invoice.tax,
-                    shippingCost: invoice.shippingCost,
-                    date: invoice.date,
-                    status: selectedStatus,
-                    shippingAddress: invoice.shippingAddress,
-                  );
-                  provider.invoices[index] = updated;
-                }
+                invoice.updateStatus(selectedStatus, "super_admin", UserRole.superAdmin);
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'تم تحديث حالة الطلب إلى "$selectedStatus" بنجاح',
+                      'تم تحديث حالة الطلب إلى "${selectedStatus.name}" بنجاح',
                     ),
                   ),
                 );
@@ -158,9 +144,10 @@ void showStoreStatusDialog(BuildContext context, BusinessModel store) {
               child: Text(TranslationKeys.cancel.tr(context)),
             ),
             ElevatedButton.icon(
-              onPressed: () {
-                final provider = context.read<SuperAdminProvider>();
-                provider.updateStoreStatus(store.id, selectedStatus);
+              onPressed: () async {
+                final provider = context.read<BusinessProvider>();
+                await provider.updateStoreStatus(store.id, selectedStatus);
+                if (!context.mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

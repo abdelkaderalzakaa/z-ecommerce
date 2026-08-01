@@ -1,4 +1,4 @@
-import 'package:z_ecommerce/core/enums/product_enums.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/product_enums.dart';
 
 /// Represents a specific product variant with unique attributes, price, and stock.
 class ProductVariant {

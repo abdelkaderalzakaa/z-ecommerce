@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
-import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
@@ -34,9 +33,7 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
       builder: (context, provider, child) {
         final filteredStores = provider.businesses.where((store) {
           final nameStr = store.localization.name.get(context).toLowerCase();
-          final categoryStr = store.businessType.name
-              .get(context)
-              .toLowerCase();
+          final categoryStr = store.businessType.name.toLowerCase();
           final matchesQuery =
               _searchQuery.isEmpty ||
               nameStr.contains(_searchQuery.toLowerCase()) ||
@@ -168,8 +165,8 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                             store.localization.name.get(context),
                         cellBuilder: (store) => TableImageTextCell(
                           title: store.localization.name.get(context),
-                          subtitle: store.contactEmail ?? store.id,
-                          imageUrl: store.logoUrl,
+                          subtitle: store.owner.email,
+                          imageUrl: store.theme.logoUrl,
                           fallbackIcon: Icons.storefront_rounded,
                         ),
                       ),
@@ -177,27 +174,26 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                         title: TranslationKeys.category.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (store) => store.category.name.get(context),
+                        sortKey: (store) => store.businessType.name,
                         cellBuilder: (store) => TableTextCell(
-                          title: store.category.name.get(context),
+                          title: store.businessType.name,
                         ),
                       ),
                       AppTableColumn<BusinessModel>(
                         title: TranslationKeys.ordersAndRating.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (store) => store.orders ?? 0,
+                        sortKey: (store) => store.orders,
                         cellBuilder: (store) => TableTextCell(
-                          title: '${store.orders ?? 0}',
-                          subtitle: '⭐ ${store.rate.toStringAsFixed(1)}',
+                          title: '${store.orders}',
+                          subtitle: '⭐ ${store.rating.toStringAsFixed(1)}',
                         ),
                       ),
                       AppTableColumn<BusinessModel>(
                         title: TranslationKeys.contact.tr(context),
                         flex: 1,
                         cellBuilder: (store) => TableTextCell(
-                          title:
-                              store.contactPhone ?? store.contactEmail ?? '-',
+                          title: store.owner.email,
                         ),
                       ),
                       AppTableColumn<BusinessModel>(

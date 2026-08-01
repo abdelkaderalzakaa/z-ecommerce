@@ -171,7 +171,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
     final business = businessProvider.selectedBusiness;
     final themeInfo = business?.theme;
     final storeName = business?.localization.name.ar ?? 'مطعم وكافيه السعادة';
-    final themeStyle = themeInfo?.restaurantMenuThemeStyle ?? 'chalkboard';
+    final themeStyle = 'chalkboard';
 
     Color primaryColor = themeInfo?.primaryColorValue ?? const Color(0xFF4F46E5);
     Color bgColor = themeInfo?.backgroundColorValue ?? const Color(0xFFF9FAFB);

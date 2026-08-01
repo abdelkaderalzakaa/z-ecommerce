@@ -13,7 +13,6 @@ import 'presentation/global/locale_provider.dart';
 import 'data/providers/offer_provider.dart';
 import 'data/providers/brand_provider.dart';
 import 'presentation/global/translate/app_localizations.dart';
-import 'presentation/global/theme/app_colors.dart';
 import 'presentation/global/theme/app_theme.dart';
 import 'presentation/pages/customer/business_entry_page.dart';
 import 'presentation/pages/super_admin/super_admin_home.dart';
@@ -54,19 +53,11 @@ class ZEcommerceApp extends StatelessWidget {
       ],
       child: Consumer3<SettingsProvider, LocaleProvider, BusinessProvider>(
         builder: (context, settings, localeProvider, businessProvider, child) {
-          final themeInfo = companyProvider.companySettings?.theme;
-          final primaryColor = themeInfo?.primaryColor != null
-              ? HexColor.fromHex(themeInfo!.primaryColor)
-              : null;
-          final secondaryColor = themeInfo?.secondaryColor != null
-              ? HexColor.fromHex(themeInfo!.secondaryColor)
-              : null;
-          final backgroundColor = themeInfo?.backgroundColor != null
-              ? HexColor.fromHex(themeInfo!.backgroundColor)
-              : null;
-          final surfaceColor = themeInfo?.surfaceColor != null
-              ? HexColor.fromHex(themeInfo!.surfaceColor)
-              : null;
+          final themeInfo = businessProvider.selectedBusiness?.theme;
+          final primaryColor = themeInfo?.primaryColorValue;
+          final secondaryColor = themeInfo?.secondaryColorValue;
+          final backgroundColor = themeInfo?.backgroundColorValue;
+          final surfaceColor = themeInfo?.surfaceColorValue;
 
           return MaterialApp(
             title: 'Shop.co – Find Clothes That Matches Your Style',

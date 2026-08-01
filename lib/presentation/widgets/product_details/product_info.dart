@@ -9,6 +9,7 @@ import '../../../data/providers/business_provider.dart';
 import '../../pages/customer/cart/cart_page.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/product_enums.dart';
 
 class ProductInfo extends StatefulWidget {
   final ProductModel product;
@@ -50,6 +51,29 @@ class _ProductInfoState extends State<ProductInfo> {
         ? TranslationKeys.viewInCart.tr(context)
         : TranslationKeys.addToCart.tr(context);
     bool showCheckmark = isInCart;
+
+    final colors = product.variants
+        .map((v) {
+          switch (v.color) {
+            case ProductColor.red: return Colors.red;
+            case ProductColor.blue: return Colors.blue;
+            case ProductColor.black: return Colors.black;
+            case ProductColor.white: return Colors.white;
+            case ProductColor.green: return Colors.green;
+            case ProductColor.yellow: return Colors.yellow;
+            default: return null;
+          }
+        })
+        .whereType<Color>()
+        .toSet()
+        .toList();
+
+    final sizes = product.variants
+        .map((v) => v.size?.name)
+        .where((s) => s != null && s.isNotEmpty)
+        .map((s) => s!)
+        .toSet()
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,9 +166,9 @@ class _ProductInfoState extends State<ProductInfo> {
           isInCart: showCheckmark,
           buttonText: buttonText,
           onQuantityChanged: (val) {
-            if (isInCart) {
+            if (isInCart && businessId != null) {
               cartProvider.updateQuantity(businessId: businessId, itemId: cartItem.id, newQuantity: val);
-            } else {
+            } else if (!isInCart) {
               setState(() => _localQuantity = val);
             }
           },

@@ -46,7 +46,11 @@ class OrderItemsTab extends StatelessWidget {
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final item = items[index];
-                final itemTotal = item.product.price * item.quantity;
+                final itemTotal = item.unitPrice * item.quantity;
+
+                final images = item.product?.images ?? [];
+                final hasImage = images.isNotEmpty && images.first.startsWith('http');
+                final itemName = item.product?.name ?? item.offer?.name.get(context) ?? 'Unknown';
 
                 return Card(
                   elevation: 0,
@@ -64,16 +68,14 @@ class OrderItemsTab extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: theme.primaryColor.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(10),
-                            image: item.product.images.isNotEmpty &&
-                                    item.product.images.first.startsWith('http')
+                            image: hasImage
                                 ? DecorationImage(
-                                    image: NetworkImage(item.product.images.first),
+                                    image: NetworkImage(images.first),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
                           ),
-                          child: item.product.images.isEmpty ||
-                                  !item.product.images.first.startsWith('http')
+                          child: !hasImage
                               ? Icon(Icons.shopping_bag_outlined, color: theme.primaryColor)
                               : null,
                         ),
@@ -83,7 +85,7 @@ class OrderItemsTab extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.product.name,
+                                itemName,
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -93,7 +95,7 @@ class OrderItemsTab extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${TranslationKeys.qty.tr(context)}: ${item.quantity} • \$${item.product.price.toStringAsFixed(2)}',
+                                '${TranslationKeys.qty.tr(context)}: ${item.quantity} • \$${item.unitPrice.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: theme.textTheme.bodySmall?.color,

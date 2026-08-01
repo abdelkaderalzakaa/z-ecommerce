@@ -26,7 +26,6 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -40,7 +39,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
     });
 
     final authProvider = context.read<AuthProvider>();
@@ -55,7 +53,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         );
       } else {
         setState(() {
-          _errorMessage = authProvider.errorMessage ?? 'فشل إرسال رابط إعادة التعيين';
         });
       }
     }

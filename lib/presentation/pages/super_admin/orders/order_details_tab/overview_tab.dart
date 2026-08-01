@@ -114,13 +114,13 @@ class OrderOverviewTab extends StatelessWidget {
                   _buildMetaRow(
                     context,
                     TranslationKeys.placedOn.tr(context),
-                    '${invoice.date.year}-${invoice.date.month.toString().padLeft(2, '0')}-${invoice.date.day.toString().padLeft(2, '0')}',
+                    '${invoice.createdAt.year}-${invoice.createdAt.month.toString().padLeft(2, '0')}-${invoice.createdAt.day.toString().padLeft(2, '0')}',
                   ),
                   const Divider(),
                   _buildMetaRow(
                     context,
                     TranslationKeys.statusActive.tr(context),
-                    invoice.status,
+                    invoice.status.name,
                   ),
                 ],
               ),

@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 import '../../data/providers/business_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
+import '../../presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/pages/order_details_page.dart';
-
 class OrderDetailsPage extends StatelessWidget {
   final InvoiceModel invoice;
 
@@ -164,14 +164,12 @@ class OrderDetailsPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final item = invoice.items[index];
               return CartItemWidget(
-                title: item.product.name,
+                title: item.product?.name ?? item.offer?.name.get(context) ?? TranslationKeys.defaultText.tr(context),
                 size:
-                    item.selectedSize ??
+                    item.selectedVariant?.size?.name ??
                     TranslationKeys.defaultText.tr(context),
-                color: item.selectedColor != null
-                    ? '#${item.selectedColor!.value.toRadixString(16).substring(2).toUpperCase()}'
-                    : TranslationKeys.defaultText.tr(context),
-                price: item.product.price,
+                color: item.selectedVariant?.color?.name ?? TranslationKeys.defaultText.tr(context),
+                price: item.unitPrice,
                 quantity: item.quantity,
                 isReadOnly: true,
               );
@@ -199,15 +197,15 @@ class OrderDetailsPage extends StatelessWidget {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          if (invoice.shippingAddress.label != null) ...[
+          if (invoice.shippingAddress.title.isNotEmpty) ...[
             Text(
-              invoice.shippingAddress.label!,
+              invoice.shippingAddress.title,
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
             const SizedBox(height: 4),
           ],
           Text(
-            '${invoice.shippingAddress.street}\\n${invoice.shippingAddress.city}, ${invoice.shippingAddress.state} ${invoice.shippingAddress.zipCode}\\n${invoice.shippingAddress.country}',
+            invoice.shippingAddress.getFormattedAddress(langCode: Localizations.localeOf(context).languageCode),
             style: const TextStyle(
               color: AppColors.textSecondary,
               height: 1.5,
@@ -237,7 +235,7 @@ class OrderDetailsPage extends StatelessWidget {
           const SizedBox(height: 24),
           _SummaryRow(
             label: TranslationKeys.subtotal.tr(context),
-            value: '$currency${invoice.subTotal.toStringAsFixed(2)}',
+            value: '$currency${invoice.subtotal.toStringAsFixed(2)}',
           ),
           const SizedBox(height: 16),
           _SummaryRow(
@@ -248,7 +246,7 @@ class OrderDetailsPage extends StatelessWidget {
           const SizedBox(height: 16),
           _SummaryRow(
             label: TranslationKeys.tax.tr(context),
-            value: '$currency${invoice.tax.toStringAsFixed(2)}',
+            value: '${currency}0.00',
           ),
           const SizedBox(height: 16),
           _SummaryRow(
@@ -318,7 +316,7 @@ class _SummaryRow extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final String status;
+  final OrderStatus status;
 
   const _StatusBadge({required this.status});
 
@@ -326,20 +324,20 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     Color bgColor;
     Color textColor;
-    String translatedStatus = status;
+    String translatedStatus = status.name;
 
     switch (status) {
-      case 'Delivered':
+      case OrderStatus.delivered:
         bgColor = Colors.green.withValues(alpha: 0.1);
         textColor = Colors.green;
         translatedStatus = TranslationKeys.statusDelivered.tr(context);
         break;
-      case 'Processing':
+      case OrderStatus.preparing:
         bgColor = Colors.orange.withValues(alpha: 0.1);
         textColor = Colors.orange;
         translatedStatus = TranslationKeys.statusProcessing.tr(context);
         break;
-      case 'Cancelled':
+      case OrderStatus.cancelled:
         bgColor = Colors.red.withValues(alpha: 0.1);
         textColor = Colors.red;
         translatedStatus = TranslationKeys.statusCancelled.tr(context);

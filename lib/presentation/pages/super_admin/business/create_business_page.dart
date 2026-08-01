@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
-import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
+import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
+import 'package:z_ecommerce/data/models/store/currency_store.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -32,47 +34,8 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
   final _ownerEmailController = TextEditingController();
   final _ownerPasswordController = TextEditingController();
 
-  final List<StoreCategoryModel> _platformCategories = const [
-    StoreCategoryModel(
-      id: 'cat_restaurants',
-      name: LocalizedString(ar: 'مطاعم ومقاهي', en: 'Restaurants & Cafes'),
-    ),
-    StoreCategoryModel(
-      id: 'cat_fashion',
-      name: LocalizedString(ar: 'أزياء وملابس', en: 'Fashion & Apparel'),
-    ),
-    StoreCategoryModel(
-      id: 'cat_electronics',
-      name: LocalizedString(
-        ar: 'إلكترونيات وأجهزة',
-        en: 'Electronics & Gadgets',
-      ),
-    ),
-    StoreCategoryModel(
-      id: 'cat_home',
-      name: LocalizedString(ar: 'المنزل والديكور', en: 'Home & Decor'),
-    ),
-    StoreCategoryModel(
-      id: 'cat_beauty',
-      name: LocalizedString(
-        ar: 'عطور ومستحضرات تجميل',
-        en: 'Perfumes & Beauty',
-      ),
-    ),
-    StoreCategoryModel(
-      id: 'cat_grocery',
-      name: LocalizedString(
-        ar: 'سوبرماركت وبقالة',
-        en: 'Supermarket & Grocery',
-      ),
-    ),
-    StoreCategoryModel(
-      id: 'cat_general',
-      name: LocalizedString(ar: 'خدمات ومنتجات عامة', en: 'General Services'),
-    ),
-  ];
-
-  StoreCategoryModel? _selectedCategory;
+  // Business type selection
+  BusinessType _selectedBusinessType = BusinessType.retailStore;
 
   bool _isSubmitting = false;
 
@@ -81,23 +44,51 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
 
     setState(() => _isSubmitting = true);
 
-    final provider = context.read<SuperAdminProvider>();
+    final businessProvider = context.read<BusinessProvider>();
 
     // Generate IDs
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     final storeId = 'cmp_${timestamp.substring(timestamp.length - 8)}';
     final ownerId = 'usr_${timestamp.substring(timestamp.length - 8)}';
 
-    final newStore = BusinessModel(
-      id: storeId,
+    // بناء UserModel للمالك
+    final newOwner = UserModel(
+      id: ownerId,
+      name: _ownerNameController.text.trim(),
+      email: _ownerEmailController.text.trim(),
+      role: UserRole.businessOwner,
+      businessId: storeId,
+      phoneNumber: _contactPhoneController.text.trim(),
+      createdAt: DateTime.now(),
+    );
+
+    // بناء LocalizationAdmin للمتجر
+    final localization = LocalizationAdmin(
       name: LocalizedString(
-        en: _storeNameEnController.text,
-        ar: _storeNameArController.text,
+        en: _storeNameEnController.text.trim(),
+        ar: _storeNameArController.text.trim(),
       ),
-      category: _selectedCategory ?? _platformCategories.first,
-      slogan: LocalizedString(en: '', ar: ''),
-      description: LocalizedString(en: '', ar: ''),
-      footerDescription: LocalizedString(en: '', ar: ''),
+      slogan: const LocalizedString(en: '', ar: ''),
+      description: const LocalizedString(en: '', ar: ''),
+      footerDescription: const LocalizedString(en: '', ar: ''),
+      aboutUs: const LocalizedString(en: '', ar: ''),
+      termsAndConditions: const LocalizedString(en: '', ar: ''),
+      privacyPolicy: const LocalizedString(en: '', ar: ''),
+    );
+
+    // بناء CurrencyStore
+    final currency = CurrencyStore(
+      id: 'curr_usd',
+      code: 'USD',
+      symbol: '\$',
+      name: 'US Dollar',
+      exchangeRate: 1.0,
+      isPrimary: true,
+    );
+
+    final newStore = BusinessModel(
+      owner: newOwner,
+      businessType: _selectedBusinessType,
       theme: const ThemeAdmin(
         primaryColor: '#000000',
         secondaryColor: '#FFFFFF',
@@ -110,54 +101,37 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
         cardRadius: 16.0,
         inputRadius: 10.0,
       ),
-      brands: [],
-      currency: 'USD',
-      deliveryFee: 0.0,
-      aboutUs: LocalizedString(en: '', ar: ''),
-      termsAndConditions: LocalizedString(en: '', ar: ''),
-      privacyPolicy: LocalizedString(en: '', ar: ''),
-      socials: [],
-      contactEmail: _contactEmailController.text,
-      contactPhone: _contactPhoneController.text,
-      createdAt: DateTime.now(),
+      localization: localization,
+      currency: currency,
       status: 'Active',
-    );
-
-    final newOwner = UserModel(
-      id: ownerId,
-      name: _ownerNameController.text,
-      email: _ownerEmailController.text,
-      role: UserRole.businessOwner,
-      businessId: storeId,
-      phoneNumber: _contactPhoneController.text,
       createdAt: DateTime.now(),
     );
 
-    final success = await provider.createStoreAndOwner(
-      newStore: newStore,
-      newOwner: newOwner,
-      password: _ownerPasswordController.text.isNotEmpty
-          ? _ownerPasswordController.text
-          : 'StoreOwner123!',
-    );
+    try {
+      await businessProvider.saveBusiness(newStore);
+      setState(() => _isSubmitting = false);
 
-    setState(() => _isSubmitting = false);
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(TranslationKeys.storeCreatedSuccessfully.tr(context)),
-        ),
-      );
-      Navigator.pop(context);
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            provider.error ?? TranslationKeys.errorCreatingStore.tr(context),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(TranslationKeys.storeCreatedSuccessfully.tr(context)),
           ),
-        ),
-      );
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              businessProvider.errorMessage ??
+                  TranslationKeys.errorCreatingStore.tr(context),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -190,9 +164,8 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty
-                        ? TranslationKeys.required.tr(context)
-                        : null,
+                    validator: (v) =>
+                        v!.isEmpty ? TranslationKeys.required.tr(context) : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -204,31 +177,28 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty
-                        ? TranslationKeys.required.tr(context)
-                        : null,
+                    validator: (v) =>
+                        v!.isEmpty ? TranslationKeys.required.tr(context) : null,
                   ),
                 ),
               ],
             ),
-            DropdownButtonFormField<StoreCategoryModel>(
-              value: _selectedCategory,
+            DropdownButtonFormField<BusinessType>(
+              value: _selectedBusinessType,
               decoration: InputDecoration(
                 labelText: TranslationKeys.category.tr(context),
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.category_rounded, size: 20),
               ),
-              items: _platformCategories.map((cat) {
-                return DropdownMenuItem<StoreCategoryModel>(
-                  value: cat,
-                  child: Text(cat.name.get(context)),
+              items: BusinessType.values.map((type) {
+                return DropdownMenuItem<BusinessType>(
+                  value: type,
+                  child: Text(type.name),
                 );
               }).toList(),
               onChanged: (val) {
-                setState(() => _selectedCategory = val);
+                if (val != null) setState(() => _selectedBusinessType = val);
               },
-              validator: (v) =>
-                  v == null ? TranslationKeys.required.tr(context) : null,
             ),
             Row(
               children: [

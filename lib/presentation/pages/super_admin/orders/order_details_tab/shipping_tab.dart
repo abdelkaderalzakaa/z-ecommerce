@@ -50,7 +50,7 @@ class OrderShippingTab extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        address.details ?? 'عنوان الشحن',
+                        address.title.isNotEmpty ? address.title : (address.details ?? 'عنوان الشحن'),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -70,6 +70,20 @@ class OrderShippingTab extends StatelessWidget {
                     TranslationKeys.city.tr(context),
                     address.city.get(context),
                   ),
+                  const Divider(),
+                  _buildAddressRow(
+                    context,
+                    TranslationKeys.state.tr(context),
+                    address.region.get(context),
+                  ),
+                  if (address.postalCode != null && address.postalCode!.isNotEmpty) ...[
+                    const Divider(),
+                    _buildAddressRow(
+                      context,
+                      TranslationKeys.zipCode.tr(context),
+                      address.postalCode!,
+                    ),
+                  ],
                   const Divider(),
                   _buildAddressRow(
                     context,

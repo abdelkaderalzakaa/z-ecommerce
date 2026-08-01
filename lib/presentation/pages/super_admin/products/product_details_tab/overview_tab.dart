@@ -43,7 +43,7 @@ class ProductOverviewTab extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              '\$${product.price.toStringAsFixed(2)}',
+                              '\$${product.basePrice.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -158,6 +158,7 @@ class ProductOverviewTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   _buildDetailItem(context, TranslationKeys.category.tr(context), product.category),
+                  _buildDetailItem(context, TranslationKeys.price.tr(context), '\$${product.basePrice.toStringAsFixed(2)}'),
                   if (product.brand != null) ...[
                     const Divider(),
                     _buildDetailItem(context, 'العلامة التجارية', product.brand!),

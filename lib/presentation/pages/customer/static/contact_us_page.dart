@@ -81,12 +81,12 @@ class ContactUsPage extends StatelessWidget {
                   _ContactItem(
                     icon: Icons.location_on_outlined,
                     label: TranslationKeys.addressFallback.tr(context),
-                    value: business?.addresses?.firstOrNull?.address.get(context) ??
+                    value: business?.addAddress.firstOrNull?.getFormattedAddress(langCode: Localizations.localeOf(context).languageCode) ??
                         "123 Ecommerce St, City, Country",
                     onTap: () async {
-                      final addr = business?.addresses?.firstOrNull;
-                      if (addr != null) {
-                        final url = Uri.parse(addr.linkMap);
+                      final addr = business?.addAddress.firstOrNull;
+                      if (addr != null && addr.latitude != null && addr.longitude != null) {
+                        final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${addr.latitude},${addr.longitude}');
                         if (await canLaunchUrl(url)) {
                           await launchUrl(url, mode: LaunchMode.externalApplication);
                         }

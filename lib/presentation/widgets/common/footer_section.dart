@@ -155,7 +155,7 @@ class _SocialIconState extends State<_SocialIcon> {
             border: Border.all(color: Theme.of(context).dividerColor, width: 1),
           ),
           child: Center(
-            child: FaIcon(
+            child: Icon(
               widget.icon,
               size: 18,
               color: _hovered ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,

@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/product_enums.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -103,8 +105,29 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
     _isTopSelling = p?.isTopSelling ?? false;
 
     if (p != null) {
-      _selectedSizes.addAll(p.sizes);
-      _selectedColors.addAll(p.colors);
+      final sizes = p.variants
+          .map((v) => v.size)
+          .whereType<ProductSize>()
+          .map((s) => s.name.toUpperCase())
+          .toSet()
+          .toList();
+      final colors = p.variants
+          .map((v) => v.color)
+          .whereType<ProductColor>()
+          .map((c) {
+            switch (c) {
+              case ProductColor.red: return Colors.red;
+              case ProductColor.blue: return Colors.blue;
+              case ProductColor.black: return Colors.black;
+              case ProductColor.white: return Colors.white;
+              case ProductColor.green: return Colors.green;
+              case ProductColor.yellow: return Colors.yellow;
+            }
+          })
+          .toSet()
+          .toList();
+      _selectedSizes.addAll(sizes);
+      _selectedColors.addAll(colors);
     } else {
       _selectedSizes.addAll(['M', 'L']);
       _selectedColors.addAll([Colors.black, Colors.blue]);

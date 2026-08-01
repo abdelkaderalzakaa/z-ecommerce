@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import '../../widgets/admin_store/store_owner_app_bar.dart';
 import '../../widgets/admin_store/store_owner_sidebar.dart';
 import 'branding/business_branding_page.dart';
@@ -22,14 +24,14 @@ class _AdminStoreState extends State<AdminStore> {
   bool _isSidebarCollapsed = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Widget> _pages = const [
-    StoreDashboardOverviewPage(),
-    StoreProductsManagementPage(),
-    StoreCategoriesBrandsPage(),
-    BusinessOrdersManagementPage(),
-    StoreOffersManagementPage(),
-    StoreReviewsManagementPage(),
-    StoreOwnerSettingsPage(),
+  List<Widget> _getPages(String businessId) => [
+    const StoreDashboardOverviewPage(),
+    const StoreProductsManagementPage(),
+    const StoreCategoriesBrandsPage(),
+    const BusinessOrdersManagementPage(),
+    StoreOffersManagementPage(businessId: businessId),
+    const StoreReviewsManagementPage(),
+    const StoreOwnerSettingsPage(),
   ];
 
   @override
@@ -82,7 +84,12 @@ class _AdminStoreState extends State<AdminStore> {
 
           // Main View Area
           Expanded(
-            child: IndexedStack(index: _selectedIndex, children: _pages),
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: _getPages(
+                context.watch<BusinessProvider>().businessSettings?.id ?? '',
+              ),
+            ),
           ),
         ],
       ),

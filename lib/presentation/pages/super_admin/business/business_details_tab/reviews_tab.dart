@@ -9,7 +9,7 @@ class ReviewsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ratings = store.ratingStore ?? [];
+    final ratings = store.ratings;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -25,7 +25,7 @@ class ReviewsTab extends StatelessWidget {
               ),
               Chip(
                 avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
-                label: Text('${store.rate.toStringAsFixed(1)} / 5.0'),
+                label: Text('${store.rating.toStringAsFixed(1)} / 5.0'),
               ),
             ],
           ),
@@ -79,7 +79,7 @@ class ReviewsTab extends StatelessWidget {
                         ),
                       ),
                     ),
-                    subtitle: Text(item.comment),
+                    subtitle: Text(item.comment ?? ''),
                   ),
                 );
               },

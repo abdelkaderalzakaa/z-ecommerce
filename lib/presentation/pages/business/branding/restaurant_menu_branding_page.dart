@@ -93,7 +93,7 @@ class _RestaurantMenuBrandingPageState
     );
 
     if (currentBusiness != null) {
-      businessProvider.updateBusinessTheme(currentBusiness.id, updatedTheme);
+      await businessProvider.updateTheme(currentBusiness.id, updatedTheme);
     }
     setState(() => _isSaving = false);
 

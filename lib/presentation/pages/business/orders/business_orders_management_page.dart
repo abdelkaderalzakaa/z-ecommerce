@@ -52,7 +52,7 @@ class _BusinessOrdersManagementPageState
 
             final matchesStatus =
                 _selectedStatusFilter == 'all' ||
-                invoice.status.get(context).toLowerCase() ==
+                invoice.status.name.toLowerCase() ==
                     _selectedStatusFilter.toLowerCase();
 
             return matchesStore && matchesQuery && matchesStatus;
@@ -182,29 +182,21 @@ class _BusinessOrdersManagementPageState
                         title: TranslationKeys.orderDate.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (order) => order.date,
+                        sortKey: (order) => order.createdAt,
                         cellBuilder: (order) => TableTextCell(
                           title:
-                              '${order.date.year}-${order.date.month.toString().padLeft(2, '0')}-${order.date.day.toString().padLeft(2, '0')}',
+                              '${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
                         ),
                       ),
                       AppTableColumn<InvoiceModel>(
                         title: TranslationKeys.statusActive.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (order) => order.status,
+                        sortKey: (order) => order.status.name,
                         cellBuilder: (order) => InkWell(
                           onTap: () => showOrderStatusDialog(context, order),
                           borderRadius: BorderRadius.circular(16),
-                          child: TableStatusBadge.fromStatus(
-                            order.status == 'Pending'
-                                ? TranslationKeys.statusPending.tr(context)
-                                : (order.status == 'Paid'
-                                      ? TranslationKeys.statusPaid.tr(context)
-                                      : TranslationKeys.statusCompleted.tr(
-                                          context,
-                                        )),
-                          ),
+                          child: TableStatusBadge.fromStatus(order.status.name),
                         ),
                       ),
                       AppTableColumn<InvoiceModel>(

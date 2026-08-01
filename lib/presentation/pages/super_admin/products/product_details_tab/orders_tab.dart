@@ -8,6 +8,7 @@ import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/common/status_dialogs.dart';
 
 class ProductOrdersTab extends StatefulWidget {
   final ProductModel product;
@@ -98,7 +99,7 @@ class _ProductOrdersTabState extends State<ProductOrdersTab> {
                 cellBuilder: (inv) => TableTextCell(
                   title: inv.id,
                   subtitle:
-                      '${inv.date.year}-${inv.date.month.toString().padLeft(2, '0')}-${inv.date.day.toString().padLeft(2, '0')}',
+                      '${inv.createdAt.year}-${inv.createdAt.month.toString().padLeft(2, '0')}-${inv.createdAt.day.toString().padLeft(2, '0')}',
                   isBold: true,
                 ),
               ),
@@ -110,11 +111,25 @@ class _ProductOrdersTabState extends State<ProductOrdersTab> {
                 cellBuilder: (inv) => TablePriceCell(amount: inv.total),
               ),
               AppTableColumn<InvoiceModel>(
+                title: TranslationKeys.orderDate.tr(context),
+                flex: 1,
+                sortable: true,
+                sortKey: (order) => order.createdAt,
+                cellBuilder: (order) => TableTextCell(
+                  title:
+                      '${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
+                ),
+              ),
+              AppTableColumn<InvoiceModel>(
                 title: TranslationKeys.statusActive.tr(context),
                 flex: 1,
                 sortable: true,
-                sortKey: (inv) => inv.status,
-                cellBuilder: (inv) => TableStatusBadge.fromStatus(inv.status),
+                sortKey: (order) => order.status.name,
+                cellBuilder: (order) => InkWell(
+                  onTap: () => showOrderStatusDialog(context, order),
+                  borderRadius: BorderRadius.circular(16),
+                  child: TableStatusBadge.fromStatus(order.status.name),
+                ),
               ),
               AppTableColumn<InvoiceModel>(
                 title: TranslationKeys.actions.tr(context),

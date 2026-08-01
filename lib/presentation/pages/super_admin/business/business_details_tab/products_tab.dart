@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
@@ -109,8 +110,8 @@ class _ProductsTabState extends State<ProductsTab> {
                 title: TranslationKeys.price.tr(context),
                 flex: 1,
                 sortable: true,
-                sortKey: (p) => p.price,
-                cellBuilder: (p) => TablePriceCell(amount: p.price),
+                sortKey: (p) => p.basePrice,
+                cellBuilder: (p) => TablePriceCell(amount: p.basePrice),
               ),
               AppTableColumn<ProductModel>(
                 title: TranslationKeys.rating.tr(context),

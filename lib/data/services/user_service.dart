@@ -61,6 +61,24 @@ class UserService {
     return null;
   }
 
+  /// جلب جميع المستخدمين
+  Future<List<UserModel>> getAllUsers() async {
+    try {
+      final snapshot = await _firestore.collection(_usersCollection).get();
+      return snapshot.docs.map((doc) {
+        // Try fromMap if exists, else fallback to fromJson if fromMap is just an alias or vice versa
+        try {
+          return UserModel.fromJson(doc.data());
+        } catch (_) {
+          return UserModel.fromJson(doc.data()); // just use fromJson which we verified exists
+        }
+      }).toList();
+    } catch (e) {
+      debugPrint('Error fetching all users: $e');
+      return [];
+    }
+  }
+
   /// حذف بيانات UserModel ومجموعاتها الفرعية بالكامل من Firestore
   Future<void> deleteUserFromFirestore(String userId, UserRole role) async {
     try {

@@ -27,7 +27,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
-  String? _errorMessage;
 
   @override
   void dispose() {
@@ -41,13 +40,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final confirmPassword = _confirmPasswordController.text;
 
     if (password.isEmpty || password != confirmPassword) {
-      setState(() => _errorMessage = TranslationKeys.passwordsDoNotMatch.tr(context));
       return;
     }
 
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
     });
 
     final authProvider = context.read<AuthProvider>();
@@ -66,7 +63,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         );
       } else {
         setState(() {
-          _errorMessage = authProvider.errorMessage ?? 'فشل تحديث كلمة المرور';
         });
       }
     }

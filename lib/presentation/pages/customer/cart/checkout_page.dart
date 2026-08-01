@@ -37,7 +37,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
       if (authProvider.isAuthenticated) {
-        final addresses = authProvider.currentUser?.addresses ?? [];
+        final addresses = authProvider.currentCustomer?.addresses ?? [];
         if (addresses.isNotEmpty) {
           setState(() {
             _selectedAddresses.add(addresses.first);
@@ -268,20 +268,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Theme.of(context).scaffoldBackgroundColor,
-                  image: user.avatarUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(user.avatarUrl!),
+                  image: DecorationImage(
+                          image: NetworkImage(user.avatarUrl),
                           fit: BoxFit.cover,
-                        )
-                      : null,
+                        ),
                 ),
-                child: user.avatarUrl == null
-                    ? Icon(
-                        Icons.person,
-                        size: 30,
-                        color: Theme.of(context).dividerColor,
-                      )
-                    : null,
+                child: null,
               ),
               const SizedBox(width: 16),
               Column(
@@ -305,8 +297,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    user.phoneNumber ??
-                        TranslationKeys.noPhoneNumber.tr(context),
+                    user.phoneNumber,
                     style: TextStyle(
                       fontSize: 14,
                       color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -336,7 +327,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           );
         }
 
-        final addresses = authProvider.currentUser?.addresses ?? [];
+        final addresses = authProvider.currentCustomer?.addresses ?? [];
 
         return _buildSectionContainer(
           title: TranslationKeys.shippingAddress.tr(context),
@@ -419,7 +410,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     Row(
                                       children: [
                                         Icon(
-                                          address.label?.toLowerCase() == 'home'
+                                          address.title.toLowerCase() == 'home' || address.title.toLowerCase() == 'المنزل'
                                               ? Icons.home
                                               : Icons.business,
                                           size: 16,
@@ -429,8 +420,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          address.label ??
-                                              TranslationKeys.addressFallback
+                                          address.title.isNotEmpty
+                                              ? address.title
+                                              : TranslationKeys.addressFallback
                                                   .tr(context),
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -443,7 +435,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}',
+                                      address.getFormattedAddress(langCode: Localizations.localeOf(context).languageCode),
                                       style: TextStyle(
                                         color: Theme.of(
                                           context,
@@ -472,7 +464,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ).then((_) {
                     if (!context.mounted) return;
                     final updatedAddresses =
-                        context.read<AuthProvider>().currentUser?.addresses ??
+                        context.read<AuthProvider>().currentCustomer?.addresses ??
                         [];
                     if (updatedAddresses.isNotEmpty &&
                         !_selectedAddresses.any(
@@ -499,7 +491,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       builder: (context, businessProvider, child) {
         final methods =
             businessProvider.selectedBusiness?.paymentMethods ??
-            [PaymentMethodType.cod];
+            [PaymentMethodType.cashOnDelivery];
 
         if (methods.isEmpty) {
           return const SizedBox.shrink();

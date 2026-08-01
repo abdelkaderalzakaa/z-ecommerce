@@ -34,9 +34,9 @@ class OrderDetailsPage extends StatelessWidget {
           title: TranslationKeys.orderDetails.tr(context),
           name: '${TranslationKeys.orderId.tr(context)}: ${invoice.id}',
           subtitle:
-              '${TranslationKeys.associatedStore.tr(context)}: متجر ${invoice.storeId} • ${invoice.date.year}-${invoice.date.month.toString().padLeft(2, '0')}-${invoice.date.day.toString().padLeft(2, '0')}',
+              '${TranslationKeys.associatedStore.tr(context)}: متجر ${invoice.storeId} • ${invoice.createdAt.year}-${invoice.createdAt.month.toString().padLeft(2, '0')}-${invoice.createdAt.day.toString().padLeft(2, '0')}',
           fallbackIcon: Icons.receipt_long_rounded,
-          statusBadge: TableStatusBadge.fromStatus(invoice.status),
+          statusBadge: TableStatusBadge.fromStatus(invoice.status.name),
           headerMetrics: [
             Chip(
               avatar: const Icon(

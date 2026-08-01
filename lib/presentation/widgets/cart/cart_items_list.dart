@@ -63,24 +63,28 @@ class CartItemsList extends StatelessWidget {
                 CartItemWidget(
                   title:
                       item.product?.name ?? item.offer?.name.get(context) ?? '',
-                  size: TranslationKeys.notAvailable.tr(context),
-                  color: '',
+                  size: item.selectedVariant?.size?.name ?? TranslationKeys.notAvailable.tr(context),
+                  color: item.selectedVariant?.color?.name ?? '',
                   price: item.totalPrice,
                   quantity: item.quantity,
                   isGift: false,
                   isBundle: false,
                   onQuantityChanged: (newQuantity) {
-                    cartProvider.updateQuantity(
-                      businessId: businessId,
-                      itemId: item.id,
-                      newQuantity: newQuantity,
-                    );
+                    if (businessId != null) {
+                      cartProvider.updateQuantity(
+                        businessId: businessId,
+                        itemId: item.id,
+                        newQuantity: newQuantity,
+                      );
+                    }
                   },
                   onRemove: () {
-                    cartProvider.removeItem(
-                      businessId: businessId,
-                      itemId: item.id,
-                    );
+                    if (businessId != null) {
+                      cartProvider.removeItem(
+                        businessId: businessId,
+                        itemId: item.id,
+                      );
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(

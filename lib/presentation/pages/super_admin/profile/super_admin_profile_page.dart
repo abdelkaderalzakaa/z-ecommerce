@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../data/providers/auth_provider.dart';
-
+import '../../../../data/providers/super_admin_provider.dart';
+import '../../../../data/models/common/social_media.dart';
+import '../../../../presentation/global/core/constants/enum_data.dart';
 class SuperAdminProfilePage extends StatefulWidget {
   const SuperAdminProfilePage({super.key});
 
@@ -30,20 +32,27 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       final user = context.watch<AuthProvider>().currentUser;
+      final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
+
       if (user != null) {
         _adminNameController.text = user.name.isNotEmpty ? user.name : 'Super Admin';
         _adminEmailController.text = user.email;
-        _adminPhoneController.text = (user.phoneNumber != null && user.phoneNumber!.isNotEmpty)
-            ? user.phoneNumber!
+        _adminPhoneController.text = user.phoneNumber.isNotEmpty
+            ? user.phoneNumber
             : '+961 70 123 456';
         _systemIdController.text = user.id.isNotEmpty ? user.id : 'SA-ROOT-9901-PROD';
 
-        final socials = user.socialLinks;
-        _whatsappController.text = socials['whatsapp'] ?? '+961 70 123 456';
-        _instagramController.text = socials['instagram'] ?? 'https://instagram.com/alzakaa';
-        _linkedinController.text = socials['linkedin'] ?? 'https://linkedin.com/company/alzakaa';
-        _facebookController.text = socials['facebook'] ?? 'https://facebook.com/alzakaa';
-        _websiteController.text = socials['website'] ?? 'https://alzakaa.com';
+        final socials = superAdmin?.socials ?? [];
+        String getUrl(SocialPlatform plat) {
+          final found = socials.where((e) => e.platform == plat);
+          return found.isNotEmpty ? found.first.url : '';
+        }
+
+        _whatsappController.text = getUrl(SocialPlatform.whatsapp).isNotEmpty ? getUrl(SocialPlatform.whatsapp) : '+961 70 123 456';
+        _instagramController.text = getUrl(SocialPlatform.instagram).isNotEmpty ? getUrl(SocialPlatform.instagram) : 'https://instagram.com/alzakaa';
+        _linkedinController.text = getUrl(SocialPlatform.linkedin).isNotEmpty ? getUrl(SocialPlatform.linkedin) : 'https://linkedin.com/company/alzakaa';
+        _facebookController.text = getUrl(SocialPlatform.facebook).isNotEmpty ? getUrl(SocialPlatform.facebook) : 'https://facebook.com/alzakaa';
+        _websiteController.text = getUrl(SocialPlatform.website).isNotEmpty ? getUrl(SocialPlatform.website) : 'https://alzakaa.com';
       } else {
         _adminNameController.text = 'Super Admin';
         _adminEmailController.text = 'alzakaasimplesolutions@gmail.com';
@@ -77,13 +86,8 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
     setState(() => _isSaving = true);
     final authProvider = context.read<AuthProvider>();
 
-    final Map<String, String> socialLinks = {
-      'whatsapp': _whatsappController.text.trim(),
-      'instagram': _instagramController.text.trim(),
-      'linkedin': _linkedinController.text.trim(),
-      'facebook': _facebookController.text.trim(),
-      'website': _websiteController.text.trim(),
-    };
+    // Remove unused socialLinks variable
+
 
     await authProvider.updateProfile(
       name: _adminNameController.text.trim(),
