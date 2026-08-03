@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/models/auth/user_model.dart';
 import '../../../data/providers/business_provider.dart';
-import '../../global/theme/theme_auth.dart';
+import '../../global/translate/localized_string.dart';
 import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
 import '../../widgets/auth/password_field.dart';
@@ -14,15 +14,14 @@ import '../../widgets/auth/social_login_buttons.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
 import 'package:z_ecommerce/presentation/pages/business/admin_business_home.dart';
 
 class RegisterPage extends StatefulWidget {
   final String? redirectTo;
-  final AuthThemeConfig? customAuthTheme;
-
-  const RegisterPage({super.key, this.redirectTo, this.customAuthTheme});
+  const RegisterPage({super.key, this.redirectTo});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -37,8 +36,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  bool _isBusinessAccount = false;
-  BusinessType _selectedBusinessType = BusinessType.retailStore;
   bool _agreeToTerms = false;
   String? _errorMessage;
 
@@ -75,23 +72,12 @@ class _RegisterPageState extends State<RegisterPage> {
     final fullName =
         '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
 
-    final bool success;
-    if (_isBusinessAccount) {
-      success = await authProvider.registerBusiness(
-        ownerName: fullName,
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        phoneNumber: _phoneController.text.trim(),
-        businessType: _selectedBusinessType,
-      );
-    } else {
-      success = await authProvider.registerCustomer(
-        name: fullName,
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        phoneNumber: _phoneController.text.trim(),
-      );
-    }
+    final success = await authProvider.registerCustomer(
+      name: fullName,
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      phoneNumber: _phoneController.text.trim(),
+    );
 
     if (mounted) {
       if (success) {
@@ -104,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
         } else {
           final destination = widget.redirectTo ?? '/';
           if (destination == '/') {
-            changeScreenUntill(context, const HomePage());
+            changeScreenUntill(context, const BusinessPage());
           } else {
             Navigator.pushReplacementNamed(context, destination);
           }
@@ -121,118 +107,21 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authTheme = widget.customAuthTheme ?? const AuthThemeConfig();
-    final primaryColor = authTheme.primaryColor;
-
     return AuthSplitLayout(
-      pageTitle: authTheme.registerTitle,
-      pageSubtitle: authTheme.registerSubtitle,
-      customAuthTheme: authTheme,
+      pageTitle: const LocalizedString(
+        ar: 'أنشئ حسابك الجديد',
+        en: 'Create your new account',
+      ),
+      pageSubtitle: const LocalizedString(
+        ar: 'انضم إلينا اليوم واستمتع بتجربة فريدة ومميزة.',
+        en: 'Join us today and enjoy a unique experience.',
+      ),
       children: [
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // اختيار نوع الحساب (عميل أو نشاط تجاري)
-              Container(
-                margin: const EdgeInsets.only(bottom: 20),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _isBusinessAccount = false),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: !_isBusinessAccount
-                                ? primaryColor
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'حساب عميل',
-                            style: TextStyle(
-                              color: !_isBusinessAccount
-                                  ? Colors.white
-                                  : Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _isBusinessAccount = true),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: _isBusinessAccount
-                                ? primaryColor
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            'حساب نشاط تجاري (متجر)',
-                            style: TextStyle(
-                              color: _isBusinessAccount
-                                  ? Colors.white
-                                  : Colors.grey[700],
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              if (_isBusinessAccount) ...[
-                DropdownButtonFormField<BusinessType>(
-                  value: _selectedBusinessType,
-                  decoration: InputDecoration(
-                    labelText: 'نوع النشاط التجاري',
-                    prefixIcon: const Icon(Icons.storefront_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  items: [
-                    const DropdownMenuItem(
-                      value: BusinessType.retailStore,
-                      child: Text('متجر تجزئة / إلكتروني'),
-                    ),
-                    const DropdownMenuItem(
-                      value: BusinessType.restaurant,
-                      child: Text('مطعم / كافيه'),
-                    ),
-                    DropdownMenuItem(
-                      value: BusinessType.service,
-                      child: const Text('مزود خدمات'),
-                    ),
-                    // todo:اكمال حسب الانيم
-                  ],
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() => _selectedBusinessType = val);
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-
               Row(
                 children: [
                   Expanded(
@@ -286,16 +175,19 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   Checkbox(
                     value: _agreeToTerms,
-                    activeColor: primaryColor,
+                    activeColor: Theme.of(context).primaryColor,
                     onChanged: (val) =>
                         setState(() => _agreeToTerms = val ?? false),
                   ),
                   Expanded(
                     child: Text(
-                      authTheme.termsAgreementText.get(context),
+                      const LocalizedString(
+                        ar: 'أوافق على الشروط والأحكام وسياسة الخصوصية',
+                        en: 'I agree to the Terms, Conditions & Privacy Policy',
+                      ).get(context),
                       style: TextStyle(
                         fontSize: 13,
-                        color: authTheme.subtitleColor,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
                       ),
                     ),
                   ),
@@ -317,11 +209,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   label: TranslationKeys.signUp.tr(context),
                   onPressed: _handleRegister,
                   isLoading: context.watch<AuthProvider>().isLoading,
-                  customAuthTheme: authTheme,
+
                 ),
               ),
 
-              if (authTheme.showGoogleLogin) ...[
+              if (true) ...[
                 const SizedBox(height: 20),
                 SocialLoginButtons(
                   onGooglePressed: () async {
@@ -346,7 +238,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         final destination = widget.redirectTo ?? '/';
                         if (destination == '/') {
                           navigator.pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const HomePage()),
+                            MaterialPageRoute(builder: (_) => const BusinessPage()),
                             (route) => false,
                           );
                         } else {
@@ -380,14 +272,13 @@ class _RegisterPageState extends State<RegisterPage> {
                           context,
                           LoginPage(
                             redirectTo: widget.redirectTo,
-                            customAuthTheme: authTheme,
                           ),
                         );
                       },
                       child: Text(
                         TranslationKeys.signIn.tr(context),
                         style: TextStyle(
-                          color: primaryColor,
+                          color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),

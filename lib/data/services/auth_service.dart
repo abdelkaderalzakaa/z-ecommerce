@@ -6,7 +6,9 @@ import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb ? 'YOUR_CLIENT_ID.apps.googleusercontent.com' : null,
+  );
 
   /// الحصول على المستخدم الحالي في Firebase Auth
   User? get currentFirebaseUser => _auth.currentUser;

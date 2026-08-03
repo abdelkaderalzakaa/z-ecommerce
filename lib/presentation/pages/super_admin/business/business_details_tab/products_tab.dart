@@ -5,6 +5,7 @@ import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/products/create_edit_product_page.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -72,6 +73,18 @@ class _ProductsTabState extends State<ProductsTab> {
                 _selectedProducts.clear();
               });
             },
+            primaryActionButton: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateEditProductPage(businessId: widget.store.id),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('إضافة منتج'),
+            ),
             searchQuery: _searchQuery,
             onSearchChanged: (val) {
               setState(() {
@@ -128,9 +141,27 @@ class _ProductsTabState extends State<ProductsTab> {
                 width: 70,
                 alignment: Alignment.center,
                 cellBuilder: (p) => TablePopupMenuActions(
-                  onView: () {},
-                  onEdit: () {},
-                  onDelete: () {},
+                  onView: () {
+                    // Optional view product logic
+                  },
+                  onEdit: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateEditProductPage(
+                          product: p,
+                          businessId: widget.store.id,
+                        ),
+                      ),
+                    );
+                  },
+                  onDelete: () {
+                    // Call provider to delete
+                    Provider.of<ProductProvider>(context, listen: false).deleteProduct(p.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('تم حذف المنتج بنجاح'), backgroundColor: Colors.green),
+                    );
+                  },
                 ),
               ),
             ],

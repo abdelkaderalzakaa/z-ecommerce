@@ -6,7 +6,7 @@ import '../../../../data/providers/auth_provider.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 
 class MyStoresTab extends StatelessWidget {
   const MyStoresTab({super.key});

@@ -8,6 +8,7 @@ import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import '../../pages/auth/login_page.dart';
 import '../../pages/super_admin/profile/super_admin_profile_page.dart';
+import '../../../data/providers/super_admin_provider.dart';
 
 class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onMenuPressed;
@@ -31,6 +32,12 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
     final authProvider = Provider.of<AuthProvider>(context);
     final currentUser = authProvider.currentUser;
 
+    final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
+    final saName = superAdmin?.localizationAdmin.name.get(context);
+    final platformName = (saName != null && saName.isNotEmpty)
+        ? saName
+        : 'z-matajer';
+
     return Container(
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -44,9 +51,7 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
         border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor.withOpacity(0.1),
-          ),
+          bottom: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
         ),
       ),
       child: Row(
@@ -80,12 +85,9 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Z-Ecommerce',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Text(
+                    platformName,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Text(
                     TranslationKeys.superAdminControlPanel.tr(context),
@@ -102,47 +104,6 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
 
           const Spacer(),
 
-          // Quick Search Box (hidden on narrow screens)
-          if (!isMobile)
-            Container(
-              width: 260,
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: theme.dividerColor.withOpacity(0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.search,
-                    size: 18,
-                    color: theme.textTheme.bodySmall?.color,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: TranslationKeys.searchPlaceholder.tr(context),
-                        hintStyle: TextStyle(
-                          fontSize: 13,
-                          color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
-                        ),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          if (!isMobile) const SizedBox(width: 16),
-
           // Dark / Light Theme Switcher Button
           IconButton(
             icon: Icon(
@@ -150,8 +111,10 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
               size: 22,
             ),
             tooltip: isDark
-                ? (AppLocalizations.of(context)?.translate('light') ?? 'الوضع المضيء')
-                : (AppLocalizations.of(context)?.translate('dark') ?? 'الوضع الداكن'),
+                ? (AppLocalizations.of(context)?.translate('light') ??
+                      'الوضع المضيء')
+                : (AppLocalizations.of(context)?.translate('dark') ??
+                      'الوضع الداكن'),
             onPressed: () {
               final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
               settingsProvider.setThemeMode(newMode);
@@ -161,7 +124,9 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           // Language Switcher
           IconButton(
             icon: const Icon(Icons.language_outlined, size: 22),
-            tooltip: AppLocalizations.of(context)?.translate('localization') ?? 'تغيير اللغة',
+            tooltip:
+                AppLocalizations.of(context)?.translate('localization') ??
+                'تغيير اللغة',
             onPressed: () {
               final newLocale = localeProvider.locale.languageCode == 'ar'
                   ? const Locale('en')
@@ -225,7 +190,8 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        (currentUser?.name != null && currentUser!.name.isNotEmpty)
+                        (currentUser?.name != null &&
+                                currentUser!.name.isNotEmpty)
                             ? currentUser.name
                             : 'Super Admin',
                         style: const TextStyle(
@@ -234,7 +200,8 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                       ),
                       Text(
-                        currentUser?.email ?? 'alzakaasimplesolutions@gmail.com',
+                        currentUser?.email ??
+                            'alzakaasimplesolutions@gmail.com',
                         style: const TextStyle(
                           fontSize: 11,
                           color: Colors.grey,
@@ -306,7 +273,10 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     const Icon(Icons.logout, size: 18, color: Colors.red),
                     const SizedBox(width: 10),
-                    Text(TranslationKeys.logout.tr(context), style: const TextStyle(color: Colors.red)),
+                    Text(
+                      TranslationKeys.logout.tr(context),
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   ],
                 ),
               ),
@@ -338,19 +308,41 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                   backgroundColor: Colors.blueAccent,
                   child: Icon(Icons.store, color: Colors.white, size: 18),
                 ),
-                title: const Text('طلب متجر جديد', style: TextStyle(fontSize: 14)),
-                subtitle: const Text('تم تقديم طلب إنشاء متجر جديد "Electronix"', style: TextStyle(fontSize: 12)),
-                trailing: const Text('منذ 10د', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                title: const Text(
+                  'طلب متجر جديد',
+                  style: TextStyle(fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'تم تقديم طلب إنشاء متجر جديد "Electronix"',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailing: const Text(
+                  'منذ 10د',
+                  style: TextStyle(fontSize: 10, color: Colors.grey),
+                ),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: Colors.green,
-                  child: Icon(Icons.check_circle, color: Colors.white, size: 18),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
-                title: const Text('تحديث النظام', style: TextStyle(fontSize: 14)),
-                subtitle: const Text('تم تحديث قاعدة البيانات بنجاح', style: TextStyle(fontSize: 12)),
-                trailing: const Text('منذ 1س', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                title: const Text(
+                  'تحديث النظام',
+                  style: TextStyle(fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'تم تحديث قاعدة البيانات بنجاح',
+                  style: TextStyle(fontSize: 12),
+                ),
+                trailing: const Text(
+                  'منذ 1س',
+                  style: TextStyle(fontSize: 10, color: Colors.grey),
+                ),
               ),
             ],
           ),

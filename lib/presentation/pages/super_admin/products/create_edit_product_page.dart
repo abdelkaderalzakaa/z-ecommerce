@@ -152,6 +152,7 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);

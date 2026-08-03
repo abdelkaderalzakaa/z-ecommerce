@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/business_provider.dart';
-import '../../global/theme/theme_auth.dart';
+import '../../global/translate/localized_string.dart';
 import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
 import '../../widgets/auth/primary_auth_button.dart';
@@ -12,11 +12,8 @@ import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
-  final AuthThemeConfig? customAuthTheme;
-
   const ForgotPasswordPage({
     super.key,
-    this.customAuthTheme,
   });
 
   @override
@@ -49,7 +46,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (success) {
         changeScreen(
           context,
-          ResetPasswordPage(customAuthTheme: widget.customAuthTheme),
+          ResetPasswordPage(),
         );
       } else {
         setState(() {
@@ -60,13 +57,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authTheme = widget.customAuthTheme ?? const AuthThemeConfig();
-    final primaryColor = authTheme.primaryColor;
-
     return AuthSplitLayout(
-      pageTitle: authTheme.forgotPasswordTitle,
-      pageSubtitle: authTheme.forgotPasswordSubtitle,
-      customAuthTheme: authTheme,
+      pageTitle: const LocalizedString(
+        ar: 'نسيت كلمة المرور؟',
+        en: 'Forgot password?',
+      ),
+      pageSubtitle: const LocalizedString(
+        ar: 'لا تقلق، أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة الضبط.',
+        en: 'No worries, enter your email and we will send you reset instructions.',
+      ),
       children: [
         AuthTextField(
           controller: _emailController,
@@ -82,7 +81,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             label: TranslationKeys.sendResetLink.tr(context),
             onPressed: _handleReset,
             isLoading: _isLoading,
-            customAuthTheme: authTheme,
           ),
         ),
         const SizedBox(height: 28),
@@ -91,10 +89,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back, size: 16, color: primaryColor),
+            icon: Icon(Icons.arrow_back, size: 16, color: Theme.of(context).primaryColor),
             label: Text(
               TranslationKeys.backToLogin.tr(context),
-              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
             ),
           ),
         ),

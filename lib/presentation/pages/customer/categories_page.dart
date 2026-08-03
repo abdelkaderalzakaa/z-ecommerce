@@ -3,7 +3,7 @@ import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.d
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../widgets/common/headers/header_home.dart';
-import '../../widgets/common/footer_section.dart';
+import '../../widgets/common/footers/footer_buisness.dart';
 import '../../widgets/common/headers/widgets/breadcrumb.dart';
 
 import '../../widgets/categories/categories_header.dart';
@@ -11,6 +11,8 @@ import '../../widgets/categories/filter_sidebar.dart';
 import '../../widgets/categories/product_grid.dart';
 import '../../widgets/categories/pagination.dart';
 import '../../widgets/categories/filter_modal.dart';
+import 'package:provider/provider.dart';
+import '../../../../data/providers/business_provider.dart';
 import '../../../../data/models/product/category_model.dart';
 import '../../../../data/models/product/brand_model.dart';
 import '../../global/translate/app_localizations.dart';
@@ -101,7 +103,7 @@ class CategoriesPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 80),
-            const FooterSection(),
+            FooterBuisness(idBuisness: category?.businessId ?? brand?.businessId ?? context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
           ],
         ),
       ),

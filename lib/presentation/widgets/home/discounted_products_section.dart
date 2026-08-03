@@ -89,12 +89,11 @@ class _MobileProductGrid extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: ProductCard(
-                product: products.isNotEmpty ? products[0] : products.first,
+            if (products.isNotEmpty)
+              Expanded(
+                child: ProductCard(product: products[0]),
               ),
-            ),
-            const SizedBox(width: 16),
+            if (products.isNotEmpty) const SizedBox(width: 16),
             if (products.length > 1)
               Expanded(child: ProductCard(product: products[1]))
             else

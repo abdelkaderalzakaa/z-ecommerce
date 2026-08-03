@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_auth.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../widgets/common/headers/header_home.dart';
-import '../../widgets/common/footer_section.dart';
+import '../../widgets/common/footers/footer_section.dart';
 import '../../widgets/auth/success_widget.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 

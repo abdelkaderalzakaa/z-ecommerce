@@ -175,6 +175,7 @@ class AuthProvider with ChangeNotifier {
         );
 
         final business = BusinessModel(
+          id: credential.user!.uid,
           owner: ownerUser,
           businessType: businessType,
           addAddress: addresses,

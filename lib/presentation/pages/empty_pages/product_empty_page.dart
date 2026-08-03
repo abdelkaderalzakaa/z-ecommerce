@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/business_provider.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 
 class ProductEmptyPage extends StatelessWidget {
   const ProductEmptyPage({super.key});

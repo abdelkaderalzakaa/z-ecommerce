@@ -3,19 +3,20 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../data/models/common/social_media.dart';
-import '../../../data/providers/business_provider.dart';
+import '../../../../data/models/common/social_media.dart';
+import '../../../../data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/logo.dart';
-import '../../global/core/responsive/responsive_layout.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
+import '../../../global/core/responsive/responsive_layout.dart';
+import '../../../global/translate/app_localizations.dart';
+import '../../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/about_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/contact_us_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/terms_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/privacy_policy_page.dart';
 
-class FooterSection extends StatelessWidget {
-  const FooterSection({super.key});
+class FooterBuisness extends StatelessWidget {
+  final String idBuisness;
+  const FooterBuisness({super.key, required this.idBuisness});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,10 @@ class FooterSection extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: isMobile ? 40 : 64),
+            padding: EdgeInsets.symmetric(
+              horizontal: hPad,
+              vertical: isMobile ? 40 : 64,
+            ),
             child: isMobile ? const _MobileFooter() : const _DesktopFooter(),
           ),
           const Divider(height: 1),
@@ -48,21 +52,42 @@ class _DesktopFooter extends StatelessWidget {
       children: [
         Expanded(flex: 3, child: _BrandColumn()),
         const SizedBox(width: 40),
-        Expanded(flex: 2, child: _FooterLinkColumn(
-          title: TranslationKeys.home.tr(context),
-          links: [
-            (label: TranslationKeys.about.tr(context), onTap: () => changeScreen(context, const AboutPage())),
-            (label: TranslationKeys.about.tr(context), onTap: () => changeScreen(context, const AboutPage())),
-          ],
-        )),
-        Expanded(flex: 2, child: _FooterLinkColumn(
-          title: TranslationKeys.help.tr(context),
-          links: [
-            (label: TranslationKeys.contactUs.tr(context), onTap: () => changeScreen(context, const ContactUsPage())),
-            (label: TranslationKeys.termsConditions.tr(context), onTap: () => changeScreen(context, const TermsPage())),
-            (label: TranslationKeys.privacyPolicy.tr(context), onTap: () => changeScreen(context, const PrivacyPolicyPage())),
-          ],
-        )),
+        Expanded(
+          flex: 2,
+          child: _FooterLinkColumn(
+            title: TranslationKeys.home.tr(context),
+            links: [
+              (
+                label: TranslationKeys.about.tr(context),
+                onTap: () => changeScreen(context, const AboutPage(useAdminTheme: true)),
+              ),
+              (
+                label: TranslationKeys.about.tr(context),
+                onTap: () => changeScreen(context, const AboutPage(useAdminTheme: true)),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: _FooterLinkColumn(
+            title: TranslationKeys.help.tr(context),
+            links: [
+              (
+                label: TranslationKeys.contactUs.tr(context),
+                onTap: () => changeScreen(context, const ContactUsPage(useAdminTheme: true)),
+              ),
+              (
+                label: TranslationKeys.termsConditions.tr(context),
+                onTap: () => changeScreen(context, const TermsPage(useAdminTheme: true)),
+              ),
+              (
+                label: TranslationKeys.privacyPolicy.tr(context),
+                onTap: () => changeScreen(context, const PrivacyPolicyPage(useAdminTheme: true)),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -81,10 +106,22 @@ class _MobileFooter extends StatelessWidget {
         _FooterLinkColumn(
           title: TranslationKeys.help.tr(context),
           links: [
-            (label: TranslationKeys.about.tr(context), onTap: () => changeScreen(context, const AboutPage())),
-            (label: TranslationKeys.contactUs.tr(context), onTap: () => changeScreen(context, const ContactUsPage())),
-            (label: TranslationKeys.termsConditions.tr(context), onTap: () => changeScreen(context, const TermsPage())),
-            (label: TranslationKeys.privacyPolicy.tr(context), onTap: () => changeScreen(context, const PrivacyPolicyPage())),
+            (
+              label: TranslationKeys.about.tr(context),
+              onTap: () => changeScreen(context, const AboutPage(useAdminTheme: true)),
+            ),
+            (
+              label: TranslationKeys.contactUs.tr(context),
+              onTap: () => changeScreen(context, const ContactUsPage(useAdminTheme: true)),
+            ),
+            (
+              label: TranslationKeys.termsConditions.tr(context),
+              onTap: () => changeScreen(context, const TermsPage(useAdminTheme: true)),
+            ),
+            (
+              label: TranslationKeys.privacyPolicy.tr(context),
+              onTap: () => changeScreen(context, const PrivacyPolicyPage(useAdminTheme: true)),
+            ),
           ],
         ),
       ],
@@ -101,7 +138,7 @@ class _BrandColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          business?.localization.name.get(context) ?? 'SHOP.CO',
+          business?.localization.name.get(context) ?? "لا يوجد بيانات",
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w900,
@@ -112,7 +149,7 @@ class _BrandColumn extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           business?.localization.footerDescription.get(context) ??
-              'We have clothes that suits your style and which you\'re proud to wear. From women to men.',
+              "لا يوجد بيانات",
           style: TextStyle(
             fontSize: 14,
             height: 1.6,
@@ -151,14 +188,18 @@ class _SocialIconState extends State<_SocialIcon> {
           height: 36,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _hovered ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+            color: _hovered
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).cardColor,
             border: Border.all(color: Theme.of(context).dividerColor, width: 1),
           ),
           child: Center(
             child: Icon(
               widget.icon,
               size: 18,
-              color: _hovered ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+              color: _hovered
+                  ? Colors.white
+                  : Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
         ),
@@ -223,7 +264,9 @@ class _FooterLinkState extends State<_FooterLink> {
             duration: const Duration(milliseconds: 200),
             style: TextStyle(
               fontSize: 14,
-              color: _hovered ? Theme.of(context).textTheme.bodyLarge?.color : Theme.of(context).textTheme.bodyMedium?.color,
+              color: _hovered
+                  ? Theme.of(context).textTheme.bodyLarge?.color
+                  : Theme.of(context).textTheme.bodyMedium?.color,
               fontWeight: _hovered ? FontWeight.w500 : FontWeight.w400,
             ),
             child: Text(widget.label),

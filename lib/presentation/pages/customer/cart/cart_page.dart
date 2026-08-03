@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../widgets/common/headers/header_home.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/common/headers/widgets/breadcrumb.dart';
 import '../../../widgets/common/headers/widgets/top_title.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,7 @@ class CartPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 80),
-            const FooterSection(),
+            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
           ],
         ),
       ),

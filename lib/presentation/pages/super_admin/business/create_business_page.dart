@@ -87,6 +87,7 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
     );
 
     final newStore = BusinessModel(
+      id: '',
       owner: newOwner,
       businessType: _selectedBusinessType,
       theme: const ThemeAdmin(

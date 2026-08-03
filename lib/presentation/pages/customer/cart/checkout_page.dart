@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_constant.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../../../data/providers/cart_provider.dart';
 import '../../../../data/providers/invoice_provider.dart';
 import '../../../../data/providers/auth_provider.dart';
@@ -10,7 +11,7 @@ import '../../../../data/models/common/address_model.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../widgets/common/headers/header_details.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/cart/order_summary.dart';
 import '../../../widgets/cart/cart_item.dart';
 import '../../../widgets/common/headers/widgets/top_title.dart';
@@ -197,7 +198,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
 
             const SizedBox(height: 80),
-            const FooterSection(),
+            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
           ],
         ),
       ),

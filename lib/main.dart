@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
+import 'package:z_ecommerce/presentation/pages/customer/business_entry_page.dart';
 import 'data/providers/product_provider.dart';
 import 'data/providers/category_provider.dart';
 import 'data/providers/cart_provider.dart';
@@ -12,12 +13,14 @@ import 'data/providers/business_provider.dart';
 import 'presentation/global/locale_provider.dart';
 import 'data/providers/offer_provider.dart';
 import 'data/providers/brand_provider.dart';
+import 'data/providers/super_admin_provider.dart';
 import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_theme.dart';
-import 'presentation/pages/customer/business_entry_page.dart';
+import 'presentation/pages/customer/business_page.dart';
 import 'presentation/pages/super_admin/super_admin_home.dart';
 import 'presentation/pages/business/admin_business_home.dart';
 import 'data/models/auth/user_model.dart';
+import 'presentation/pages/auth/banned_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -30,6 +33,7 @@ void main() async {
   } catch (e) {
     debugPrint('Firebase initialization notice: $e');
   }
+  
   runApp(const ZEcommerceApp());
 }
 
@@ -50,6 +54,7 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BusinessProvider()),
         ChangeNotifierProvider(create: (_) => OfferProvider()),
         ChangeNotifierProvider(create: (_) => BrandProvider()),
+        ChangeNotifierProvider(create: (_) => SuperAdminProvider()),
       ],
       child: Consumer3<SettingsProvider, LocaleProvider, BusinessProvider>(
         builder: (context, settings, localeProvider, businessProvider, child) {
@@ -60,7 +65,14 @@ class ZEcommerceApp extends StatelessWidget {
           final surfaceColor = themeInfo?.surfaceColorValue;
 
           return MaterialApp(
-            title: 'Shop.co – Find Clothes That Matches Your Style',
+            onGenerateTitle: (context) {
+              final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
+              final saName = superAdmin?.localizationAdmin.name.get(context);
+              final platformName = (saName != null && saName.isNotEmpty) ? saName : 'z-matajer';
+              
+              final bName = businessProvider.selectedBusiness?.localization.name.get(context);
+              return (bName != null && bName.isNotEmpty) ? bName : platformName;
+            },
             debugShowCheckedModeBanner: false,
             themeMode: settings.themeMode,
             locale: localeProvider.locale,
@@ -93,8 +105,23 @@ class ZEcommerceApp extends StatelessWidget {
   }
 }
 
-class AppRootRouter extends StatelessWidget {
+class AppRootRouter extends StatefulWidget {
   const AppRootRouter({super.key});
+
+  @override
+  State<AppRootRouter> createState() => _AppRootRouterState();
+}
+
+class _AppRootRouterState extends State<AppRootRouter> {
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Future.microtask(() {
+  //     if (mounted) {
+  //       context.read<SuperAdminProvider>().saveSuperAdminOnce();
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +136,10 @@ class AppRootRouter extends StatelessWidget {
         final user = authProvider.currentUser;
         if (user == null) {
           return const BusinessEntryPage();
+        }
+
+        if (!user.isActive) {
+          return const BannedPage();
         }
 
         switch (user.role) {

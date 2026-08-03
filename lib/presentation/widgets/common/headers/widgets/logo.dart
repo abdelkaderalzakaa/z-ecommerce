@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -12,9 +13,15 @@ class Logo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
+    final saName = superAdmin?.localizationAdmin.name.get(context);
+    final platformName = (saName != null && saName.isNotEmpty) ? saName : 'z-matajer';
+    
+    final bName = selectedBusiness?.localization.name.get(context);
+    final displayName = (bName != null && bName.isNotEmpty) ? bName : platformName;
 
     return Text(
-      selectedBusiness?.localization.name.get(context) ?? 'Z - Ecommerce',
+      displayName,
       style: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w900,
@@ -32,12 +39,18 @@ class Copyright extends StatelessWidget {
   Widget build(BuildContext context) {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
+    final saName = superAdmin?.localizationAdmin.name.get(context);
+    final platformName = (saName != null && saName.isNotEmpty) ? saName : 'z-matajer';
+    
+    final bName = selectedBusiness?.localization.name.get(context);
+    final displayName = (bName != null && bName.isNotEmpty) ? bName : platformName;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 10),
       child: Center(
         child: Text(
-          '©${DateTime.now().year} ${selectedBusiness?.localization.name.get(context) ?? "Z - Ecommerce"} ${TranslationKeys.byAlzakaaSimpleSolutionsAllRightsReserved.tr(context)}',
+          '©${DateTime.now().year} $displayName ${TranslationKeys.byAlzakaaSimpleSolutionsAllRightsReserved.tr(context)}',
           style: TextStyle(
             fontSize: 13,
             color: Theme.of(context).textTheme.bodyMedium?.color,

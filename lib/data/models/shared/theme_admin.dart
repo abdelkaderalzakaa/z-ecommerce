@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-//// هذا المودل الذي يستقبل معلومات الثيم من الداتا بيز
-/// وتاثر على جميع واجهات السوبر ادمن وايضا على واجهة الرئيسية وايضا واجهات المصادقة
-/// هذا المودل يجب ان يكون موجود في جميع التطبيقات التي تعمل في النظام
-/// ويكون موجود في الداتا بيز
-/// ويكون موجود في العرض
-/// ويكون موجود في المعالجة
 class ThemeAdmin {
   final String primaryColor;
   final String secondaryColor;
   final String backgroundColor;
   final String surfaceColor;
   final String textColor;
+
+  final String darkPrimaryColor;
+  final String darkSecondaryColor;
+  final String darkBackgroundColor;
+  final String darkSurfaceColor;
+  final String darkTextColor;
 
   final String fontFamily;
   final double fontScale;
@@ -29,6 +29,11 @@ class ThemeAdmin {
     this.backgroundColor = '#F9FAFB',
     this.surfaceColor = '#FFFFFF',
     this.textColor = '#111827',
+    this.darkPrimaryColor = '#4F46E5',
+    this.darkSecondaryColor = '#10B981',
+    this.darkBackgroundColor = '#111827',
+    this.darkSurfaceColor = '#1F2937',
+    this.darkTextColor = '#F9FAFB',
     this.fontFamily = 'Cairo',
     this.fontScale = 1.0,
     this.buttonRadius = 12.0,
@@ -45,6 +50,11 @@ class ThemeAdmin {
       'backgroundColor': backgroundColor,
       'surfaceColor': surfaceColor,
       'textColor': textColor,
+      'darkPrimaryColor': darkPrimaryColor,
+      'darkSecondaryColor': darkSecondaryColor,
+      'darkBackgroundColor': darkBackgroundColor,
+      'darkSurfaceColor': darkSurfaceColor,
+      'darkTextColor': darkTextColor,
       'fontFamily': fontFamily,
       'fontScale': fontScale,
       'buttonRadius': buttonRadius,
@@ -62,6 +72,11 @@ class ThemeAdmin {
       backgroundColor: json['backgroundColor'] ?? '#F9FAFB',
       surfaceColor: json['surfaceColor'] ?? '#FFFFFF',
       textColor: json['textColor'] ?? '#111827',
+      darkPrimaryColor: json['darkPrimaryColor'] ?? json['primaryColor'] ?? '#4F46E5',
+      darkSecondaryColor: json['darkSecondaryColor'] ?? json['secondaryColor'] ?? '#10B981',
+      darkBackgroundColor: json['darkBackgroundColor'] ?? '#111827',
+      darkSurfaceColor: json['darkSurfaceColor'] ?? '#1F2937',
+      darkTextColor: json['darkTextColor'] ?? '#F9FAFB',
       fontFamily: json['fontFamily'] ?? 'Cairo',
       fontScale: (json['fontScale'] ?? 1.0).toDouble(),
       buttonRadius: (json['buttonRadius'] ?? 12.0).toDouble(),
@@ -76,7 +91,7 @@ class ThemeAdmin {
   double get raduisButton => buttonRadius;
   double get raduisCard => cardRadius;
 
-  // Flutter Helper Getters
+  // Flutter Helper Getters (Light)
   Color get primaryColorValue =>
       _parseColor(primaryColor, const Color(0xFF4F46E5));
   Color get secondaryColorValue =>
@@ -86,6 +101,24 @@ class ThemeAdmin {
   Color get surfaceColorValue =>
       _parseColor(surfaceColor, const Color(0xFFFFFFFF));
   Color get textColorValue => _parseColor(textColor, const Color(0xFF111827));
+
+  // Flutter Helper Getters (Dark)
+  Color get darkPrimaryColorValue =>
+      _parseColor(darkPrimaryColor, const Color(0xFF4F46E5));
+  Color get darkSecondaryColorValue =>
+      _parseColor(darkSecondaryColor, const Color(0xFF10B981));
+  Color get darkBackgroundColorValue =>
+      _parseColor(darkBackgroundColor, const Color(0xFF111827));
+  Color get darkSurfaceColorValue =>
+      _parseColor(darkSurfaceColor, const Color(0xFF1F2937));
+  Color get darkTextColorValue => _parseColor(darkTextColor, const Color(0xFFF9FAFB));
+
+  // Dynamic Theme Getters
+  Color getPrimaryColor(bool isDark) => isDark ? darkPrimaryColorValue : primaryColorValue;
+  Color getSecondaryColor(bool isDark) => isDark ? darkSecondaryColorValue : secondaryColorValue;
+  Color getBackgroundColor(bool isDark) => isDark ? darkBackgroundColorValue : backgroundColorValue;
+  Color getSurfaceColor(bool isDark) => isDark ? darkSurfaceColorValue : surfaceColorValue;
+  Color getTextColor(bool isDark) => isDark ? darkTextColorValue : textColorValue;
 
   BorderRadius get buttonBorderRadius => BorderRadius.circular(buttonRadius);
   BorderRadius get cardBorderRadius => BorderRadius.circular(cardRadius);
@@ -115,6 +148,11 @@ class ThemeAdmin {
       backgroundColor: '',
       surfaceColor: '',
       textColor: '',
+      darkPrimaryColor: '',
+      darkSecondaryColor: '',
+      darkBackgroundColor: '',
+      darkSurfaceColor: '',
+      darkTextColor: '',
       fontFamily: '',
       fontScale: 0,
       buttonRadius: 0,

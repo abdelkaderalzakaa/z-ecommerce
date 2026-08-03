@@ -19,6 +19,13 @@ class BusinessProvider with ChangeNotifier {
   StreamSubscription<List<BusinessModel>>? _businessSubscription;
 
   List<BusinessModel> get businesses => List.unmodifiable(_businesses);
+  
+  /// المتاجر الفعالة للعرض للزبائن (نشط أو نشط ومعتمد)
+  List<BusinessModel> get activeBusinesses => _businesses.where((b) => b.isActive).toList();
+  
+  /// المتاجر المعتمدة (نشط ومعتمد)
+  List<BusinessModel> get verifiedBusinesses => _businesses.where((b) => b.isVerified).toList();
+
   BusinessModel? get businessSettings => _businessSettings;
   BusinessModel? get selectedBusiness => _businessSettings;
   bool get isLoading => _isLoading;
@@ -39,8 +46,8 @@ class BusinessProvider with ChangeNotifier {
             orElse: () => _businessSettings!,
           );
           _businessSettings = updated;
-        } else if (_businesses.isNotEmpty) {
-          _businessSettings = _businesses.first;
+        } else if (activeBusinesses.isNotEmpty) {
+          _businessSettings = activeBusinesses.first;
         }
         notifyListeners();
       },

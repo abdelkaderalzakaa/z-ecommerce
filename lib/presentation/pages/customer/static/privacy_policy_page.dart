@@ -6,19 +6,35 @@ import '../../../../data/providers/business_provider.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../widgets/common/headers/header_details.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/common/headers/widgets/top_title.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/privacy_policy_page.dart';
+import '../../../../data/providers/super_admin_provider.dart';
+import '../../../global/theme/app_theme.dart';
+import '../../../global/settings_provider.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
-  const PrivacyPolicyPage({super.key});
+  final bool useAdminTheme;
+  const PrivacyPolicyPage({super.key, this.useAdminTheme = false});
 
   @override
   Widget build(BuildContext context) {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return Scaffold(
+    final settings = context.watch<SettingsProvider>();
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+
+    final bool isDark = settings.themeMode == ThemeMode.dark ||
+        (settings.themeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+    final themeAdmin = superAdminProvider.currentSuperAdmin?.themeAdmin;
+    final dynamicTheme = useAdminTheme 
+        ? AppTheme.getThemeFromAdmin(themeAdmin, isDark) 
+        : null;
+
+    Widget content = Scaffold(
       appBar: HeaderDetails(
         title: TranslationKeys.privacyPolicy.tr(context),
         paths: [
@@ -54,5 +70,14 @@ class PrivacyPolicyPage extends StatelessWidget {
         ),
       ),
     );
+
+    if (dynamicTheme != null) {
+      content = Theme(
+        data: dynamicTheme,
+        child: content,
+      );
+    }
+
+    return content;
   }
 }

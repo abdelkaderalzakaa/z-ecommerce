@@ -33,11 +33,9 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
 
     return Consumer<InvoiceProvider>(
       builder: (context, provider, child) {
-        final allOrders = provider.invoices.isNotEmpty
-            ? provider.invoices
-            : null;
+        final allOrders = provider.invoices;
 
-        final filteredOrders = allOrders!.where((order) {
+        final filteredOrders = allOrders.where((order) {
           final matchesQuery =
               _searchQuery.isEmpty ||
               order.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||

@@ -66,6 +66,45 @@ class OverviewTab extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
+          // Account Info Card
+          _buildSectionCard(
+            context: context,
+            title: 'معلومات الحساب',
+            icon: Icons.person,
+            children: [
+              _buildInfoRow('اسم المالك:', store.owner?.name ?? 'غير محدد'),
+              _buildInfoRow('البريد الإلكتروني:', store.owner?.email ?? 'غير محدد'),
+              _buildInfoRow('رقم الهاتف:', store.owner?.phoneNumber ?? 'غير محدد'),
+              _buildInfoRow('تاريخ التسجيل:', store.createdAt?.toLocal().toString().split(' ')[0] ?? 'غير محدد'),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Locations Card
+          _buildSectionCard(
+            context: context,
+            title: 'المواقع والفروع',
+            icon: Icons.location_on,
+            children: store.addAddress.isEmpty 
+              ? [const Text('لا توجد عناوين مضافة')]
+              : store.addAddress.map((addr) => _buildInfoRow(addr.title, '\${addr.city.get(context)} - \${addr.street}')).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          // Store Info Card
+          _buildSectionCard(
+            context: context,
+            title: 'معلومات المتجر الأساسية',
+            icon: Icons.store,
+            children: [
+              _buildInfoRow('الاسم:', store.localization.name.get(context)),
+              _buildInfoRow('الوصف:', store.localization.description.get(context)),
+              _buildInfoRow('الشعار (Slogan):', store.localization.slogan.get(context)),
+              _buildInfoRow('العملة:', store.currency.code),
+            ],
+          ),
+          const SizedBox(height: 24),
+
           // Analytics Overview Card
           Card(
             elevation: 0,
@@ -181,6 +220,63 @@ class OverviewTab extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: theme.primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const Divider(height: 32),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+          ),
+          Expanded(
+            child: Text(value),
+          ),
+        ],
       ),
     );
   }

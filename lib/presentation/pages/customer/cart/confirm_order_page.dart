@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../../../data/providers/business_provider.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
 import '../../../widgets/common/headers/header_details.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 
 class ConfirmOrderPage extends StatelessWidget {
   final List<String>? ids;
@@ -123,7 +124,8 @@ class ConfirmOrderPage extends StatelessWidget {
                 ),
               ),
             ),
-            const FooterSection(),
+            const SizedBox(height: 80),
+            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
           ],
         ),
       ),

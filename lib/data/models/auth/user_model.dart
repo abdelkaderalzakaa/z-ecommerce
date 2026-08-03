@@ -11,6 +11,7 @@ class UserModel {
   final String phoneNumber;
   final String avatarUrl;
   final DateTime createdAt;
+  final bool isActive;
 
   UserModel({
     required this.id,
@@ -21,24 +22,28 @@ class UserModel {
     required this.phoneNumber,
     this.avatarUrl = "",
     required this.createdAt,
+    this.isActive = true,
   });
 
   UserModel copyWith({
     String? name,
+    String? email,
     String? phoneNumber,
     String? avatarUrl,
     UserRole? role,
     String? businessId,
+    bool? isActive,
   }) {
     return UserModel(
       id: id,
       name: name ?? this.name,
-      email: email,
+      email: email ?? this.email,
       role: role ?? this.role,
       businessId: businessId ?? this.businessId,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdAt: createdAt,
+      isActive: isActive ?? this.isActive,
     );
   }
 
@@ -52,6 +57,7 @@ class UserModel {
       'phoneNumber': phoneNumber,
       'avatarUrl': avatarUrl,
       'createdAt': createdAt.toIso8601String(),
+      'isActive': isActive,
     };
   }
 
@@ -73,6 +79,7 @@ class UserModel {
       phoneNumber: json['phoneNumber'],
       avatarUrl: json['avatarUrl'],
       createdAt: DateTime.parse(json['createdAt']),
+      isActive: json['isActive'] ?? true,
     );
   }
 
@@ -91,6 +98,7 @@ class UserModel {
       phoneNumber: '',
       avatarUrl: '',
       createdAt: DateTime.now(),
+      isActive: true,
     );
   }
 }

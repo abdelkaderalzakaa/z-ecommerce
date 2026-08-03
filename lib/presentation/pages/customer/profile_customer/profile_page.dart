@@ -3,10 +3,11 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../../../../../data/providers/auth_provider.dart';
 import '../../../../data/providers/business_provider.dart';
 import '../../../widgets/common/headers/header_details.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/common/headers/widgets/top_title.dart';
 import '../../../widgets/profile/profile_sidebar.dart';
 import '../../../widgets/profile/profile_tabs_mobile.dart';
@@ -96,7 +97,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _onSelectTab(int index) {
     if (index != _selectedIndex) {
-      changeScreenReplacement(context, ProfilePage(tabId: _indexToTabId(index)));
+      changeScreenReplacement(
+        context,
+        ProfilePage(tabId: _indexToTabId(index)),
+      );
     }
   }
 

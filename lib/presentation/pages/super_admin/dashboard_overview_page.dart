@@ -714,7 +714,7 @@ class DashboardOverviewPage extends StatelessWidget {
                   children: [
                     TableImageTextCell(
                       title: p.name,
-                      subtitle: '\$${p.price}',
+                      subtitle: '\$${p.basePrice}',
                       imageUrl: p.images.isNotEmpty ? p.images.first : null,
                       fallbackIcon: Icons.shopping_bag_outlined,
                     ),

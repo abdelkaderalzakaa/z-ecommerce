@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
-
-import 'package:z_ecommerce/data/providers/brand_provider.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/store_create_edit_category_page.dart';
 
 class CategoryTab extends StatelessWidget {
   final BusinessModel store;
@@ -14,14 +13,9 @@ class CategoryTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final categoryProvider = Provider.of<CategoryProvider>(context);
-    final brandProvider = Provider.of<BrandProvider>(context);
 
     final storeCategories = categoryProvider.categories
         .where((c) => c.businessId == null || c.businessId == store.id)
-        .toList();
-
-    final storeBrands = brandProvider.brands
-        .where((b) => b.businessId == null || b.businessId == store.id)
         .toList();
 
     return SingleChildScrollView(
@@ -33,11 +27,23 @@ class CategoryTab extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'الأقسام والعلامات التجارية للمتجر: ${store.localization.name.get(context)}',
+                'الأقسام والفئات للمتجر',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => StoreCreateEditCategoryPage(businessId: store.id),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('إضافة فئة'),
               ),
             ],
           ),
@@ -84,63 +90,60 @@ class CategoryTab extends StatelessWidget {
               ),
             )
           else
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: storeCategories.map((cat) {
-                return Chip(
-                  avatar: Icon(cat.icon ?? Icons.category_rounded, size: 18),
-                  label: Text(cat.label),
-                  backgroundColor: cat.bgColor.withOpacity(0.15),
-                  side: BorderSide(color: cat.bgColor.withOpacity(0.3)),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: storeCategories.length,
+              itemBuilder: (context, index) {
+                final cat = storeCategories[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8.0),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: cat.bgColor.withOpacity(0.2),
+                      child: Icon(cat.icon ?? Icons.category_rounded, color: cat.bgColor),
+                    ),
+                    title: Text(cat.label),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.compare_arrows, color: Colors.orange),
+                          tooltip: 'نقل المنتجات من هذا القسم لقسم آخر',
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('زر: نقل المنتجات')),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StoreCreateEditCategoryPage(
+                                  businessId: store.id,
+                                  category: cat,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            Provider.of<CategoryProvider>(context, listen: false).deleteCategory(cat.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('تم حذف الفئة بنجاح'), backgroundColor: Colors.green),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
-              }).toList(),
-            ),
-
-          const SizedBox(height: 28),
-
-          // Store Brands
-          const Text(
-            'العلامات التجارية المسجلة للمتجر (Store Brands)',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          if (storeBrands.isEmpty)
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(24.0),
-                child: Center(
-                  child: Text('لا توجد علامات تجارية مسجلة للمتجر حالياً'),
-                ),
-              ),
-            )
-          else
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: storeBrands.map((brand) {
-                return Chip(
-                  avatar: const Icon(
-                    Icons.branding_watermark_rounded,
-                    size: 18,
-                    color: Colors.blue,
-                  ),
-                  label: Text(brand.name),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                );
-              }).toList(),
+              },
             ),
         ],
       ),

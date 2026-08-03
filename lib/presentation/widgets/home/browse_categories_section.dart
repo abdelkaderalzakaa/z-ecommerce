@@ -22,6 +22,14 @@ class BrowseCategoriesSection extends StatelessWidget {
     return Consumer<CategoryProvider>(
       builder: (context, provider, child) {
         final categories = provider.categories;
+        if (categories.isEmpty) return const SizedBox.shrink();
+        
+        // We only show grid if we have at least 4 categories, otherwise we could pad with something else.
+        // For now, if length < 4, let's just return shrink or safely slice it.
+        // Or we can just check if empty and then render dynamically. But since the grid is hardcoded to 4,
+        // let's ensure we have at least 4, or don't show the grid.
+        if (categories.length < 4) return const SizedBox.shrink();
+
         return Container(
           margin: EdgeInsets.symmetric(horizontal: hPad),
           padding: EdgeInsets.all(isMobile ? 24 : 64),

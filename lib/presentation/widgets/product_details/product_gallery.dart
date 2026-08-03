@@ -98,7 +98,6 @@ class _MainImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Center(
-        // TODO: Replace with actual image
         child: Icon(
           Icons.checkroom,
           size: 120,
@@ -132,12 +131,13 @@ class _Thumbnail extends StatelessWidget {
             color: const Color(0xFFF0EEED),
             borderRadius: BorderRadius.circular(AppRadius.card),
             border: Border.all(
-              color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Colors.transparent,
               width: 1.5,
             ),
           ),
           child: Center(
-            // TODO: Replace with actual image
             child: Icon(
               Icons.checkroom,
               size: 48,

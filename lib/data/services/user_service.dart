@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
@@ -42,6 +44,42 @@ class UserService {
       debugPrint('User saved successfully: ${user.id}');
     } catch (e) {
       debugPrint('Error saving user: $e');
+    }
+  }
+
+  /// إنشاء مستخدم في Authentication دون تسجيل خروج الأدمن الحالي
+  Future<String?> createNewAuthUserWithoutLoggingOut(String email, String password) async {
+    try {
+      final secondaryApp = await Firebase.initializeApp(
+        name: 'SecondaryApp_${DateTime.now().millisecondsSinceEpoch}',
+        options: Firebase.app().options,
+      );
+      final auth = FirebaseAuth.instanceFor(app: secondaryApp);
+      final userCredential = await auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final uid = userCredential.user?.uid;
+      await auth.signOut();
+      await secondaryApp.delete();
+      return uid;
+    } catch (e) {
+      debugPrint('Error creating secondary auth user: $e');
+      rethrow;
+    }
+  }
+
+  /// تغيير حالة تنشيط أو حظر المستخدم
+  Future<void> updateUserStatus(String userId, bool isActive) async {
+    try {
+      await _firestore
+          .collection(_usersCollection)
+          .doc(userId)
+          .update({'isActive': isActive});
+      debugPrint('User status updated successfully: $userId to $isActive');
+    } catch (e) {
+      debugPrint('Error updating user status: $e');
+      rethrow;
     }
   }
 
@@ -106,8 +144,10 @@ class UserService {
   /// إنشاء أو تحديث بيانات المتجر/النشاط التجاري في مجموعة businesses
   Future<void> saveBusiness(BusinessModel business) async {
     try {
-      // 1. حفظ UserModel أولاً في users
-      await saveUser(business.owner);
+      // 1. حفظ UserModel أولاً في users إن وجد
+      if (business.owner != null) {
+        await saveUser(business.owner!);
+      }
 
       // 2. حفظ BusinessModel في businesses
       await _firestore
@@ -140,11 +180,40 @@ class UserService {
   Future<List<BusinessModel>> getAllBusinesses() async {
     try {
       final snapshot = await _firestore.collection(_businessesCollection).get();
+        return snapshot.docs.map((doc) => BusinessModel.fromMap(doc.data(), doc.id)).toList();
+    } catch (e) {
+      debugPrint('Error fetching businesses: $e');
+      return [];
+    }
+  }
+
+  /// جلب المتاجر التي ليس لها مدير حالياً
+  Future<List<BusinessModel>> getUnassignedBusinesses() async {
+    try {
+      final snapshot = await _firestore.collection(_businessesCollection).get();
       return snapshot.docs
           .map((doc) => BusinessModel.fromMap(doc.data(), doc.id))
+          .where((b) => b.owner == null)
           .toList();
     } catch (e) {
-      debugPrint('Error fetching all businesses: $e');
+      debugPrint('Error fetching unassigned businesses: $e');
+      return [];
+    }
+  }
+
+  /// جلب مدراء المتاجر الذين ليس لديهم متجر حالياً
+  Future<List<UserModel>> getUnassignedBusinessOwners() async {
+    try {
+      final snapshot = await _firestore
+          .collection(_usersCollection)
+          .where('role', isEqualTo: UserRole.businessOwner.name)
+          .get();
+      return snapshot.docs
+          .map((doc) => UserModel.fromMap(doc.data()))
+          .where((u) => u.businessId == null || u.businessId!.isEmpty)
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching unassigned business owners: $e');
       return [];
     }
   }

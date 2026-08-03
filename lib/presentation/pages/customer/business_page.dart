@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/header_buisness.dart';
 import '../../../data/models/store/business_model.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../global/locale_provider.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import '../../global/translate/translation_keys.dart';
+import '../../global/core/constants/enum_data.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/business_entry_page.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_theme.dart';
+import 'package:z_ecommerce/presentation/global/settings_provider.dart';
+import '../../../data/providers/super_admin_provider.dart';
 
 class BusinessPage extends StatefulWidget {
   const BusinessPage({super.key});
@@ -16,6 +25,7 @@ class BusinessPage extends StatefulWidget {
 class _BusinessPageState extends State<BusinessPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String? _selectedCategory;
 
   @override
   void dispose() {
@@ -26,135 +36,263 @@ class _BusinessPageState extends State<BusinessPage> {
   @override
   Widget build(BuildContext context) {
     final isAr = context.watch<LocaleProvider>().locale.languageCode == 'ar';
+    final settings = context.watch<SettingsProvider>();
+    
+    final bool isDark = settings.themeMode == ThemeMode.dark || 
+                        (settings.themeMode == ThemeMode.system && 
+                         MediaQuery.of(context).platformBrightness == Brightness.dark);
+                         
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+    final themeAdmin = superAdminProvider.currentSuperAdmin?.themeAdmin;
+    final dynamicTheme = AppTheme.getThemeFromAdmin(themeAdmin, isDark);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(isAr ? 'جميع الأعمال والمتاجر' : 'All Businesses & Stores'),
-        centerTitle: true,
-      ),
-      body: Consumer<BusinessProvider>(
-        builder: (context, businessProvider, child) {
-          final businesses = businessProvider.businesses;
+    return Theme(
+      data: dynamicTheme,
+      child: Scaffold(
+        backgroundColor: dynamicTheme.scaffoldBackgroundColor,
+        appBar: const HeaderBuisness(),
+        body: Consumer<BusinessProvider>(
+          builder: (context, businessProvider, child) {
+            final businesses = businessProvider.businesses;
 
-          if (businessProvider.isLoading && businesses.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+            if (businessProvider.isLoading && businesses.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (businessProvider.errorMessage != null && businesses.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    isAr ? 'حدث خطأ في تحميل البيانات' : 'Error loading data',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => businessProvider.fetchBusinesses(),
-                    child: Text(isAr ? 'إعادة المحاولة' : 'Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final filteredStores = businesses.where((b) {
-            final nameAr = b.localization.name.ar.toLowerCase();
-            final nameEn = b.localization.name.en.toLowerCase();
-            final q = _searchQuery.toLowerCase();
-            return nameAr.contains(q) || nameEn.contains(q);
-          }).toList();
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
+            if (businessProvider.errorMessage != null && businesses.isEmpty) {
+              return Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Search Bar
-                    TextField(
-                      controller: _searchController,
-                      onChanged: (value) =>
-                          setState(() => _searchQuery = value),
-                      decoration: InputDecoration(
-                        hintText: isAr
-                            ? 'ابحث عن متجر أو نشاط تجاري...'
-                            : 'Search for a store or business...',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                    const SizedBox(height: 16),
+                    Text(
+                      isAr ? 'حدث خطأ في تحميل البيانات' : 'Error loading data',
+                      style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () => businessProvider.fetchBusinesses(),
+                      child: Text(isAr ? 'إعادة المحاولة' : 'Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final filteredStores = businesses.where((b) {
+              final nameAr = b.localization.name.ar.toLowerCase();
+              final nameEn = b.localization.name.en.toLowerCase();
+              final q = _searchQuery.toLowerCase();
+              final matchesSearch = nameAr.contains(q) || nameEn.contains(q);
+              final matchesCategory =
+                  _selectedCategory == null ||
+                  b.businessType.name == _selectedCategory;
+              return matchesSearch && matchesCategory;
+            }).toList();
+
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(40, 20, 40, 20),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1200),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Page Title and Back Button
+                            Row(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: const BackButtonIcon(),
+                                    color: Colors.black87,
+                                    onPressed: () {
+                                      changeScreenReplacement(
+                                        context,
+                                        const BusinessEntryPage(),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Text(
+                                    isAr
+                                        ? 'جميع الأعمال والمتاجر'
+                                        : 'All Businesses & Stores',
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Search Bar
+                            TextField(
+                              controller: _searchController,
+                              onChanged: (value) =>
+                                  setState(() => _searchQuery = value),
+                              decoration: InputDecoration(
+                                hintText: isAr
+                                    ? 'ابحث عن متجر أو نشاط تجاري...'
+                                    : 'Search for a store or business...',
+                                prefixIcon: const Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Categories Filter
+                            SizedBox(
+                              height: 50,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: BusinessType.values.length,
+                                itemBuilder: (context, index) {
+                                  final type = BusinessType.values[index];
+                                  final isSelected =
+                                      _selectedCategory == type.name;
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      right: isAr ? 0 : 12,
+                                      left: isAr ? 12 : 0,
+                                    ),
+                                    child: ChoiceChip(
+                                      label: Row(
+                                        children: [
+                                          Icon(
+                                            type.icon,
+                                            size: 18,
+                                            color: isSelected
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(isAr ? type.ar : type.en),
+                                        ],
+                                      ),
+                                      selected: isSelected,
+                                      selectedColor: Theme.of(
+                                        context,
+                                      ).primaryColor,
+                                      backgroundColor: Colors.grey[100],
+                                      labelStyle: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      onSelected: (selected) {
+                                        setState(() {
+                                          _selectedCategory = selected
+                                              ? type.name
+                                              : null;
+                                        });
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                if (filteredStores.isEmpty)
+                                  Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 40,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            Icons.storefront_outlined,
+                                            size: 64,
+                                            color: Colors.grey[400],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            isAr
+                                                ? 'عذراً، لم يتم العثور على أي متجر يطابق بحثك.'
+                                                : 'Sorry, no stores found matching your criteria.',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      int crossAxisCount = 1;
+                                      if (constraints.maxWidth > 900) {
+                                        crossAxisCount = 3;
+                                      } else if (constraints.maxWidth > 600) {
+                                        crossAxisCount = 2;
+                                      }
+
+                                      return GridView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: crossAxisCount,
+                                              childAspectRatio: 0.85,
+                                              crossAxisSpacing: 32,
+                                              mainAxisSpacing: 32,
+                                            ),
+                                        itemCount: filteredStores.length,
+                                        itemBuilder: (context, index) {
+                                          return StoreCard(
+                                            business: filteredStores[index],
+                                            isAr: isAr,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
-
-                    if (filteredStores.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 40),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.storefront_outlined,
-                                size: 64,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                isAr
-                                    ? 'عذراً، لم يتم العثور على أي متجر يطابق بحثك.'
-                                    : 'Sorry, no stores found matching your criteria.',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          int crossAxisCount = 1;
-                          if (constraints.maxWidth > 900) {
-                            crossAxisCount = 3;
-                          } else if (constraints.maxWidth > 600) {
-                            crossAxisCount = 2;
-                          }
-
-                          return GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: crossAxisCount,
-                                  childAspectRatio: 0.85,
-                                  crossAxisSpacing: 32,
-                                  mainAxisSpacing: 32,
-                                ),
-                            itemCount: filteredStores.length,
-                            itemBuilder: (context, index) {
-                              return StoreCard(
-                                business: filteredStores[index],
-                                isAr: isAr,
-                              );
-                            },
-                          );
-                        },
-                      ),
-                  ],
-                ),
+                  ),
+                  const FooterSection(),
+                ],
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -176,7 +314,7 @@ class _StoreCardState extends State<StoreCard> {
 
   @override
   Widget build(BuildContext context) {
-    final mockRating = (4.0 + (widget.business.owner.id.hashCode % 10) / 10)
+    final mockRating = (4.0 + (widget.business.id.hashCode % 10) / 10)
         .toStringAsFixed(1);
 
     return MouseRegion(
@@ -199,7 +337,22 @@ class _StoreCardState extends State<StoreCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: InkWell(
-            onTap: () => changeScreen(context, const HomePage()),
+            onTap: () {
+              if (widget.business.isInactive) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      widget.isAr ? 'هذا المتجر غير نشط حالياً' : 'This store is currently inactive',
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+              final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+              businessProvider.selectBusiness(widget.business.id);
+              changeScreen(context, const HomePage());
+            },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

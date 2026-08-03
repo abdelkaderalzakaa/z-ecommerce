@@ -6,12 +6,16 @@ import '../../../../data/providers/business_provider.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../widgets/common/headers/header_details.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/common/headers/widgets/top_title.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/about_page.dart';
+import '../../../../data/providers/super_admin_provider.dart';
+import '../../../global/theme/app_theme.dart';
+import '../../../global/settings_provider.dart';
 
 class AboutPage extends StatelessWidget {
-  const AboutPage({super.key});
+  final bool useAdminTheme;
+  const AboutPage({super.key, this.useAdminTheme = false});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +23,19 @@ class AboutPage extends StatelessWidget {
     final isMobile = ResponsiveLayout.isMobile(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
     final business = businessProvider.selectedBusiness;
-    return Scaffold(
+    final settings = context.watch<SettingsProvider>();
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+
+    final bool isDark = settings.themeMode == ThemeMode.dark ||
+        (settings.themeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+    final themeAdmin = superAdminProvider.currentSuperAdmin?.themeAdmin;
+    final dynamicTheme = useAdminTheme 
+        ? AppTheme.getThemeFromAdmin(themeAdmin, isDark) 
+        : null;
+
+    Widget content = Scaffold(
       appBar: HeaderDetails(
         title: TranslationKeys.about.tr(context),
         paths: [
@@ -52,5 +68,14 @@ class AboutPage extends StatelessWidget {
         ),
       ),
     );
+
+    if (dynamicTheme != null) {
+      content = Theme(
+        data: dynamicTheme,
+        child: content,
+      );
+    }
+
+    return content;
   }
 }

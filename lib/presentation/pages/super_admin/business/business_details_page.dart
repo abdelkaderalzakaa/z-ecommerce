@@ -5,12 +5,17 @@ import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/details_template.dart';
+import 'package:z_ecommerce/core/services/excel_export_service.dart';
+import 'package:z_ecommerce/core/services/excel_import_service.dart';
+import 'package:z_ecommerce/data/models/store/business_model.dart';
+
 import 'business_details_tab/overview_tab.dart';
 import 'business_details_tab/products_tab.dart';
-import 'business_details_tab/orders_tab.dart';
-import 'business_details_tab/reviews_tab.dart';
+import 'business_details_tab/offers_tab.dart';
 import 'business_details_tab/category_tab.dart';
-import 'business_details_tab/settings_tab.dart';
+import 'business_details_tab/brand_tab.dart';
+import 'business_details_tab/followers_tab.dart';
+import 'business_details_tab/reviews_tab.dart';
 
 class BusinessDetailsPage extends StatelessWidget {
   final String storeId;
@@ -26,46 +31,115 @@ class BusinessDetailsPage extends StatelessWidget {
           orElse: () => provider.businesses.first,
         );
 
+        // Calculate readiness based on filled fields
+        int readinessScore = 0;
+        if (store.owner != null) readinessScore += 20;
+        if (store.addAddress.isNotEmpty) readinessScore += 20;
+        if (store.localization.name.ar.isNotEmpty) readinessScore += 20;
+        if (store.socials.isNotEmpty) readinessScore += 20;
+        if (store.paymentMethods.isNotEmpty) readinessScore += 20;
+        
+        String readinessText = readinessScore == 100 ? 'جاهز بالكامل' : 'قيد التجهيز ($readinessScore%)';
+        Color readinessColor = readinessScore == 100 ? Colors.green : Colors.orange;
+
         return DetailsTemplate(
           title: TranslationKeys.storeDetailsTitle.tr(context),
           name: store.localization.name.get(context),
-          subtitle:
-              '${TranslationKeys.category.tr(context)}: ${store.businessType.name} • ${store.id}',
+          subtitle: '${TranslationKeys.category.tr(context)}: ${store.businessType.name} • ${store.id}',
           avatarUrl: store.theme.logoUrl,
           fallbackIcon: Icons.storefront_rounded,
           statusBadge: TableStatusBadge.fromStatus(store.status ?? 'Active'),
           headerMetrics: [
+            // Readiness Level
             Chip(
-              avatar: const Icon(Icons.star, size: 16, color: Colors.amber),
-              label: Text('⭐ ${store.rating.toStringAsFixed(1)}'),
-              padding: EdgeInsets.zero,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              avatar: Icon(Icons.check_circle_outline, color: readinessColor, size: 16),
+              label: Text(readinessText, style: TextStyle(color: readinessColor, fontSize: 12)),
+              backgroundColor: readinessColor.withOpacity(0.1),
+              side: BorderSide.none,
             ),
-            Chip(
-              avatar: const Icon(
-                Icons.shopping_bag,
-                size: 16,
-                color: Colors.blue,
+            const SizedBox(width: 8),
+            // Import Button
+            ElevatedButton.icon(
+              onPressed: () async {
+                await ExcelImportService.importData(context, store.id);
+              },
+              icon: const Icon(Icons.upload_rounded, size: 16),
+              label: const Text('استيراد بيانات'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              label: Text(
-                '${store.orders} ${TranslationKeys.orders.tr(context)}',
-              ),
-              padding: EdgeInsets.zero,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            if (store.owner.phoneNumber.isNotEmpty)
-              Chip(
-                avatar: const Icon(Icons.phone, size: 16, color: Colors.green),
-                label: Text(store.owner.phoneNumber),
-                padding: EdgeInsets.zero,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            const SizedBox(width: 8),
+            // Export Button
+            ElevatedButton.icon(
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('جاري تجهيز الملف للتصدير...')),
+                );
+                try {
+                  await ExcelExportService.exportBusinessData(context, store.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تم تصدير البيانات بنجاح!'), backgroundColor: Colors.green),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('حدث خطأ أثناء التصدير: \$e'), backgroundColor: Colors.red),
+                  );
+                }
+              },
+              icon: const Icon(Icons.download_rounded, size: 16),
+              label: const Text('تصدير بيانات المتجر'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
+            ),
+            const SizedBox(width: 8),
+            // Status Menu
+            PopupMenuButton<String>(
+              child: ElevatedButton.icon(
+                onPressed: null, // Menu handles tap
+                icon: const Icon(Icons.edit_note, size: 16, color: Colors.white),
+                label: const Text('تغيير الحالة', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  disabledBackgroundColor: Colors.purple,
+                  disabledForegroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+              ),
+              onSelected: (val) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('تم تغيير حالة المتجر إلى: \$val')),
+                );
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'Active', child: Text('نشط')),
+                const PopupMenuItem(value: 'Active & Verified', child: Text('نشط ومعتمد')),
+                const PopupMenuItem(value: 'Pending', child: Text('معلق (قيد الانتظار)')),
+                const PopupMenuItem(value: 'Inactive', child: Text('غير نشط')),
+              ],
+            ),
+            const SizedBox(width: 8),
+            // Pause / Close
+            ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تم إيقاف المتجر مؤقتاً.')),
+                );
+              },
+              icon: const Icon(Icons.pause_circle_filled, size: 16),
+              label: const Text('إيقاف مؤقت'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+            ),
           ],
-          onRefresh: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('تم تحديث بيانات المتجر')),
-            );
-          },
           onEdit: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -75,34 +149,26 @@ class BusinessDetailsPage extends StatelessWidget {
               ),
             );
           },
-          onDelete: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${TranslationKeys.deleteSelected.tr(context)} "${store.localization.name.get(context)}"',
-                ),
-                backgroundColor: Colors.red,
-              ),
-            );
-          },
-          tabs: [
-            Tab(text: TranslationKeys.overviewTab.tr(context)),
-            Tab(text: TranslationKeys.productsTab.tr(context)),
-            Tab(text: TranslationKeys.ordersTab.tr(context)),
-            const Tab(text: 'التقييمات والمتابعات'),
-            const Tab(text: 'الأقسام والعلامات'),
-            Tab(text: TranslationKeys.settingsTab.tr(context)),
+          tabs: const [
+            Tab(text: 'نظرة عامة'),
+            Tab(text: 'المنتجات'),
+            Tab(text: 'العروض'),
+            Tab(text: 'الفئات'),
+            Tab(text: 'العلامات التجارية'),
+            Tab(text: 'المتابعات'),
+            Tab(text: 'التقييمات والإعجابات'),
           ],
           tabViews: [
             OverviewTab(store: store),
             ProductsTab(store: store),
-            OrdersTab(store: store),
-            ReviewsTab(store: store),
+            OffersTab(store: store),
             CategoryTab(store: store),
-            SettingsTab(store: store),
+            BrandTab(store: store),
+            FollowersTab(store: store),
+            ReviewsTab(store: store),
           ],
         );
       },
     );
   }
-}
+}

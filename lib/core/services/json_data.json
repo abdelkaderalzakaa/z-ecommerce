@@ -1,0 +1,1549 @@
+{
+    "business": {
+        "id": "cmp_99344235",
+        "owner": {
+            "id": "HPjG3vv2r8eJ3UAtOI0bSxgZjZp1",
+            "name": "usertestbuisness",
+            "email": "usertestbuisness@gmail.com",
+            "role": "businessOwner",
+            "businessId": "cmp_99344235",
+            "phoneNumber": "+9647701234567",
+            "avatarUrl": "https://example.com/avatar.png",
+            "createdAt": "2026-08-01T18:40:36.774Z",
+            "isActive": true
+        },
+        "businessType": "retailStore",
+        "addAddress": [
+            {
+                "id": "addr_1",
+                "title": "الرئيسي",
+                "city": {
+                    "ar": "بغداد",
+                    "en": "Baghdad"
+                },
+                "street": "شارع الرشيد",
+                "building": "12",
+                "phone": "+9647701234567",
+                "isDefault": true
+            }
+        ],
+        "likes": 245,
+        "theme": {
+            "primaryColor": "#0D47A1",
+            "secondaryColor": "#FF6F00",
+            "backgroundColor": "#F5F5F5",
+            "surfaceColor": "#FFFFFF",
+            "textColor": "#212121",
+            "fontFamily": "Cairo",
+            "fontScale": 1,
+            "buttonRadius": 12,
+            "cardRadius": 16,
+            "inputRadius": 10,
+            "logoUrl": "https://example.com/logo.png",
+            "coverBannerUrl": "https://example.com/banner.png"
+        },
+        "localization": {
+            "name": {
+                "ar": "متجر الأناقة",
+                "en": "Elegance Store"
+            },
+            "slogan": {
+                "ar": "أناقتك تبدأ من هنا",
+                "en": "Your elegance starts here"
+            },
+            "description": {
+                "ar": "متجر متخصص في المنتجات الفاخرة والإلكترونيات والأزياء",
+                "en": "Specialized in luxury products, electronics and fashion"
+            },
+            "footerDescription": {
+                "ar": "شكراً لزيارتكم متجرنا",
+                "en": "Thank you for visiting our store"
+            },
+            "aboutUs": {
+                "ar": "نحن متجر رائد في تقديم أفضل المنتجات بأسعار تنافسية",
+                "en": "We are a leading store offering the best products at competitive prices"
+            },
+            "termsAndConditions": {
+                "ar": "الشروط والأحكام...",
+                "en": "Terms and conditions..."
+            },
+            "privacyPolicy": {
+                "ar": "سياسة الخصوصية...",
+                "en": "Privacy policy..."
+            }
+        },
+        "currency": {
+            "id": "curr_usd",
+            "code": "USD",
+            "symbol": "$",
+            "name": "US Dollar",
+            "exchangeRate": 1,
+            "isPrimary": true
+        },
+        "socials": [
+            {
+                "platform": "instagram",
+                "url": "https://instagram.com/elegance_store"
+            },
+            {
+                "platform": "facebook",
+                "url": "https://facebook.com/elegance_store"
+            },
+            {
+                "platform": "whatsapp",
+                "url": "https://wa.me/9647701234567"
+            }
+        ],
+        "paymentMethods": [
+            "cash",
+            "card",
+            "wallet"
+        ],
+        "orders": 128,
+        "followersUsers": [
+            "usr_1",
+            "usr_2",
+            "usr_3"
+        ],
+        "ratings": [
+            {
+                "userId": "usr_1",
+                "rating": 5,
+                "comment": "ممتاز"
+            }
+        ],
+        "visits": [
+            {
+                "date": "2026-08-01",
+                "count": 150
+            },
+            {
+                "date": "2026-08-02",
+                "count": 200
+            }
+        ],
+        "status": "Active",
+        "createdAt": "2026-08-01T18:49:04.241Z",
+        "updatedAt": "2026-08-02T10:30:00.000Z"
+    },
+    "categories": [
+        {
+            "id": "cat_phones",
+            "businessId": "cmp_99344235",
+            "label": "الهواتف الذكية",
+            "label_en": "Smartphones",
+            "iconName": "device_hub",
+            "bgColor": "#FFFFFF",
+            "createdAt": "2026-07-04T00:00:00.000Z"
+        },
+        {
+            "id": "cat_laptops",
+            "businessId": "cmp_99344235",
+            "label": "الحواسيب المحمولة",
+            "label_en": "Laptops",
+            "iconName": "device_hub",
+            "bgColor": "#FFFFFF",
+            "createdAt": "2026-07-30T00:00:00.000Z"
+        },
+        {
+            "id": "cat_watches",
+            "businessId": "cmp_99344235",
+            "label": "الساعات الذكية",
+            "label_en": "Smartwatches",
+            "iconName": "device_hub",
+            "bgColor": "#FFFFFF",
+            "createdAt": "2026-07-03T00:00:00.000Z"
+        },
+        {
+            "id": "cat_acc",
+            "businessId": "cmp_99344235",
+            "label": "الإكسسوارات",
+            "label_en": "Accessories",
+            "iconName": "device_hub",
+            "bgColor": "#FFFFFF",
+            "createdAt": "2026-07-10T00:00:00.000Z"
+        },
+        {
+            "id": "cat_home",
+            "businessId": "cmp_99344235",
+            "label": "الأجهزة المنزلية",
+            "label_en": "Home Appliances",
+            "iconName": "device_hub",
+            "bgColor": "#FFFFFF",
+            "createdAt": "2026-07-29T00:00:00.000Z"
+        }
+    ],
+    "brands": [
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Apple",
+            "name_en": "Apple",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Samsung",
+            "name_en": "Samsung",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Sony",
+            "name_en": "Sony",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Dell",
+            "name_en": "Dell",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "HP",
+            "name_en": "HP",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Lenovo",
+            "name_en": "Lenovo",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Asus",
+            "name_en": "Asus",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Acer",
+            "name_en": "Acer",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Huawei",
+            "name_en": "Huawei",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Xiaomi",
+            "name_en": "Xiaomi",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Oppo",
+            "name_en": "Oppo",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Vivo",
+            "name_en": "Vivo",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Nokia",
+            "name_en": "Nokia",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Motorola",
+            "name_en": "Motorola",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "OnePlus",
+            "name_en": "OnePlus",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Google",
+            "name_en": "Google",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "LG",
+            "name_en": "LG",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Panasonic",
+            "name_en": "Panasonic",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Toshiba",
+            "name_en": "Toshiba",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        },
+        {
+            "id": "brand_${i + 1}",
+            "businessId": "cmp_99344235",
+            "name": "Philips",
+            "name_en": "Philips",
+            "logo": "https://example.com/brands/${brandNames[i].toLowerCase()}.png"
+        }
+    ],
+    "products": [
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_laptops",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 818,
+            "costPrice": 572.5999999999999,
+            "discount": 39,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 72,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Apple"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": false,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "3.9",
+            "createdAt": "2026-07-15T00:00:00.000Z",
+            "updatedAt": "2026-07-09T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_home",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 641,
+            "costPrice": 448.7,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 40,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Nokia"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": true,
+            "isNewArrival": true,
+            "isBestSeller": true,
+            "sku": "SKU-${1000 + i}",
+            "rating": "3.7",
+            "createdAt": "2026-07-22T00:00:00.000Z",
+            "updatedAt": "2026-07-16T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_laptops",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 1255,
+            "costPrice": 878.5,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 96,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Nokia"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": true,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.5",
+            "createdAt": "2026-08-01T00:00:00.000Z",
+            "updatedAt": "2026-07-26T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_laptops",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 250,
+            "costPrice": 175.0,
+            "discount": 24,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 68,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "LG"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.4",
+            "createdAt": "2026-07-31T00:00:00.000Z",
+            "updatedAt": "2026-07-06T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_watches",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 516,
+            "costPrice": 361.2,
+            "discount": 17,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 30,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Sony"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": false,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "3.6",
+            "createdAt": "2026-07-15T00:00:00.000Z",
+            "updatedAt": "2026-07-30T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_home",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 350,
+            "costPrice": 244.99999999999997,
+            "discount": 32,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 38,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Nokia"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": true,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.1",
+            "createdAt": "2026-07-11T00:00:00.000Z",
+            "updatedAt": "2026-07-05T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_home",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 1304,
+            "costPrice": 912.8,
+            "discount": 45,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 37,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Oppo"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": true,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.2",
+            "createdAt": "2026-07-06T00:00:00.000Z",
+            "updatedAt": "2026-07-20T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_phones",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 980,
+            "costPrice": 686.0,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 39,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Asus"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": false,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.5",
+            "createdAt": "2026-07-31T00:00:00.000Z",
+            "updatedAt": "2026-07-15T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_phones",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 849,
+            "costPrice": 594.3,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 23,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "HP"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": true,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.8",
+            "createdAt": "2026-07-24T00:00:00.000Z",
+            "updatedAt": "2026-07-17T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_phones",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 557,
+            "costPrice": 389.9,
+            "discount": 13,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 42,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Google"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": true,
+            "isBestSeller": true,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.1",
+            "createdAt": "2026-07-23T00:00:00.000Z",
+            "updatedAt": "2026-07-25T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_acc",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 1248,
+            "costPrice": 873.5999999999999,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 26,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Acer"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": false,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.1",
+            "createdAt": "2026-07-20T00:00:00.000Z",
+            "updatedAt": "2026-07-03T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_phones",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 115,
+            "costPrice": 80.5,
+            "discount": 13,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 36,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "LG"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": true,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "3.8",
+            "createdAt": "2026-07-31T00:00:00.000Z",
+            "updatedAt": "2026-07-14T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_home",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 513,
+            "costPrice": 359.09999999999997,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 20,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Dell"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": false,
+            "isNewArrival": true,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.5",
+            "createdAt": "2026-07-14T00:00:00.000Z",
+            "updatedAt": "2026-07-25T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_home",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 1414,
+            "costPrice": 989.8,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 44,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Lenovo"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": false,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.0",
+            "createdAt": "2026-07-23T00:00:00.000Z",
+            "updatedAt": "2026-07-06T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_watches",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 1258,
+            "costPrice": 880.5999999999999,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 30,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Acer"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": true,
+            "isNewArrival": false,
+            "isBestSeller": true,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.6",
+            "createdAt": "2026-07-25T00:00:00.000Z",
+            "updatedAt": "2026-07-12T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_acc",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 233,
+            "costPrice": 163.1,
+            "discount": 38,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 14,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "LG"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": false,
+            "isBestSeller": true,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.2",
+            "createdAt": "2026-08-01T00:00:00.000Z",
+            "updatedAt": "2026-07-08T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_phones",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 719,
+            "costPrice": 503.29999999999995,
+            "discount": 12,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 86,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Asus"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": false,
+            "isNewArrival": false,
+            "isBestSeller": true,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.1",
+            "createdAt": "2026-07-09T00:00:00.000Z",
+            "updatedAt": "2026-07-03T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_watches",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 691,
+            "costPrice": 483.7,
+            "discount": 41,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 50,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Toshiba"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": false,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.1",
+            "createdAt": "2026-07-18T00:00:00.000Z",
+            "updatedAt": "2026-07-20T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_acc",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 816,
+            "costPrice": 571.1999999999999,
+            "discount": 0,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 37,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "Panasonic"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": false,
+            "isFeatured": true,
+            "isNewArrival": true,
+            "isBestSeller": false,
+            "sku": "SKU-${1000 + i}",
+            "rating": "4.5",
+            "createdAt": "2026-07-05T00:00:00.000Z",
+            "updatedAt": "2026-07-07T00:00:00.000Z"
+        },
+        {
+            "id": "prod_${i + 1}",
+            "businessId": "cmp_99344235",
+            "categoryId": "cat_acc",
+            "brandId": "brand_${i + 1}",
+            "name": "منتج ${brand[\"name\"]} المميز ${i + 1}",
+            "description": "وصف رائع لمنتج ${brand[\"name\"]} في فئة ${cat[\"label\"]}",
+            "images": [
+                "https://example.com/products/prod_${i + 1}_1.jpg",
+                "https://example.com/products/prod_${i + 1}_2.jpg"
+            ],
+            "basePrice": 1492,
+            "costPrice": 1044.3999999999999,
+            "discount": 35,
+            "currency": "USD",
+            "isAvailable": true,
+            "stockQuantity": 69,
+            "variants": [],
+            "tags": [
+                "جديد",
+                "مميز",
+                "OnePlus"
+            ],
+            "relatedProductIds": [],
+            "specifications": [
+                {
+                    "key": "اللون",
+                    "value": "أسود"
+                },
+                {
+                    "key": "الضمان",
+                    "value": "سنة واحدة"
+                }
+            ],
+            "hasDiscount": true,
+            "isFeatured": true,
+            "isNewArrival": false,
+            "isBestSeller": true,
+            "sku": "SKU-${1000 + i}",
+            "rating": "5.0",
+            "createdAt": "2026-08-01T00:00:00.000Z",
+            "updatedAt": "2026-07-26T00:00:00.000Z"
+        }
+    ],
+    "offers": [
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 45,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-19T00:00:00.000Z",
+            "endDate": "2026-08-22T20:58:25.168077Z",
+            "createdAt": "2026-07-26T00:00:00.000Z",
+            "updatedAt": "2026-07-15T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 22,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-30T00:00:00.000Z",
+            "endDate": "2026-08-27T20:58:25.168077Z",
+            "createdAt": "2026-07-19T00:00:00.000Z",
+            "updatedAt": "2026-07-25T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 46,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-25T00:00:00.000Z",
+            "endDate": "2026-08-27T20:58:25.168077Z",
+            "createdAt": "2026-07-21T00:00:00.000Z",
+            "updatedAt": "2026-07-16T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 40,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-08T00:00:00.000Z",
+            "endDate": "2026-08-30T20:58:25.168077Z",
+            "createdAt": "2026-07-19T00:00:00.000Z",
+            "updatedAt": "2026-07-08T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 23,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-17T00:00:00.000Z",
+            "endDate": "2026-08-25T20:58:25.168077Z",
+            "createdAt": "2026-07-27T00:00:00.000Z",
+            "updatedAt": "2026-07-23T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 47,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-04T00:00:00.000Z",
+            "endDate": "2026-08-17T20:58:25.169336Z",
+            "createdAt": "2026-07-27T00:00:00.000Z",
+            "updatedAt": "2026-07-11T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 47,
+            "applicableProductIds": [
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-05T00:00:00.000Z",
+            "endDate": "2026-08-10T20:58:25.169336Z",
+            "createdAt": "2026-07-05T00:00:00.000Z",
+            "updatedAt": "2026-07-12T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 14,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-27T00:00:00.000Z",
+            "endDate": "2026-08-14T20:58:25.169336Z",
+            "createdAt": "2026-07-18T00:00:00.000Z",
+            "updatedAt": "2026-07-16T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 22,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-10T00:00:00.000Z",
+            "endDate": "2026-08-10T20:58:25.169336Z",
+            "createdAt": "2026-07-16T00:00:00.000Z",
+            "updatedAt": "2026-07-28T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 44,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-31T00:00:00.000Z",
+            "endDate": "2026-08-20T20:58:25.169336Z",
+            "createdAt": "2026-07-21T00:00:00.000Z",
+            "updatedAt": "2026-07-14T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 46,
+            "applicableProductIds": [
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-07T00:00:00.000Z",
+            "endDate": "2026-08-20T20:58:25.169336Z",
+            "createdAt": "2026-07-26T00:00:00.000Z",
+            "updatedAt": "2026-07-24T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 25,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-17T00:00:00.000Z",
+            "endDate": "2026-09-01T20:58:25.169336Z",
+            "createdAt": "2026-07-31T00:00:00.000Z",
+            "updatedAt": "2026-07-14T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 28,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-04T00:00:00.000Z",
+            "endDate": "2026-08-14T20:58:25.170451Z",
+            "createdAt": "2026-07-25T00:00:00.000Z",
+            "updatedAt": "2026-07-23T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 45,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-03T00:00:00.000Z",
+            "endDate": "2026-08-15T20:58:25.170451Z",
+            "createdAt": "2026-07-03T00:00:00.000Z",
+            "updatedAt": "2026-07-25T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 44,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-16T00:00:00.000Z",
+            "endDate": "2026-08-12T20:58:25.170451Z",
+            "createdAt": "2026-07-12T00:00:00.000Z",
+            "updatedAt": "2026-08-01T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 29,
+            "applicableProductIds": [
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-21T00:00:00.000Z",
+            "endDate": "2026-09-01T20:58:25.170451Z",
+            "createdAt": "2026-07-14T00:00:00.000Z",
+            "updatedAt": "2026-07-25T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 17,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-25T00:00:00.000Z",
+            "endDate": "2026-08-10T20:58:25.170451Z",
+            "createdAt": "2026-07-25T00:00:00.000Z",
+            "updatedAt": "2026-07-07T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "percentage",
+            "discountValue": 17,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-13T00:00:00.000Z",
+            "endDate": "2026-08-10T20:58:25.170451Z",
+            "createdAt": "2026-07-08T00:00:00.000Z",
+            "updatedAt": "2026-07-05T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 44,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-27T00:00:00.000Z",
+            "endDate": "2026-08-28T20:58:25.171491Z",
+            "createdAt": "2026-07-29T00:00:00.000Z",
+            "updatedAt": "2026-07-19T00:00:00.000Z"
+        },
+        {
+            "id": "offer_${i + 1}",
+            "businessId": "cmp_99344235",
+            "title": "عرض التوفير الأكبر ${i + 1}",
+            "description": "خصم خاص لفترة محدودة!",
+            "imageUrl": "https://example.com/offers/off_${i + 1}.jpg",
+            "discountType": "fixed",
+            "discountValue": 41,
+            "applicableProductIds": [
+                "prod_${i + 1}",
+                "prod_${i + 1}",
+                "prod_${i + 1}"
+            ],
+            "isActive": true,
+            "startDate": "2026-07-18T00:00:00.000Z",
+            "endDate": "2026-08-10T20:58:25.171491Z",
+            "createdAt": "2026-07-21T00:00:00.000Z",
+            "updatedAt": "2026-07-04T00:00:00.000Z"
+        }
+    ]
+}

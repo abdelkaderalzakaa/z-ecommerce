@@ -1,6 +1,6 @@
 import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
-import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
+import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
 import '../auth/user_model.dart';
 
 class SuperAdminModel {
@@ -8,8 +8,9 @@ class SuperAdminModel {
   final UserModel user;
 
   final List<SocialModel> socials;
-  final List<BusinessVisitModel> visits; // businessId = "super_admin_system"
   final LocalizationAdmin localizationAdmin;
+  final ThemeAdmin themeAdmin;
+  
   // 2. التواريخ
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -19,8 +20,8 @@ class SuperAdminModel {
     this.createdAt,
     this.updatedAt,
     required this.socials,
-    required this.visits,
     required this.localizationAdmin,
+    required this.themeAdmin,
   });
 
   // ==========================================
@@ -42,11 +43,6 @@ class SuperAdminModel {
                 .map((e) => SocialModel.fromMap(e))
                 .toList()
           : [],
-      visits:
-          (map['visits'] as List<dynamic>?)
-              ?.map((e) => BusinessVisitModel.fromMap(e, e['id'] ?? ''))
-              .toList() ??
-          [],
       createdAt: map['createdAt'] != null
           ? DateTime.tryParse(map['createdAt'])
           : null,
@@ -56,6 +52,9 @@ class SuperAdminModel {
       localizationAdmin: LocalizationAdmin.fromMap(
         map['localizationAdmin'] ?? {},
       ),
+      themeAdmin: map['themeAdmin'] != null
+          ? ThemeAdmin.fromMap(map['themeAdmin'])
+          : ThemeAdmin.empty(),
     );
   }
 
@@ -64,28 +63,28 @@ class SuperAdminModel {
       'id': id,
       'user': user.toMap(),
       'socials': socials.map((e) => e.toMap()).toList(),
-      'visits': visits.map((e) => e.toMap()).toList(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'localizationAdmin': localizationAdmin.toMap(),
+      'themeAdmin': themeAdmin.toMap(),
     };
   }
 
   SuperAdminModel copyWith({
     UserModel? user,
     List<SocialModel>? socials,
-    List<BusinessVisitModel>? visits,
     DateTime? createdAt,
     DateTime? updatedAt,
     LocalizationAdmin? localizationAdmin,
+    ThemeAdmin? themeAdmin,
   }) {
     return SuperAdminModel(
       user: user ?? this.user,
       socials: socials ?? this.socials,
-      visits: visits ?? this.visits,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       localizationAdmin: localizationAdmin ?? this.localizationAdmin,
+      themeAdmin: themeAdmin ?? this.themeAdmin,
     );
   }
 
@@ -94,8 +93,8 @@ class SuperAdminModel {
     return SuperAdminModel(
       user: UserModel.empty(),
       socials: const [],
-      visits: const [],
       localizationAdmin: LocalizationAdmin.empty(),
+      themeAdmin: ThemeAdmin.empty(),
     );
   }
 }

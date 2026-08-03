@@ -1,8 +1,36 @@
+import 'package:flutter/material.dart';
+
 enum BusinessType {
-  retailStore, // متجر تجزئة
-  restaurant,  // مطعم / كافيه
-  service,     // تقديم خدمات
-  other;       // غير ذلك
+  retailStore(
+    icon: Icons.storefront,
+    en: 'Retail Stores',
+    ar: 'متاجر تجزئة',
+  ),
+  restaurant(
+    icon: Icons.restaurant,
+    en: 'Restaurants & Cafes',
+    ar: 'مطاعم وكافيهات',
+  ),
+  service(
+    icon: Icons.design_services,
+    en: 'Services',
+    ar: 'خدمات',
+  ),
+  other(
+    icon: Icons.more_horiz,
+    en: 'Other',
+    ar: 'غير ذلك',
+  );
+
+  final IconData icon;
+  final String en;
+  final String ar;
+
+  const BusinessType({
+    required this.icon,
+    required this.en,
+    required this.ar,
+  });
 
   static BusinessType fromString(String? value) {
     return BusinessType.values.firstWhere(

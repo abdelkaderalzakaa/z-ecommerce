@@ -13,7 +13,7 @@ import '../../../global/settings_provider.dart';
 import '../../../global/locale_provider.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 
 class HeaderAuth extends StatefulWidget implements PreferredSizeWidget {
   final String? title;

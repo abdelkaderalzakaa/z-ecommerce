@@ -112,9 +112,9 @@ class ProductService {
   /// ➕ إضافة منتج جديد وإرجاع المعرف المُنشأ
   Future<String?> addProduct(ProductModel product) async {
     try {
-      final docRef = await _firestore.collection(_collection).add(product.toMap());
-      debugPrint('Product added successfully with ID: ${docRef.id}');
-      return docRef.id;
+      await _firestore.collection(_collection).doc(product.id).set(product.toMap());
+      debugPrint('Product added successfully with ID: ${product.id}');
+      return product.id;
     } catch (e) {
       debugPrint('Error adding product: $e');
       return null;

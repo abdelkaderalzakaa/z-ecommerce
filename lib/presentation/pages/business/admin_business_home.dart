@@ -38,6 +38,33 @@ class _AdminStoreState extends State<AdminStore> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final isMobile = mediaQuery.size.width < 900;
+    
+    final businessProvider = context.watch<BusinessProvider>();
+    final store = businessProvider.businessSettings;
+    
+    if (store != null && store.isInactive) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.block, size: 100, color: Colors.red),
+              const SizedBox(height: 24),
+              const Text(
+                'عذراً، هذا المتجر غير مفعل حالياً',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'لا يمكنك الوصول إلى لوحة تحكم المتجر لأن حالته غير نشطة.\nالرجاء التواصل مع الإدارة للتفعيل.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       key: _scaffoldKey,

@@ -8,7 +8,7 @@ import 'orders/orders_management_page.dart';
 import 'users/users_management_page.dart';
 import 'offers/offers_management_page.dart';
 import 'categories/categories_management_page.dart';
-import 'auth_theme_settings_page.dart';
+
 import 'platform_settings_page.dart';
 
 class SuperAdminHome extends StatefulWidget {
@@ -31,7 +31,6 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
     UsersManagementPage(),
     OffersManagementPage(),
     CategoriesManagementPage(),
-    AuthThemeSettingsPage(),
     PlatformSettingsPage(),
   ];
 

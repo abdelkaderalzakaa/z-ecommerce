@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../data/providers/business_provider.dart';
-import '../../data/providers/product_provider.dart';
-import '../../data/providers/category_provider.dart';
-import '../../data/providers/brand_provider.dart';
-import '../../data/providers/offer_provider.dart';
-import '../widgets/common/headers/header_home.dart';
-import '../widgets/home/hero_section.dart';
-import '../widgets/home/brands_section.dart';
-import '../widgets/home/new_arrivals_section.dart';
-import '../widgets/home/top_selling_section.dart';
-import '../widgets/home/browse_categories_section.dart';
-import '../widgets/home/browse_brands_section.dart';
-import '../widgets/home/discounted_products_section.dart';
-import '../widgets/home/offers_section.dart';
-import '../widgets/home/newsletter_section.dart';
-import '../widgets/common/footer_section.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
+import '../../../data/providers/business_provider.dart';
+import '../../../data/providers/product_provider.dart';
+import '../../../data/providers/category_provider.dart';
+import '../../../data/providers/brand_provider.dart';
+import '../../../data/providers/offer_provider.dart';
+import '../../widgets/common/headers/header_home.dart';
+import '../../widgets/home/hero_section.dart';
+import '../../widgets/home/brands_section.dart';
+import '../../widgets/home/new_arrivals_section.dart';
+import '../../widgets/home/top_selling_section.dart';
+import '../../widgets/home/browse_categories_section.dart';
+import '../../widgets/home/browse_brands_section.dart';
+import '../../widgets/home/discounted_products_section.dart';
+import '../../widgets/home/offers_section.dart';
+import '../../widgets/home/newsletter_section.dart';
+import '../../widgets/common/footers/footer_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -80,19 +81,23 @@ class _HomePageState extends State<HomePage> {
     final businessProvider = Provider.of<BusinessProvider>(context);
     final storeTheme = businessProvider.selectedBusiness?.theme;
 
-    final primaryColor = storeTheme?.primaryColorValue ?? Theme.of(context).primaryColor;
-    final secondaryColor = storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
-    final bgColor = storeTheme?.backgroundColorValue ?? Theme.of(context).scaffoldBackgroundColor;
-    final fontFamily = storeTheme?.fontFamily != null && storeTheme!.fontFamily.isNotEmpty 
-        ? storeTheme.fontFamily 
+    final primaryColor =
+        storeTheme?.primaryColorValue ?? Theme.of(context).primaryColor;
+    final secondaryColor =
+        storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
+    final bgColor =
+        storeTheme?.backgroundColorValue ??
+        Theme.of(context).scaffoldBackgroundColor;
+    final fontFamily =
+        storeTheme?.fontFamily != null && storeTheme!.fontFamily.isNotEmpty
+        ? storeTheme.fontFamily
         : 'Cairo';
 
     final dynamicTheme = Theme.of(context).copyWith(
       primaryColor: primaryColor,
-      colorScheme: Theme.of(context).colorScheme.copyWith(
-        primary: primaryColor,
-        secondary: secondaryColor,
-      ),
+      colorScheme: Theme.of(
+        context,
+      ).colorScheme.copyWith(primary: primaryColor, secondary: secondaryColor),
       scaffoldBackgroundColor: bgColor,
       textTheme: Theme.of(context).textTheme.apply(fontFamily: fontFamily),
     );
@@ -116,7 +121,10 @@ class _HomePageState extends State<HomePage> {
                   NewArrivalsSection(key: _newArrivalsKey),
                   const SizedBox(height: 72),
                   const BrowseBrandsSection(),
-                  Divider(color: Theme.of(innerContext).dividerColor, height: 1),
+                  Divider(
+                    color: Theme.of(innerContext).dividerColor,
+                    height: 1,
+                  ),
                   const OffersSection(sectionType: 'coupons'),
                   const SizedBox(height: 72),
                   TopSellingSection(key: _topSellingKey),
@@ -128,7 +136,10 @@ class _HomePageState extends State<HomePage> {
                   const OffersSection(sectionType: 'deals'),
                   const SizedBox(height: 72),
                   NewsletterSection(key: _newsletterKey),
-                  const FooterSection(),
+                  FooterBuisness(
+                    idBuisness:
+                        context.read<BusinessProvider>().selectedBusiness?.id ?? '',
+                  ),
                 ],
               ),
             ),

@@ -1,43 +1,38 @@
 import 'package:flutter/material.dart';
-import '../../global/theme/theme_auth.dart';
 
 class PrimaryAuthButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final bool isLoading;
-  final AuthThemeConfig? customAuthTheme;
-
   const PrimaryAuthButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.isLoading = false,
-    this.customAuthTheme,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = customAuthTheme ?? const AuthThemeConfig();
+    final theme = Theme.of(context);
 
     return Container(
       width: double.infinity,
-      height: theme.buttonHeight,
+      height: 52.0,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(theme.buttonBorderRadius),
-        gradient: theme.enableButtonGradient
-            ? LinearGradient(
-                colors: [theme.primaryColor, theme.buttonGradientEnd],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              )
-            : null,
-        color: theme.enableButtonGradient ? null : theme.primaryColor,
-        boxShadow: theme.buttonShadow,
+        borderRadius: BorderRadius.circular(12),
+        color: theme.primaryColor,
+        boxShadow: [
+          BoxShadow(
+            color: theme.primaryColor.withValues(alpha: 0.24),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          )
+        ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(theme.buttonBorderRadius),
+          borderRadius: BorderRadius.circular(12),
           onTap: isLoading ? null : onPressed,
           child: Center(
             child: isLoading
@@ -51,13 +46,12 @@ class PrimaryAuthButton extends StatelessWidget {
                   )
                 : Text(
                     label,
-                    style: theme.buttonTextStyle ??
-                        const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
                   ),
           ),
         ),

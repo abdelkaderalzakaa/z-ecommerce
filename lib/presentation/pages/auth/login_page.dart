@@ -1,7 +1,8 @@
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/forgot_password_page.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
 import 'package:z_ecommerce/presentation/pages/business/admin_business_home.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../data/models/auth/user_model.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../../data/providers/business_provider.dart';
-import '../../global/theme/theme_auth.dart';
+import '../../global/translate/localized_string.dart';
 import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/auth_text_field.dart';
 import '../../widgets/auth/password_field.dart';
@@ -21,9 +22,7 @@ import '../../global/translate/translation_keys.dart';
 
 class LoginPage extends StatefulWidget {
   final String? redirectTo;
-  final AuthThemeConfig? customAuthTheme;
-
-  const LoginPage({super.key, this.redirectTo, this.customAuthTheme});
+  const LoginPage({super.key, this.redirectTo});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -64,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
         } else {
           final destination = widget.redirectTo ?? '/';
           if (destination == '/') {
-            changeScreenUntill(context, const HomePage());
+            changeScreenUntill(context, const BusinessPage());
           } else {
             Navigator.pushReplacementNamed(context, destination);
           }
@@ -81,13 +80,15 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authTheme = widget.customAuthTheme ?? const AuthThemeConfig();
-    final primaryColor = authTheme.primaryColor;
-
     return AuthSplitLayout(
-      pageTitle: authTheme.loginTitle,
-      pageSubtitle: authTheme.loginSubtitle,
-      customAuthTheme: authTheme,
+      pageTitle: const LocalizedString(
+        ar: 'مرحباً بك مجدداً',
+        en: 'Welcome back',
+      ),
+      pageSubtitle: const LocalizedString(
+        ar: 'أدخل بياناتك للمتابعة وإدارة حسابك والتسوق بسهولة.',
+        en: 'Enter your details to continue, manage your account and shop easily.',
+      ),
       children: [
         Form(
           key: _formKey,
@@ -117,13 +118,13 @@ class _LoginPageState extends State<LoginPage> {
                     onTap: () {
                       changeScreen(
                         context,
-                        ForgotPasswordPage(customAuthTheme: authTheme),
+                        ForgotPasswordPage(),
                       );
                     },
                     child: Text(
                       TranslationKeys.forgotPassword.tr(context),
                       style: TextStyle(
-                        color: primaryColor,
+                        color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -143,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                         scale: 0.8,
                         child: Switch(
                           value: _rememberMe,
-                          activeColor: primaryColor,
+                          activeColor: Theme.of(context).primaryColor,
                           onChanged: (val) {
                             setState(() => _rememberMe = val);
                           },
@@ -179,7 +180,6 @@ class _LoginPageState extends State<LoginPage> {
                   label: TranslationKeys.logIn.tr(context),
                   onPressed: _handleLogin,
                   isLoading: context.watch<AuthProvider>().isLoading,
-                  customAuthTheme: authTheme,
                 ),
               ),
 
@@ -207,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 24),
 
               // Social Login Button (Google)
-              if (authTheme.showGoogleLogin)
+              if (true)
                 SocialLoginButtons(
                   onGooglePressed: () async {
                     final navigator = Navigator.of(context);
@@ -231,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                         final destination = widget.redirectTo ?? '/';
                         if (destination == '/') {
                           navigator.pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const HomePage()),
+                            MaterialPageRoute(builder: (_) => const BusinessPage()),
                             (route) => false,
                           );
                         } else {
@@ -266,14 +266,13 @@ class _LoginPageState extends State<LoginPage> {
                           context,
                           RegisterPage(
                             redirectTo: widget.redirectTo,
-                            customAuthTheme: authTheme,
                           ),
                         );
                       },
                       child: Text(
                         TranslationKeys.signUp.tr(context),
                         style: TextStyle(
-                          color: primaryColor,
+                          color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),

@@ -1,11 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
 
 class AppTheme {
+  static ThemeData getThemeFromAdmin(ThemeAdmin? admin, bool isDark) {
+    if (admin == null) {
+      return isDark ? getDarkTheme() : getLightTheme();
+    }
+
+    if (isDark) {
+      return getDarkTheme(
+        primaryColor: admin.getPrimaryColor(true),
+        secondaryColor: admin.getSecondaryColor(true),
+        backgroundColor: admin.getBackgroundColor(true),
+        surfaceColor: admin.getSurfaceColor(true),
+        textColor: admin.getTextColor(true),
+        fontFamily: admin.fontFamily,
+        buttonRadius: admin.buttonRadius,
+        cardRadius: admin.cardRadius,
+        inputRadius: admin.inputRadius,
+      );
+    } else {
+      return getLightTheme(
+        primaryColor: admin.getPrimaryColor(false),
+        secondaryColor: admin.getSecondaryColor(false),
+        backgroundColor: admin.getBackgroundColor(false),
+        surfaceColor: admin.getSurfaceColor(false),
+        textColor: admin.getTextColor(false),
+        fontFamily: admin.fontFamily,
+        buttonRadius: admin.buttonRadius,
+        cardRadius: admin.cardRadius,
+        inputRadius: admin.inputRadius,
+      );
+    }
+  }
+
   static ThemeData getLightTheme({
     Color? primaryColor,
     Color? secondaryColor,
     Color? backgroundColor,
     Color? surfaceColor,
+    Color? textColor,
     String? fontFamily,
     double? buttonRadius,
     double? cardRadius,
@@ -41,7 +75,7 @@ class AppTheme {
       useMaterial3: true,
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
+          foregroundColor: (primaryColor ?? const Color(0xFF4F46E5)).computeLuminance() > 0.5 ? Colors.black : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(effectiveButtonRadius)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           textStyle: TextStyle(
@@ -182,35 +216,52 @@ class AppTheme {
   static ThemeData getDarkTheme({
     Color? primaryColor,
     Color? secondaryColor,
+    Color? backgroundColor,
+    Color? surfaceColor,
+    Color? textColor,
+    String? fontFamily,
+    double? buttonRadius,
+    double? cardRadius,
+    double? inputRadius,
   }) {
-    final adjustedPrimary = primaryColor != null ? _adjustForDarkMode(primaryColor) : const Color(0xFFFFFFFF);
+    final effectiveFontFamily = fontFamily ?? 'Cairo';
+    final effectiveButtonRadius = buttonRadius ?? 12.0;
+    final effectiveInputRadius = inputRadius ?? 10.0;
+    final effectiveCardRadius = cardRadius ?? 16.0;
+
+    final adjustedPrimary = primaryColor != null ? _adjustForDarkMode(primaryColor) : const Color(0xFF4F46E5);
     final adjustedSecondary = secondaryColor != null ? _adjustForDarkMode(secondaryColor) : const Color(0xFFFF3333);
+    final adjustedBackground = backgroundColor ?? const Color(0xFF121212);
+    final adjustedSurface = surfaceColor ?? adjustedPrimary.withValues(alpha: 0.15);
+    final adjustedText = textColor ?? const Color(0xFFFFFFFF);
 
     return ThemeData(
       brightness: Brightness.dark,
+      fontFamily: effectiveFontFamily,
       primaryColor: adjustedPrimary,
-      scaffoldBackgroundColor: const Color(0xFF121212),
-      cardColor: adjustedPrimary.withValues(alpha: 0.15),
+      scaffoldBackgroundColor: adjustedBackground,
+      cardColor: adjustedSurface,
       dividerColor: adjustedPrimary.withValues(alpha: 0.2),
       colorScheme: ColorScheme.dark(
         primary: adjustedPrimary,
         secondary: adjustedSecondary,
-        surface: adjustedPrimary.withValues(alpha: 0.15),
+        surface: adjustedSurface,
         surfaceContainerHighest: adjustedPrimary.withValues(alpha: 0.2),
-        onSurface: const Color(0xFFFFFFFF),
+        onSurface: adjustedText,
         onSurfaceVariant: const Color(0xFFA0A0A0),
       ),
-      textTheme: const TextTheme(
-        bodyLarge: TextStyle(color: Color(0xFFFFFFFF)),
-        bodyMedium: TextStyle(color: Color(0xFFA0A0A0)),
+      textTheme: TextTheme(
+        bodyLarge: TextStyle(fontFamily: effectiveFontFamily, color: adjustedText),
+        bodyMedium: TextStyle(fontFamily: effectiveFontFamily, color: const Color(0xFFA0A0A0)),
         bodySmall: TextStyle(color: Color(0xFF707070)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
-          shape: const StadiumBorder(),
+          foregroundColor: adjustedPrimary.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(effectiveButtonRadius)),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
+            fontFamily: effectiveFontFamily,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -227,9 +278,10 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Color(0xFF333333), width: 1.5),
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(effectiveButtonRadius)),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
+            fontFamily: effectiveFontFamily,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -252,9 +304,10 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: adjustedPrimary,
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(effectiveButtonRadius)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
+            fontFamily: effectiveFontFamily,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -279,23 +332,23 @@ class AppTheme {
         fillColor: adjustedPrimary.withValues(alpha: 0.1),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(effectiveInputRadius),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(effectiveInputRadius),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(effectiveInputRadius),
           borderSide: BorderSide(color: adjustedPrimary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(effectiveInputRadius),
           borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(effectiveInputRadius),
           borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
         ),
         hintStyle: const TextStyle(color: Color(0xFF707070), fontSize: 14),
@@ -305,14 +358,14 @@ class AppTheme {
         color: const Color(0xFF1E1E1E),
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(effectiveCardRadius),
           side: const BorderSide(color: Color(0xFF333333), width: 1),
         ),
         margin: EdgeInsets.zero,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: const Color(0xFF121212),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(effectiveCardRadius)),
         elevation: 0,
       ),
       snackBarTheme: SnackBarThemeData(

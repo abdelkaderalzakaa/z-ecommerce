@@ -8,7 +8,7 @@ import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
 import '../../../widgets/common/headers/header_details.dart';
 import '../../../global/translate/localized_string.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/offers/offer_card.dart';
 import 'package:z_ecommerce/presentation/pages/customer/offer/offers_page.dart';
 

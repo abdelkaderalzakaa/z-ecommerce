@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../data/models/order/invoice_model.dart';
 import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
 import '../widgets/common/headers/header_details.dart';
-import '../widgets/common/footer_section.dart';
+import '../widgets/common/footers/footer_section.dart';
 import '../widgets/cart/cart_item.dart';
 import 'package:provider/provider.dart';
 import '../../data/providers/business_provider.dart';
@@ -100,7 +101,7 @@ class OrderDetailsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            const FooterSection(),
+            FooterBuisness(idBuisness: invoice.storeId),
           ],
         ),
       ),

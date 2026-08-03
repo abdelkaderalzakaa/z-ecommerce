@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/business_provider.dart';
-import '../../global/theme/theme_auth.dart';
+import '../../global/translate/localized_string.dart';
 import '../../widgets/auth/auth_split_layout.dart';
 import '../../widgets/auth/password_field.dart';
 import '../../widgets/auth/primary_auth_button.dart';
@@ -12,11 +12,8 @@ import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  final AuthThemeConfig? customAuthTheme;
-
   const ResetPasswordPage({
     super.key,
-    this.customAuthTheme,
   });
 
   @override
@@ -70,13 +67,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authTheme = widget.customAuthTheme ?? const AuthThemeConfig();
-    final primaryColor = authTheme.primaryColor;
-
     return AuthSplitLayout(
-      pageTitle: authTheme.resetPasswordTitle,
-      pageSubtitle: authTheme.resetPasswordSubtitle,
-      customAuthTheme: authTheme,
+      pageTitle: const LocalizedString(
+        ar: 'تعيين كلمة مرور جديدة',
+        en: 'Set new password',
+      ),
+      pageSubtitle: const LocalizedString(
+        ar: 'يجب أن تكون كلمة المرور الجديدة مختلفة عن السابقة.',
+        en: 'Your new password must be different from previously used passwords.',
+      ),
       children: [
         PasswordField(
           controller: _passwordController,
@@ -96,7 +95,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             label: TranslationKeys.resetPassword.tr(context),
             onPressed: _handleReset,
             isLoading: _isLoading,
-            customAuthTheme: authTheme,
           ),
         ),
         const SizedBox(height: 28),
@@ -105,10 +103,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back, size: 16, color: primaryColor),
+            icon: Icon(Icons.arrow_back, size: 16, color: Theme.of(context).primaryColor),
             label: Text(
               TranslationKeys.backToLogin.tr(context),
-              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
             ),
           ),
         ),

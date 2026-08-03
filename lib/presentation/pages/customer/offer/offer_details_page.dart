@@ -11,7 +11,7 @@ import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
 import '../../../widgets/common/product_card.dart';
-import '../../../widgets/common/footer_section.dart';
+import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/common/headers/header_details.dart';
 import '../../../../data/providers/business_provider.dart';
 

@@ -133,13 +133,13 @@ class _AccountInfoTabState extends State<AccountInfoTab> {
                 children: [
                   _SaveButton(onTap: _saveChanges),
                   const SizedBox(height: 16),
-                  _LogoutButton(),
+                  _LogoutButton(isMobile: isMobile),
                 ],
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  _LogoutButton(),
+                  _LogoutButton(isMobile: isMobile),
                   const SizedBox(width: 16),
                   _SaveButton(onTap: _saveChanges),
                 ],
@@ -170,12 +170,24 @@ class _SaveButton extends StatelessWidget {
 }
 
 class _LogoutButton extends StatelessWidget {
+  final bool isMobile;
+
+  const _LogoutButton({required this.isMobile});
+
   @override
   Widget build(BuildContext context) {
+    Widget buildBtn(Widget child) {
+      if (isMobile) {
+        return Expanded(child: child);
+      }
+      return SizedBox(width: 150, child: child);
+    }
+
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: OutlinedButton(
+        buildBtn(
+          OutlinedButton(
             onPressed: () {
               context.read<AuthProvider>().logout();
               changeScreenReplacement(context, const BusinessEntryPage());
@@ -192,8 +204,8 @@ class _LogoutButton extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton(
+        buildBtn(
+          ElevatedButton(
             onPressed: () async {
               final confirm = await showDialog<bool>(
                 context: context,
@@ -219,9 +231,7 @@ class _LogoutButton extends StatelessWidget {
               );
 
               if (confirm == true && context.mounted) {
-                final success = await context
-                    .read<AuthProvider>()
-                    .deleteAccount();
+                final success = await context.read<AuthProvider>().deleteAccount();
                 if (success && context.mounted) {
                   changeScreenReplacement(context, const BusinessEntryPage());
                 }
@@ -242,3 +252,4 @@ class _LogoutButton extends StatelessWidget {
     );
   }
 }
+

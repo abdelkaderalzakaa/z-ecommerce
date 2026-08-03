@@ -2,6 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/header_buisness.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/header_home.dart';
+import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import 'dart:math';
 
 import '../../../data/models/store/business_model.dart';
@@ -14,11 +18,14 @@ import '../../../data/providers/product_provider.dart';
 import '../../global/locale_provider.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/home_page.dart';
+import '../../global/core/constants/enum_data.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/profile_customer/profile_page.dart';
-import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_theme.dart';
+import 'package:z_ecommerce/presentation/global/settings_provider.dart';
+import '../../../data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/pages/customer/offer/offer_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart';
 
@@ -85,27 +92,16 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final businessProvider = Provider.of<BusinessProvider>(context);
-    final storeTheme = businessProvider.selectedBusiness?.theme;
+    final settings = context.watch<SettingsProvider>();
 
-    final primaryColor = storeTheme?.primaryColorValue ?? Colors.black;
-    final secondaryColor =
-        storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
-    final bgColor = storeTheme?.backgroundColorValue ?? Colors.white;
-    final fontFamily =
-        storeTheme?.fontFamily != null && storeTheme!.fontFamily.isNotEmpty
-        ? storeTheme.fontFamily
-        : 'Cairo';
+    final bool isDark =
+        settings.themeMode == ThemeMode.dark ||
+        (settings.themeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-    final dynamicTheme = ThemeData(
-      primaryColor: primaryColor,
-      colorScheme: ColorScheme.light(
-        primary: primaryColor,
-        secondary: secondaryColor,
-      ),
-      fontFamily: fontFamily,
-      scaffoldBackgroundColor: bgColor,
-    );
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+    final themeAdmin = superAdminProvider.currentSuperAdmin?.themeAdmin;
+    final dynamicTheme = AppTheme.getThemeFromAdmin(themeAdmin, isDark);
 
     return Theme(
       data: dynamicTheme,
@@ -113,24 +109,14 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
         builder: (innerContext) {
           return Scaffold(
             extendBodyBehindAppBar: true,
-            appBar: _buildHeader(innerContext),
+            appBar: HeaderBuisness(isTransparent: !_isScrolled),
             body: SingleChildScrollView(
               controller: _scrollController,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Stack(
-                    clipBehavior: Clip.none,
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      _buildHeroSection(innerContext),
-                      Positioned(
-                        bottom: -60,
-                        child: _buildCategoriesBar(innerContext),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 60),
+                  _buildHeroSection(innerContext),
+                  _buildCategoriesBar(innerContext),
                   _buildRecommendedStoresSection(innerContext),
                   _buildStoresGrid(innerContext),
                   _buildOffersSection(innerContext),
@@ -138,7 +124,7 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                   _buildFeaturesSection(innerContext),
                   _buildNewsletterSection(innerContext),
                   _buildHowItWorksSection(innerContext),
-                  _buildFooter(innerContext),
+                  const FooterSection(),
                 ],
               ),
             ),
@@ -159,118 +145,22 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
     );
   }
 
-  PreferredSizeWidget _buildHeader(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-    final primaryColor = Theme.of(context).primaryColor;
-
-    return AppBar(
-      backgroundColor: _isScrolled ? Colors.white : Colors.transparent,
-      elevation: _isScrolled ? 4 : 0,
-      centerTitle: false,
-      title: Row(
-        children: [
-          // Logo of the institution
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(4),
-              child: Image.network(
-                'https://ui-avatars.com/api/?name=Alzaka&background=ffffff&color=000000&bold=true&font-size=0.33',
-                height: 36,
-                width: 36,
-                errorBuilder: (context, error, stackTrace) => Icon(
-                  Icons.business,
-                  color: Theme.of(context).primaryColor,
-                  size: 32,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            isAr ? 'الزكاء للحلول الرقمية' : 'Alzaka Digital',
-            style: TextStyle(
-              color: _isScrolled ? Colors.black87 : Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.language,
-            color: _isScrolled ? Colors.black87 : Colors.white,
-          ),
-          onPressed: () => context.read<LocaleProvider>().toggleLanguage(),
-        ),
-        const SizedBox(width: 8),
-        if (!auth.isAuthenticated) ...[
-          TextButton(
-            onPressed: () => changeScreen(context, const LoginPage()),
-            style: TextButton.styleFrom(
-              foregroundColor: _isScrolled ? Colors.black87 : Colors.white,
-            ),
-            child: Text(
-              TranslationKeys.login.tr(context),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: ElevatedButton(
-              onPressed: () => changeScreen(context, const RegisterPage()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isScrolled ? primaryColor : Colors.white,
-                foregroundColor: _isScrolled ? Colors.white : primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                TranslationKeys.createAccount.tr(context),
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-        ] else ...[
-          IconButton(
-            icon: Icon(
-              Icons.person,
-              color: _isScrolled ? Colors.black87 : Colors.white,
-            ),
-            onPressed: () => changeScreen(context, const ProfilePage()),
-          ),
-          const SizedBox(width: 16),
-        ],
-      ],
-    );
-  }
-
   Widget _buildHeroSection(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
     return SizedBox(
       height: 500,
       child: Stack(
         children: [
-          // Animated Background
+          // Hero Images
           Positioned.fill(
             child: AnimatedSwitcher(
               duration: const Duration(seconds: 1),
-              child: Container(
+              child: Image.network(
+                _heroImages[_currentHeroImageIndex],
                 key: ValueKey<int>(_currentHeroImageIndex),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(_heroImages[_currentHeroImageIndex]),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    Container(color: Theme.of(context).primaryColor),
               ),
             ),
           ),
@@ -292,148 +182,96 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
           // Content
           Positioned.fill(
             child: Align(
-              alignment: isAr ? Alignment.centerRight : Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: isAr ? 24.0 : 60.0,
-                  right: isAr ? 60.0 : 24.0,
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isDesktop = constraints.maxWidth > 800;
-                    final textContent = Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 60), // Space for AppBar
-                        SizedBox(
-                          width: 600,
-                          child: Text(
-                            isAr
-                                ? 'كل ما تحتاجه في مكان واحد'
-                                : 'Everything you need in one place',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 56,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
+              alignment: Alignment.center,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        isAr
+                            ? 'كل ما تحتاجه في مكان واحد'
+                            : 'Everything you need in one place',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 56,
+                          fontWeight: FontWeight.bold,
+                          height: 1.2,
+                        ),
+                      ),
+                      Text(
+                        isAr
+                            ? 'اكتشف أفضل المتاجر، العروض الحصرية، والمنتجات الرائعة.'
+                            : 'Discover top stores, exclusive offers, and amazing products.',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(height: 60),
+                      // Search Bar
+                      Container(
+                        width: 600,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: 600,
-                          child: Text(
-                            isAr
-                                ? 'اكتشف أفضل المتاجر، العروض الحصرية، والمنتجات الرائعة.'
-                                : 'Discover top stores, exclusive offers, and amazing products.',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        // Search Bar
-                        Container(
-                          width: 600,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 20),
-                              const Icon(Icons.search, color: Colors.grey),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextField(
-                                  controller: _searchController,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _searchQuery = value;
-                                    });
-                                  },
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: isAr
-                                        ? 'ابحث عن متاجر، منتجات، أو فئات...'
-                                        : 'Search for stores, products, or categories...',
-                                    hintStyle: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.arrow_forward,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () => _showSnackBar(
-                                    isAr ? 'جاري البحث...' : 'Searching...',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 80,
-                        ), // Space to prevent overlap with Categories Bar
-                      ],
-                    );
-
-                    if (isDesktop) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (!isAr)
-                            Expanded(child: textContent)
-                          else
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 20),
+                            const Icon(Icons.search, color: Colors.grey),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: Center(
-                                child: Image.network(
-                                  'https://images.unsplash.com/photo-1556740714-a8395b3bf30f?q=80&w=2070', // Payment terminal / Side image
-                                  height: 300,
-                                  fit: BoxFit.contain,
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _searchQuery = value;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: isAr
+                                      ? 'ابحث عن متاجر، منتجات، أو فئات...'
+                                      : 'Search for stores, products, or categories...',
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 18,
+                                  ),
                                 ),
                               ),
                             ),
-                          if (!isAr)
-                            Expanded(
-                              child: Center(
-                                child: Image.network(
-                                  'https://images.unsplash.com/photo-1556740714-a8395b3bf30f?q=80&w=2070',
-                                  height: 300,
-                                  fit: BoxFit.contain,
+                            Container(
+                              margin: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () => _showSnackBar(
+                                  isAr ? 'جاري البحث...' : 'Searching...',
                                 ),
                               ),
-                            )
-                          else
-                            Expanded(child: textContent),
-                        ],
-                      );
-                    } else {
-                      return textContent;
-                    }
-                  },
-                ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -444,46 +282,22 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
 
   Widget _buildCategoriesBar(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-
-    final categories = [
-      {
-        'icon': Icons.restaurant,
-        'en': 'Restaurants',
-        'ar': 'مطاعم',
-        'id': 'restaurant',
-      },
-      {
-        'icon': Icons.devices,
-        'en': 'Electronics',
-        'ar': 'إلكترونيات',
-        'id': 'electronics',
-      },
-      {
-        'icon': Icons.home,
-        'en': 'Home & Living',
-        'ar': 'المنزل والديكور',
-        'id': 'appliances',
-      },
-      {
-        'icon': Icons.checkroom,
-        'en': 'Fashion',
-        'ar': 'أزياء',
-        'id': 'fashion',
-      },
-      {
-        'icon': Icons.face_retouching_natural,
-        'en': 'Beauty',
-        'ar': 'تجميل',
-        'id': 'beauty',
-      },
-    ];
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 800;
 
     return Container(
-      width: MediaQuery.of(context).size.width * 0.8,
+      margin: EdgeInsets.symmetric(
+        vertical: isMobile ? 20 : 40,
+        horizontal: isMobile ? 16 : 32,
+      ),
+      width: isMobile ? screenWidth * 0.95 : screenWidth * 0.8,
       constraints: const BoxConstraints(maxWidth: 1000),
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 16 : 24,
+        horizontal: isMobile ? 8 : 24,
+      ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -497,52 +311,51 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Left Arrow
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.chevron_left, color: Colors.black54),
-              onPressed: () {
-                _categoriesScrollController.animateTo(
-                  (_categoriesScrollController.offset - 120).clamp(
-                    0,
-                    _categoriesScrollController.position.maxScrollExtent,
+          if (!isMobile)
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
                   ),
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              },
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(Icons.chevron_left, color: Theme.of(context).textTheme.bodyMedium?.color),
+                onPressed: () {
+                  _categoriesScrollController.animateTo(
+                    (_categoriesScrollController.offset - 150).clamp(
+                      0,
+                      _categoriesScrollController.position.maxScrollExtent,
+                    ),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
             ),
-          ),
+          if (!isMobile) const SizedBox(width: 16),
           // Categories
           Expanded(
             child: SizedBox(
-              height: 130, // Increased height to prevent bottom overflow
+              height: isMobile
+                  ? 105
+                  : 120, // Increased height to prevent bottom overflow
               child: ListView.builder(
                 controller: _categoriesScrollController,
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
-                itemCount: categories.length,
+                itemCount: BusinessType.values.length,
                 itemBuilder: (context, index) {
-                  final cat = categories[index];
-                  final catId = cat['id'] as String;
+                  final cat = BusinessType.values[index];
+                  final catId = cat.name;
                   final isSelected = _selectedCategory == catId;
 
-                  return SizedBox(
-                    width:
-                        (MediaQuery.of(context).size.width * 0.8 - 100) /
-                        min(
-                          4,
-                          categories.length,
-                        ), // Calculate width so 4 items fit max
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -555,35 +368,38 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.all(isMobile ? 12 : 16),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Theme.of(context).primaryColor
-                                  : Colors.grey[50],
+                                  : Theme.of(context).colorScheme.surfaceContainerHighest,
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: isSelected
                                     ? Theme.of(context).primaryColor
-                                    : Colors.grey[200]!,
+                                    : Theme.of(context).dividerColor,
                               ),
                             ),
                             child: Icon(
-                              cat['icon'] as IconData,
-                              color: isSelected ? Colors.white : Colors.black87,
-                              size: 32,
+                              cat.icon,
+                              color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                              size: isMobile ? 24 : 32,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           Text(
-                            isAr ? cat['ar'] as String : cat['en'] as String,
+                            isAr ? cat.ar : cat.en,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: isMobile ? 12 : 14,
                               fontWeight: FontWeight.bold,
                               color: isSelected
                                   ? Theme.of(context).primaryColor
-                                  : Colors.black87,
+                                  : Theme.of(context).textTheme.bodyMedium?.color,
                             ),
                           ),
                         ],
@@ -594,32 +410,34 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
               ),
             ),
           ),
+          if (!isMobile) const SizedBox(width: 16),
           // Right Arrow
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.chevron_right, color: Colors.black54),
-              onPressed: () {
-                _categoriesScrollController.animateTo(
-                  (_categoriesScrollController.offset + 120).clamp(
-                    0,
-                    _categoriesScrollController.position.maxScrollExtent,
+          if (!isMobile)
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
                   ),
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              },
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyMedium?.color),
+                onPressed: () {
+                  _categoriesScrollController.animateTo(
+                    (_categoriesScrollController.offset + 150).clamp(
+                      0,
+                      _categoriesScrollController.position.maxScrollExtent,
+                    ),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -710,7 +528,7 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
   Widget _buildRecommendedStoresSection(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
     final businessProvider = Provider.of<BusinessProvider>(context);
-    final displayStores = businessProvider.businesses.take(3).toList();
+    final displayStores = businessProvider.verifiedBusinesses.take(3).toList();
 
     if (displayStores.isEmpty) return const SizedBox.shrink();
 
@@ -858,12 +676,19 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                   final businessProvider = Provider.of<BusinessProvider>(
                     context,
                   );
-                  final businesses = businessProvider.businesses;
-                  final filteredStores = businesses.where((b) {
+                  final stores = businessProvider.activeBusinesses;
+                  final filteredStores = stores.where((b) {
                     final nameAr = b.localization.name.ar.toLowerCase();
                     final nameEn = b.localization.name.en.toLowerCase();
                     final q = _searchQuery.toLowerCase();
-                    return nameAr.contains(q) || nameEn.contains(q);
+                    final matchesSearch =
+                        nameAr.contains(q) || nameEn.contains(q);
+
+                    final matchesCategory =
+                        _selectedCategory == null ||
+                        b.businessType.name == _selectedCategory;
+
+                    return matchesSearch && matchesCategory;
                   }).toList();
 
                   if (filteredStores.isEmpty) {
@@ -930,8 +755,9 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
 
     return Consumer<OfferProvider>(
       builder: (context, offerProvider, child) {
-        final List<OfferModel> displayOffers =
-            offerProvider.activeOffers.take(6).toList();
+        final List<OfferModel> displayOffers = offerProvider.activeOffers
+            .take(6)
+            .toList();
 
         return Container(
           color: Colors.grey[50],
@@ -1117,162 +943,6 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
       },
     );
   }
-
-  Widget _buildFooter(BuildContext context) {
-    final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
-    return Container(
-      color: const Color(0xFF1E1E1E),
-      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 32),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // About Z-Hub
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.storefront,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              isAr ? 'منصة المتاجر' : 'Z-Hub',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          isAr
-                              ? 'منصتك الموثوقة للتسوق من أفضل المتاجر المحلية والعالمية بكل سهولة وأمان.'
-                              : 'Your trusted platform to shop from the best local and international stores easily and securely.',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 40),
-                  // Developer Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isAr ? 'الشركة المطورة' : 'Developed By',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          isAr
-                              ? 'مؤسسة الزكاء للحلول الرقمية'
-                              : 'Alzaka Digital Solutions',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        const SizedBox(height: 8),
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.language,
-                              color: Colors.white70,
-                              size: 16,
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'www.alzaka.com',
-                                style: TextStyle(color: Colors.blueAccent),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        const Row(
-                          children: [
-                            Icon(Icons.email, color: Colors.white70, size: 16),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'info@alzaka.com',
-                                style: TextStyle(color: Colors.blueAccent),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 40),
-                  // Links
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isAr ? 'روابط سريعة' : 'Quick Links',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          isAr ? 'شروط الاستخدام' : 'Terms of Service',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          isAr ? 'سياسة الخصوصية' : 'Privacy Policy',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          isAr ? 'اتصل بنا' : 'Contact Us',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 40),
-              const Divider(color: Colors.white24),
-              const SizedBox(height: 20),
-              Text(
-                isAr
-                    ? '© 2026 جميع الحقوق محفوظة.'
-                    : '© 2026 All rights reserved.',
-                style: const TextStyle(color: Colors.white54),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1380,7 +1050,7 @@ class _StoreCardState extends State<_StoreCard> {
   @override
   Widget build(BuildContext context) {
     // Generate a mock rating between 4.0 and 5.0
-    final mockRating = (4.0 + (widget.business.owner.id.hashCode % 10) / 10)
+    final mockRating = (4.0 + (widget.business.id.hashCode % 10) / 10)
         .toStringAsFixed(1);
 
     return MouseRegion(
@@ -1403,7 +1073,11 @@ class _StoreCardState extends State<_StoreCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
           child: InkWell(
-            onTap: () => changeScreen(context, const HomePage()),
+            onTap: () {
+              final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+              businessProvider.selectBusiness(widget.business.id);
+              changeScreen(context, const HomePage());
+            },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -1589,7 +1263,11 @@ class _StoreCardState extends State<_StoreCard> {
                     vertical: _isHovered ? 12 : 0,
                   ),
                   child: ElevatedButton(
-                    onPressed: () => changeScreen(context, const HomePage()),
+                    onPressed: () {
+                      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+                      businessProvider.selectBusiness(widget.business.id);
+                      changeScreen(context, const HomePage());
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       shape: RoundedRectangleBorder(
@@ -1630,7 +1308,7 @@ class _TrendingProductCard extends StatelessWidget {
     return Container(
       width: 250,
       decoration: BoxDecoration(
-      color: Colors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -2424,7 +2102,7 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
       [const Color(0xFF11998E), const Color(0xFF38EF7D)],
       [const Color(0xFFF7971E), const Color(0xFFFFD200)],
     ];
-    final colorIdx = widget.business.owner.id.hashCode % colors.length;
+    final colorIdx = widget.business.id.hashCode % colors.length;
     final gradient = LinearGradient(
       colors: colors[colorIdx],
       begin: Alignment.topLeft,
@@ -2435,7 +2113,11 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
-        onTap: () => changeScreen(context, const HomePage()),
+        onTap: () {
+          final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+          businessProvider.selectBusiness(widget.business.id);
+          changeScreen(context, const HomePage());
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           transform: Matrix4.translationValues(0, _isHovered ? -8 : 0, 0),
