@@ -30,7 +30,7 @@ class _ProductCardState extends State<ProductCard> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           changeScreen(context, ProductDetailsPage(product: widget.product));
         },
@@ -131,10 +131,12 @@ class _ProductImagePlaceholder extends StatelessWidget {
             child: Consumer<AuthProvider>(
               builder: (context, authProvider, child) {
                 final isFavorite =
-                    authProvider.currentCustomer?.wishlist.contains(product.id) ??
+                    authProvider.currentCustomer?.wishlist.contains(
+                      product.id,
+                    ) ??
                     false;
 
-                return GestureDetector(
+                return InkWell(
                   onTap: () {
                     if (authProvider.isAuthenticated) {
                     } else {
@@ -177,12 +179,11 @@ class _ProductImagePlaceholder extends StatelessWidget {
             right: 12,
             child: Consumer2<CartProvider, BusinessProvider>(
               builder: (context, cartProvider, businessProvider, child) {
-                final businessId =
-                    businessProvider.selectedBusiness?.id;
+                final businessId = businessProvider.selectedBusiness?.id;
                 final isInCart = cartProvider
                     .items(businessId)
                     .any((item) => item.product?.id == product.id);
-                return GestureDetector(
+                return InkWell(
                   onTap: () {
                     if (isInCart) {
                       changeScreen(context, const CartPage());

@@ -61,9 +61,14 @@ class _BrandsSectionState extends State<BrandsSection> {
             const NeverScrollableScrollPhysics(), // Prevent manual scroll interference
         itemBuilder: (context, index) {
           final brand = brands[index % brands.length];
-          final businessSettings = context.read<BusinessProvider>().businessSettings;
+          final businessSettings = context
+              .read<BusinessProvider>()
+              .businessSettings;
           return Center(
-            child: _BrandItem(brand: brand, businessId: businessSettings?.id ?? ''),
+            child: _BrandItem(
+              brand: brand,
+              businessId: businessSettings?.id ?? '',
+            ),
           );
         },
       ),
@@ -82,7 +87,7 @@ class _BrandItem extends StatelessWidget {
         brand.name.toUpperCase() == 'VERSACE' ||
         brand.name.toUpperCase() == 'GUCCI';
 
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         changeScreen(context, const CategoriesPage());
       },

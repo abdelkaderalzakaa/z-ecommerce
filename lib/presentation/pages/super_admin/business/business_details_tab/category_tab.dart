@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/store_create_edit_category_page.dart';
 
 class CategoryTab extends StatelessWidget {
@@ -33,17 +34,18 @@ class CategoryTab extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              ElevatedButton.icon(
+              ButtonApp(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => StoreCreateEditCategoryPage(businessId: store.id),
+                      builder: (context) =>
+                          StoreCreateEditCategoryPage(businessId: store.id),
                     ),
                   );
                 },
-                icon: const Icon(Icons.add),
-                label: const Text('إضافة فئة'),
+                icon: Icons.add,
+                label: 'إضافة فئة',
               ),
             ],
           ),
@@ -101,41 +103,59 @@ class CategoryTab extends StatelessWidget {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: cat.bgColor.withOpacity(0.2),
-                      child: Icon(cat.icon ?? Icons.category_rounded, color: cat.bgColor),
+                      child: Icon(
+                        cat.icon ?? Icons.category_rounded,
+                        color: cat.bgColor,
+                      ),
                     ),
                     title: Text(cat.label),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.compare_arrows, color: Colors.orange),
-                          tooltip: 'نقل المنتجات من هذا القسم لقسم آخر',
+                        ButtonApp(
+                          format: FormatButtonApp.icon,
+                          icon: Icons.compare_arrows,
+                          color: Colors.orange,
+                          label: 'نقل المنتجات من هذا القسم لقسم آخر',
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('زر: نقل المنتجات')),
                             );
                           },
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                        ButtonApp(
+                          format: FormatButtonApp.icon,
+                          icon: Icons.edit,
+                          color: Colors.blue,
+                          label: 'تعديل',
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => StoreCreateEditCategoryPage(
-                                  businessId: store.id,
-                                  category: cat,
-                                ),
+                                builder: (context) =>
+                                    StoreCreateEditCategoryPage(
+                                      businessId: store.id,
+                                      category: cat,
+                                    ),
                               ),
                             );
                           },
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
+                        ButtonApp(
+                          format: FormatButtonApp.icon,
+                          icon: Icons.delete,
+                          color: Colors.red,
+                          label: 'حذف',
                           onPressed: () {
-                            Provider.of<CategoryProvider>(context, listen: false).deleteCategory(cat.id);
+                            Provider.of<CategoryProvider>(
+                              context,
+                              listen: false,
+                            ).deleteCategory(cat.id);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('تم حذف الفئة بنجاح'), backgroundColor: Colors.green),
+                              const SnackBar(
+                                content: Text('تم حذف الفئة بنجاح'),
+                                backgroundColor: Colors.green,
+                              ),
                             );
                           },
                         ),

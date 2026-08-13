@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
 
 import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -233,13 +234,11 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                               color: theme.dividerColor.withOpacity(0.15),
                             ),
                           ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back_rounded,
-                              size: 20,
-                            ),
+                          child: ButtonApp(
+                            format: FormatButtonApp.icon,
+                            icon: Icons.arrow_back_rounded,
                             onPressed: () => Navigator.pop(context),
-                            tooltip: 'التراجع والعودة للإعدادات',
+                            label: 'التراجع والعودة للإعدادات',
                           ),
                         ),
                       ],
@@ -269,28 +268,11 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
+                  ButtonApp(
+                    isLoading: _isSaving,
                     onPressed: _isSaving ? null : _saveTheme,
-                    icon: _isSaving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.check_circle_rounded, size: 18),
-                    label: Text(TranslationKeys.saveChanges.tr(context)),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+                    icon: Icons.check_circle_rounded,
+                    label: TranslationKeys.saveChanges.tr(context),
                   ),
                 ],
               ),
@@ -436,8 +418,10 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                         color: textColor,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 20),
+                    ButtonApp(
+                      format: FormatButtonApp.icon,
+                      icon: Icons.close_rounded,
+                      label: 'إغلاق',
                       onPressed: () => Navigator.pop(ctx),
                     ),
                   ],
@@ -493,29 +477,15 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  child: ButtonApp(
                     onPressed: () {
                       Navigator.pop(ctx);
                       _showMockupCheckoutDialog(t);
                     },
-                    icon: const Icon(Icons.shopping_bag_rounded, size: 18),
-                    label: Text(
-                      _mockupIsArabic
-                          ? 'متابعة الدفع والشراء'
-                          : 'Proceed to Checkout',
-                      style: TextStyle(
-                        fontFamily: t.fontFamily,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: t.buttonBorderRadius,
-                      ),
-                    ),
+                    icon: Icons.shopping_bag_rounded,
+                    label: _mockupIsArabic
+                        ? 'متابعة الدفع والشراء'
+                        : 'Proceed to Checkout',
                   ),
                 ),
               ],
@@ -719,7 +689,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  child: ButtonApp(
                     onPressed: () {
                       setState(() => _mockupCartCount++);
                       Navigator.pop(ctx);
@@ -735,24 +705,10 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
-                    label: Text(
-                      _mockupIsArabic
-                          ? 'إضافة إلى سلة التسوق'
-                          : 'Add to Shopping Cart',
-                      style: TextStyle(
-                        fontFamily: t.fontFamily,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: t.buttonBorderRadius,
-                      ),
-                    ),
+                    icon: Icons.add_shopping_cart_rounded,
+                    label: _mockupIsArabic
+                        ? 'إضافة إلى سلة التسوق'
+                        : 'Add to Shopping Cart',
                   ),
                 ),
               ],
@@ -828,22 +784,15 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
               ],
             ),
             actions: [
-              TextButton(
+              ButtonApp(
+                format: FormatButtonApp.text,
                 onPressed: () => Navigator.pop(ctx),
-                child: Text(_mockupIsArabic ? 'إلغاء' : 'Cancel'),
+                label: _mockupIsArabic ? 'إلغاء' : 'Cancel',
               ),
-              ElevatedButton(
+              ButtonApp(
+                radius: 50,
                 onPressed: () => Navigator.pop(ctx),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: t.buttonBorderRadius,
-                  ),
-                ),
-                child: Text(
-                  _mockupIsArabic ? 'تطبيق الفلترة' : 'Apply Filter',
-                  style: const TextStyle(color: Colors.white),
-                ),
+                label: _mockupIsArabic ? 'تطبيق الفلترة' : 'Apply Filter',
               ),
             ],
           ),
@@ -853,7 +802,6 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
   }
 
   void _showMockupCheckoutDialog(ThemeAdmin t) {
-    final primaryColor = t.primaryColorValue;
     showDialog(
       context: context,
       builder: (ctx) => Directionality(
@@ -888,11 +836,12 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
             ),
           ),
           actions: [
-            TextButton(
+            ButtonApp(
+              format: FormatButtonApp.text,
               onPressed: () => Navigator.pop(ctx),
-              child: Text(_mockupIsArabic ? 'تراجع' : 'Cancel'),
+              label: _mockupIsArabic ? 'تراجع' : 'Cancel',
             ),
-            ElevatedButton(
+            ButtonApp(
               onPressed: () {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -906,16 +855,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: t.buttonBorderRadius,
-                ),
-              ),
-              child: Text(
-                _mockupIsArabic ? 'تأكيد ودفع' : 'Confirm & Pay',
-                style: const TextStyle(color: Colors.white),
-              ),
+              label: _mockupIsArabic ? 'تأكيد ودفع' : 'Confirm & Pay',
             ),
           ],
         ),
@@ -954,11 +894,12 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
             ),
           ),
           actions: [
-            TextButton(
+            ButtonApp(
+              format: FormatButtonApp.text,
               onPressed: () => Navigator.pop(ctx),
-              child: Text(_mockupIsArabic ? 'إلغاء' : 'Cancel'),
+              label: _mockupIsArabic ? 'إلغاء' : 'Cancel',
             ),
-            ElevatedButton(
+            ButtonApp(
               onPressed: () {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -972,16 +913,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: t.secondaryColorValue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: t.buttonBorderRadius,
-                ),
-              ),
-              child: Text(
-                _mockupIsArabic ? 'تطبيق الخصم' : 'Apply Discount',
-                style: const TextStyle(color: Colors.white),
-              ),
+              label: _mockupIsArabic ? 'تطبيق الخصم' : 'Apply Discount',
             ),
           ],
         ),
@@ -1013,16 +945,25 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
           content: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                icon: const Icon(Icons.send_rounded, color: Colors.green),
+              ButtonApp(
+                format: FormatButtonApp.icon,
+                icon: Icons.send_rounded,
+                color: Colors.green,
+                label: 'إرسال',
                 onPressed: () => Navigator.pop(ctx),
               ),
-              IconButton(
-                icon: const Icon(Icons.camera_alt_rounded, color: Colors.pink),
+              ButtonApp(
+                format: FormatButtonApp.icon,
+                label: 'كاميرا',
+                icon: Icons.camera_alt_rounded,
+                color: Colors.pink,
                 onPressed: () => Navigator.pop(ctx),
               ),
-              IconButton(
-                icon: const Icon(Icons.copy_rounded, color: Colors.indigo),
+              ButtonApp(
+                format: FormatButtonApp.icon,
+                label: 'نسخ',
+                icon: Icons.copy_rounded,
+                color: Colors.indigo,
                 onPressed: () => Navigator.pop(ctx),
               ),
             ],
@@ -2432,7 +2373,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 itemBuilder: (context, index) {
                   final item = _logoGallery[index];
                   final isSelected = _logoUrl == item['url'];
-                  return GestureDetector(
+                  return InkWell(
                     onTap: () => setState(() => _logoUrl = item['url']!),
                     child: Container(
                       width: 64,
@@ -2469,7 +2410,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 itemBuilder: (context, index) {
                   final item = _coverGallery[index];
                   final isSelected = _coverBannerUrl == item['url'];
-                  return GestureDetector(
+                  return InkWell(
                     onTap: () => setState(() => _coverBannerUrl = item['url']!),
                     child: Container(
                       width: 120,
@@ -2786,7 +2727,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                             const Color(0xFF18181B),
                             const Color(0xFF0F172A),
                           ]) ...[
-                            GestureDetector(
+                            InkWell(
                               onTap: () {
                                 final hsv = HSVColor.fromColor(c);
                                 setDialogState(() {
@@ -2818,17 +2759,18 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 ),
               ),
               actions: [
-                TextButton(
+                ButtonApp(
+                  format: FormatButtonApp.text,
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('إلغاء'),
+                  label: 'إلغاء',
                 ),
-                ElevatedButton.icon(
+                ButtonApp(
                   onPressed: () {
                     onColorSelected(hexString);
                     Navigator.pop(ctx);
                   },
-                  icon: const Icon(Icons.check_rounded, size: 16),
-                  label: const Text('تطبيق اللون المختار'),
+                  icon: Icons.check,
+                  label: 'تطبيق اللون المختار',
                 ),
               ],
             );

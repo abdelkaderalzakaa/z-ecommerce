@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../translate/app_localizations.dart';
 import '../translate/translation_keys.dart';
 
@@ -66,7 +67,9 @@ class TableHeaderBar extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
+                  border: Border.all(
+                    color: theme.dividerColor.withOpacity(0.2),
+                  ),
                 ),
                 child: TextField(
                   controller: searchController,
@@ -111,9 +114,11 @@ class TableHeaderBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        IconButton(
-          icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-          tooltip: TranslationKeys.deleteSelected.tr(context),
+        ButtonApp(
+          format: FormatButtonApp.icon,
+          icon: Icons.delete_outline,
+          color: Colors.red,
+          label: TranslationKeys.deleteSelected.tr(context),
           onPressed: onBulkDelete,
         ),
         const Spacer(),

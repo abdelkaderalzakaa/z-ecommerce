@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 
@@ -19,11 +20,11 @@ class ProductEmptyPage extends StatelessWidget {
             const SizedBox(height: 16),
             const Text('The product you are looking for does not exist.', style: TextStyle(fontSize: 18)),
             const SizedBox(height: 24),
-            ElevatedButton(
+            ButtonApp(
               onPressed: () {
                 changeScreen(context, const HomePage());
               },
-              child: const Text('Back to Home'),
+              label: 'Back to Home',
             ),
           ],
         ),

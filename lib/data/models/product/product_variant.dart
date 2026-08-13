@@ -2,6 +2,7 @@ import 'package:z_ecommerce/presentation/global/core/constants/product_enums.dar
 
 /// Represents a specific product variant with unique attributes, price, and stock.
 class ProductVariant {
+  final bool isDefault;
   final ProductSize? size;
   final ProductColor? color;
   final ProductMaterial? material;
@@ -12,10 +13,14 @@ class ProductVariant {
   /// Final price for THIS specific variant
   final double price;
 
+  /// Original price before discount (optional)
+  final double? originalPrice;
+
   /// Stock for THIS specific variant
   final int stock;
 
   const ProductVariant({
+    this.isDefault = false,
     this.size,
     this.color,
     this.material,
@@ -23,12 +28,14 @@ class ProductVariant {
     this.weight,
     this.weightUnit,
     required this.price,
+    this.originalPrice,
     required this.stock,
   });
 
   /// Unique identifier generated from non-null attributes
   String get variantKey {
     final List<String> parts = [];
+    if (isDefault) parts.add('default');
     if (size != null) parts.add('size:${size!.name}');
     if (color != null) parts.add('color:${color!.name}');
     if (material != null) parts.add('material:${material!.name}');
@@ -37,12 +44,13 @@ class ProductVariant {
       final unitStr = weightUnit != null ? ' ${weightUnit!.name}' : '';
       parts.add('weight:$weight$unitStr');
     }
-    return parts.join('|');
+    return parts.isEmpty ? 'standard' : parts.join('|');
   }
 
   /// Factory constructor to create a [ProductVariant] from a map.
   factory ProductVariant.fromMap(Map<String, dynamic> map) {
     return ProductVariant(
+      isDefault: map['isDefault'] as bool? ?? false,
       size: _enumFromString(ProductSize.values, map['size']),
       color: _enumFromString(ProductColor.values, map['color']),
       material: _enumFromString(ProductMaterial.values, map['material']),
@@ -50,6 +58,7 @@ class ProductVariant {
       weight: map['weight'] != null ? (map['weight'] as num).toDouble() : null,
       weightUnit: _enumFromString(WeightUnit.values, map['weightUnit']),
       price: (map['price'] as num? ?? 0.0).toDouble(),
+      originalPrice: map['originalPrice'] != null ? (map['originalPrice'] as num).toDouble() : null,
       stock: map['stock'] as int? ?? 0,
     );
   }
@@ -57,6 +66,7 @@ class ProductVariant {
   /// Converts this [ProductVariant] into a map.
   Map<String, dynamic> toMap() {
     return {
+      'isDefault': isDefault,
       'size': size?.name,
       'color': color?.name,
       'material': material?.name,
@@ -64,6 +74,7 @@ class ProductVariant {
       'weight': weight,
       'weightUnit': weightUnit?.name,
       'price': price,
+      'originalPrice': originalPrice,
       'stock': stock,
     };
   }
@@ -80,6 +91,7 @@ class ProductVariant {
 
   /// Creates a copy of this [ProductVariant] with modified fields.
   ProductVariant copyWith({
+    bool? isDefault,
     ProductSize? size,
     ProductColor? color,
     ProductMaterial? material,
@@ -87,9 +99,11 @@ class ProductVariant {
     double? weight,
     WeightUnit? weightUnit,
     double? price,
+    double? originalPrice,
     int? stock,
   }) {
     return ProductVariant(
+      isDefault: isDefault ?? this.isDefault,
       size: size ?? this.size,
       color: color ?? this.color,
       material: material ?? this.material,
@@ -97,6 +111,7 @@ class ProductVariant {
       weight: weight ?? this.weight,
       weightUnit: weightUnit ?? this.weightUnit,
       price: price ?? this.price,
+      originalPrice: originalPrice ?? this.originalPrice,
       stock: stock ?? this.stock,
     );
   }
@@ -105,6 +120,7 @@ class ProductVariant {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is ProductVariant &&
+        other.isDefault == isDefault &&
         other.size == size &&
         other.color == color &&
         other.material == material &&
@@ -112,12 +128,14 @@ class ProductVariant {
         other.weight == weight &&
         other.weightUnit == weightUnit &&
         other.price == price &&
+        other.originalPrice == originalPrice &&
         other.stock == stock;
   }
 
   @override
   int get hashCode {
     return Object.hash(
+      isDefault,
       size,
       color,
       material,
@@ -125,6 +143,7 @@ class ProductVariant {
       weight,
       weightUnit,
       price,
+      originalPrice,
       stock,
     );
   }
@@ -132,6 +151,7 @@ class ProductVariant {
   /// إنشاء كائن ProductVariant فارغ بقيم افتراضية
   factory ProductVariant.empty() {
     return const ProductVariant(
+      isDefault: false,
       price: 0.0,
       stock: 0,
     );

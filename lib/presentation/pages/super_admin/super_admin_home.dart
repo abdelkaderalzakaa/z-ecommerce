@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import '../../widgets/super_admin/super_admin_app_bar.dart';
 import '../../widgets/super_admin/super_admin_sidebar.dart';
 import 'dashboard_overview_page.dart';
 import 'business/businessess_management_page.dart';
-import 'products/products_management_page.dart';
 import 'orders/orders_management_page.dart';
 import 'users/users_management_page.dart';
 import 'offers/offers_management_page.dart';
@@ -24,9 +25,8 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<Widget> _pages = const [
-    DashboardOverviewPage(),
-    BusinessessManagementPage(),
-    ProductsManagementPage(),
+    DashboardOverviewPage(), 
+    BusinessessManagementPage(), 
     OrdersManagementPage(),
     UsersManagementPage(),
     OffersManagementPage(),
@@ -84,7 +84,25 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
 
           // Main View Area
           Expanded(
-            child: IndexedStack(index: _selectedIndex, children: _pages),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: Text(
+                    TranslationKeys.superAdminDashboard.tr(context),
+                    style: const TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: IndexedStack(index: _selectedIndex, children: _pages),
+                ),
+              ],
+            ),
           ),
         ],
       ),

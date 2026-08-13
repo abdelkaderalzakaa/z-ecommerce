@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../../data/providers/customer_provider.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/models/common/address_model.dart';
@@ -62,7 +63,11 @@ class AddressesTab extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 64, color: AppColors.textMuted),
+                    const Icon(
+                      Icons.location_on_outlined,
+                      size: 64,
+                      color: AppColors.textMuted,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       TranslationKeys.noAddressesFound.tr(context),
@@ -75,31 +80,36 @@ class AddressesTab extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       TranslationKeys.addNewAddressPrompt.tr(context),
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
                     ),
                   ],
                 ),
               )
             : isMobile
-                ? ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: addresses.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) => _AddressCard(address: addresses[index]),
-                  )
-                : GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 24,
-                      mainAxisSpacing: 24,
-                      childAspectRatio: 1.5,
-                    ),
-                    itemCount: addresses.length,
-                    itemBuilder: (context, index) => _AddressCard(address: addresses[index]),
-                  ),
+            ? ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: addresses.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 16),
+                itemBuilder: (context, index) =>
+                    _AddressCard(address: addresses[index]),
+              )
+            : GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 24,
+                  mainAxisSpacing: 24,
+                  childAspectRatio: 1.5,
+                ),
+                itemCount: addresses.length,
+                itemBuilder: (context, index) =>
+                    _AddressCard(address: addresses[index]),
+              ),
       ],
     );
   }
@@ -108,17 +118,14 @@ class AddressesTab extends StatelessWidget {
 class _AddNewButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return ButtonApp(
       onPressed: () {
         showDialog(
           context: context,
           builder: (context) => const AddressFormDialog(),
         );
       },
-      child: Text(
-        TranslationKeys.addNew.tr(context),
-        textAlign: TextAlign.center,
-      ),
+      label: TranslationKeys.addNew.tr(context),
     );
   }
 }
@@ -144,36 +151,54 @@ class _AddressCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   address.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
                 ),
               ),
               Row(
                 children: [
-                  _IconButton(
+                  ButtonApp(
+                    format: FormatButtonApp.icon,
                     icon: Icons.edit_outlined,
-                    onTap: () {
+                    label: 'تعديل',
+                    onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => AddressFormDialog(initialAddress: address),
+                        builder: (context) =>
+                            AddressFormDialog(initialAddress: address),
                       );
                     },
                   ),
                   const SizedBox(width: 8),
-                  _IconButton(
+                  ButtonApp(
+                    format: FormatButtonApp.icon,
                     icon: Icons.delete_outline,
                     color: Colors.red,
-                    onTap: () {
-                      final customer = context.read<AuthProvider>().currentCustomer;
+                    label: 'حذف',
+                    onPressed: () {
+                      final customer = context
+                          .read<AuthProvider>()
+                          .currentCustomer;
                       if (customer != null) {
-                        final updated = customer.addresses.where((a) => a.id != address.id).toList();
-                        context.read<CustomerProvider>().updateAddresses(customer.id, updated);
+                        final updated = customer.addresses
+                            .where((a) => a.id != address.id)
+                            .toList();
+                        context.read<CustomerProvider>().updateAddresses(
+                          customer.id,
+                          updated,
+                        );
                       }
                     },
                   ),
@@ -189,34 +214,21 @@ class _AddressCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '${address.city.get(context)}, ${address.region.get(context)} ${address.postalCode ?? ''}',
-            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 14),
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+              fontSize: 14,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             address.country.get(context),
-            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 14),
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+              fontSize: 14,
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _IconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color? color;
-
-  const _IconButton({required this.icon, required this.onTap, this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onTap,
-      icon: Icon(icon, size: 20),
-      style: color != null 
-        ? IconButton.styleFrom(foregroundColor: color)
-        : null,
     );
   }
 }

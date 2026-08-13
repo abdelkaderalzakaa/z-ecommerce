@@ -49,11 +49,12 @@ class CategoriesHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.input),
               borderSide: BorderSide(color: Theme.of(context).primaryColor),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
         );
-
-
 
         if (isMobile) {
           return Column(
@@ -63,7 +64,7 @@ class CategoriesHeader extends StatelessWidget {
                 children: [
                   Expanded(child: searchField),
                   const SizedBox(width: 8),
-                  GestureDetector(
+                  InkWell(
                     onTap: onFilterTap,
                     child: Container(
                       padding: const EdgeInsets.all(12),
@@ -71,7 +72,11 @@ class CategoriesHeader extends StatelessWidget {
                         color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(AppRadius.input),
                       ),
-                      child: const Icon(Icons.tune, size: 24, color: Colors.white),
+                      child: const Icon(
+                        Icons.tune,
+                        size: 24,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -91,11 +96,7 @@ class CategoriesHeader extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(child: searchField),
-              ],
-            ),
+            Row(children: [Expanded(child: searchField)]),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../data/providers/auth_provider.dart';
 import '../../global/locale_provider.dart';
 import '../../global/settings_provider.dart';
@@ -57,10 +58,11 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: Row(
         children: [
           if (isMobile) ...[
-            IconButton(
-              icon: const Icon(Icons.menu),
+            ButtonApp(
+              format: FormatButtonApp.icon,
+              icon: Icons.menu,
               onPressed: onMenuPressed,
-              tooltip: 'الرمز الرئيسي',
+              label: 'القائمة',
             ),
             const SizedBox(width: 8),
           ],
@@ -105,12 +107,10 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           const Spacer(),
 
           // Dark / Light Theme Switcher Button
-          IconButton(
-            icon: Icon(
-              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-              size: 22,
-            ),
-            tooltip: isDark
+          ButtonApp(
+            format: FormatButtonApp.icon,
+            icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+            label: isDark
                 ? (AppLocalizations.of(context)?.translate('light') ??
                       'الوضع المضيء')
                 : (AppLocalizations.of(context)?.translate('dark') ??
@@ -122,9 +122,10 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
 
           // Language Switcher
-          IconButton(
-            icon: const Icon(Icons.language_outlined, size: 22),
-            tooltip:
+          ButtonApp(
+            format: FormatButtonApp.icon,
+            icon: Icons.language_outlined,
+            label:
                 AppLocalizations.of(context)?.translate('localization') ??
                 'تغيير اللغة',
             onPressed: () {
@@ -138,9 +139,10 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           // Notification Icon with Badge
           Stack(
             children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none_outlined, size: 22),
-                tooltip: 'الإشعارات',
+              ButtonApp(
+                format: FormatButtonApp.icon,
+                icon: Icons.notifications_none_outlined,
+                label: 'الإشعارات',
                 onPressed: () {
                   _showNotificationsDialog(context);
                 },
@@ -348,9 +350,10 @@ class SuperAdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         actions: [
-          TextButton(
+          ButtonApp(
+            format: FormatButtonApp.text,
             onPressed: () => Navigator.pop(context),
-            child: const Text('إغلاق'),
+            label: 'إغلاق',
           ),
         ],
       ),

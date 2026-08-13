@@ -1,4 +1,5 @@
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/pages/auth/reset_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -12,9 +13,7 @@ import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({
-    super.key,
-  });
+  const ForgotPasswordPage({super.key});
 
   @override
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
@@ -44,13 +43,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     if (mounted) {
       setState(() => _isLoading = false);
       if (success) {
-        changeScreen(
-          context,
-          ResetPasswordPage(),
-        );
+        changeScreen(context, ResetPasswordPage());
       } else {
-        setState(() {
-        });
+        setState(() {});
       }
     }
   }
@@ -85,15 +80,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ),
         const SizedBox(height: 28),
         Center(
-          child: TextButton.icon(
+          child: ButtonApp(
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back, size: 16, color: Theme.of(context).primaryColor),
-            label: Text(
-              TranslationKeys.backToLogin.tr(context),
-              style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
-            ),
+            icon: Icons.arrow_back,
+            label: TranslationKeys.backToLogin.tr(context),
           ),
         ),
       ],

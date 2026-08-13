@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 /// A model representing a single section/card in the Add/Edit form.
 /// Each section contains a title, optional icon, and a list of form field widgets.
@@ -126,8 +127,7 @@ class AddEditTemplate extends StatelessWidget {
                       // Form Sections as Cards
                       for (int i = 0; i < sections.length; i++) ...[
                         _buildSectionCard(context, theme, sections[i], isWide),
-                        if (i < sections.length - 1)
-                          const SizedBox(height: 20),
+                        if (i < sections.length - 1) const SizedBox(height: 20),
                       ],
 
                       // Optional bottom extra widget
@@ -169,9 +169,7 @@ class AddEditTemplate extends StatelessWidget {
               decoration: BoxDecoration(
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: theme.dividerColor.withOpacity(0.15),
-                ),
+                border: Border.all(color: theme.dividerColor.withOpacity(0.15)),
               ),
               child: Icon(
                 Icons.arrow_back_rounded,
@@ -191,7 +189,9 @@ class AddEditTemplate extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      isEditMode ? Icons.edit_note_rounded : Icons.add_circle_outline_rounded,
+                      isEditMode
+                          ? Icons.edit_note_rounded
+                          : Icons.add_circle_outline_rounded,
                       size: 22,
                       color: theme.primaryColor,
                     ),
@@ -217,7 +217,9 @@ class AddEditTemplate extends StatelessWidget {
                       subtitle!,
                       style: TextStyle(
                         fontSize: 12,
-                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(
+                          0.7,
+                        ),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -387,9 +389,7 @@ class AddEditTemplate extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                side: BorderSide(
-                  color: theme.dividerColor.withOpacity(0.3),
-                ),
+                side: BorderSide(color: theme.dividerColor.withOpacity(0.3)),
               ),
               child: Text(
                 cancelLabel ?? 'إلغاء',
@@ -422,39 +422,17 @@ class AddEditTemplate extends StatelessWidget {
           ],
 
           // Primary Submit Button
-          ElevatedButton.icon(
+          ButtonApp(
             onPressed: isSubmitting ? null : onSubmit,
-            icon: isSubmitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Icon(
-                    submitIcon ??
+            isLoading:isSubmitting ,
+            icon:  submitIcon ??
                         (isEditMode
                             ? Icons.check_circle_outline_rounded
                             : Icons.add_circle_outline_rounded),
-                    size: 18,
-                  ),
-            label: Text(
-              submitLabel,
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
+                   
+            label:  
+              submitLabel, 
+            ),  
         ],
       ),
     );

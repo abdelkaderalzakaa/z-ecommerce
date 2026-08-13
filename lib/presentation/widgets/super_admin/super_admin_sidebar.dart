@@ -30,10 +30,6 @@ class SuperAdminSidebar extends StatelessWidget {
       icon: Icons.store_rounded,
     ),
     SuperAdminSidebarItem(
-      titleKey: TranslationKeys.productsManagement,
-      icon: Icons.inventory_2_rounded,
-    ),
-    SuperAdminSidebarItem(
       titleKey: TranslationKeys.ordersManagement,
       icon: Icons.shopping_cart_rounded,
     ),

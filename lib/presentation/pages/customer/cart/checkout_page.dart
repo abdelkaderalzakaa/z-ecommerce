@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_constant.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../../../data/providers/cart_provider.dart';
 import '../../../../data/providers/invoice_provider.dart';
@@ -198,7 +199,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
 
             const SizedBox(height: 80),
-            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
+            FooterBuisness(
+              idBuisness:
+                  context.read<BusinessProvider>().selectedBusiness?.id ?? '',
+            ),
           ],
         ),
       ),
@@ -247,11 +251,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     fontSize: 16,
                   ),
                 ),
-                ElevatedButton(
+                ButtonApp(
                   onPressed: () {
                     changeScreen(context, const LoginPage());
                   },
-                  child: Text(TranslationKeys.login.tr(context)),
+                  label: TranslationKeys.login.tr(context),
                 ),
               ],
             ),
@@ -270,9 +274,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   shape: BoxShape.circle,
                   color: Theme.of(context).scaffoldBackgroundColor,
                   image: DecorationImage(
-                          image: NetworkImage(user.avatarUrl),
-                          fit: BoxFit.cover,
-                        ),
+                    image: NetworkImage(user.avatarUrl),
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 child: null,
               ),
@@ -359,96 +363,100 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       (a) => a.id == address.id,
                     );
 
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isSelected) {
-                              _selectedAddresses.removeWhere(
-                                (a) => a.id == address.id,
-                              );
-                            } else {
-                              _selectedAddresses.add(address);
-                            }
-                          });
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedAddresses.removeWhere(
+                              (a) => a.id == address.id,
+                            );
+                          } else {
+                            _selectedAddresses.add(address);
+                          }
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Theme.of(context).scaffoldBackgroundColor
+                              : Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(AppRadius.card),
+                          border: Border.all(
                             color: isSelected
-                                ? Theme.of(context).scaffoldBackgroundColor
-                                : Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(AppRadius.card),
-                            border: Border.all(
+                                ? Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color ??
+                                      Colors.white
+                                : Theme.of(context).dividerColor,
+                            width: isSelected ? 2 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected
+                                  ? Icons.check_box
+                                  : Icons.check_box_outline_blank,
                               color: isSelected
                                   ? Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color ??
-                                        Colors.white
+                                      context,
+                                    ).textTheme.bodyLarge?.color
                                   : Theme.of(context).dividerColor,
-                              width: isSelected ? 2 : 1,
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isSelected
-                                    ? Icons.check_box
-                                    : Icons.check_box_outline_blank,
-                                color: isSelected
-                                    ? Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.color
-                                    : Theme.of(context).dividerColor,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          address.title.toLowerCase() == 'home' || address.title.toLowerCase() == 'المنزل'
-                                              ? Icons.home
-                                              : Icons.business,
-                                          size: 16,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        address.title.toLowerCase() ==
+                                                    'home' ||
+                                                address.title.toLowerCase() ==
+                                                    'المنزل'
+                                            ? Icons.home
+                                            : Icons.business,
+                                        size: 16,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        address.title.isNotEmpty
+                                            ? address.title
+                                            : TranslationKeys.addressFallback
+                                                  .tr(context),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
                                           color: Theme.of(
                                             context,
                                           ).textTheme.bodyLarge?.color,
                                         ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          address.title.isNotEmpty
-                                              ? address.title
-                                              : TranslationKeys.addressFallback
-                                                  .tr(context),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(
-                                              context,
-                                            ).textTheme.bodyLarge?.color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      address.getFormattedAddress(langCode: Localizations.localeOf(context).languageCode),
-                                      style: TextStyle(
-                                        color: Theme.of(
-                                          context,
-                                        ).textTheme.bodyMedium?.color,
-                                        fontSize: 14,
                                       ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    address.getFormattedAddress(
+                                      langCode: Localizations.localeOf(
+                                        context,
+                                      ).languageCode,
                                     ),
-                                  ],
-                                ),
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium?.color,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -465,7 +473,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ).then((_) {
                     if (!context.mounted) return;
                     final updatedAddresses =
-                        context.read<AuthProvider>().currentCustomer?.addresses ??
+                        context
+                            .read<AuthProvider>()
+                            .currentCustomer
+                            ?.addresses ??
                         [];
                     if (updatedAddresses.isNotEmpty &&
                         !_selectedAddresses.any(
@@ -512,66 +523,63 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedPaymentMethod = method;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedPaymentMethod = method;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Theme.of(context).scaffoldBackgroundColor
+                          : Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      border: Border.all(
                         color: isSelected
-                            ? Theme.of(context).scaffoldBackgroundColor
-                            : Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(AppRadius.card),
-                        border: Border.all(
-                          color: isSelected
-                              ? Theme.of(context).textTheme.bodyLarge?.color ??
-                                    Colors.white
-                              : Theme.of(context).dividerColor,
-                          width: isSelected ? 2 : 1,
-                        ),
+                            ? Theme.of(context).textTheme.bodyLarge?.color ??
+                                  Colors.white
+                            : Theme.of(context).dividerColor,
+                        width: isSelected ? 2 : 1,
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            method.name == 'cod'
-                                ? Icons.money
-                                : method.name == 'creditCard'
-                                ? Icons.credit_card
-                                : method.name == 'paypal'
-                                ? Icons.paypal
-                                : Icons.account_balance_wallet,
-                            size: 28,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: TextStyle(
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color: Theme.of(
-                                  context,
-                                ).textTheme.bodyLarge?.color,
-                              ),
-                            ),
-                          ),
-                          if (isSelected)
-                            Icon(
-                              Icons.check_circle,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          method.name == 'cod'
+                              ? Icons.money
+                              : method.name == 'creditCard'
+                              ? Icons.credit_card
+                              : method.name == 'paypal'
+                              ? Icons.paypal
+                              : Icons.account_balance_wallet,
+                          size: 28,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               color: Theme.of(
                                 context,
                               ).textTheme.bodyLarge?.color,
                             ),
-                        ],
-                      ),
+                          ),
+                        ),
+                        if (isSelected)
+                          Icon(
+                            Icons.check_circle,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.color,
+                          ),
+                      ],
                     ),
                   ),
                 ),

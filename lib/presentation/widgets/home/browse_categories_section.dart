@@ -23,7 +23,7 @@ class BrowseCategoriesSection extends StatelessWidget {
       builder: (context, provider, child) {
         final categories = provider.categories;
         if (categories.isEmpty) return const SizedBox.shrink();
-        
+
         // We only show grid if we have at least 4 categories, otherwise we could pad with something else.
         // For now, if length < 4, let's just return shrink or safely slice it.
         // Or we can just check if empty and then render dynamically. But since the grid is hardcoded to 4,
@@ -39,7 +39,9 @@ class BrowseCategoriesSection extends StatelessWidget {
           ),
           child: Column(
             children: [
-              SectionHeader(title: TranslationKeys.browseByCategory.tr(context)),
+              SectionHeader(
+                title: TranslationKeys.browseByCategory.tr(context),
+              ),
               const SizedBox(height: 40),
               isMobile
                   ? _MobileCategoryGrid(categories: categories)
@@ -139,7 +141,7 @@ class _CategoryCardState extends State<_CategoryCard> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           changeScreen(context, const CategoriesPage());
         },
@@ -151,7 +153,9 @@ class _CategoryCardState extends State<_CategoryCard> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _hovered ? Theme.of(context).primaryColor : Colors.transparent,
+                color: _hovered
+                    ? Theme.of(context).primaryColor
+                    : Colors.transparent,
                 width: 1.5,
               ),
             ),

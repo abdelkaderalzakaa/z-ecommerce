@@ -1,0 +1,187 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
+import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
+import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/business/products/product_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/products/pages_create_edit_product/info_product.dart';
+
+class ProductsManagementPage extends StatefulWidget {
+  const ProductsManagementPage({super.key});
+
+  @override
+  State<ProductsManagementPage> createState() => _ProductsManagementPageState();
+}
+
+class _ProductsManagementPageState extends State<ProductsManagementPage> {
+  String _searchQuery = '';
+  List<ProductModel> _selectedProducts = [];
+  int _currentPage = 1;
+  int _itemsPerPage = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().listenToAllProducts();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Consumer<ProductProvider>(
+      builder: (context, provider, child) {
+        final filteredProducts = provider.allProducts.where((product) {
+          final titleStr = product.name.toLowerCase();
+          final matchesQuery =
+              _searchQuery.isEmpty ||
+              titleStr.contains(_searchQuery.toLowerCase()) ||
+              product.id.toLowerCase().contains(_searchQuery.toLowerCase());
+          return matchesQuery;
+        }).toList();
+
+        final totalItems = filteredProducts.length;
+        final totalPages = (totalItems / _itemsPerPage).ceil();
+        final startIndex = (_currentPage - 1) * _itemsPerPage;
+        final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
+        final paginatedProducts = (startIndex < totalItems)
+            ? filteredProducts.sublist(startIndex, endIndex)
+            : <ProductModel>[];
+
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Padding(
+            padding: const EdgeInsets.all(10),
+            child: AppDataTable<ProductModel>(
+              items: paginatedProducts,
+              selectable: true,
+              showIndexColumn: true,
+              selectedItems: _selectedProducts,
+              onSelectionChanged: (selected) {
+                setState(() {
+                  _selectedProducts = selected;
+                });
+              },
+              primaryActionButton: ButtonApp(
+                onPressed: () =>
+                    changeScreen(context, const InfoProductPage()),
+                icon: Icons.add,
+                label: TranslationKeys.addNewProduct.tr(context),
+              ),
+              onBulkDelete: () {
+                for (var p in _selectedProducts) {
+                  provider.deleteProduct(p.id);
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})',
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                setState(() {
+                  _selectedProducts.clear();
+                });
+              },
+              searchQuery: _searchQuery,
+              onSearchChanged: (val) {
+                setState(() {
+                  _searchQuery = val;
+                  _currentPage = 1;
+                });
+              },
+              currentPage: _currentPage,
+              totalPages: totalPages > 0 ? totalPages : 1,
+              totalItems: totalItems,
+              itemsPerPage: _itemsPerPage,
+              onPageChanged: (page) => setState(() => _currentPage = page),
+              onItemsPerPageChanged: (rows) {
+                setState(() {
+                  _itemsPerPage = rows;
+                  _currentPage = 1;
+                });
+              },
+              emptyMessage: _searchQuery.isNotEmpty
+                  ? TranslationKeys.noMatchingResults.tr(context)
+                  : TranslationKeys.noDataAvailable.tr(context),
+              onRowTap: (product) => changeScreen(
+                context,
+                ProductDetailsPage(productId: product.id),
+              ),
+              columns: [
+                AppTableColumn<ProductModel>(
+                  title: TranslationKeys.product.tr(context),
+                  flex: 2,
+                  sortable: true,
+                  sortKey: (p) => p.name,
+                  cellBuilder: (p) => TableImageTextCell(
+                    title: p.name,
+                    subtitle: p.id,
+                    imageUrl: (p.images.isNotEmpty) ? p.images.first : null,
+                    fallbackIcon: Icons.inventory_2_rounded,
+                  ),
+                ),
+                AppTableColumn<ProductModel>(
+                  title: TranslationKeys.price.tr(context),
+                  flex: 1,
+                  sortable: true,
+                  sortKey: (p) => p.basePrice,
+                  cellBuilder: (p) => TablePriceCell(amount: p.basePrice),
+                ),
+                AppTableColumn<ProductModel>(
+                  title: TranslationKeys.category.tr(context),
+                  flex: 1,
+                  sortable: true,
+                  sortKey: (p) => p.category,
+                  cellBuilder: (p) => Text(
+                    p.category,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                ),
+                AppTableColumn<ProductModel>(
+                  title: TranslationKeys.statusActive.tr(context),
+                  flex: 1,
+                  cellBuilder: (p) => TableStatusBadge.fromStatus(
+                    TranslationKeys.statusActive.tr(context),
+                  ),
+                ),
+                AppTableColumn<ProductModel>(
+                  title: TranslationKeys.actions.tr(context),
+                  width: 70,
+                  alignment: Alignment.center,
+                  cellBuilder: (p) => TablePopupMenuActions(
+                    onView: () => changeScreen(
+                      context,
+                      ProductDetailsPage(productId: p.id),
+                    ),
+                    onEdit: () => changeScreen(
+                      context,
+                      InfoProductPage(product: p),
+                    ),
+                    onDelete: () {
+                      provider.deleteProduct(p.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('تم حذف المنتج "${p.name}" بنجاح'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

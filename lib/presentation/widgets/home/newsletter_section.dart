@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../global/translate/app_localizations.dart';
@@ -37,12 +38,8 @@ class _NewsletterSectionState extends State<NewsletterSection> {
           borderRadius: BorderRadius.circular(AppRadius.xl),
         ),
         child: isMobile
-            ? _MobileNewsletter(
-                emailController: _emailController,
-              )
-            : _DesktopNewsletter(
-                emailController: _emailController,
-              ),
+            ? _MobileNewsletter(emailController: _emailController)
+            : _DesktopNewsletter(emailController: _emailController),
       ),
     );
   }
@@ -50,24 +47,17 @@ class _NewsletterSectionState extends State<NewsletterSection> {
 
 class _DesktopNewsletter extends StatelessWidget {
   final TextEditingController emailController;
-  const _DesktopNewsletter({
-    required this.emailController,
-  });
+  const _DesktopNewsletter({required this.emailController});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          flex: 5,
-          child: _NewsletterTitle(isMobile: false),
-        ),
+        Expanded(flex: 5, child: _NewsletterTitle(isMobile: false)),
         const SizedBox(width: 48),
         Expanded(
           flex: 5,
-          child: _NewsletterForm(
-            emailController: emailController,
-          ),
+          child: _NewsletterForm(emailController: emailController),
         ),
       ],
     );
@@ -76,9 +66,7 @@ class _DesktopNewsletter extends StatelessWidget {
 
 class _MobileNewsletter extends StatelessWidget {
   final TextEditingController emailController;
-  const _MobileNewsletter({
-    required this.emailController,
-  });
+  const _MobileNewsletter({required this.emailController});
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +74,7 @@ class _MobileNewsletter extends StatelessWidget {
       children: [
         _NewsletterTitle(isMobile: true),
         const SizedBox(height: 32),
-        _NewsletterForm(
-          emailController: emailController,
-        ),
+        _NewsletterForm(emailController: emailController),
       ],
     );
   }
@@ -116,9 +102,7 @@ class _NewsletterTitle extends StatelessWidget {
 class _NewsletterForm extends StatelessWidget {
   final TextEditingController emailController;
 
-  const _NewsletterForm({
-    required this.emailController,
-  });
+  const _NewsletterForm({required this.emailController});
 
   @override
   Widget build(BuildContext context) {
@@ -128,18 +112,20 @@ class _NewsletterForm extends StatelessWidget {
         const SizedBox(height: 14),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
+          child: ButtonApp(
             onPressed: () {
               if (emailController.text.isNotEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(TranslationKeys.subscribedSuccessfully.tr(context)),
+                    content: Text(
+                      TranslationKeys.subscribedSuccessfully.tr(context),
+                    ),
                   ),
                 );
                 emailController.clear();
               }
             },
-            child: Text(TranslationKeys.subscribeToNewsletter.tr(context)),
+            label: TranslationKeys.subscribeToNewsletter.tr(context),
           ),
         ),
       ],

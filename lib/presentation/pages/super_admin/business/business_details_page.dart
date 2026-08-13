@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/details_template.dart';
@@ -38,78 +39,85 @@ class BusinessDetailsPage extends StatelessWidget {
         if (store.localization.name.ar.isNotEmpty) readinessScore += 20;
         if (store.socials.isNotEmpty) readinessScore += 20;
         if (store.paymentMethods.isNotEmpty) readinessScore += 20;
-        
-        String readinessText = readinessScore == 100 ? 'جاهز بالكامل' : 'قيد التجهيز ($readinessScore%)';
-        Color readinessColor = readinessScore == 100 ? Colors.green : Colors.orange;
+
+        String readinessText = readinessScore == 100
+            ? 'جاهز بالكامل'
+            : 'قيد التجهيز ($readinessScore%)';
+        Color readinessColor = readinessScore == 100
+            ? Colors.green
+            : Colors.orange;
 
         return DetailsTemplate(
           title: TranslationKeys.storeDetailsTitle.tr(context),
           name: store.localization.name.get(context),
-          subtitle: '${TranslationKeys.category.tr(context)}: ${store.businessType.name} • ${store.id}',
+          subtitle:
+              '${TranslationKeys.category.tr(context)}: ${store.businessType.name} • ${store.id}',
           avatarUrl: store.theme.logoUrl,
           fallbackIcon: Icons.storefront_rounded,
           statusBadge: TableStatusBadge.fromStatus(store.status ?? 'Active'),
           headerMetrics: [
             // Readiness Level
             Chip(
-              avatar: Icon(Icons.check_circle_outline, color: readinessColor, size: 16),
-              label: Text(readinessText, style: TextStyle(color: readinessColor, fontSize: 12)),
+              avatar: Icon(
+                Icons.check_circle_outline,
+                color: readinessColor,
+                size: 16,
+              ),
+              label: Text(
+                readinessText,
+                style: TextStyle(color: readinessColor, fontSize: 12),
+              ),
               backgroundColor: readinessColor.withOpacity(0.1),
               side: BorderSide.none,
             ),
             const SizedBox(width: 8),
             // Import Button
-            ElevatedButton.icon(
+            ButtonApp(
               onPressed: () async {
                 await ExcelImportService.importData(context, store.id);
               },
-              icon: const Icon(Icons.upload_rounded, size: 16),
-              label: const Text('استيراد بيانات'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
+              icon: Icons.upload_rounded,
+              label: 'استيراد بيانات',
+              color: Colors.green,
             ),
             const SizedBox(width: 8),
             // Export Button
-            ElevatedButton.icon(
+            ButtonApp(
               onPressed: () async {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('جاري تجهيز الملف للتصدير...')),
                 );
                 try {
-                  await ExcelExportService.exportBusinessData(context, store.id);
+                  await ExcelExportService.exportBusinessData(
+                    context,
+                    store.id,
+                  );
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم تصدير البيانات بنجاح!'), backgroundColor: Colors.green),
+                    const SnackBar(
+                      content: Text('تم تصدير البيانات بنجاح!'),
+                      backgroundColor: Colors.green,
+                    ),
                   );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('حدث خطأ أثناء التصدير: \$e'), backgroundColor: Colors.red),
+                    SnackBar(
+                      content: Text('حدث خطأ أثناء التصدير: \$e'),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               },
-              icon: const Icon(Icons.download_rounded, size: 16),
-              label: const Text('تصدير بيانات المتجر'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
+              icon: Icons.download_rounded,
+              color: Colors.amber,
+              label: 'تصدير بيانات المتجر',
             ),
             const SizedBox(width: 8),
             // Status Menu
             PopupMenuButton<String>(
-              child: ElevatedButton.icon(
-                onPressed: null, // Menu handles tap
-                icon: const Icon(Icons.edit_note, size: 16, color: Colors.white),
-                label: const Text('تغيير الحالة', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  disabledBackgroundColor: Colors.purple,
-                  disabledForegroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
+              child: ButtonApp(
+                onPressed: null,
+                icon: Icons.edit_note,
+                label: 'تغيير الحالة',
               ),
               onSelected: (val) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -118,26 +126,27 @@ class BusinessDetailsPage extends StatelessWidget {
               },
               itemBuilder: (context) => [
                 const PopupMenuItem(value: 'Active', child: Text('نشط')),
-                const PopupMenuItem(value: 'Active & Verified', child: Text('نشط ومعتمد')),
-                const PopupMenuItem(value: 'Pending', child: Text('معلق (قيد الانتظار)')),
+                const PopupMenuItem(
+                  value: 'Active & Verified',
+                  child: Text('نشط ومعتمد'),
+                ),
+                const PopupMenuItem(
+                  value: 'Pending',
+                  child: Text('معلق (قيد الانتظار)'),
+                ),
                 const PopupMenuItem(value: 'Inactive', child: Text('غير نشط')),
               ],
             ),
             const SizedBox(width: 8),
             // Pause / Close
-            ElevatedButton.icon(
+            ButtonApp(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('تم إيقاف المتجر مؤقتاً.')),
                 );
               },
-              icon: const Icon(Icons.pause_circle_filled, size: 16),
-              label: const Text('إيقاف مؤقت'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
+              icon: Icons.pause_circle_filled,
+              label: 'إيقاف مؤقت',
             ),
           ],
           onEdit: () {
@@ -171,4 +180,4 @@ class BusinessDetailsPage extends StatelessWidget {
       },
     );
   }
-}
+}

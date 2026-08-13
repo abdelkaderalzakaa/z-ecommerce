@@ -27,7 +27,7 @@ class ProfileSidebar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: Text(
               TranslationKeys.menu.tr(context),
@@ -77,23 +77,28 @@ class _SidebarItemState extends State<_SidebarItem> {
       if (widget.title == TranslationKeys.logout) return Colors.red;
       if (widget.isSelected) return Theme.of(context).primaryColor;
       if (_hovered) return Theme.of(context).primaryColor;
-      return Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textSecondary;
+      return Theme.of(context).textTheme.bodyMedium?.color ??
+          AppColors.textSecondary;
     }
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           decoration: BoxDecoration(
-            color: widget.isSelected ? Theme.of(context).colorScheme.surfaceContainerHighest : Colors.transparent,
+            color: widget.isSelected
+                ? Theme.of(context).colorScheme.surfaceContainerHighest
+                : Colors.transparent,
             border: Border(
               left: BorderSide(
-                color: widget.isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+                color: widget.isSelected
+                    ? Theme.of(context).primaryColor
+                    : Colors.transparent,
                 width: 4,
               ),
             ),

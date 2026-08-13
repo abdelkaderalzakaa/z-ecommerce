@@ -52,7 +52,7 @@ class _HeaderDetailsState extends State<HeaderDetails> {
               children: [
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
+                  child: InkWell(
                     onTap: () {
                       changeScreen(context, const HomePage());
                     },

@@ -163,7 +163,7 @@ class _ContactItemState extends State<_ContactItem> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: Container(
           padding: const EdgeInsets.all(16),

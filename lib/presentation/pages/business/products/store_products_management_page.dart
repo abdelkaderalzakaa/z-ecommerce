@@ -8,10 +8,11 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/products/create_edit_product_page.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/products/product_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/products/pages_create_edit_product/info_product.dart';
+import 'package:z_ecommerce/presentation/pages/business/products/product_details_page.dart';
 
 class StoreProductsManagementPage extends StatefulWidget {
   const StoreProductsManagementPage({super.key});
@@ -87,23 +88,13 @@ class _StoreProductsManagementPageState
                         ),
                       ],
                     ),
-                    ElevatedButton.icon(
+                    ButtonApp(
                       onPressed: () => changeScreen(
                         context,
-                        CreateEditProductPage(businessId: currentStoreId),
+                        InfoProductPage(businessId: currentStoreId),
                       ),
-                      icon: const Icon(Icons.add, size: 18),
-                      label: Text(TranslationKeys.addNewProduct.tr(context)),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 11,
-                        ),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                      icon:  Icons.add,  
+                      label: TranslationKeys.addNewProduct.tr(context) 
                     ),
                   ],
                 ),
@@ -216,7 +207,7 @@ class _StoreProductsManagementPageState
                           ),
                           onEdit: () => changeScreen(
                             context,
-                            CreateEditProductPage(product: p),
+                            InfoProductPage(product: p),
                           ),
                           onDelete: () {
                             provider.deleteProduct(p.id);

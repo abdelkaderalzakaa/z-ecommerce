@@ -1,4 +1,6 @@
 import 'package:z_ecommerce/data/models/product/product_variant.dart';
+import 'package:z_ecommerce/data/models/product/discount_model.dart';
+import 'package:z_ecommerce/data/models/product/product_offer_model.dart';
 import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 
 /// Represents a product in the e-commerce store with dynamic variants.
@@ -19,14 +21,17 @@ class ProductModel {
   final List<String> images; // قائمة روابط الصور
   final String? thumbnail; // الصورة المصغرة الرئيسية
 
-  // 4. الأسعار والخصومات
-  final double originalPrice; // السعر الأصلي قبل الخصم
-  final int? discountPercent; // نسبة الخصم المئوية (مثل 15%)
-
   // 5. المتغيرات والخيارات الديناميكية (Variants)
   final List<ProductVariant> variants;
 
+  // 5.2 الخصومات المحددة للمنتج
+  final List<DiscountModel> discounts;
+
+  // 5.3 العروض والاوفرات المحددة للمنتج
+  final List<ProductOfferModel> offers;
+
   // 6. حالة المنتج والتفضيل
+  final bool isActive; // هل المنتج نشط؟
   final bool isFeatured; // هل المنتج مميز؟
   final bool isTopSelling; // هل المنتج من الأكثر مبيعاً؟
 
@@ -48,9 +53,10 @@ class ProductModel {
     this.brand,
     this.images = const [],
     this.thumbnail,
-    required this.originalPrice,
-    this.discountPercent,
     this.variants = const [],
+    this.discounts = const [],
+    this.offers = const [],
+    this.isActive = true,
     this.isFeatured = false,
     this.isTopSelling = false,
     this.ratings = const [],
@@ -61,6 +67,14 @@ class ProductModel {
   // ==========================================
   // 🧮 Dynamic Getters & Helpers
   // ==========================================
+
+  /// الحصول على المتغير الافتراضي
+  ProductVariant get defaultVariant {
+    if (variants.isEmpty) {
+      return const ProductVariant(isDefault: true, price: 0.0, stock: 0);
+    }
+    return variants.firstWhere((v) => v.isDefault, orElse: () => variants.first);
+  }
 
   /// إجمالي مخزون المنتج المجمع من كافة المتغيرات
   int get totalStock {
@@ -73,8 +87,39 @@ class ProductModel {
 
   /// السعر الأساسي للمنتج بعد تطبيق الخصم (في حال عدم تحديد متغيّر)
   double get basePrice {
-    if (!hasDiscount) return originalPrice;
-    return originalPrice * (1 - (discountPercent! / 100));
+    final activeDisc = discounts.firstWhere((d) => d.isValid, orElse: () => const DiscountModel(id: '', name: '', type: '', value: 0, isActive: false));
+    if (activeDisc.isActive && activeDisc.value > 0) {
+      if (activeDisc.isPercentage) {
+        return defaultVariant.price * (1 - (activeDisc.value / 100));
+      } else {
+        return (defaultVariant.price - activeDisc.value).clamp(0.0, double.infinity);
+      }
+    }
+    return defaultVariant.price;
+  }
+
+  /// السعر الأصلي قبل الخصم
+  double get originalPrice {
+    return defaultVariant.originalPrice ?? defaultVariant.price;
+  }
+
+  /// نسبة الخصم المئوية (مثل 15%) المحسوبة ديناميكياً
+  int? get discountPercent {
+    final activeDisc = discounts.firstWhere((d) => d.isValid, orElse: () => const DiscountModel(id: '', name: '', type: '', value: 0, isActive: false));
+    if (activeDisc.isActive && activeDisc.value > 0) {
+      if (activeDisc.isPercentage) {
+        return activeDisc.value.round();
+      } else {
+        final orig = originalPrice;
+        if (orig > 0) {
+          return ((activeDisc.value / orig) * 100).round();
+        }
+      }
+    }
+    final orig = originalPrice;
+    final curr = basePrice;
+    if (orig <= curr || orig == 0) return null;
+    return (((orig - curr) / orig) * 100).round();
   }
 
   /// حساب السعر لمتغير محدد وتطبيق الخصم عليه إذا كان للمنتج خصم
@@ -130,12 +175,19 @@ class ProductModel {
       brand: map['brand'],
       images: List<String>.from(map['images'] ?? []),
       thumbnail: map['thumbnail'],
-      originalPrice: (map['originalPrice'] as num? ?? 0.0).toDouble(),
-      discountPercent: map['discountPercent'],
       variants: (map['variants'] as List<dynamic>?)
               ?.map((e) => ProductVariant.fromMap(Map<String, dynamic>.from(e as Map)))
               .toList() ??
           const [],
+      discounts: (map['discounts'] as List<dynamic>?)
+              ?.map((e) => DiscountModel.fromMap(Map<String, dynamic>.from(e as Map)))
+              .toList() ??
+          const [],
+      offers: (map['offers'] as List<dynamic>?)
+              ?.map((e) => ProductOfferModel.fromMap(Map<String, dynamic>.from(e as Map)))
+              .toList() ??
+          const [],
+      isActive: map['isActive'] ?? true,
       isFeatured: map['isFeatured'] ?? false,
       isTopSelling: map['isTopSelling'] ?? false,
       ratings: (map['ratings'] as List<dynamic>?)
@@ -163,9 +215,10 @@ class ProductModel {
       'brand': brand,
       'images': images,
       'thumbnail': thumbnail,
-      'originalPrice': originalPrice,
-      'discountPercent': discountPercent,
       'variants': variants.map((v) => v.toMap()).toList(),
+      'discounts': discounts.map((d) => d.toMap()).toList(),
+      'offers': offers.map((o) => o.toMap()).toList(),
+      'isActive': isActive,
       'isFeatured': isFeatured,
       'isTopSelling': isTopSelling,
       'ratings': ratings.map((r) => r.toMap()).toList(),
@@ -193,9 +246,10 @@ class ProductModel {
     String? brand,
     List<String>? images,
     String? thumbnail,
-    double? originalPrice,
-    int? discountPercent,
     List<ProductVariant>? variants,
+    List<DiscountModel>? discounts,
+    List<ProductOfferModel>? offers,
+    bool? isActive,
     bool? isFeatured,
     bool? isTopSelling,
     List<RatedUser>? ratings,
@@ -213,9 +267,10 @@ class ProductModel {
       brand: brand ?? this.brand,
       images: images ?? this.images,
       thumbnail: thumbnail ?? this.thumbnail,
-      originalPrice: originalPrice ?? this.originalPrice,
-      discountPercent: discountPercent ?? this.discountPercent,
       variants: variants ?? this.variants,
+      discounts: discounts ?? this.discounts,
+      offers: offers ?? this.offers,
+      isActive: isActive ?? this.isActive,
       isFeatured: isFeatured ?? this.isFeatured,
       isTopSelling: isTopSelling ?? this.isTopSelling,
       ratings: ratings ?? this.ratings,
@@ -233,7 +288,6 @@ class ProductModel {
       name: '',
       description: '',
       category: '',
-      originalPrice: 0.0,
     );
   }
 }

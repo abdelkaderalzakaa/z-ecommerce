@@ -6,6 +6,7 @@ import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
@@ -65,13 +66,18 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
             ],
           ),
           actions: [
-            TextButton(
+            ButtonApp(
+              format: FormatButtonApp.text,
               onPressed: () => Navigator.pop(context),
-              child: Text(TranslationKeys.cancel.tr(context)),
+              label:TranslationKeys.cancel.tr(context),
             ),
-            ElevatedButton.icon(
+            ButtonApp(
               onPressed: () {
-                invoice.updateStatus(selectedStatus, "super_admin", UserRole.superAdmin);
+                invoice.updateStatus(
+                  selectedStatus,
+                  "super_admin",
+                  UserRole.superAdmin,
+                );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -81,8 +87,8 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
                   ),
                 );
               },
-              icon: const Icon(Icons.check, size: 18),
-              label: Text(TranslationKeys.saveChanges.tr(context)),
+              icon: Icons.check,
+              label: TranslationKeys.saveChanges.tr(context),
             ),
           ],
         );
@@ -109,7 +115,9 @@ void showStoreStatusDialog(BuildContext context, BusinessModel store) {
             children: [
               Icon(Icons.storefront_rounded, color: theme.primaryColor),
               const SizedBox(width: 10),
-              Text('تحديث حالة المتجر "${store.localization.name.get(context)}"'),
+              Text(
+                'تحديث حالة المتجر "${store.localization.name.get(context)}"',
+              ),
             ],
           ),
           content: Column(
@@ -139,11 +147,12 @@ void showStoreStatusDialog(BuildContext context, BusinessModel store) {
             ],
           ),
           actions: [
-            TextButton(
+            ButtonApp(
+              format: FormatButtonApp.text,
               onPressed: () => Navigator.pop(context),
-              child: Text(TranslationKeys.cancel.tr(context)),
+              label: TranslationKeys.cancel.tr(context),
             ),
-            ElevatedButton.icon(
+            ButtonApp(
               onPressed: () async {
                 final provider = context.read<BusinessProvider>();
                 await provider.updateStoreStatus(store.id, selectedStatus);
@@ -157,8 +166,8 @@ void showStoreStatusDialog(BuildContext context, BusinessModel store) {
                   ),
                 );
               },
-              icon: const Icon(Icons.check, size: 18),
-              label: Text(TranslationKeys.saveChanges.tr(context)),
+              icon: Icons.check,
+              label: TranslationKeys.saveChanges.tr(context),
             ),
           ],
         );

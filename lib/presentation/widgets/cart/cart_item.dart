@@ -85,27 +85,41 @@ class CartItemWidget extends StatelessWidget {
                           if (isGift)
                             Container(
                               margin: const EdgeInsets.only(top: 4),
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.green.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: const Text(
                                 'Free Gift',
-                                style: TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           if (isBundle)
                             Container(
                               margin: const EdgeInsets.only(top: 4),
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.blue.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: const Text(
                                 'Bundle Offer',
-                                style: TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           const SizedBox(height: 8),
@@ -114,7 +128,9 @@ class CartItemWidget extends StatelessWidget {
                             style: TextStyle(
                               fontSize: isMobile ? 12 : 14,
                               fontWeight: FontWeight.w400,
-                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -123,22 +139,21 @@ class CartItemWidget extends StatelessWidget {
                             style: TextStyle(
                               fontSize: isMobile ? 12 : 14,
                               fontWeight: FontWeight.w400,
-                              color: Theme.of(context).textTheme.bodyMedium?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color,
                             ),
                           ),
                         ],
                       ),
                     ),
                     if (!isReadOnly)
-                      MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: onRemove,
-                          child: Icon(
-                            Icons.delete_outline,
-                            color: Theme.of(context).colorScheme.error,
-                            size: 24,
-                          ),
+                      InkWell(
+                        onTap: onRemove,
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 24,
                         ),
                       ),
                   ],
@@ -162,8 +177,13 @@ class CartItemWidget extends StatelessWidget {
                         onChanged: onQuantityChanged ?? (val) {},
                       )
                     else if (isGift)
-                      Text('${TranslationKeys.qty.tr(context)}: $quantity',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 14)),
+                      Text(
+                        '${TranslationKeys.qty.tr(context)}: $quantity',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                          fontSize: 14,
+                        ),
+                      ),
                   ],
                 ),
               ],

@@ -115,7 +115,7 @@ class _OfferCardState extends State<OfferCard>
     return MouseRegion(
       onEnter: (_) => _onHover(true),
       onExit: (_) => _onHover(false),
-      child: GestureDetector(
+      child: InkWell(
         onTapDown: (_) => _animationController.forward(),
         onTapUp: (_) => _animationController.reverse(),
         onTapCancel: () => _animationController.reverse(),
@@ -254,11 +254,10 @@ class _OfferCardState extends State<OfferCard>
                                       mainIdToCheck = offer.productIds?.first;
                                     }
 
-                                    final businessId =
-                                        context
-                                            .read<BusinessProvider>()
-                                            .selectedBusiness
-                                            ?.id;
+                                    final businessId = context
+                                        .read<BusinessProvider>()
+                                        .selectedBusiness
+                                        ?.id;
                                     final isInCart =
                                         mainIdToCheck != null &&
                                         cart
@@ -480,8 +479,7 @@ class _OfferCardState extends State<OfferCard>
   }
 
   void _addToCart(BuildContext context) {
-    final businessId =
-        context.read<BusinessProvider>().selectedBusiness?.id;
+    final businessId = context.read<BusinessProvider>().selectedBusiness?.id;
     if (businessId == null) return;
     final cart = context.read<CartProvider>();
     final products = context.read<ProductProvider>().allProducts;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 
@@ -15,15 +16,22 @@ class CartEmptyPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
+            const Icon(
+              Icons.shopping_cart_outlined,
+              size: 80,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 16),
-            const Text("Looks like you haven't added anything to your cart yet.", style: TextStyle(fontSize: 16)),
+            const Text(
+              "Looks like you haven't added anything to your cart yet.",
+              style: TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            ButtonApp(
               onPressed: () {
                 changeScreen(context, const CategoriesPage());
               },
-              child: const Text('Start Shopping'),
+              label: 'Start Shopping',
             ),
           ],
         ),

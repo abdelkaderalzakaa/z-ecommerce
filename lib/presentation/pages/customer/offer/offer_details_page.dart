@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'dart:async';
 
 import '../../../../../data/models/product/offer_model.dart';
@@ -270,7 +271,7 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
                     _buildTimerWidget(),
                     const Spacer(),
                     if (offer.type == 'coupon' && offer.couponCode != null)
-                      ElevatedButton.icon(
+                      ButtonApp(
                         onPressed: () {
                           Clipboard.setData(
                             ClipboardData(text: offer.couponCode!),
@@ -281,28 +282,10 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
                             ),
                           );
                         },
-                        icon: Icon(
-                          Icons.copy,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        label: Text(
-                          'Copy: ${offer.couponCode}',
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
+                        icon: 
+                          Icons.copy, 
+                        label:  
+                          'Copy: ${offer.couponCode}', 
                       ),
                   ],
                 ),

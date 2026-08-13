@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../global/core/constants/app_constants.dart';
 
 class QuantitySelector extends StatefulWidget {
   final int initialQuantity;
   final ValueChanged<int>? onChanged;
 
-  const QuantitySelector({
-    super.key,
-    this.initialQuantity = 1,
-    this.onChanged,
-  });
+  const QuantitySelector({super.key, this.initialQuantity = 1, this.onChanged});
 
   @override
   State<QuantitySelector> createState() => _QuantitySelectorState();
@@ -55,14 +52,11 @@ class _QuantitySelectorState extends State<QuantitySelector> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
+          ButtonApp(
+            format: FormatButtonApp.icon,
             onPressed: _decrement,
-            icon: const Icon(Icons.remove, size: 16),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            style: IconButton.styleFrom(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
+            icon: Icons.remove,
+            label: 'تقليل الكمية',
           ),
           const SizedBox(width: 16),
           Text(
@@ -74,14 +68,11 @@ class _QuantitySelectorState extends State<QuantitySelector> {
             ),
           ),
           const SizedBox(width: 16),
-          IconButton(
+          ButtonApp(
+            format: FormatButtonApp.icon,
             onPressed: _increment,
-            icon: const Icon(Icons.add, size: 16),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            style: IconButton.styleFrom(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
+            icon: Icons.add,
+            label: 'زيادة الكمية',
           ),
         ],
       ),

@@ -29,7 +29,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return Consumer<InvoiceProvider>(
       builder: (context, provider, child) {
@@ -42,7 +42,8 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
               order.storeId.toLowerCase().contains(_searchQuery.toLowerCase());
           final matchesStatus =
               _selectedStatusFilter == 'all' ||
-              order.status.name.toLowerCase() == _selectedStatusFilter.toLowerCase();
+              order.status.name.toLowerCase() ==
+                  _selectedStatusFilter.toLowerCase();
           return matchesQuery && matchesStatus;
         }).toList();
 
@@ -57,38 +58,10 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
         return Scaffold(
           backgroundColor: Colors.transparent,
           body: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Page Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          TranslationKeys.ordersManagement.tr(context),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'استعراض ومتابعة كافة الطلبات المنفذة عبر جميع المتاجر',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.textTheme.bodySmall?.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
                 // Full Height Expanded AppDataTable for InvoiceModel
                 Expanded(
                   child: AppDataTable<InvoiceModel>(

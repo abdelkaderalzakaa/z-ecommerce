@@ -114,12 +114,9 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
+                  InkWell(
                     onTap: () {
-                      changeScreen(
-                        context,
-                        ForgotPasswordPage(),
-                      );
+                      changeScreen(context, ForgotPasswordPage());
                     },
                     child: Text(
                       TranslationKeys.forgotPassword.tr(context),
@@ -231,7 +228,9 @@ class _LoginPageState extends State<LoginPage> {
                         final destination = widget.redirectTo ?? '/';
                         if (destination == '/') {
                           navigator.pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const BusinessPage()),
+                            MaterialPageRoute(
+                              builder: (_) => const BusinessPage(),
+                            ),
                             (route) => false,
                           );
                         } else {
@@ -260,13 +259,11 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     const SizedBox(width: 4),
-                    GestureDetector(
+                    InkWell(
                       onTap: () {
                         changeScreen(
                           context,
-                          RegisterPage(
-                            redirectTo: widget.redirectTo,
-                          ),
+                          RegisterPage(redirectTo: widget.redirectTo),
                         );
                       },
                       child: Text(

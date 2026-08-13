@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 import '../../../../data/providers/business_provider.dart';
 
@@ -149,10 +150,11 @@ class _RestaurantMenuBrandingPageState
                           color: theme.dividerColor.withOpacity(0.15),
                         ),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                      child: ButtonApp(
+                        format: FormatButtonApp.icon,
+                        icon:  Icons.arrow_back_rounded,  
                         onPressed: () => Navigator.pop(context),
-                        tooltip: 'تراجع والعودة',
+                        label: 'تراجع والعودة',
                       ),
                     ),
                   Column(
@@ -180,29 +182,13 @@ class _RestaurantMenuBrandingPageState
                     ],
                   ),
                   const Spacer(),
-                  ElevatedButton.icon(
+                  ButtonApp(
                     onPressed: _isSaving ? null : _saveMenuBranding,
-                    icon: _isSaving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.save_rounded, size: 18),
-                    label: Text(
-                      _isSaving
-                          ? (Localizations.localeOf(context).languageCode ==
-                                    'ar'
-                                ? 'جاري الحفظ...'
-                                : 'Saving...')
-                          : (Localizations.localeOf(context).languageCode ==
-                                    'ar'
-                                ? 'حفظ الهوية للمنيو'
-                                : 'Save Menu Settings'),
-                    ),
+                    icon: Icons.save_rounded,
+                    isLoading: _isSaving,
+                    label: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'حفظ الهوية للمنيو'
+                        : 'Save Menu Settings',
                   ),
                 ],
               ),
@@ -884,31 +870,12 @@ class _RestaurantMenuBrandingPageState
                     bottom: 12,
                     left: 12,
                     right: 12,
-                    child: ElevatedButton.icon(
+                    child: ButtonApp(
                       onPressed: () => setState(() => _mockupPageView = 1),
-                      icon: const Icon(
-                        Icons.restaurant_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      label: Text(
-                        _mockupIsArabic
-                            ? 'تصفح قائمة الطعام والوجبات الآن 👈'
-                            : 'Open Full Food Menu 👈',
-                        style: TextStyle(
-                          fontFamily: t.fontFamily,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepOrange,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: t.buttonBorderRadius,
-                        ),
-                      ),
+                      icon: Icons.restaurant_rounded,
+                      label: _mockupIsArabic
+                          ? 'تصفح قائمة الطعام والوجبات الآن 👈'
+                          : 'Open Full Food Menu 👈',
                     ),
                   ),
                 ],

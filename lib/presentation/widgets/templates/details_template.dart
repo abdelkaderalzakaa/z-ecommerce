@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/header_detail_tamp.dart';
 
 /// A reusable, responsive, unified Details Template widget for Flutter applications.
 /// Capable of displaying detailed views for any entity (e.g., Stores, Products, Orders, Users).
@@ -22,6 +24,7 @@ class DetailsTemplate extends StatelessWidget {
   final IconData fallbackIcon;
   final Widget? statusBadge;
   final List<Widget>? headerMetrics;
+  final Widget? trailing;
 
   /// Tabbed Content Section
   final List<Tab> tabs;
@@ -41,6 +44,7 @@ class DetailsTemplate extends StatelessWidget {
     this.fallbackIcon = Icons.info_outline,
     this.statusBadge,
     this.headerMetrics,
+    this.trailing,
     required this.tabs,
     required this.tabViews,
   }) : assert(
@@ -53,85 +57,20 @@ class DetailsTemplate extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: HeaderDetailsTemp(
+        title: title,
+        onBack: onBack,
+        onEdit: onEdit,
+        onDelete: onDelete,
+        onRefresh: onRefresh,
+        extraActions: extraActions,
+      ),
       body: SafeArea(
         child: DefaultTabController(
           length: tabs.length,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Custom Header & Action Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 16.0,
-                ),
-                child: Row(
-                  children: [
-                    // Back Button
-                    InkWell(
-                      onTap: onBack ?? () => Navigator.of(context).pop(),
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: theme.dividerColor.withOpacity(0.15),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.arrow_back_rounded,
-                          size: 20,
-                          color: theme.textTheme.bodyLarge?.color,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-
-                    // Page Title
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-
-                    // Action Buttons (Refresh, Edit, Delete, Extra Actions)
-                    if (onRefresh != null)
-                      IconButton(
-                        icon: const Icon(Icons.refresh_rounded, size: 20),
-                        tooltip: 'تحديث البيانات',
-                        onPressed: onRefresh,
-                      ),
-                    if (onEdit != null)
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 20),
-                        color: Colors.blueAccent,
-                        tooltip: 'تعديل',
-                        onPressed: onEdit,
-                      ),
-                    if (onDelete != null)
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          size: 20,
-                        ),
-                        color: Colors.red,
-                        tooltip: 'حذف',
-                        onPressed: onDelete,
-                      ),
-                    if (extraActions != null) ...extraActions!,
-                  ],
-                ),
-              ),
-
-              // 2. Profile / Entity Header Card
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -237,6 +176,10 @@ class DetailsTemplate extends StatelessWidget {
                                   runSpacing: 6,
                                   children: headerMetrics!,
                                 ),
+                              ],
+                              if (trailing != null) ...[
+                                const SizedBox(width: 16),
+                                trailing!,
                               ],
                             ],
                           ),

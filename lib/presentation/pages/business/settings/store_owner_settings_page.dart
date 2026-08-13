@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/branding/restaurant_menu_branding_page.dart';
@@ -50,19 +51,31 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
     _nameArController = TextEditingController(text: 'متجري التجاري');
     _nameEnController = TextEditingController(text: 'My Commercial Store');
     _sloganController = TextEditingController(text: 'أفخم التشكيلات المودرن');
-    _descriptionController = TextEditingController(text: 'متجر متخصص بتقديم أحدث المنتجات بجودة عالية وأسعار منافسة');
+    _descriptionController = TextEditingController(
+      text: 'متجر متخصص بتقديم أحدث المنتجات بجودة عالية وأسعار منافسة',
+    );
     _emailController = TextEditingController(text: 'owner@mystore.com');
     _phoneController = TextEditingController(text: '+961 70 123 456');
     _deliveryFeeController = TextEditingController(text: '5.0');
 
     // Social Media Defaults
-    _facebookController = TextEditingController(text: 'https://facebook.com/mystore');
-    _instagramController = TextEditingController(text: 'https://instagram.com/mystore');
+    _facebookController = TextEditingController(
+      text: 'https://facebook.com/mystore',
+    );
+    _instagramController = TextEditingController(
+      text: 'https://instagram.com/mystore',
+    );
     _whatsappController = TextEditingController(text: '+96170123456');
     _twitterController = TextEditingController(text: 'https://x.com/mystore');
-    _tiktokController = TextEditingController(text: 'https://tiktok.com/@mystore');
-    _linkedinController = TextEditingController(text: 'https://linkedin.com/company/mystore');
-    _youtubeController = TextEditingController(text: 'https://youtube.com/@mystore');
+    _tiktokController = TextEditingController(
+      text: 'https://tiktok.com/@mystore',
+    );
+    _linkedinController = TextEditingController(
+      text: 'https://linkedin.com/company/mystore',
+    );
+    _youtubeController = TextEditingController(
+      text: 'https://youtube.com/@mystore',
+    );
   }
 
   @override
@@ -94,7 +107,9 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حفظ وتحديث كافة إعدادات الهوية والتواصل بنجاح!')),
+        const SnackBar(
+          content: Text('تم حفظ وتحديث كافة إعدادات الهوية والتواصل بنجاح!'),
+        ),
       );
     }
   }
@@ -128,7 +143,9 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                    validator: (v) => v!.isEmpty
+                        ? TranslationKeys.required.tr(context)
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -140,7 +157,9 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                    validator: (v) => v!.isEmpty
+                        ? TranslationKeys.required.tr(context)
+                        : null,
                   ),
                 ),
               ],
@@ -186,7 +205,9 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                   ],
                 ),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.2)),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor.withOpacity(0.2),
+                ),
               ),
               child: Row(
                 children: [
@@ -196,7 +217,11 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                       color: Theme.of(context).primaryColor.withOpacity(0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.palette_rounded, size: 28, color: Theme.of(context).primaryColor),
+                    child: Icon(
+                      Icons.palette_rounded,
+                      size: 28,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -207,34 +232,32 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                           Localizations.localeOf(context).languageCode == 'ar'
                               ? 'استوديو تخصيص الهوية وثيم المتجر المباشر (Store Theme Studio)'
                               : 'Store Theme & Branding Studio',
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           Localizations.localeOf(context).languageCode == 'ar'
                               ? 'تحكم بالدرجات والألوان الرئيسية والفرعية، روابط اللوجو والغلاف، الخطوط العربي والإنجليزي، انحناءات الأزرار للكروت مع معاينة حية.'
                               : 'Control primary/secondary colors, logo/banner URLs, Arabic/English fonts, and radii with real-time preview.',
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 16),
-                  ElevatedButton.icon(
-                    onPressed: () => changeScreen(context, const StoreBrandingPage()),
-                    icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'ar'
-                          ? 'تخصيص الهوية والثيم الآن'
-                          : 'Customize Store Branding',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+                  ButtonApp(
+                    onPressed: () =>
+                        changeScreen(context, const StoreBrandingPage()),
+                    icon: Icons.open_in_new_rounded,
+                    label: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'تخصيص الهوية والثيم الآن'
+                        : 'Customize Store Branding',
                   ),
                 ],
               ),
@@ -263,7 +286,11 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                       color: Colors.deepOrange.withOpacity(0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.restaurant_menu_rounded, size: 28, color: Colors.deepOrange),
+                    child: const Icon(
+                      Icons.restaurant_menu_rounded,
+                      size: 28,
+                      color: Colors.deepOrange,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -274,36 +301,34 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                           Localizations.localeOf(context).languageCode == 'ar'
                               ? 'استوديو تخصيص منيو المطعم الرقمي (Restaurant Menu Studio)'
                               : 'Digital Restaurant Menu Studio',
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           Localizations.localeOf(context).languageCode == 'ar'
                               ? 'استوديو مخصص للمطاعم والكافيهات لتنسيق المنيو الرقمي، السعرات الحرارية، مكونات الحساسية، والطلب المباشر للطاولة بالـ QR.'
                               : 'Dedicated studio for restaurants & cafes to customize 2-page digital menu, calories, allergens & table QR ordering.',
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 16),
-                  ElevatedButton.icon(
-                    onPressed: () => changeScreen(context, const RestaurantMenuBrandingPage()),
-                    icon: const Icon(Icons.restaurant_rounded, size: 18),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'ar'
-                          ? 'تخصيص المنيو الرقمي الآن'
-                          : 'Customize Restaurant Menu',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                  ButtonApp(
+                    onPressed: () => changeScreen(
+                      context,
+                      const RestaurantMenuBrandingPage(),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
+                    icon: Icons.restaurant_rounded,
+                    label: Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'تخصيص المنيو الرقمي الآن'
+                        : 'Customize Restaurant Menu',
                   ),
                 ],
               ),
@@ -350,7 +375,10 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                     decoration: const InputDecoration(
                       labelText: 'واتساب مباشر (WhatsApp Number)',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.chat_bubble_outline_rounded, size: 20),
+                      prefixIcon: Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),
@@ -386,7 +414,10 @@ class _StoreOwnerSettingsPageState extends State<StoreOwnerSettingsPage> {
                     decoration: const InputDecoration(
                       labelText: 'لينكد إن (LinkedIn URL)',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.business_center_outlined, size: 20),
+                      prefixIcon: Icon(
+                        Icons.business_center_outlined,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ),

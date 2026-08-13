@@ -9,13 +9,13 @@ import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/categories/categories_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/offers/offers_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/orders/orders_management_page.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/products/product_details_page.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/products/products_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/products/product_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/business/businessess_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/users/users_management_page.dart';
@@ -25,8 +25,6 @@ class DashboardOverviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Consumer5<
       BusinessProvider,
       ProductProvider,
@@ -50,7 +48,12 @@ class DashboardOverviewPage extends StatelessWidget {
 
             // Calculations & Summaries across all providers
             final totalStores = storesProvider.businesses.length;
-            final activeStores = storesProvider.businesses.where((b) => b.status == 'مفعل من السوبر ادمن' || b.status == 'Active').length;
+            final activeStores = storesProvider.businesses
+                .where(
+                  (b) =>
+                      b.status == 'مفعل من السوبر ادمن' || b.status == 'Active',
+                )
+                .length;
 
             final totalProducts = productProvider.allProducts.length;
             final topSellingProductsCount = productProvider.allProducts.length;
@@ -85,68 +88,10 @@ class DashboardOverviewPage extends StatelessWidget {
             return Scaffold(
               backgroundColor: Colors.transparent,
               body: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header Title & Time Filter
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              TranslationKeys.superAdminDashboard.tr(context),
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'نظرة شاملة وموسعة على المتاجر، المنتجات، الطلبات، التقييمات، المستخدمين، والعروض',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: theme.textTheme.bodySmall?.color,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: theme.dividerColor.withOpacity(0.15),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.dashboard_customize_rounded,
-                                size: 16,
-                                color: theme.primaryColor,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'التقرير التجميعي الشامل',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
                     // 1. KPI Stats Grid (6 Diverse Section Cards)
                     LayoutBuilder(
                       builder: (context, constraints) {
@@ -183,7 +128,7 @@ class DashboardOverviewPage extends StatelessWidget {
                               color: const Color(0xFF10B981),
                               onTap: () => changeScreen(
                                 context,
-                                const ProductsManagementPage(),
+                                const BusinessessManagementPage(),
                               ),
                             ),
                             _buildKpiCard(
@@ -365,59 +310,37 @@ class DashboardOverviewPage extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: color, size: 20),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 12,
-                  color: theme.textTheme.bodySmall?.color,
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
+                child: Icon(icon, color: color, size: 20),
+              ),
+              Expanded(
+                child: Text(
                   title,
                   style: TextStyle(
                     fontSize: 12,
@@ -425,20 +348,49 @@ class DashboardOverviewPage extends StatelessWidget {
                     color: theme.textTheme.bodyLarge?.color,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subText,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: theme.textTheme.bodySmall?.color,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-          ],
-        ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      subText,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  ButtonApp(
+                    radius: 5,
+                    onPressed: onTap,
+                    format: FormatButtonApp.icon,
+                    icon: Icons.arrow_forward_ios_rounded,
+                    label: "",
+                    color: color,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -489,21 +441,11 @@ class DashboardOverviewPage extends StatelessWidget {
                   ),
                 ],
               ),
-              ElevatedButton.icon(
+              ButtonApp(
                 onPressed: () =>
                     changeScreen(context, const OrdersManagementPage()),
-                icon: const Icon(Icons.shopping_cart_outlined, size: 14),
-                label: const Text(
-                  'إدارة الطلبات',
-                  style: TextStyle(fontSize: 12),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  elevation: 0,
-                ),
+                icon: Icons.shopping_cart_outlined,
+                label: 'إدارة الطلبات',
               ),
             ],
           ),
@@ -580,8 +522,10 @@ class DashboardOverviewPage extends StatelessWidget {
                 'توزيع الأقسام والتصنيفات',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+              ButtonApp(
+                format: FormatButtonApp.icon,
+                icon: Icons.arrow_forward_rounded,
+                label: 'انتقال للتصنيفات',
                 onPressed: () =>
                     changeScreen(context, const CategoriesManagementPage()),
               ),
@@ -687,10 +631,11 @@ class DashboardOverviewPage extends StatelessWidget {
                 'المنتجات الأعلى تقييماً',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              TextButton(
+              ButtonApp(
+                format: FormatButtonApp.text,
                 onPressed: () =>
-                    changeScreen(context, const ProductsManagementPage()),
-                child: const Text('إدارة المنتجات'),
+                    changeScreen(context, const BusinessessManagementPage()),
+                label: 'عرض المتاجر',
               ),
             ],
           ),
@@ -782,10 +727,11 @@ class DashboardOverviewPage extends StatelessWidget {
                 'المتاجر الأعلى تقييماً ونشاطاً',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              TextButton(
+              ButtonApp(
+                format: FormatButtonApp.text,
                 onPressed: () =>
                     changeScreen(context, const BusinessessManagementPage()),
-                child: const Text('إدارة المتاجر'),
+                label: 'إدارة المتاجر',
               ),
             ],
           ),
@@ -908,8 +854,10 @@ class DashboardOverviewPage extends StatelessWidget {
                 'توزيع أدوار المستخدمين',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+              ButtonApp(
+                format: FormatButtonApp.icon,
+                icon: Icons.arrow_forward_rounded,
+                label: 'انتقال للمستخدمين',
                 onPressed: () =>
                     changeScreen(context, const UsersManagementPage()),
               ),
@@ -1014,10 +962,11 @@ class DashboardOverviewPage extends StatelessWidget {
                 'الحملات والعروض التسويقية الفعالة',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              TextButton(
+              ButtonApp(
+                format: FormatButtonApp.text,
                 onPressed: () =>
                     changeScreen(context, const OffersManagementPage()),
-                child: const Text('إدارة العروض'),
+                label: 'إدارة العروض',
               ),
             ],
           ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/providers/super_admin_provider.dart';
 import '../../../../data/models/common/social_media.dart';
 import '../../../../presentation/global/core/constants/enum_data.dart';
+
 class SuperAdminProfilePage extends StatefulWidget {
   const SuperAdminProfilePage({super.key});
 
@@ -35,12 +37,16 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
       final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
 
       if (user != null) {
-        _adminNameController.text = user.name.isNotEmpty ? user.name : 'Super Admin';
+        _adminNameController.text = user.name.isNotEmpty
+            ? user.name
+            : 'Super Admin';
         _adminEmailController.text = user.email;
         _adminPhoneController.text = user.phoneNumber.isNotEmpty
             ? user.phoneNumber
             : '+961 70 123 456';
-        _systemIdController.text = user.id.isNotEmpty ? user.id : 'SA-ROOT-9901-PROD';
+        _systemIdController.text = user.id.isNotEmpty
+            ? user.id
+            : 'SA-ROOT-9901-PROD';
 
         final socials = superAdmin?.socials ?? [];
         String getUrl(SocialPlatform plat) {
@@ -48,11 +54,21 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
           return found.isNotEmpty ? found.first.url : '';
         }
 
-        _whatsappController.text = getUrl(SocialPlatform.whatsapp).isNotEmpty ? getUrl(SocialPlatform.whatsapp) : '+961 70 123 456';
-        _instagramController.text = getUrl(SocialPlatform.instagram).isNotEmpty ? getUrl(SocialPlatform.instagram) : 'https://instagram.com/alzakaa';
-        _linkedinController.text = getUrl(SocialPlatform.linkedin).isNotEmpty ? getUrl(SocialPlatform.linkedin) : 'https://linkedin.com/company/alzakaa';
-        _facebookController.text = getUrl(SocialPlatform.facebook).isNotEmpty ? getUrl(SocialPlatform.facebook) : 'https://facebook.com/alzakaa';
-        _websiteController.text = getUrl(SocialPlatform.website).isNotEmpty ? getUrl(SocialPlatform.website) : 'https://alzakaa.com';
+        _whatsappController.text = getUrl(SocialPlatform.whatsapp).isNotEmpty
+            ? getUrl(SocialPlatform.whatsapp)
+            : '+961 70 123 456';
+        _instagramController.text = getUrl(SocialPlatform.instagram).isNotEmpty
+            ? getUrl(SocialPlatform.instagram)
+            : 'https://instagram.com/alzakaa';
+        _linkedinController.text = getUrl(SocialPlatform.linkedin).isNotEmpty
+            ? getUrl(SocialPlatform.linkedin)
+            : 'https://linkedin.com/company/alzakaa';
+        _facebookController.text = getUrl(SocialPlatform.facebook).isNotEmpty
+            ? getUrl(SocialPlatform.facebook)
+            : 'https://facebook.com/alzakaa';
+        _websiteController.text = getUrl(SocialPlatform.website).isNotEmpty
+            ? getUrl(SocialPlatform.website)
+            : 'https://alzakaa.com';
       } else {
         _adminNameController.text = 'Super Admin';
         _adminEmailController.text = 'alzakaasimplesolutions@gmail.com';
@@ -87,7 +103,6 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
     final authProvider = context.read<AuthProvider>();
 
     // Remove unused socialLinks variable
-
 
     await authProvider.updateProfile(
       name: _adminNameController.text.trim(),
@@ -127,7 +142,9 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
               decoration: BoxDecoration(
                 color: theme.cardColor,
                 border: Border(
-                  bottom: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+                  bottom: BorderSide(
+                    color: theme.dividerColor.withOpacity(0.12),
+                  ),
                 ),
               ),
               child: Row(
@@ -138,12 +155,15 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
                       decoration: BoxDecoration(
                         color: theme.scaffoldBackgroundColor,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: theme.dividerColor.withOpacity(0.15)),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.15),
+                        ),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                      child: ButtonApp(
+                        format: FormatButtonApp.icon,
+                        icon: Icons.arrow_back_rounded,
+                        label: 'تراجع والعودة',
                         onPressed: () => Navigator.pop(context),
-                        tooltip: 'تراجع والعودة',
                       ),
                     ),
                   Column(
@@ -167,30 +187,23 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
                     ],
                   ),
                   const Spacer(),
-                  ElevatedButton.icon(
+                  ButtonApp(
                     onPressed: () async {
                       await context.read<AuthProvider>().signOut();
                       if (context.mounted) {
-                        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                        Navigator.of(
+                          context,
+                        ).pushNamedAndRemoveUntil('/', (route) => false);
                       }
                     },
-                    icon: const Icon(Icons.logout_rounded, size: 18, color: Colors.white),
-                    label: const Text('تسجيل الخروج', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade700,
-                    ),
+                    icon: Icons.logout_rounded,
+                    label: 'تسجيل الخروج',
                   ),
                   const SizedBox(width: 12),
-                  ElevatedButton.icon(
+                  ButtonApp(
                     onPressed: _isSaving ? null : _handleSaveProfile,
-                    icon: _isSaving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.save_rounded, size: 18),
-                    label: Text(_isSaving ? 'جاري الحفظ...' : 'حفظ التعديلات'),
+                    icon: Icons.save_rounded,
+                    label: _isSaving ? 'جاري الحفظ...' : 'حفظ التعديلات',
                   ),
                 ],
               ),
@@ -243,7 +256,11 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
               CircleAvatar(
                 radius: 38,
                 backgroundColor: theme.primaryColor,
-                child: const Icon(Icons.shield_rounded, size: 40, color: Colors.white),
+                child: const Icon(
+                  Icons.shield_rounded,
+                  size: 40,
+                  color: Colors.white,
+                ),
               ),
               Positioned(
                 bottom: 0,
@@ -254,7 +271,11 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
                     color: Color(0xFF10B981),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.key_rounded, size: 14, color: Colors.white),
+                  child: const Icon(
+                    Icons.key_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -267,20 +288,34 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
                 Row(
                   children: [
                     Text(
-                      _adminNameController.text.isNotEmpty ? _adminNameController.text : 'Super Admin',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      _adminNameController.text.isNotEmpty
+                          ? _adminNameController.text
+                          : 'Super Admin',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFDC2626).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFDC2626).withOpacity(0.3)),
+                        border: Border.all(
+                          color: const Color(0xFFDC2626).withOpacity(0.3),
+                        ),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.workspace_premium_rounded, size: 14, color: Color(0xFFDC2626)),
+                          Icon(
+                            Icons.workspace_premium_rounded,
+                            size: 14,
+                            color: Color(0xFFDC2626),
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'مدير النظام (Super Admin)',
@@ -298,7 +333,10 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
                 const SizedBox(height: 6),
                 Text(
                   'مستوى الصلاحيات: Full System Authority Access | مستوى الأمان: 99.8% High Security',
-                  style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
                 ),
               ],
             ),
@@ -319,7 +357,10 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('بيانات الاعتماد الرسمية لمدير النظام', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'بيانات الاعتماد الرسمية لمدير النظام',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -358,7 +399,8 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
                   decoration: const InputDecoration(
                     labelText: 'البريد الرسمي المعتمد (غير قابل للتعديل)',
                     prefixIcon: Icon(Icons.mark_email_read_rounded),
-                    helperText: 'لا يمكن تغيير البريد الإلكتروني الرئيسي لمنع فقدان الصلاحيات',
+                    helperText:
+                        'لا يمكن تغيير البريد الإلكتروني الرئيسي لمنع فقدان الصلاحيات',
                   ),
                 ),
               ),
@@ -396,13 +438,19 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
             children: [
               Icon(Icons.share_rounded, size: 20),
               SizedBox(width: 8),
-              Text('روابط التواصل الاجتماعي والتواصل المباشر', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                'روابط التواصل الاجتماعي والتواصل المباشر',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             'روابط وسائل التواصل الرسمية الخاصة بالإدارة والمساعدة والمنصة',
-            style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color),
+            style: TextStyle(
+              fontSize: 12,
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
           const SizedBox(height: 20),
           Row(

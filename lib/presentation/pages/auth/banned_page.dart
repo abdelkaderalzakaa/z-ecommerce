@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 class BannedPage extends StatelessWidget {
   const BannedPage({super.key});
@@ -17,11 +18,7 @@ class BannedPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.block_outlined,
-                size: 80,
-                color: Colors.redAccent,
-              ),
+              Icon(Icons.block_outlined, size: 80, color: Colors.redAccent),
               const SizedBox(height: 24),
               Text(
                 'تم إيقاف حسابك',
@@ -42,17 +39,12 @@ class BannedPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              ElevatedButton.icon(
+              ButtonApp(
                 onPressed: () {
                   context.read<AuthProvider>().logout();
                 },
-                icon: const Icon(Icons.logout),
-                label: const Text('تسجيل الخروج'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
+                icon: Icons.logout,
+                label: 'تسجيل الخروج',
               ),
             ],
           ),

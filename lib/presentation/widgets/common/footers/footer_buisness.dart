@@ -59,11 +59,13 @@ class _DesktopFooter extends StatelessWidget {
             links: [
               (
                 label: TranslationKeys.about.tr(context),
-                onTap: () => changeScreen(context, const AboutPage(useAdminTheme: true)),
+                onTap: () =>
+                    changeScreen(context, const AboutPage(useAdminTheme: true)),
               ),
               (
                 label: TranslationKeys.about.tr(context),
-                onTap: () => changeScreen(context, const AboutPage(useAdminTheme: true)),
+                onTap: () =>
+                    changeScreen(context, const AboutPage(useAdminTheme: true)),
               ),
             ],
           ),
@@ -75,15 +77,22 @@ class _DesktopFooter extends StatelessWidget {
             links: [
               (
                 label: TranslationKeys.contactUs.tr(context),
-                onTap: () => changeScreen(context, const ContactUsPage(useAdminTheme: true)),
+                onTap: () => changeScreen(
+                  context,
+                  const ContactUsPage(useAdminTheme: true),
+                ),
               ),
               (
                 label: TranslationKeys.termsConditions.tr(context),
-                onTap: () => changeScreen(context, const TermsPage(useAdminTheme: true)),
+                onTap: () =>
+                    changeScreen(context, const TermsPage(useAdminTheme: true)),
               ),
               (
                 label: TranslationKeys.privacyPolicy.tr(context),
-                onTap: () => changeScreen(context, const PrivacyPolicyPage(useAdminTheme: true)),
+                onTap: () => changeScreen(
+                  context,
+                  const PrivacyPolicyPage(useAdminTheme: true),
+                ),
               ),
             ],
           ),
@@ -108,19 +117,27 @@ class _MobileFooter extends StatelessWidget {
           links: [
             (
               label: TranslationKeys.about.tr(context),
-              onTap: () => changeScreen(context, const AboutPage(useAdminTheme: true)),
+              onTap: () =>
+                  changeScreen(context, const AboutPage(useAdminTheme: true)),
             ),
             (
               label: TranslationKeys.contactUs.tr(context),
-              onTap: () => changeScreen(context, const ContactUsPage(useAdminTheme: true)),
+              onTap: () => changeScreen(
+                context,
+                const ContactUsPage(useAdminTheme: true),
+              ),
             ),
             (
               label: TranslationKeys.termsConditions.tr(context),
-              onTap: () => changeScreen(context, const TermsPage(useAdminTheme: true)),
+              onTap: () =>
+                  changeScreen(context, const TermsPage(useAdminTheme: true)),
             ),
             (
               label: TranslationKeys.privacyPolicy.tr(context),
-              onTap: () => changeScreen(context, const PrivacyPolicyPage(useAdminTheme: true)),
+              onTap: () => changeScreen(
+                context,
+                const PrivacyPolicyPage(useAdminTheme: true),
+              ),
             ),
           ],
         ),
@@ -180,7 +197,7 @@ class _SocialIconState extends State<_SocialIcon> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -256,7 +273,7 @@ class _FooterLinkState extends State<_FooterLink> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 14),

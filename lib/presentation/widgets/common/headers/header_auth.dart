@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/buttons.dart';
@@ -52,7 +53,8 @@ class _HeaderAuthState extends State<HeaderAuth> {
             child: Row(
               children: [
                 /// back button
-                IconButton(
+                ButtonApp(
+                  format: FormatButtonApp.icon,
                   onPressed: () {
                     if (Navigator.canPop(context)) {
                       Navigator.pop(context);
@@ -60,7 +62,8 @@ class _HeaderAuthState extends State<HeaderAuth> {
                       changeScreen(context, const HomePage());
                     }
                   },
-                  icon: Icon(Icons.arrow_back_ios_outlined),
+                  icon: Icons.arrow_back_ios_outlined,
+                  label: 'رجوع',
                 ),
                 const SizedBox(width: 8),
 
@@ -76,19 +79,19 @@ class _HeaderAuthState extends State<HeaderAuth> {
                     ),
                   ),
                 ],
-                
+
                 Spacer(),
 
                 /// Theme
                 Consumer<SettingsProvider>(
                   builder: (context, settings, _) {
-                    return IconButton(
-                      icon: Icon(
-                        settings.themeMode == ThemeMode.dark
-                            ? Icons.dark_mode
-                            : Icons.light_mode,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
+                    return ButtonApp(
+                      format: FormatButtonApp.icon,
+                      icon: settings.themeMode == ThemeMode.dark
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      label: TranslationKeys.theme.tr(context),
                       onPressed: () {
                         settings.setThemeMode(
                           settings.themeMode == ThemeMode.dark
@@ -96,26 +99,25 @@ class _HeaderAuthState extends State<HeaderAuth> {
                               : ThemeMode.dark,
                         );
                       },
-                      tooltip: TranslationKeys.theme.tr(context),
                     );
                   },
                 ),
                 const SizedBox(width: 4),
+
                 /// Language
                 Consumer2<SettingsProvider, LocaleProvider>(
                   builder: (context, settings, localeProvider, _) {
                     final currentLang = localeProvider.locale.languageCode;
-                    return IconButton(
-                      icon: Icon(
-                        Icons.language,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
+                    return ButtonApp(
+                      format: FormatButtonApp.icon,
+                      icon: Icons.language,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      label: 'تغيير اللغة',
                       onPressed: () {
                         final newLang = currentLang == 'en' ? 'ar' : 'en';
                         settings.setLanguage(newLang);
                         localeProvider.setLocale(Locale(newLang));
                       },
-                      tooltip: TranslationKeys.language.tr(context),
                     );
                   },
                 ),
@@ -144,7 +146,7 @@ class _HeaderAuthState extends State<HeaderAuth> {
 //             'Sign up and get 20% off to your first order. ',
 //             style: TextStyle(color: Colors.white, fontSize: 13),
 //           ),
-//           GestureDetector(
+//           InkWell(
 //             onTap: () {},
 //             child: const Text(
 //               'Sign Up Now',
@@ -182,7 +184,7 @@ class _NavLinkState extends State<_NavLink> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

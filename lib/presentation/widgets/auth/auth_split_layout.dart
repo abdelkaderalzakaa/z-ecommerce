@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../global/translate/localized_string.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../../data/providers/super_admin_provider.dart';
@@ -28,12 +29,13 @@ class AuthSplitLayout extends StatelessWidget {
     final themeAdmin = superAdmin?.themeAdmin;
     final settings = context.watch<SettingsProvider>();
 
-    final bool isDark = settings.themeMode == ThemeMode.dark ||
+    final bool isDark =
+        settings.themeMode == ThemeMode.dark ||
         (settings.themeMode == ThemeMode.system &&
             MediaQuery.of(context).platformBrightness == Brightness.dark);
 
     final dynamicTheme = AppTheme.getThemeFromAdmin(themeAdmin, isDark);
-    
+
     final isMobile = ResponsiveLayout.isMobile(context);
     final primaryColor = dynamicTheme.primaryColor;
     final bgCanvasColor = dynamicTheme.scaffoldBackgroundColor;
@@ -41,57 +43,66 @@ class AuthSplitLayout extends StatelessWidget {
     return Scaffold(
       backgroundColor: bgCanvasColor,
       body: SingleChildScrollView(
-          child: Center(
-            child: isMobile
-                ? _buildFormSection(context, primaryColor, dynamicTheme)
-                : Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          dynamicTheme.scaffoldBackgroundColor,
-                          dynamicTheme.cardColor,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+        child: Center(
+          child: isMobile
+              ? _buildFormSection(context, primaryColor, dynamicTheme)
+              : Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        dynamicTheme.scaffoldBackgroundColor,
+                        dynamicTheme.cardColor,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    height: MediaQuery.of(context).size.height,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Left Side - Visual Image & Quote Banner
-                        Expanded(
-                          flex: 5,
-                          child: _buildVisualSection(context, dynamicTheme, primaryColor),
+                  ),
+                  height: MediaQuery.of(context).size.height,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Left Side - Visual Image & Quote Banner
+                      Expanded(
+                        flex: 5,
+                        child: _buildVisualSection(
+                          context,
+                          dynamicTheme,
+                          primaryColor,
                         ),
-                        Container(color: dynamicTheme.dividerColor, width: 1),
-                        // Right Side - Form Section
-                        Expanded(
-                          flex: 6,
-                          child: Container(
-                            color: dynamicTheme.scaffoldBackgroundColor,
-                            padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                            child: Center(
-                              child: _buildFormSection(
-                                context,
-                                primaryColor,
-                                dynamicTheme,
-                              ),
+                      ),
+                      Container(color: dynamicTheme.dividerColor, width: 1),
+                      // Right Side - Form Section
+                      Expanded(
+                        flex: 6,
+                        child: Container(
+                          color: dynamicTheme.scaffoldBackgroundColor,
+                          padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                          child: Center(
+                            child: _buildFormSection(
+                              context,
+                              primaryColor,
+                              dynamicTheme,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-          ),
+                ),
         ),
+      ),
     );
   }
 
-  Widget _buildVisualSection(BuildContext context, ThemeData dynamicTheme, Color primaryColor) {
+  Widget _buildVisualSection(
+    BuildContext context,
+    ThemeData dynamicTheme,
+    Color primaryColor,
+  ) {
     final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
     final logoUrl = superAdmin?.themeAdmin.logoUrl ?? '';
-    final brandName = superAdmin?.localizationAdmin.name.get(context) ?? 'z-matajer';
+    final brandName =
+        superAdmin?.localizationAdmin.name.get(context) ?? 'z-matajer';
     return Stack(
       children: [
         // Brand Header (Logo / Name)
@@ -112,17 +123,10 @@ class AuthSplitLayout extends StatelessWidget {
                         logoUrl,
                         width: 28,
                         height: 28,
-                        errorBuilder: (_, _, _) => Icon(
-                          Icons.hub,
-                          color: primaryColor,
-                          size: 24,
-                        ),
+                        errorBuilder: (_, _, _) =>
+                            Icon(Icons.hub, color: primaryColor, size: 24),
                       )
-                    : Icon(
-                        Icons.hub_rounded,
-                        color: primaryColor,
-                        size: 24,
-                      ),
+                    : Icon(Icons.hub_rounded, color: primaryColor, size: 24),
               ),
               const SizedBox(width: 12),
               Text(
@@ -146,7 +150,8 @@ class AuthSplitLayout extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                superAdmin?.localizationAdmin.description.get(context) ?? 'سجل الآن لتجربة تسوق فريدة مع z-matajer. احصل على أفضل العروض والميزات الحصرية.',
+                superAdmin?.localizationAdmin.description.get(context) ??
+                    'سجل الآن لتجربة تسوق فريدة مع z-matajer. احصل على أفضل العروض والميزات الحصرية.',
                 style: TextStyle(
                   color: Colors.black87,
                   fontSize: 24,
@@ -166,10 +171,7 @@ class AuthSplitLayout extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 'تسوق آمن، توصيل سريع، ودعم متواصل',
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontSize: 13,
-                ),
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
               ),
             ],
           ),
@@ -197,7 +199,8 @@ class AuthSplitLayout extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(10),
-                  child: IconButton(
+                  child: ButtonApp(
+                    format: FormatButtonApp.icon,
                     onPressed: () {
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);
@@ -205,14 +208,8 @@ class AuthSplitLayout extends StatelessWidget {
                         changeScreenUntill(context, const HomePage());
                       }
                     },
-                    icon: const Icon(Icons.arrow_back),
-                    tooltip: 'رجوع',
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.grey[100],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    icon: Icons.arrow_back,
+                    label: 'رجوع',
                   ),
                 ),
                 Column(

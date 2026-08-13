@@ -9,6 +9,7 @@ import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -160,20 +161,11 @@ class _StoreCategoriesBrandsPageState extends State<StoreCategoriesBrandsPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton.icon(
+                ButtonApp(
                   onPressed: () =>
                       _showAddEditCategoryDialog(context, currentStoreId),
-                  icon: const Icon(Icons.add_rounded, size: 18),
-                  label: const Text('إضافة قسم/فئة جديدة'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  icon: Icons.add_rounded,
+                  label: 'إضافة قسم/فئة جديدة',
                 ),
               ],
             ),
@@ -296,20 +288,11 @@ class _StoreCategoriesBrandsPageState extends State<StoreCategoriesBrandsPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton.icon(
+                ButtonApp(
                   onPressed: () =>
                       _showAddEditBrandDialog(context, currentStoreId),
-                  icon: const Icon(Icons.add_rounded, size: 18),
-                  label: const Text('إضافة علامة تجارية جديدة'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  icon: Icons.add_rounded,
+                  label: 'إضافة علامة تجارية جديدة',
                 ),
               ],
             ),
@@ -412,11 +395,12 @@ class _StoreCategoriesBrandsPageState extends State<StoreCategoriesBrandsPage>
           ],
         ),
         actions: [
-          TextButton(
+          ButtonApp(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(TranslationKeys.cancel.tr(ctx)),
+            label: TranslationKeys.cancel.tr(ctx),
+            format: FormatButtonApp.text,
           ),
-          ElevatedButton(
+          ButtonApp(
             onPressed: () async {
               final text = nameController.text.trim();
               if (text.isEmpty) return;
@@ -453,11 +437,9 @@ class _StoreCategoriesBrandsPageState extends State<StoreCategoriesBrandsPage>
                 );
               }
             },
-            child: Text(
-              isEdit
-                  ? TranslationKeys.saveChanges.tr(ctx)
-                  : TranslationKeys.addNewProduct.tr(ctx),
-            ),
+            label: isEdit
+                ? TranslationKeys.saveChanges.tr(ctx)
+                : TranslationKeys.addNewProduct.tr(ctx),
           ),
         ],
       ),
@@ -514,11 +496,12 @@ class _StoreCategoriesBrandsPageState extends State<StoreCategoriesBrandsPage>
           ],
         ),
         actions: [
-          TextButton(
+          ButtonApp(
+            format: FormatButtonApp.text,
             onPressed: () => Navigator.pop(ctx),
-            child: Text(TranslationKeys.cancel.tr(ctx)),
+            label: TranslationKeys.cancel.tr(ctx),
           ),
-          ElevatedButton(
+          ButtonApp(
             onPressed: () async {
               final name = nameController.text.trim();
               if (name.isEmpty) return;
@@ -561,11 +544,9 @@ class _StoreCategoriesBrandsPageState extends State<StoreCategoriesBrandsPage>
                 );
               }
             },
-            child: Text(
-              isEdit
-                  ? TranslationKeys.saveChanges.tr(ctx)
-                  : TranslationKeys.addNewProduct.tr(ctx),
-            ),
+            label: isEdit
+                ? TranslationKeys.saveChanges.tr(ctx)
+                : TranslationKeys.addNewProduct.tr(ctx),
           ),
         ],
       ),

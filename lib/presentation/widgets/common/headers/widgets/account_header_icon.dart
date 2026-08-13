@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../../../../data/providers/auth_provider.dart';
 import '../../../../../data/providers/business_provider.dart';
 import 'buttons.dart';
@@ -32,24 +33,22 @@ class AccountHeaderIcon extends StatelessWidget {
         }
 
         if (isMobile) {
-          return IconButton(
+          return ButtonApp(
+            format: FormatButtonApp.icon,
             onPressed: handlePress,
-            icon: Icon(
-              isAuthenticated ? Icons.person : Icons.person_outline,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-            ),
+            icon: isAuthenticated ? Icons.person : Icons.person_outline,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+            label: TranslationKeys.myAccount.tr(context),
           );
         }
 
-        return ElevatedButton.icon(
+        return ButtonApp(
           onPressed: handlePress,
-          icon: Icon(isAuthenticated ? Icons.person : Icons.person_outline),
-          label: Text(
-            isAuthenticated
-                ? user?.name.split(' ').first ??
-                      TranslationKeys.profile.tr(context)
-                : TranslationKeys.logIn.tr(context),
-          ),
+          icon: isAuthenticated ? Icons.person : Icons.person_outline,
+          label: isAuthenticated
+              ? user?.name.split(' ').first ??
+                    TranslationKeys.profile.tr(context)
+              : TranslationKeys.logIn.tr(context),
         );
       },
     );

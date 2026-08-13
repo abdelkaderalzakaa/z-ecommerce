@@ -52,7 +52,8 @@ class _TabChip extends StatelessWidget {
     Color getTextColor() {
       if (title == TranslationKeys.logout.tr(context)) return Colors.red;
       if (isSelected) return Colors.white;
-      return Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.textPrimary;
+      return Theme.of(context).textTheme.bodyLarge?.color ??
+          AppColors.textPrimary;
     }
 
     Color getBgColor() {
@@ -60,7 +61,7 @@ class _TabChip extends StatelessWidget {
       return Theme.of(context).cardColor;
     }
 
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -68,7 +69,9 @@ class _TabChip extends StatelessWidget {
           color: getBgColor(),
           borderRadius: BorderRadius.circular(AppRadius.xxl),
           border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).dividerColor,
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).dividerColor,
           ),
         ),
         child: Text(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/providers/business_provider.dart';
 import '../../../global/translate/app_localizations.dart';
@@ -28,7 +29,9 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
     if (!_isInitialized) {
       final user = context.watch<AuthProvider>().currentUser;
       if (user != null) {
-        _fullNameController.text = user.name.isNotEmpty ? user.name : 'صاحب المتجر';
+        _fullNameController.text = user.name.isNotEmpty
+            ? user.name
+            : 'صاحب المتجر';
         _emailController.text = user.email;
         _phoneController.text = (user.phoneNumber.isNotEmpty)
             ? user.phoneNumber
@@ -99,7 +102,9 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
               decoration: BoxDecoration(
                 color: storeTheme?.surfaceColorValue ?? theme.cardColor,
                 border: Border(
-                  bottom: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+                  bottom: BorderSide(
+                    color: theme.dividerColor.withOpacity(0.12),
+                  ),
                 ),
               ),
               child: Row(
@@ -110,12 +115,15 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
                       decoration: BoxDecoration(
                         color: theme.scaffoldBackgroundColor,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: theme.dividerColor.withOpacity(0.15)),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.15),
+                        ),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                      child: ButtonApp(
+                        format: FormatButtonApp.icon,
+                        icon:  Icons.arrow_back_rounded,  
                         onPressed: () => Navigator.pop(context),
-                        tooltip: 'تراجع والعودة',
+                        label: 'تراجع والعودة',
                       ),
                     ),
                   Column(
@@ -140,31 +148,28 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
                   ),
                   const Spacer(),
                   // Sign Out Button
-                  ElevatedButton.icon(
+                  ButtonApp(
+                    color: Colors.red,
                     onPressed: () async {
                       await context.read<AuthProvider>().signOut();
                       if (context.mounted) {
-                        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                        Navigator.of(
+                          context,
+                        ).pushNamedAndRemoveUntil('/', (route) => false);
                       }
                     },
-                    icon: const Icon(Icons.logout_rounded, size: 18, color: Colors.white),
-                    label: const Text('تسجيل الخروج', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade700,
-                    ),
+                    icon: Icons.logout_rounded,
+                    label: 'تسجيل الخروج',
                   ),
                   const SizedBox(width: 12),
                   // Save Button
-                  ElevatedButton.icon(
+                  ButtonApp(
+                    isLoading: _isSaving,
                     onPressed: _isSaving ? null : _handleSaveProfile,
-                    icon: _isSaving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.save_rounded, size: 18),
-                    label: Text(_isSaving ? '...' : TranslationKeys.saveChanges.tr(context)),
+                    icon: Icons.save_rounded,
+                    label: _isSaving
+                        ? '...'
+                        : TranslationKeys.saveChanges.tr(context),
                   ),
                 ],
               ),
@@ -191,7 +196,11 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
     );
   }
 
-  Widget _buildOwnerCardHeader(ThemeData theme, String storeName, String? storeLogo) {
+  Widget _buildOwnerCardHeader(
+    ThemeData theme,
+    String storeName,
+    String? storeLogo,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -213,9 +222,15 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
               CircleAvatar(
                 radius: 36,
                 backgroundColor: theme.primaryColor.withOpacity(0.12),
-                backgroundImage: storeLogo != null ? NetworkImage(storeLogo) : null,
+                backgroundImage: storeLogo != null
+                    ? NetworkImage(storeLogo)
+                    : null,
                 child: storeLogo == null
-                    ? Icon(Icons.person_rounded, size: 36, color: theme.primaryColor)
+                    ? Icon(
+                        Icons.person_rounded,
+                        size: 36,
+                        color: theme.primaryColor,
+                      )
                     : null,
               ),
               Positioned(
@@ -227,7 +242,11 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
                     color: Color(0xFF10B981),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check_rounded, size: 12, color: Colors.white),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 12,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -240,20 +259,34 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
                 Row(
                   children: [
                     Text(
-                      _fullNameController.text.isNotEmpty ? _fullNameController.text : 'صاحب المتجر',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      _fullNameController.text.isNotEmpty
+                          ? _fullNameController.text
+                          : 'صاحب المتجر',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+                        border: Border.all(
+                          color: theme.primaryColor.withOpacity(0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.stars_rounded, size: 14, color: theme.primaryColor),
+                          Icon(
+                            Icons.stars_rounded,
+                            size: 14,
+                            color: theme.primaryColor,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             'صاحب المتجر المعتمد (Store Owner)',
@@ -271,7 +304,10 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
                 const SizedBox(height: 6),
                 Text(
                   'اسم المتجر المرتبط: $storeName | عضو معتمد في المنصة',
-                  style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
                 ),
               ],
             ),
@@ -292,7 +328,10 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('البيانات الشخصية ورابط التواصل', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'البيانات الشخصية ورابط التواصل',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -328,7 +367,8 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
                   decoration: const InputDecoration(
                     labelText: 'البريد الإلكتروني للإدارة (غير قابل للتعديل)',
                     prefixIcon: Icon(Icons.email_outlined),
-                    helperText: 'لا يمكن تغيير البريد الإلكتروني لمنع فقدان الوصول للمتجر',
+                    helperText:
+                        'لا يمكن تغيير البريد الإلكتروني لمنع فقدان الوصول للمتجر',
                   ),
                 ),
               ),

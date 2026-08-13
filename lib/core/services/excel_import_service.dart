@@ -15,6 +15,7 @@ import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/models/product/category_model.dart';
 import 'package:z_ecommerce/data/models/product/brand_model.dart';
 import 'package:z_ecommerce/data/models/product/offer_model.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 class ExcelImportService {
   
@@ -80,14 +81,13 @@ class ExcelImportService {
             ),
           ),
           actions: [
-            TextButton(
+            ButtonApp(
+              label:'إلغاء',
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(dialogContext).primaryColor),
+            ButtonApp(
+              label :'تأكيد واستيراد',
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('تأكيد واستيراد', style: TextStyle(color: Colors.white)),
             ),
           ],
         );

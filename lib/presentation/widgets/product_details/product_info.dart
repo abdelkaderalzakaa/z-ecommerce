@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
 import '../../../data/models/product/product_model.dart';
+import '../../../data/models/product/product_variant.dart';
 import '../../../data/providers/cart_provider.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../pages/customer/cart/cart_page.dart';
@@ -35,9 +36,7 @@ class _ProductInfoState extends State<ProductInfo> {
 
     final cartItemIndex = cartProvider
         .items(businessId)
-        .indexWhere(
-          (item) => item.product?.id == product.id,
-        );
+        .indexWhere((item) => item.product?.id == product.id);
     final cartItem = cartItemIndex >= 0
         ? cartProvider.items(businessId)[cartItemIndex]
         : null;
@@ -52,7 +51,21 @@ class _ProductInfoState extends State<ProductInfo> {
         : TranslationKeys.addToCart.tr(context);
     bool showCheckmark = isInCart;
 
-    final colors = product.variants
+    final sizes = product.variants
+        .map((v) => v.size?.name)
+        .where((s) => s != null && s.isNotEmpty)
+        .map((s) => s!)
+        .toSet()
+        .toList();
+
+    final activeSizeName = sizes.isNotEmpty ? sizes[_selectedSizeIndex.clamp(0, sizes.length - 1)] : null;
+
+    final variantsForSize = product.variants.where((v) {
+      if (activeSizeName == null) return true;
+      return v.size?.name == activeSizeName;
+    }).toList();
+
+    final colors = variantsForSize
         .map((v) {
           switch (v.color) {
             case ProductColor.red: return Colors.red;
@@ -68,12 +81,37 @@ class _ProductInfoState extends State<ProductInfo> {
         .toSet()
         .toList();
 
-    final sizes = product.variants
-        .map((v) => v.size?.name)
-        .where((s) => s != null && s.isNotEmpty)
-        .map((s) => s!)
-        .toSet()
-        .toList();
+    final activeColorIndex = colors.isNotEmpty ? _selectedColorIndex.clamp(0, colors.length - 1) : 0;
+    final selectedColor = colors.isNotEmpty ? colors[activeColorIndex] : null;
+
+    ProductColor? getEnumFromColor(Color? c) {
+      if (c == null) return null;
+      if (c == Colors.red) return ProductColor.red;
+      if (c == Colors.blue) return ProductColor.blue;
+      if (c == Colors.black) return ProductColor.black;
+      if (c == Colors.white) return ProductColor.white;
+      if (c == Colors.green) return ProductColor.green;
+      if (c == Colors.yellow) return ProductColor.yellow;
+      return null;
+    }
+    
+    final matchingColorEnum = getEnumFromColor(selectedColor);
+    
+    ProductVariant selectedVariant = product.defaultVariant;
+    try {
+      selectedVariant = product.variants.firstWhere((v) {
+        final matchesColor = matchingColorEnum == null || v.color == matchingColorEnum;
+        final matchesSize = activeSizeName == null || v.size?.name == activeSizeName;
+        return matchesColor && matchesSize;
+      });
+    } catch (_) {
+      selectedVariant = product.defaultVariant;
+    }
+
+    final double activePrice = product.getPriceForVariant(selectedVariant);
+    final double activeOriginalPrice = selectedVariant.originalPrice ?? selectedVariant.price;
+    final bool hasDisc = product.hasDiscount || (selectedVariant.originalPrice != null && selectedVariant.originalPrice! > selectedVariant.price);
+    final int? activeDiscountPercent = product.discountPercent;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,21 +127,21 @@ class _ProductInfoState extends State<ProductInfo> {
         Row(
           children: [
             Text(
-              '$currency${product.basePrice.toStringAsFixed(0)}',
+              '$currency${activePrice.toStringAsFixed(2)}',
               style: AppTextStyles.priceStyle(
                 context,
               ).copyWith(fontSize: isMobile ? 24 : 32),
             ),
-            ...[
-            const SizedBox(width: 12),
-            Text(
-              '$currency${product.originalPrice.toStringAsFixed(0)}',
-              style: AppTextStyles.priceStrike(
-                context,
-              ).copyWith(fontSize: isMobile ? 24 : 32),
-            ),
-          ],
-            if (product.discountPercent != null) ...[
+            if (hasDisc) ...[
+              const SizedBox(width: 12),
+              Text(
+                '$currency${activeOriginalPrice.toStringAsFixed(2)}',
+                style: AppTextStyles.priceStrike(
+                  context,
+                ).copyWith(fontSize: isMobile ? 24 : 32),
+              ),
+            ],
+            if (hasDisc && activeDiscountPercent != null) ...[
               const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -115,7 +153,7 @@ class _ProductInfoState extends State<ProductInfo> {
                   borderRadius: BorderRadius.circular(AppRadius.xxl),
                 ),
                 child: Text(
-                  '-${product.discountPercent}%',
+                  '-$activeDiscountPercent%',
                   style: const TextStyle(
                     color: AppColors.discountText,
                     fontWeight: FontWeight.w500,
@@ -126,6 +164,26 @@ class _ProductInfoState extends State<ProductInfo> {
             ],
           ],
         ),
+        const SizedBox(height: 12),
+        // Stock quantity display
+        Row(
+          children: [
+            Icon(
+              selectedVariant.stock > 0 ? Icons.check_circle_outline : Icons.remove_circle_outline,
+              color: selectedVariant.stock > 0 ? Colors.green : Colors.red,
+              size: 16,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              selectedVariant.stock > 0 ? 'الكمية المتوفرة: ${selectedVariant.stock}' : 'غير متوفر في المخزون',
+              style: TextStyle(
+                color: selectedVariant.stock > 0 ? Colors.green : Colors.red,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 20),
         Text(
           product.description,
@@ -133,32 +191,37 @@ class _ProductInfoState extends State<ProductInfo> {
             context,
           ).copyWith(fontSize: isMobile ? 14 : 16),
         ),
+        if (colors.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Divider(color: Theme.of(context).dividerColor, height: 1),
+          ),
+          _ColorSelector(
+            colors: colors,
+            selectedIndex: activeColorIndex,
+            onChanged: (val) => setState(() {
+              _selectedColorIndex = val;
+              _localQuantity = null;
+            }),
+          ),
+        ],
+        if (sizes.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Divider(color: Theme.of(context).dividerColor, height: 1),
+          ),
+          _SizeSelector(
+            sizes: sizes,
+            selectedIndex: _selectedSizeIndex.clamp(0, sizes.length - 1),
+            onChanged: (val) => setState(() {
+              _selectedSizeIndex = val;
+              _selectedColorIndex = 0; // Reset color index when size changes to avoid out-of-bounds
+              _localQuantity = null;
+            }),
+          ),
+        ],
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
-          child: Divider(color: Theme.of(context).dividerColor, height: 1),
-        ),
-        _ColorSelector(
-          colors: colors,
-          selectedIndex: _selectedColorIndex,
-          onChanged: (val) => setState(() {
-            _selectedColorIndex = val;
-            _localQuantity = null;
-          }),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
-          child: Divider(color: Theme.of(context).dividerColor, height: 1),
-        ),
-        _SizeSelector(
-          sizes: sizes,
-          selectedIndex: _selectedSizeIndex,
-          onChanged: (val) => setState(() {
-            _selectedSizeIndex = val;
-            _localQuantity = null;
-          }),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
+          padding: const EdgeInsets.symmetric(vertical: 24),
           child: Divider(color: Theme.of(context).dividerColor, height: 1),
         ),
         _ActionRow(
@@ -167,7 +230,11 @@ class _ProductInfoState extends State<ProductInfo> {
           buttonText: buttonText,
           onQuantityChanged: (val) {
             if (isInCart && businessId != null) {
-              cartProvider.updateQuantity(businessId: businessId, itemId: cartItem.id, newQuantity: val);
+              cartProvider.updateQuantity(
+                businessId: businessId,
+                itemId: cartItem.id,
+                newQuantity: val,
+              );
             } else if (!isInCart) {
               setState(() => _localQuantity = val);
             }
@@ -218,7 +285,7 @@ class _ColorSelector extends StatelessWidget {
         Row(
           children: List.generate(
             colors.length,
-            (index) => GestureDetector(
+            (index) => InkWell(
               onTap: () => onChanged(index),
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
@@ -275,7 +342,7 @@ class _SizeSelector extends StatelessWidget {
             final isSelected = selectedIndex == index;
             return MouseRegion(
               cursor: SystemMouseCursors.click,
-              child: GestureDetector(
+              child: InkWell(
                 onTap: () => onChanged(index),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -346,7 +413,7 @@ class _ActionRowState extends State<_ActionRow> {
             children: [
               MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: GestureDetector(
+                child: InkWell(
                   onTap: () {
                     if (widget.quantity > 1) {
                       widget.onQuantityChanged(widget.quantity - 1);
@@ -367,7 +434,7 @@ class _ActionRowState extends State<_ActionRow> {
               const SizedBox(width: 24),
               MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: GestureDetector(
+                child: InkWell(
                   onTap: () => widget.onQuantityChanged(widget.quantity + 1),
                   child: const Icon(Icons.add, size: 20),
                 ),
@@ -381,7 +448,7 @@ class _ActionRowState extends State<_ActionRow> {
             onEnter: (_) => setState(() => _hovered = true),
             onExit: (_) => setState(() => _hovered = false),
             cursor: SystemMouseCursors.click,
-            child: GestureDetector(
+            child: InkWell(
               onTap: widget.onPrimaryAction,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),

@@ -209,7 +209,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   label: TranslationKeys.signUp.tr(context),
                   onPressed: _handleRegister,
                   isLoading: context.watch<AuthProvider>().isLoading,
-
                 ),
               ),
 
@@ -238,7 +237,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         final destination = widget.redirectTo ?? '/';
                         if (destination == '/') {
                           navigator.pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const BusinessPage()),
+                            MaterialPageRoute(
+                              builder: (_) => const BusinessPage(),
+                            ),
                             (route) => false,
                           );
                         } else {
@@ -266,13 +267,11 @@ class _RegisterPageState extends State<RegisterPage> {
                       style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                     const SizedBox(width: 4),
-                    GestureDetector(
+                    InkWell(
                       onTap: () {
                         changeScreen(
                           context,
-                          LoginPage(
-                            redirectTo: widget.redirectTo,
-                          ),
+                          LoginPage(redirectTo: widget.redirectTo),
                         );
                       },
                       child: Text(

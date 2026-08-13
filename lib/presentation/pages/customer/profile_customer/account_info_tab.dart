@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
 import '../../../../../data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -131,7 +132,11 @@ class _AccountInfoTabState extends State<AccountInfoTab> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _SaveButton(onTap: _saveChanges),
+                  ButtonApp(
+                    onPressed: _saveChanges,
+                    label: TranslationKeys.saveChanges.tr(context),
+                    icon: Icons.save,
+                  ),
                   const SizedBox(height: 16),
                   _LogoutButton(isMobile: isMobile),
                 ],
@@ -141,30 +146,14 @@ class _AccountInfoTabState extends State<AccountInfoTab> {
                 children: [
                   _LogoutButton(isMobile: isMobile),
                   const SizedBox(width: 16),
-                  _SaveButton(onTap: _saveChanges),
+                  ButtonApp(
+                    onPressed: _saveChanges,
+                    label: TranslationKeys.saveChanges.tr(context),
+                    icon: Icons.save,
+                  ),
                 ],
               ),
       ],
-    );
-  }
-}
-
-class _SaveButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _SaveButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-      ),
-      child: Text(
-        TranslationKeys.saveChanges.tr(context),
-        textAlign: TextAlign.center,
-      ),
     );
   }
 }
@@ -205,7 +194,8 @@ class _LogoutButton extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         buildBtn(
-          ElevatedButton(
+          ButtonApp(
+            color: Colors.red,
             onPressed: () async {
               final confirm = await showDialog<bool>(
                 context: context,
@@ -215,41 +205,35 @@ class _LogoutButton extends StatelessWidget {
                     'هل أنت تأكد من أنك تريد حذف حسابك نهائياً؟ لا يمكن التراجع عن هذا الإجراء.',
                   ),
                   actions: [
-                    TextButton(
+                    ButtonApp(
+                      format: FormatButtonApp.text,
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('إلغاء'),
+                      label: 'إلغاء',
                     ),
-                    TextButton(
+                    ButtonApp(
+                      format: FormatButtonApp.text,
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text(
-                        'حذف الحساب',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      color: Colors.red,
+                      label: 'حذف الحساب',
                     ),
                   ],
                 ),
               );
 
               if (confirm == true && context.mounted) {
-                final success = await context.read<AuthProvider>().deleteAccount();
+                final success = await context
+                    .read<AuthProvider>()
+                    .deleteAccount();
                 if (success && context.mounted) {
                   changeScreenReplacement(context, const BusinessEntryPage());
                 }
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[700],
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: const Text(
-              'حذف الحساب',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white),
-            ),
+
+            label: 'حذف الحساب',
           ),
         ),
       ],
     );
   }
 }
-

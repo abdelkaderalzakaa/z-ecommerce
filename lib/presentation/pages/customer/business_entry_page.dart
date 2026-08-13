@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_buisness.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_home.dart';
@@ -256,11 +257,10 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                                 color: Theme.of(context).primaryColor,
                                 shape: BoxShape.circle,
                               ),
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.white,
-                                ),
+                              child: ButtonApp(
+                                format: FormatButtonApp.icon,
+                                icon: Icons.arrow_forward,
+                                label: 'بحث',
                                 onPressed: () => _showSnackBar(
                                   isAr ? 'جاري البحث...' : 'Searching...',
                                 ),
@@ -323,8 +323,11 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                   ),
                 ],
               ),
-              child: IconButton(
-                icon: Icon(Icons.chevron_left, color: Theme.of(context).textTheme.bodyMedium?.color),
+              child: ButtonApp(
+                format: FormatButtonApp.icon,
+                icon: Icons.chevron_left,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                label: 'السابق',
                 onPressed: () {
                   _categoriesScrollController.animateTo(
                     (_categoriesScrollController.offset - 150).clamp(
@@ -356,7 +359,7 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: GestureDetector(
+                    child: InkWell(
                       onTap: () {
                         setState(() {
                           if (_selectedCategory == catId) {
@@ -375,7 +378,9 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Theme.of(context).primaryColor
-                                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainerHighest,
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: isSelected
@@ -385,7 +390,11 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                             ),
                             child: Icon(
                               cat.icon,
-                              color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
                               size: isMobile ? 24 : 32,
                             ),
                           ),
@@ -399,7 +408,9 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                               fontWeight: FontWeight.bold,
                               color: isSelected
                                   ? Theme.of(context).primaryColor
-                                  : Theme.of(context).textTheme.bodyMedium?.color,
+                                  : Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.color,
                             ),
                           ),
                         ],
@@ -424,8 +435,11 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                   ),
                 ],
               ),
-              child: IconButton(
-                icon: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyMedium?.color),
+              child: ButtonApp(
+                format: FormatButtonApp.icon,
+                icon: Icons.chevron_right,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                label: 'التالي',
                 onPressed: () {
                   _categoriesScrollController.animateTo(
                     (_categoriesScrollController.offset + 150).clamp(
@@ -656,17 +670,11 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                         : 'Browse our top stores and shop with confidence',
                     style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
-                  TextButton(
+                  ButtonApp(
+                    format: FormatButtonApp.text,
                     onPressed: () =>
                         changeScreenReplacement(context, const BusinessPage()),
-                    child: Text(
-                      isAr ? 'الجميع' : 'See All',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                    label: isAr ? 'الجميع' : 'See All',
                   ),
                 ],
               ),
@@ -779,20 +787,14 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                           color: Colors.black87,
                         ),
                       ),
-                      TextButton(
+                      ButtonApp(
+                        format: FormatButtonApp.text,
                         onPressed: () => _showSnackBar(
                           isAr
                               ? 'سيتم عرض جميع العروض قريباً'
                               : 'Will show all offers soon',
                         ),
-                        child: Text(
-                          isAr ? 'الجميع' : 'See All',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
+                        label: isAr ? 'الجميع' : 'See All',
                       ),
                     ],
                   ),
@@ -875,20 +877,14 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
                           color: Colors.black87,
                         ),
                       ),
-                      TextButton(
+                      ButtonApp(
+                        format: FormatButtonApp.text,
                         onPressed: () => _showSnackBar(
                           isAr
                               ? 'سيتم عرض جميع المنتجات قريباً'
                               : 'Will show all products soon',
                         ),
-                        child: Text(
-                          isAr ? 'الجميع' : 'See All',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
+                        label: isAr ? 'الجميع' : 'See All',
                       ),
                     ],
                   ),
@@ -1074,7 +1070,10 @@ class _StoreCardState extends State<_StoreCard> {
           borderRadius: BorderRadius.circular(24),
           child: InkWell(
             onTap: () {
-              final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+              final businessProvider = Provider.of<BusinessProvider>(
+                context,
+                listen: false,
+              );
               businessProvider.selectBusiness(widget.business.id);
               changeScreen(context, const HomePage());
             },
@@ -1119,13 +1118,15 @@ class _StoreCardState extends State<_StoreCard> {
                             color: Colors.white.withOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
-                          child: IconButton(
-                            icon: Icon(
-                              _isLiked ? Icons.favorite : Icons.favorite_border,
-                              color: _isLiked
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[600],
-                            ),
+                          child: ButtonApp(
+                            format: FormatButtonApp.icon,
+                            icon: _isLiked
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: _isLiked
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey[600],
+                            label: 'إعجاب',
                             onPressed: () =>
                                 setState(() => _isLiked = !_isLiked),
                           ),
@@ -1262,25 +1263,17 @@ class _StoreCardState extends State<_StoreCard> {
                     horizontal: 20,
                     vertical: _isHovered ? 12 : 0,
                   ),
-                  child: ElevatedButton(
+                  child: ButtonApp(
                     onPressed: () {
-                      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+                      final businessProvider = Provider.of<BusinessProvider>(
+                        context,
+                        listen: false,
+                      );
                       businessProvider.selectBusiness(widget.business.id);
                       changeScreen(context, const HomePage());
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      widget.isAr ? 'زيارة المتجر' : 'Visit Store',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    label: widget.isAr ? 'زيارة المتجر' : 'Visit Store',
+                    format: FormatButtonApp.unique,
                   ),
                 ),
               ],
@@ -1606,39 +1599,17 @@ class _PremiumNewsletterSectionState extends State<_PremiumNewsletterSection>
                           ),
                         ),
                         const SizedBox(height: 20),
-                        ElevatedButton(
+                        ButtonApp(
                           onPressed: () => _showSnackBar(
                             context,
                             isAr
                                 ? 'تم الاشتراك بنجاح! شكراً لك.'
                                 : 'Subscribed successfully! Thank you.',
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 4,
-                            shadowColor: primaryColor.withOpacity(0.4),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                isAr
-                                    ? 'تسجيل الدخول / اشتراك'
-                                    : 'Subscribe Now',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.send_rounded, size: 20),
-                            ],
-                          ),
+                          icon: Icons.send,
+                          label: isAr
+                              ? 'تسجيل الدخول / اشتراك'
+                              : 'Subscribe Now',
                         ),
                       ],
                     ),
@@ -1880,7 +1851,7 @@ class _PremiumHowItWorksSectionState extends State<_PremiumHowItWorksSection>
                         children: List.generate(_steps.length, (index) {
                           final isSelected = _currentStep == index;
                           return Expanded(
-                            child: GestureDetector(
+                            child: InkWell(
                               onTap: () => setState(() => _currentStep = index),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 300),
@@ -2112,9 +2083,12 @@ class _PremiumRecommendedCardState extends State<_PremiumRecommendedCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
-          final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+          final businessProvider = Provider.of<BusinessProvider>(
+            context,
+            listen: false,
+          );
           businessProvider.selectBusiness(widget.business.id);
           changeScreen(context, const HomePage());
         },

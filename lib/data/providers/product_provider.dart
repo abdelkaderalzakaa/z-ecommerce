@@ -153,8 +153,12 @@ class ProductProvider extends ChangeNotifier {
       final docId = await _productService.addProduct(product);
       if (docId != null) {
         final newProduct = product.copyWith(id: docId);
-        _allProducts.add(newProduct);
-        _storeProducts.add(newProduct);
+        if (!_allProducts.any((p) => p.id == newProduct.id)) {
+          _allProducts.add(newProduct);
+        }
+        if (!_storeProducts.any((p) => p.id == newProduct.id)) {
+          _storeProducts.add(newProduct);
+        }
         _isLoading = false;
         notifyListeners();
         return true;

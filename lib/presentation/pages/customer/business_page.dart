@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_buisness.dart';
 import '../../../data/models/store/business_model.dart';
@@ -37,11 +38,12 @@ class _BusinessPageState extends State<BusinessPage> {
   Widget build(BuildContext context) {
     final isAr = context.watch<LocaleProvider>().locale.languageCode == 'ar';
     final settings = context.watch<SettingsProvider>();
-    
-    final bool isDark = settings.themeMode == ThemeMode.dark || 
-                        (settings.themeMode == ThemeMode.system && 
-                         MediaQuery.of(context).platformBrightness == Brightness.dark);
-                         
+
+    final bool isDark =
+        settings.themeMode == ThemeMode.dark ||
+        (settings.themeMode == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
     final superAdminProvider = context.watch<SuperAdminProvider>();
     final themeAdmin = superAdminProvider.currentSuperAdmin?.themeAdmin;
     final dynamicTheme = AppTheme.getThemeFromAdmin(themeAdmin, isDark);
@@ -71,9 +73,10 @@ class _BusinessPageState extends State<BusinessPage> {
                       style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 8),
-                    ElevatedButton(
+                    ButtonApp(
                       onPressed: () => businessProvider.fetchBusinesses(),
-                      child: Text(isAr ? 'إعادة المحاولة' : 'Retry'),
+                      icon: Icons.refresh,
+                      label: isAr ? 'إعادة المحاولة' : 'Retry',
                     ),
                   ],
                 ),
@@ -116,8 +119,10 @@ class _BusinessPageState extends State<BusinessPage> {
                                       ),
                                     ],
                                   ),
-                                  child: IconButton(
-                                    icon: const BackButtonIcon(),
+                                  child: ButtonApp(
+                                    format: FormatButtonApp.icon,
+                                    icon: Icons.arrow_back,
+                                    label: 'رجوع',
                                     color: Colors.black87,
                                     onPressed: () {
                                       changeScreenReplacement(
@@ -342,14 +347,19 @@ class _StoreCardState extends State<StoreCard> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      widget.isAr ? 'هذا المتجر غير نشط حالياً' : 'This store is currently inactive',
+                      widget.isAr
+                          ? 'هذا المتجر غير نشط حالياً'
+                          : 'This store is currently inactive',
                     ),
                     backgroundColor: Colors.red,
                   ),
                 );
                 return;
               }
-              final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+              final businessProvider = Provider.of<BusinessProvider>(
+                context,
+                listen: false,
+              );
               businessProvider.selectBusiness(widget.business.id);
               changeScreen(context, const HomePage());
             },
@@ -391,13 +401,13 @@ class _StoreCardState extends State<StoreCard> {
                             color: Colors.white.withOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
-                          child: IconButton(
-                            icon: Icon(
-                              _isLiked ? Icons.favorite : Icons.favorite_border,
-                              color: _isLiked
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[600],
-                            ),
+                          child: ButtonApp(
+                            format: FormatButtonApp.icon,
+                            icon: _isLiked ? Icons.favorite : Icons.favorite_border,
+                            color: _isLiked
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey[600],
+                            label: 'إعجاب',
                             onPressed: () =>
                                 setState(() => _isLiked = !_isLiked),
                           ),
@@ -530,21 +540,9 @@ class _StoreCardState extends State<StoreCard> {
                     horizontal: 20,
                     vertical: _isHovered ? 12 : 0,
                   ),
-                  child: ElevatedButton(
+                  child: ButtonApp(
                     onPressed: () => changeScreen(context, const HomePage()),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      widget.isAr ? 'زيارة المتجر' : 'Visit Store',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    label: widget.isAr ? 'زيارة المتجر' : 'Visit Store',
                   ),
                 ),
               ],

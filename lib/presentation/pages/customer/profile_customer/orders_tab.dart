@@ -271,7 +271,7 @@ class _ViewDetailsButtonState extends State<_ViewDetailsButton> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           changeScreen(context, OrderDetailsPage(invoice: widget.invoice));
         },

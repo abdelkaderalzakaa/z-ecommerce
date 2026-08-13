@@ -5,7 +5,8 @@ import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/products/create_edit_product_page.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
+import 'package:z_ecommerce/presentation/pages/business/products/pages_create_edit_product/info_product.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -25,6 +26,14 @@ class _ProductsTabState extends State<ProductsTab> {
   List<ProductModel> _selectedProducts = [];
   int _currentPage = 1;
   int _itemsPerPage = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().listenToAllProducts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,17 +82,18 @@ class _ProductsTabState extends State<ProductsTab> {
                 _selectedProducts.clear();
               });
             },
-            primaryActionButton: ElevatedButton.icon(
+            primaryActionButton: ButtonApp(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CreateEditProductPage(businessId: widget.store.id),
+                    builder: (context) =>
+                        InfoProductPage(businessId: widget.store.id),
                   ),
                 );
               },
-              icon: const Icon(Icons.add),
-              label: const Text('إضافة منتج'),
+              icon: Icons.add ,
+              label: 'إضافة منتج' ,
             ),
             searchQuery: _searchQuery,
             onSearchChanged: (val) {
@@ -148,7 +158,7 @@ class _ProductsTabState extends State<ProductsTab> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CreateEditProductPage(
+                        builder: (context) => InfoProductPage(
                           product: p,
                           businessId: widget.store.id,
                         ),
@@ -157,9 +167,15 @@ class _ProductsTabState extends State<ProductsTab> {
                   },
                   onDelete: () {
                     // Call provider to delete
-                    Provider.of<ProductProvider>(context, listen: false).deleteProduct(p.id);
+                    Provider.of<ProductProvider>(
+                      context,
+                      listen: false,
+                    ).deleteProduct(p.id);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تم حذف المنتج بنجاح'), backgroundColor: Colors.green),
+                      const SnackBar(
+                        content: Text('تم حذف المنتج بنجاح'),
+                        backgroundColor: Colors.green,
+                      ),
                     );
                   },
                 ),

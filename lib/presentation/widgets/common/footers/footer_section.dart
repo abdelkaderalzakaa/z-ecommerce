@@ -33,7 +33,9 @@ class FooterSection extends StatelessWidget {
               horizontal: hPad,
               vertical: isMobile ? 40 : 64,
             ),
-            child: isMobile ? _MobileFooter(useAdminTheme: useAdminTheme) : _DesktopFooter(useAdminTheme: useAdminTheme),
+            child: isMobile
+                ? _MobileFooter(useAdminTheme: useAdminTheme)
+                : _DesktopFooter(useAdminTheme: useAdminTheme),
           ),
           const Copyright(),
         ],
@@ -53,7 +55,7 @@ class _DesktopFooter extends StatelessWidget {
       children: [
         Expanded(flex: 3, child: _BrandColumn()),
         const SizedBox(width: 40),
-       
+
         Expanded(
           flex: 2,
           child: _FooterLinkColumn(
@@ -61,19 +63,31 @@ class _DesktopFooter extends StatelessWidget {
             links: [
               (
                 label: TranslationKeys.about.tr(context),
-                onTap: () => changeScreen(context, AboutPage(useAdminTheme: useAdminTheme)),
+                onTap: () => changeScreen(
+                  context,
+                  AboutPage(useAdminTheme: useAdminTheme),
+                ),
               ),
               (
                 label: TranslationKeys.contactUs.tr(context),
-                onTap: () => changeScreen(context, ContactUsPage(useAdminTheme: useAdminTheme)),
+                onTap: () => changeScreen(
+                  context,
+                  ContactUsPage(useAdminTheme: useAdminTheme),
+                ),
               ),
               (
                 label: TranslationKeys.termsConditions.tr(context),
-                onTap: () => changeScreen(context, TermsPage(useAdminTheme: useAdminTheme)),
+                onTap: () => changeScreen(
+                  context,
+                  TermsPage(useAdminTheme: useAdminTheme),
+                ),
               ),
               (
                 label: TranslationKeys.privacyPolicy.tr(context),
-                onTap: () => changeScreen(context, PrivacyPolicyPage(useAdminTheme: useAdminTheme)),
+                onTap: () => changeScreen(
+                  context,
+                  PrivacyPolicyPage(useAdminTheme: useAdminTheme),
+                ),
               ),
             ],
           ),
@@ -99,19 +113,31 @@ class _MobileFooter extends StatelessWidget {
           links: [
             (
               label: TranslationKeys.about.tr(context),
-              onTap: () => changeScreen(context, AboutPage(useAdminTheme: useAdminTheme)),
+              onTap: () => changeScreen(
+                context,
+                AboutPage(useAdminTheme: useAdminTheme),
+              ),
             ),
             (
               label: TranslationKeys.contactUs.tr(context),
-              onTap: () => changeScreen(context, ContactUsPage(useAdminTheme: useAdminTheme)),
+              onTap: () => changeScreen(
+                context,
+                ContactUsPage(useAdminTheme: useAdminTheme),
+              ),
             ),
             (
               label: TranslationKeys.termsConditions.tr(context),
-              onTap: () => changeScreen(context, TermsPage(useAdminTheme: useAdminTheme)),
+              onTap: () => changeScreen(
+                context,
+                TermsPage(useAdminTheme: useAdminTheme),
+              ),
             ),
             (
               label: TranslationKeys.privacyPolicy.tr(context),
-              onTap: () => changeScreen(context, PrivacyPolicyPage(useAdminTheme: useAdminTheme)),
+              onTap: () => changeScreen(
+                context,
+                PrivacyPolicyPage(useAdminTheme: useAdminTheme),
+              ),
             ),
           ],
         ),
@@ -124,8 +150,11 @@ class _BrandColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
-    final platformName = superAdmin?.localizationAdmin.name.get(context) ?? 'z-matajer';
-    final platformDescription = superAdmin?.localizationAdmin.footerDescription.get(context) ?? 'منصة متقدمة للتجارة الإلكترونية.';
+    final platformName =
+        superAdmin?.localizationAdmin.name.get(context) ?? 'z-matajer';
+    final platformDescription =
+        superAdmin?.localizationAdmin.footerDescription.get(context) ??
+        'منصة متقدمة للتجارة الإلكترونية.';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +201,7 @@ class _SocialIconState extends State<_SocialIcon> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -248,7 +277,7 @@ class _FooterLinkState extends State<_FooterLink> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 14),

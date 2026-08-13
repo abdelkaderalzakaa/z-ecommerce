@@ -1,5 +1,6 @@
 import 'package:z_ecommerce/presentation/pages/customer/offer/offers_page.dart';
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/buttons.dart';
@@ -43,7 +44,9 @@ class _HeaderBuisnessState extends State<HeaderBuisness> {
     final hPad = ResponsiveLayout.horizontalPadding(context);
 
     return ColoredBox(
-      color: widget.isTransparent ? Colors.transparent : Theme.of(context).scaffoldBackgroundColor,
+      color: widget.isTransparent
+          ? Colors.transparent
+          : Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -59,34 +62,42 @@ class _HeaderBuisnessState extends State<HeaderBuisness> {
                   Consumer2<SettingsProvider, LocaleProvider>(
                     builder: (context, settings, localeProvider, _) {
                       final currentLang = localeProvider.locale.languageCode;
-                      final isDark = settings.themeMode == ThemeMode.dark || (settings.themeMode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.dark);
+                      final isDark =
+                          settings.themeMode == ThemeMode.dark ||
+                          (settings.themeMode == ThemeMode.system &&
+                              MediaQuery.of(context).platformBrightness ==
+                                  Brightness.dark);
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // Theme Toggle
-                          IconButton(
-                            icon: Icon(
-                              isDark ? Icons.light_mode : Icons.dark_mode,
-                              color: widget.isTransparent ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
-                            ),
+                          ButtonApp(
+                            format: FormatButtonApp.icon,
+                            icon: isDark ? Icons.light_mode : Icons.dark_mode,
+                            color: widget.isTransparent
+                                ? Colors.white
+                                : Theme.of(context).textTheme.bodyLarge?.color,
+                            label: isDark ? 'Light Mode' : 'Dark Mode',
                             onPressed: () {
-                              settings.setThemeMode(isDark ? ThemeMode.light : ThemeMode.dark);
+                              settings.setThemeMode(
+                                isDark ? ThemeMode.light : ThemeMode.dark,
+                              );
                             },
-                            tooltip: isDark ? 'Light Mode' : 'Dark Mode',
                           ),
                           const SizedBox(width: 4),
                           // Language Toggle
-                          IconButton(
-                            icon: Icon(
-                              Icons.language,
-                              color: widget.isTransparent ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
-                            ),
+                          ButtonApp(
+                            format: FormatButtonApp.icon,
+                            icon: Icons.language,
+                            color: widget.isTransparent
+                                ? Colors.white
+                                : Theme.of(context).textTheme.bodyLarge?.color,
+                            label: TranslationKeys.language.tr(context),
                             onPressed: () {
                               final newLang = currentLang == 'en' ? 'ar' : 'en';
                               settings.setLanguage(newLang);
                               localeProvider.setLocale(Locale(newLang));
                             },
-                            tooltip: TranslationKeys.language.tr(context),
                           ),
                         ],
                       );
@@ -120,7 +131,7 @@ class _HeaderBuisnessState extends State<HeaderBuisness> {
 //             'Sign up and get 20% off to your first order. ',
 //             style: TextStyle(color: Colors.white, fontSize: 13),
 //           ),
-//           GestureDetector(
+//           InkWell(
 //             onTap: () {},
 //             child: const Text(
 //               'Sign Up Now',
@@ -158,7 +169,7 @@ class _NavLinkState extends State<_NavLink> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: widget.onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

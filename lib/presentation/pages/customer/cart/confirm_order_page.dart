@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../../../data/providers/business_provider.dart';
 import '../../../global/translate/app_localizations.dart';
@@ -96,27 +97,12 @@ class ConfirmOrderPage extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         height: 56,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.button,
-                              ),
-                            ),
-                            elevation: 0,
-                          ),
+                        child: ButtonApp(
+                          icon: Icons.home,
                           onPressed: () {
                             changeScreen(context, const HomePage());
                           },
-                          child: Text(
-                            TranslationKeys.backToHome.tr(context),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          label: TranslationKeys.backToHome.tr(context),
                         ),
                       ),
                     ],
@@ -125,7 +111,10 @@ class ConfirmOrderPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 80),
-            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
+            FooterBuisness(
+              idBuisness:
+                  context.read<BusinessProvider>().selectedBusiness?.id ?? '',
+            ),
           ],
         ),
       ),

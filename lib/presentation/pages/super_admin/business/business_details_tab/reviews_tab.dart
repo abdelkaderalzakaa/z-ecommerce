@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 class ReviewsTab extends StatefulWidget {
   final BusinessModel store;
@@ -41,7 +42,11 @@ class _ReviewsTabState extends State<ReviewsTab> {
                         reviewsEnabled = val;
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(val ? 'تم تفعيل التقييمات' : 'تم إيقاف التقييمات')),
+                        SnackBar(
+                          content: Text(
+                            val ? 'تم تفعيل التقييمات' : 'تم إيقاف التقييمات',
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -54,7 +59,11 @@ class _ReviewsTabState extends State<ReviewsTab> {
                         likesEnabled = val;
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(val ? 'تم تفعيل الإعجابات' : 'تم إيقاف الإعجابات')),
+                        SnackBar(
+                          content: Text(
+                            val ? 'تم تفعيل الإعجابات' : 'تم إيقاف الإعجابات',
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -98,8 +107,12 @@ class _ReviewsTabState extends State<ReviewsTab> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: theme.primaryColor.withOpacity(0.1),
-                      backgroundImage: item.userAvatar != null ? NetworkImage(item.userAvatar!) : null,
-                      child: item.userAvatar == null ? const Icon(Icons.person) : null,
+                      backgroundImage: item.userAvatar != null
+                          ? NetworkImage(item.userAvatar!)
+                          : null,
+                      child: item.userAvatar == null
+                          ? const Icon(Icons.person)
+                          : null,
                     ),
                     title: Row(
                       children: [
@@ -126,34 +139,47 @@ class _ReviewsTabState extends State<ReviewsTab> {
                         const SizedBox(height: 4),
                         Text(
                           item.createdAt.toLocal().toString().split(' ')[0],
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.reply, color: Colors.green),
-                          tooltip: 'إضافة تعليق يمثل الموقع',
+                        ButtonApp(
+                          format: FormatButtonApp.icon,
+                          icon: Icons.reply,
+                          color: Colors.green,
+                          label: 'إضافة تعليق يمثل الموقع',
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('زر: رد كمدير للموقع')),
+                              const SnackBar(
+                                content: Text('زر: رد كمدير للموقع'),
+                              ),
                             );
                           },
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          tooltip: 'تعديل التقييم',
+                        ButtonApp(
+                          format: FormatButtonApp.icon,
+                          icon: Icons.edit,
+                          color: Colors.blue,
+                          label: 'تعديل التقييم',
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('زر: تعديل التقييم')),
+                              const SnackBar(
+                                content: Text('زر: تعديل التقييم'),
+                              ),
                             );
                           },
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          tooltip: 'حذف التقييم',
+                        ButtonApp(
+                          format: FormatButtonApp.icon,
+                          icon: Icons.delete,
+                          color: Colors.red,
+                          label: 'حذف التقييم',
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('زر: حذف التقييم')),

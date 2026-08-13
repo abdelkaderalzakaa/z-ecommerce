@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../global/locale_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../global/settings_provider.dart';
 import '../../global/navigation.dart';
@@ -43,8 +44,11 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       titleSpacing: 16,
       leading: isMobile
-          ? IconButton(
-              icon: Icon(Icons.menu_rounded, color: primaryColor),
+          ? ButtonApp(
+              format: FormatButtonApp.icon,
+              icon: Icons.menu_rounded,
+              color: primaryColor,
+              label: 'القائمة',
               onPressed: onMenuPressed,
             )
           : null,
@@ -55,18 +59,18 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
             height: 38,
             decoration: BoxDecoration(
               color: primaryColor.withOpacity(0.12),
-              borderRadius: storeTheme?.cardBorderRadius ?? BorderRadius.circular(10),
+              borderRadius:
+                  storeTheme?.cardBorderRadius ?? BorderRadius.circular(10),
               border: Border.all(color: primaryColor.withOpacity(0.2)),
               image: logoUrl != null
-                  ? DecorationImage(image: NetworkImage(logoUrl), fit: BoxFit.cover)
+                  ? DecorationImage(
+                      image: NetworkImage(logoUrl),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
             child: logoUrl == null
-                ? Icon(
-                    Icons.storefront_rounded,
-                    color: primaryColor,
-                    size: 20,
-                  )
+                ? Icon(Icons.storefront_rounded, color: primaryColor, size: 20)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -101,18 +105,16 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
         Consumer<SettingsProvider>(
           builder: (context, settings, _) {
             final isDark = settings.themeMode == ThemeMode.dark;
-            return IconButton(
-              icon: Icon(
-                isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                color: isDark ? Colors.amber : theme.primaryColor,
-                size: 22,
-              ),
+            return ButtonApp(
+              format: FormatButtonApp.icon,
+              icon: isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              color: isDark ? Colors.amber : theme.primaryColor,
+              label: TranslationKeys.theme.tr(context),
               onPressed: () {
                 settings.setThemeMode(
                   isDark ? ThemeMode.light : ThemeMode.dark,
                 );
               },
-              tooltip: TranslationKeys.theme.tr(context),
             );
           },
         ),
@@ -121,7 +123,9 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
         // Language Toggle Button (AR / EN)
         InkWell(
           onTap: () {
-            final nextLocale = isArabic ? const Locale('en') : const Locale('ar');
+            final nextLocale = isArabic
+                ? const Locale('en')
+                : const Locale('ar');
             localeProvider.setLocale(nextLocale);
           },
           borderRadius: BorderRadius.circular(20),
@@ -134,11 +138,18 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.language_rounded, size: 16, color: theme.primaryColor),
+                Icon(
+                  Icons.language_rounded,
+                  size: 16,
+                  color: theme.primaryColor,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   isArabic ? 'English' : 'العربية',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -147,9 +158,10 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(width: 12),
 
         // Notifications Icon Button
-        IconButton(
-          icon: const Icon(Icons.notifications_none_rounded, size: 22),
-          tooltip: TranslationKeys.notifications.tr(context),
+        ButtonApp(
+          format: FormatButtonApp.icon,
+          icon: Icons.notifications_none_rounded,
+          label: TranslationKeys.notifications.tr(context),
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -177,7 +189,9 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: theme.primaryColor.withOpacity(0.15),
-                  backgroundImage: logoUrl != null ? NetworkImage(logoUrl) : null,
+                  backgroundImage: logoUrl != null
+                      ? NetworkImage(logoUrl)
+                      : null,
                   child: logoUrl == null
                       ? Text(
                           'S',
@@ -193,7 +207,10 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
                   const SizedBox(width: 8),
                   Text(
                     storeName,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ],

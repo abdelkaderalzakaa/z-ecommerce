@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../../data/providers/cart_provider.dart';
 import '../../../data/providers/business_provider.dart';
 import '../../../../data/providers/offer_provider.dart';
@@ -97,22 +98,12 @@ class _OrderSummaryState extends State<OrderSummary> {
                 ),
               ),
               const SizedBox(width: 8),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.input),
-                  ),
-                ),
+              ButtonApp(
                 onPressed: () {},
-                child: Text(
-                  TranslationKeys.notAvailable.tr(context) == 'not_available'
-                      ? 'Apply'
-                      : 'تطبيق',
-                ),
+                label:
+                    TranslationKeys.notAvailable.tr(context) == 'not_available'
+                    ? 'Apply'
+                    : 'تطبيق',
               ),
             ],
           ),
@@ -261,17 +252,16 @@ class _CheckoutButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
+      child: ButtonApp(
         onPressed: onTap,
-        icon: Icon(
+        icon:  
           isCheckoutPage ? Icons.check : Icons.arrow_forward,
-          size: 20,
-        ),
-        label: Text(
+       
+        label:  
           isCheckoutPage
               ? TranslationKeys.placeOrder.tr(context)
               : TranslationKeys.goToCheckout.tr(context),
-        ),
+        
       ),
     );
   }

@@ -40,7 +40,11 @@ class BrowseBrandsSection extends StatelessWidget {
                 spacing: 16,
                 runSpacing: 16,
                 alignment: WrapAlignment.center,
-                children: brands.map((brand) => _BrandCard(brand: brand, isMobile: isMobile)).toList(),
+                children: brands
+                    .map(
+                      (brand) => _BrandCard(brand: brand, isMobile: isMobile),
+                    )
+                    .toList(),
               ),
             ],
           ),
@@ -65,24 +69,29 @@ class _BrandCardState extends State<_BrandCard> {
 
   @override
   Widget build(BuildContext context) {
-    
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           changeScreen(context, const CategoriesPage());
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: widget.isMobile ? (MediaQuery.of(context).size.width / 2) - 48 : 220,
+          width: widget.isMobile
+              ? (MediaQuery.of(context).size.width / 2) - 48
+              : 220,
           height: widget.isMobile ? 120 : 160,
           decoration: BoxDecoration(
-            color: _isHovered ? Theme.of(context).primaryColor : Theme.of(context).scaffoldBackgroundColor,
+            color: _isHovered
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).scaffoldBackgroundColor,
             borderRadius: BorderRadius.circular(AppRadius.card),
             border: Border.all(
-              color: _isHovered ? Theme.of(context).primaryColor : Theme.of(context).dividerColor,
+              color: _isHovered
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).dividerColor,
               width: 1,
             ),
             boxShadow: _isHovered
@@ -104,7 +113,9 @@ class _BrandCardState extends State<_BrandCard> {
               fontSize: widget.isMobile ? 16 : 22,
               fontWeight: FontWeight.w800,
               letterSpacing: 2,
-              color: _isHovered ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+              color: _isHovered
+                  ? Colors.white
+                  : Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
         ),

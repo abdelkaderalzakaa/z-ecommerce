@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product/category_model.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 class StoreCreateEditCategoryPage extends StatefulWidget {
   final String businessId;
@@ -168,7 +169,7 @@ class _StoreCreateEditCategoryPageState
                     runSpacing: 12,
                     children: _colorOptions.map((color) {
                       final isSelected = color.value == _selectedColor.value;
-                      return GestureDetector(
+                      return InkWell(
                         onTap: () => setState(() => _selectedColor = color),
                         child: Container(
                           width: 48,
@@ -184,8 +185,10 @@ class _StoreCreateEditCategoryPageState
                             ),
                           ),
                           child: isSelected
-                              ? Icon(Icons.check,
-                                  color: Theme.of(context).primaryColor)
+                              ? Icon(
+                                  Icons.check,
+                                  color: Theme.of(context).primaryColor,
+                                )
                               : null,
                         ),
                       );
@@ -204,14 +207,18 @@ class _StoreCreateEditCategoryPageState
                     runSpacing: 12,
                     children: _iconOptions.map((icon) {
                       final isSelected = icon == _selectedIcon;
-                      return GestureDetector(
+                      return InkWell(
                         onTap: () => setState(() => _selectedIcon = icon),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Theme.of(context).primaryColor.withOpacity(0.1)
-                                : Theme.of(context).dividerColor.withOpacity(0.1),
+                                ? Theme.of(
+                                    context,
+                                  ).primaryColor.withOpacity(0.1)
+                                : Theme.of(
+                                    context,
+                                  ).dividerColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
@@ -235,22 +242,10 @@ class _StoreCreateEditCategoryPageState
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
+                    child: ButtonApp(
                       onPressed: _isSubmitting ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isSubmitting
-                          ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary)
-                          : Text(
-                              isEdit ? 'حفظ التعديلات' : 'إضافة الفئة',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                      isLoading: _isSubmitting,
+                      label: isEdit ? 'حفظ التعديلات' : 'إضافة الفئة',
                     ),
                   ),
                 ],

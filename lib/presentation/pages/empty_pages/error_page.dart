@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 import '../../global/locale_provider.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_entry_page.dart';
@@ -76,33 +77,14 @@ class ErrorPage extends StatelessWidget {
               const SizedBox(height: 40),
 
               // Return Home Button
-              ElevatedButton.icon(
+              ButtonApp(
                 onPressed: () {
                   // If they are inside a company context, maybe go to that company's home.
                   // But usually safest to just clear stack and go to entry
                   changeScreenReplacement(context, const BusinessEntryPage());
                 },
-                icon: const Icon(Icons.home_rounded),
-                label: Text(
-                  isAr ? 'العودة للصفحة الرئيسية' : 'Return to Home',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 5,
-                  shadowColor: primaryColor.withOpacity(0.5),
-                ),
+                icon: Icons.home_rounded,
+                label: isAr ? 'العودة للصفحة الرئيسية' : 'Return to Home',
               ),
             ],
           ),

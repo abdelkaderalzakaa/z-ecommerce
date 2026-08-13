@@ -16,6 +16,8 @@ import '../../global/translate/translation_keys.dart';
 import '../../widgets/product_details/related_products.dart';
 import '../../../../data/models/product/product_model.dart';
 import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart';
+import '../../widgets/product_details/product_offers_section.dart';
+import '../../widgets/product_details/product_reviews_section.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final ProductModel product;
@@ -53,9 +55,7 @@ class ProductDetailsPage extends StatelessWidget {
                   ? Column(
                       children: [
                         ProductGallery(
-                          images: product.images.isEmpty
-                              ? ['p1', 'p2', 'p3']
-                              : product.images,
+                          images: product.images,
                         ),
                         const SizedBox(height: 24),
                         ProductInfo(product: product),
@@ -70,9 +70,7 @@ class ProductDetailsPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ProductGallery(
-                                images: product.images.isEmpty
-                                    ? ['p1', 'p2', 'p3']
-                                    : product.images,
+                                images: product.images,
                               ),
                             ],
                           ),
@@ -86,6 +84,12 @@ class ProductDetailsPage extends StatelessWidget {
             const SizedBox(height: 50),
 
             const RelatedProducts(),
+
+            const SizedBox(height: 24),
+            ProductOffersSection(product: product),
+
+            const SizedBox(height: 24),
+            ProductReviewsSection(product: product),
 
             const SizedBox(height: 64),
             FooterBuisness(idBuisness: product.businessId),

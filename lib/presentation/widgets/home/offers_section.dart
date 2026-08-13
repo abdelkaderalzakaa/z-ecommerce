@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/pages/customer/offer/offers_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,11 +20,15 @@ class OffersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OfferProvider>(
       builder: (context, provider, child) {
-        final businessId =
-            context.watch<BusinessProvider>().selectedBusiness?.id;
+        final businessId = context
+            .watch<BusinessProvider>()
+            .selectedBusiness
+            ?.id;
         var activeOffers = provider.activeOffers;
         if (businessId != null) {
-          activeOffers = activeOffers.where((o) => o.businessId == businessId).toList();
+          activeOffers = activeOffers
+              .where((o) => o.businessId == businessId)
+              .toList();
         }
         if (activeOffers.isEmpty) return const SizedBox.shrink();
 
@@ -118,11 +123,12 @@ class OffersSection extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextButton(
+                ButtonApp(
+                  format: FormatButtonApp.text,
                   onPressed: () {
                     changeScreen(context, const OffersPage());
                   },
-                  child: Text(TranslationKeys.viewAll.tr(context)),
+                  label:  TranslationKeys.viewAll.tr(context) ,
                 ),
               ],
             ),

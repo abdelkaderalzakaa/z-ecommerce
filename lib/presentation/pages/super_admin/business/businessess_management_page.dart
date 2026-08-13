@@ -6,6 +6,7 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/business/create_business_page.dart';
@@ -59,25 +60,10 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
         return Scaffold(
           backgroundColor: Colors.transparent,
           body: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Page Header Title
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      TranslationKeys.storesManagement.tr(context),
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
                 // Full Height Expanded AppDataTable Component
                 Expanded(
                   child: AppDataTable<BusinessModel>(
@@ -116,21 +102,11 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                     onFilterTap: () => _showFilterDialog(context),
 
                     // Primary Action Button
-                    primaryActionButton: ElevatedButton.icon(
+                    primaryActionButton: ButtonApp(
                       onPressed: () =>
                           changeScreen(context, const CreateBusinessPage()),
-                      icon: const Icon(Icons.add, size: 18),
-                      label: Text(TranslationKeys.addNewStore.tr(context)),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 11,
-                        ),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                      icon: Icons.add,
+                      label: TranslationKeys.addNewStore.tr(context),
                     ),
 
                     // Pagination Properties
@@ -175,9 +151,8 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                         flex: 1,
                         sortable: true,
                         sortKey: (store) => store.businessType.name,
-                        cellBuilder: (store) => TableTextCell(
-                          title: store.businessType.name,
-                        ),
+                        cellBuilder: (store) =>
+                            TableTextCell(title: store.businessType.name),
                       ),
                       AppTableColumn<BusinessModel>(
                         title: TranslationKeys.ordersAndRating.tr(context),
@@ -192,9 +167,8 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                       AppTableColumn<BusinessModel>(
                         title: TranslationKeys.contact.tr(context),
                         flex: 1,
-                        cellBuilder: (store) => TableTextCell(
-                          title: store.owner?.email ?? '',
-                        ),
+                        cellBuilder: (store) =>
+                            TableTextCell(title: store.owner?.email ?? ''),
                       ),
                       AppTableColumn<BusinessModel>(
                         title: TranslationKeys.statusActive.tr(context),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product/brand_model.dart';
 import 'package:z_ecommerce/data/providers/brand_provider.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 class StoreCreateEditBrandPage extends StatefulWidget {
   final String businessId;
@@ -169,22 +170,11 @@ class _StoreCreateEditBrandPageState extends State<StoreCreateEditBrandPage> {
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
+                    child: ButtonApp(
+                      isLoading: _isSubmitting,
                       onPressed: _isSubmitting ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: _isSubmitting
-                          ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary)
-                          : Text(
-                              isEdit ? 'حفظ التعديلات' : 'إضافة العلامة',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                     
+                      label: isEdit ? 'حفظ التعديلات' : 'إضافة العلامة',
                     ),
                   ),
                 ],

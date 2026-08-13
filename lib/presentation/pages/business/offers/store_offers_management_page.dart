@@ -7,9 +7,10 @@ import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/offers/create_edit_offer_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/offers/create_edit_offer_page.dart';
 
 class StoreOffersManagementPage extends StatefulWidget {
   final String businessId;
@@ -36,8 +37,7 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
       body: Consumer<OfferProvider>(
         builder: (context, provider, child) {
           final filteredOffers = provider.activeOffers.where((offer) {
-            final matchesStore =
-                offer.businessId == widget.businessId;
+            final matchesStore = offer.businessId == widget.businessId;
             final titleStr = offer.name.get(context).toLowerCase();
             final matchesQuery =
                 _searchQuery.isEmpty ||
@@ -87,21 +87,11 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
                         ),
                       ],
                     ),
-                    ElevatedButton.icon(
+                    ButtonApp(
                       onPressed: () =>
                           changeScreen(context, const CreateEditOfferPage()),
-                      icon: const Icon(Icons.add, size: 18),
-                      label: Text(TranslationKeys.addNewOffer.tr(context)),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 11,
-                        ),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                      icon: Icons.add,
+                      label: TranslationKeys.addNewOffer.tr(context),
                     ),
                   ],
                 ),

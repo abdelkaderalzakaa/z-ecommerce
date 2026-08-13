@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../global/core/constants/app_constants.dart';
 import 'auth_text_field.dart';
 
@@ -34,18 +35,18 @@ class _PasswordFieldState extends State<PasswordField> {
       obscureText: _obscureText,
       suffixIcon: Padding(
         padding: const EdgeInsets.only(right: 8.0),
-        child: IconButton(
-          icon: Icon(
-            _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            color: AppColors.textMuted,
-            size: 20,
-          ),
+        child: ButtonApp(
+          format: FormatButtonApp.icon,
+          icon: _obscureText
+              ? Icons.visibility_off_outlined
+              : Icons.visibility_outlined,
+          color: AppColors.textMuted,
+          label: 'عرض كلمة المرور',
           onPressed: () {
             setState(() {
               _obscureText = !_obscureText;
             });
           },
-          splashRadius: 20,
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 
 class IconButtonHeader extends StatelessWidget {
@@ -16,19 +17,19 @@ class IconButtonHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (label == null || label!.isEmpty) {
-      return IconButton(
+      return ButtonApp(
+        format: FormatButtonApp.icon,
         onPressed: onTap,
-        icon: Icon(icon),
+        icon: icon,
+        label: 'أيقونة',
       );
     }
-    
-    return TextButton.icon(
+
+    return ButtonApp(
+      format: FormatButtonApp.text,
       onPressed: onTap,
-      icon: Icon(icon),
-      label: Text(label!),
-      style: TextButton.styleFrom(
-        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-      ),
+      icon: icon,
+      label: label!,
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/responsive/responsive_layout.dart';
@@ -23,7 +24,7 @@ class TopTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
-    final titleStyle = isHero 
+    final titleStyle = isHero
         ? AppTextStyles.heroTitle(context, isMobile).copyWith(
             fontSize: isMobile ? 32 : 40,
             color: Theme.of(context).textTheme.bodyLarge?.color,
@@ -39,21 +40,20 @@ class TopTitle extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            size: isMobile ? 28 : 32,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-          ),
-          onPressed: onBack ?? () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            } else {
-              changeScreen(context, const HomePage());
-            }
-          },
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
+        ButtonApp(
+          format: FormatButtonApp.icon,
+          icon: Icons.arrow_back_rounded,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+          label: 'رجوع',
+          onPressed:
+              onBack ??
+              () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  changeScreen(context, const HomePage());
+                }
+              },
         ),
         const SizedBox(width: 16),
         Flexible(

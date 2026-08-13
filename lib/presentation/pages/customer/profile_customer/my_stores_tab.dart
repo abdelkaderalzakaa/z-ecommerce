@@ -95,7 +95,7 @@ class _StoreCardState extends State<_StoreCard> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           changeScreen(context, const HomePage());
         },

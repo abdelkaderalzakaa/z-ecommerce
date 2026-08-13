@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
 /// Reusable Card Container for Super Admin Views
 class SuperAdminSectionContainer extends StatelessWidget {
@@ -71,12 +72,14 @@ class SuperAdminSectionContainer extends StatelessWidget {
             const SizedBox(height: 24),
             Row(
               children: statCards
-                  .map((card) => Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                          child: card,
-                        ),
-                      ))
+                  .map(
+                    (card) => Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                        child: card,
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ],
@@ -97,9 +100,7 @@ class SuperAdminSectionContainer extends StatelessWidget {
                   offset: const Offset(0, 4),
                 ),
               ],
-              border: Border.all(
-                color: theme.dividerColor.withOpacity(0.1),
-              ),
+              border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
             ),
             child: child,
           ),
@@ -134,10 +135,7 @@ class MetricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6),
         ],
       ),
       child: Row(
@@ -191,14 +189,10 @@ class ProductsManagementPage extends StatelessWidget {
       title: 'إدارة المنتجات',
       subtitle: 'متابعة والتحكم بجميع المنتجات المعروضة عبر المتاجر المختلفة',
       icon: Icons.inventory_2_rounded,
-      actionWidget: ElevatedButton.icon(
+      actionWidget: ButtonApp(
         onPressed: () {},
-        icon: const Icon(Icons.add, size: 18),
-        label: const Text('إضافة منتج جديد'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+        icon: Icons.add,
+        label: 'إضافة منتج جديد',
       ),
       statCards: const [
         MetricCard(
@@ -231,7 +225,10 @@ class ProductsManagementPage extends StatelessWidget {
                     hintText: 'البحث باسم المنتج أو المتجر...',
                     prefixIcon: const Icon(Icons.search, size: 20),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -247,7 +244,7 @@ class ProductsManagementPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // Products Table
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -264,21 +261,23 @@ class ProductsManagementPage extends StatelessWidget {
                 5,
                 (index) => DataRow(
                   cells: [
-                    DataCell(Row(
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: theme.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                    DataCell(
+                      Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: theme.primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(Icons.shopping_bag, size: 20),
                           ),
-                          child: const Icon(Icons.shopping_bag, size: 20),
-                        ),
-                        const SizedBox(width: 10),
-                        Text('منتج أزياء تجريبي #${index + 1}'),
-                      ],
-                    )),
+                          const SizedBox(width: 10),
+                          Text('منتج أزياء تجريبي #${index + 1}'),
+                        ],
+                      ),
+                    ),
                     const DataCell(Text('متجر الأناقة')),
                     DataCell(Text('\$${(index + 1) * 29}.99')),
                     DataCell(Text('${(index + 1) * 15} قطعة')),
@@ -286,25 +285,36 @@ class ProductsManagementPage extends StatelessWidget {
                       Chip(
                         label: Text(
                           index.isEven ? 'نشط' : 'قيد المراجعة',
-                          style: const TextStyle(fontSize: 11, color: Colors.white),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.white,
+                          ),
                         ),
-                        backgroundColor: index.isEven ? Colors.green : Colors.orange,
+                        backgroundColor: index.isEven
+                            ? Colors.green
+                            : Colors.orange,
                         padding: EdgeInsets.zero,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ),
-                    DataCell(Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.visibility_outlined, size: 18),
-                          onPressed: () {},
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 18),
-                          onPressed: () {},
-                        ),
-                      ],
-                    )),
+                    DataCell(
+                      Row(
+                        children: [
+                          ButtonApp(
+                            format: FormatButtonApp.icon,
+                            icon: Icons.visibility_outlined,
+                            label: 'عرض',
+                            onPressed: () {},
+                          ),
+                          ButtonApp(
+                            format: FormatButtonApp.icon,
+                            icon: Icons.edit_outlined,
+                            label: 'تعديل',
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -358,7 +368,10 @@ class OrdersManagementPage extends StatelessWidget {
                     hintText: 'البحث برقم الطلب أو العميل...',
                     prefixIcon: const Icon(Icons.search, size: 20),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -396,12 +409,19 @@ class OrdersManagementPage extends StatelessWidget {
                     DataCell(
                       Chip(
                         label: Text(
-                          index == 0 ? 'جديد' : (index == 1 ? 'قيد التوصيل' : 'مكتمل'),
-                          style: const TextStyle(fontSize: 11, color: Colors.white),
+                          index == 0
+                              ? 'جديد'
+                              : (index == 1 ? 'قيد التوصيل' : 'مكتمل'),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.white,
+                          ),
                         ),
                         backgroundColor: index == 0
                             ? Colors.blue
-                            : (index == 1 ? Colors.amber.shade800 : Colors.green),
+                            : (index == 1
+                                  ? Colors.amber.shade800
+                                  : Colors.green),
                         padding: EdgeInsets.zero,
                       ),
                     ),
@@ -429,14 +449,10 @@ class UsersManagementPage extends StatelessWidget {
       title: 'إدارة المستخدمين والأدوار',
       subtitle: 'التحكم بحسابات المستخدمين ومدراء المتاجر والصلاحيات في النظام',
       icon: Icons.people_alt_rounded,
-      actionWidget: ElevatedButton.icon(
+      actionWidget: ButtonApp(
         onPressed: () {},
-        icon: const Icon(Icons.person_add, size: 18),
-        label: const Text('إضافة مستخدم جديد'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+        icon: Icons.person_add,
+        label: 'إضافة مستخدم جديد',
       ),
       statCards: const [
         MetricCard(
@@ -468,7 +484,10 @@ class UsersManagementPage extends StatelessWidget {
                     hintText: 'البحث باسم المستخدم أو البريد الإلكتروني...',
                     prefixIcon: const Icon(Icons.search, size: 20),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -498,7 +517,10 @@ class UsersManagementPage extends StatelessWidget {
                     const DataCell(Text('2026-01-15')),
                     const DataCell(
                       Chip(
-                        label: Text('نشط', style: TextStyle(fontSize: 11, color: Colors.white)),
+                        label: Text(
+                          'نشط',
+                          style: TextStyle(fontSize: 11, color: Colors.white),
+                        ),
                         backgroundColor: Colors.green,
                       ),
                     ),
@@ -525,14 +547,10 @@ class OffersManagementPage extends StatelessWidget {
       title: 'إدارة العروض والخصومات',
       subtitle: 'إنشاء ومتابعة حملات التخفيضات وكوبونات الخصم للمتاجر',
       icon: Icons.local_offer_rounded,
-      actionWidget: ElevatedButton.icon(
+      actionWidget: ButtonApp(
         onPressed: () {},
-        icon: const Icon(Icons.add, size: 18),
-        label: const Text('إضافة عرض جديد'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+        icon: Icons.add,
+        label: 'إضافة عرض جديد',
       ),
       child: const Center(
         child: Padding(
@@ -570,14 +588,10 @@ class CategoriesManagementPage extends StatelessWidget {
       title: 'إدارة الأقسام والتصنيفات',
       subtitle: 'تنظيم الهيكل العام للأقسام الرئيسية والفرعية في المنصة',
       icon: Icons.category_rounded,
-      actionWidget: ElevatedButton.icon(
+      actionWidget: ButtonApp(
         onPressed: () {},
-        icon: const Icon(Icons.add, size: 18),
-        label: const Text('إضافة قسم جديد'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+        icon: Icons.add,
+        label: 'إضافة قسم جديد',
       ),
       child: const Center(
         child: Padding(

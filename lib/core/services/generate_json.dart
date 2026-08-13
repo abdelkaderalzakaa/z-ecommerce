@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 void main() {
   final random = Random();
   String getRandomDate() {
     final daysToSubtract = random.nextInt(30);
     final date = DateTime(2026, 8, 1).subtract(Duration(days: daysToSubtract));
-    return date.toIso8601String() + 'Z';
+    return '${date.toIso8601String()}Z';
   }
 
   final business = {
@@ -175,7 +177,7 @@ void main() {
       'applicableProductIds': appProducts,
       'isActive': true,
       'startDate': getRandomDate(),
-      'endDate': DateTime.now().add(Duration(days: random.nextInt(25) + 5)).toIso8601String() + 'Z',
+      'endDate': '${DateTime.now().add(Duration(days: random.nextInt(25) + 5)).toIso8601String()}Z',
       'createdAt': getRandomDate(),
       'updatedAt': getRandomDate()
     });
@@ -191,5 +193,7 @@ void main() {
 
   final file = File('lib/core/services/json_data.json');
   file.writeAsStringSync(jsonEncode(data));
-  print('Successfully wrote 20 mock items to lib/core/services/json_data.json');
+  if (kDebugMode) {
+    print('Successfully wrote 20 mock items to lib/core/services/json_data.json');
+  }
 }
