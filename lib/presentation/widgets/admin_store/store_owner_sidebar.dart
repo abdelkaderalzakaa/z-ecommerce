@@ -22,31 +22,39 @@ class StoreOwnerSidebar extends StatelessWidget {
 
   static final List<StoreOwnerSidebarItem> items = [
     const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.dashboard,
+      titleKey: TranslationKeys.storeOverview,
       icon: Icons.dashboard_rounded,
     ),
     const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.productsManagement,
+      titleKey: TranslationKeys.storeProductsTab,
       icon: Icons.inventory_2_rounded,
     ),
     const StoreOwnerSidebarItem(
-      titleKey: 'الفئات والعلامات',
-      icon: Icons.category_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.ordersManagement,
-      icon: Icons.shopping_cart_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.offersManagement,
+      titleKey: TranslationKeys.storeOffersTab,
       icon: Icons.local_offer_rounded,
     ),
     const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.reviews,
+      titleKey: TranslationKeys.storeOrdersTab,
+      icon: Icons.shopping_cart_rounded,
+    ),
+    const StoreOwnerSidebarItem(
+      titleKey: TranslationKeys.storeCategoriesTab,
+      icon: Icons.category_rounded,
+    ),
+    const StoreOwnerSidebarItem(
+      titleKey: TranslationKeys.storeBrandsTab,
+      icon: Icons.branding_watermark_rounded,
+    ),
+    const StoreOwnerSidebarItem(
+      titleKey: TranslationKeys.storeFollowersTab,
+      icon: Icons.people_alt_rounded,
+    ),
+    const StoreOwnerSidebarItem(
+      titleKey: TranslationKeys.storeReviewsAndLikesTab,
       icon: Icons.star_rounded,
     ),
     const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.settingsTab,
+      titleKey: TranslationKeys.storeSettingsTab,
       icon: Icons.settings_rounded,
     ),
   ];
@@ -134,7 +142,7 @@ class StoreOwnerSidebar extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              item.titleKey.contains(' ') ? item.titleKey : item.titleKey.tr(context),
+                              item.titleKey.tr(context),
                               style: TextStyle(
                                 fontFamily: fontFamily,
                                 fontSize: 13,

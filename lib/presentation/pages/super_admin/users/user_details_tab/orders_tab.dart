@@ -19,76 +19,31 @@ class UserOrdersTab extends StatefulWidget {
 }
 
 class _UserOrdersTabState extends State<UserOrdersTab> {
-  String _searchQuery = '';
-  List<InvoiceModel> _selectedOrders = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
-
   @override
   Widget build(BuildContext context) {
     return Consumer<InvoiceProvider>(
       builder: (context, provider, child) {
-        final userInvoices = provider.invoices.where((inv) {
-          final matchesQuery =
-              _searchQuery.isEmpty ||
-              inv.id.toLowerCase().contains(_searchQuery.toLowerCase());
-          return matchesQuery;
-        }).toList();
-
-        final totalItems = userInvoices.length;
-        final totalPages = (totalItems / _itemsPerPage).ceil();
-        final startIndex = (_currentPage - 1) * _itemsPerPage;
-        final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-        final paginatedOrders = (startIndex < totalItems)
-            ? userInvoices.sublist(startIndex, endIndex)
-            : <InvoiceModel>[];
+        final userInvoices = provider.invoices;
 
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: AppDataTable<InvoiceModel>(
-            items: paginatedOrders,
+            items: userInvoices,
             selectable: true,
             showIndexColumn: true,
-            selectedItems: _selectedOrders,
-            onSelectionChanged: (selected) {
-              setState(() {
-                _selectedOrders = selected;
-              });
-            },
-            onBulkDelete: () {
+            onBulkDelete: (selected) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    '${TranslationKeys.deleteSelected.tr(context)} (${_selectedOrders.length})',
+                    '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
                   ),
                   backgroundColor: Colors.red,
                 ),
               );
-              setState(() {
-                _selectedOrders.clear();
-              });
             },
-            searchQuery: _searchQuery,
-            onSearchChanged: (val) {
-              setState(() {
-                _searchQuery = val;
-                _currentPage = 1;
-              });
-            },
-            currentPage: _currentPage,
-            totalPages: totalPages > 0 ? totalPages : 1,
-            totalItems: totalItems,
-            itemsPerPage: _itemsPerPage,
-            onPageChanged: (page) => setState(() => _currentPage = page),
-            onItemsPerPageChanged: (rows) {
-              setState(() {
-                _itemsPerPage = rows;
-                _currentPage = 1;
-              });
-            },
-            emptyMessage: _searchQuery.isNotEmpty
-                ? TranslationKeys.noMatchingResults.tr(context)
-                : TranslationKeys.noDataAvailable.tr(context),
+            searchMatcher: (inv, q) =>
+                inv.id.toLowerCase().contains(q.toLowerCase()),
+            emptyMessage: TranslationKeys.noDataAvailable.tr(context),
             columns: [
               AppTableColumn<InvoiceModel>(
                 title: TranslationKeys.orderId.tr(context),

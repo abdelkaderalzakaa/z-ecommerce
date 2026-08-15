@@ -22,40 +22,20 @@ class BusinessessManagementPage extends StatefulWidget {
 }
 
 class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
-  String _searchQuery = '';
   String _selectedStatusFilter = 'all';
-  List<BusinessModel> _selectedStores = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<BusinessProvider>(
       builder: (context, provider, child) {
         final filteredStores = provider.businesses.where((store) {
-          final nameStr = store.localization.name.get(context).toLowerCase();
-          final categoryStr = store.businessType.name.toLowerCase();
-          final matchesQuery =
-              _searchQuery.isEmpty ||
-              nameStr.contains(_searchQuery.toLowerCase()) ||
-              categoryStr.contains(_searchQuery.toLowerCase()) ||
-              store.id.toLowerCase().contains(_searchQuery.toLowerCase());
-
           final matchesStatus =
               _selectedStatusFilter == 'all' ||
               (store.status ?? 'Active').toLowerCase() ==
                   _selectedStatusFilter.toLowerCase();
 
-          return matchesQuery && matchesStatus;
+          return matchesStatus;
         }).toList();
-
-        final totalItems = filteredStores.length;
-        final totalPages = (totalItems / _itemsPerPage).ceil();
-        final startIndex = (_currentPage - 1) * _itemsPerPage;
-        final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-        final paginatedStores = (startIndex < totalItems)
-            ? filteredStores.sublist(startIndex, endIndex)
-            : <BusinessModel>[];
 
         return Scaffold(
           backgroundColor: Colors.transparent,
@@ -67,38 +47,26 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                 // Full Height Expanded AppDataTable Component
                 Expanded(
                   child: AppDataTable<BusinessModel>(
-                    items: paginatedStores,
+                    items: filteredStores,
                     isLoading: provider.isLoading,
                     selectable: true,
                     showIndexColumn: true,
-                    selectedItems: _selectedStores,
-                    onSelectionChanged: (selected) {
-                      setState(() {
-                        _selectedStores = selected;
-                      });
-                    },
-                    onBulkDelete: () {
+                    onBulkDelete: (selected) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedStores.length})',
+                            '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
                           ),
                           backgroundColor: Colors.red,
                         ),
                       );
-                      setState(() {
-                        _selectedStores.clear();
-                      });
                     },
 
                     // Search and Filter Handlers
-                    searchQuery: _searchQuery,
-                    onSearchChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                        _currentPage = 1;
-                      });
-                    },
+                    searchMatcher: (store, q) =>
+                        store.localization.name.get(context).toLowerCase().contains(q) ||
+                        store.businessType.name.toLowerCase().contains(q) ||
+                        store.id.toLowerCase().contains(q),
                     onFilterTap: () => _showFilterDialog(context),
 
                     // Primary Action Button
@@ -109,23 +77,7 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                       label: TranslationKeys.addNewStore.tr(context),
                     ),
 
-                    // Pagination Properties
-                    currentPage: _currentPage,
-                    totalPages: totalPages > 0 ? totalPages : 1,
-                    totalItems: totalItems,
-                    itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) =>
-                        setState(() => _currentPage = page),
-                    onItemsPerPageChanged: (rows) {
-                      setState(() {
-                        _itemsPerPage = rows;
-                        _currentPage = 1;
-                      });
-                    },
-
-                    emptyMessage: _searchQuery.isNotEmpty
-                        ? TranslationKeys.noMatchingResults.tr(context)
-                        : TranslationKeys.noDataAvailable.tr(context),
+                    emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                     onRowTap: (store) => changeScreen(
                       context,
                       BusinessDetailsPage(storeId: store.id),

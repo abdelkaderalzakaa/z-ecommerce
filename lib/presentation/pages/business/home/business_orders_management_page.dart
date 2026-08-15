@@ -15,7 +15,7 @@ import 'package:z_ecommerce/presentation/pages/super_admin/orders/order_details_
 class BusinessOrdersManagementPage extends StatefulWidget {
   final String businessId;
 
-  const BusinessOrdersManagementPage({super.key, this.businessId = 'cmp_001'});
+  const BusinessOrdersManagementPage({super.key, required this.businessId});
 
   @override
   State<BusinessOrdersManagementPage> createState() =>
@@ -24,11 +24,7 @@ class BusinessOrdersManagementPage extends StatefulWidget {
 
 class _BusinessOrdersManagementPageState
     extends State<BusinessOrdersManagementPage> {
-  String _searchQuery = '';
   String _selectedStatusFilter = 'all';
-  List<InvoiceModel> _selectedInvoices = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
 
   @override
   Widget build(BuildContext context) {
@@ -39,119 +35,61 @@ class _BusinessOrdersManagementPageState
       body: Consumer<InvoiceProvider>(
         builder: (context, provider, child) {
           final filteredInvoices = provider.invoices.where((invoice) {
-            final matchesStore =
-                invoice.storeId == widget.businessId ||
-                invoice.storeId == 'cmp_001';
-            final matchesQuery =
-                _searchQuery.isEmpty ||
-                invoice.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                invoice.shippingAddress.city
-                    .get(context)
-                    .toLowerCase()
-                    .contains(_searchQuery.toLowerCase());
-
+            final matchesStore = invoice.storeId == widget.businessId;
             final matchesStatus =
                 _selectedStatusFilter == 'all' ||
                 invoice.status.name.toLowerCase() ==
                     _selectedStatusFilter.toLowerCase();
 
-            return matchesStore && matchesQuery && matchesStatus;
+            return matchesStore && matchesStatus;
           }).toList();
 
-          final totalItems = filteredInvoices.length;
-          final totalPages = (totalItems / _itemsPerPage).ceil();
-          final startIndex = (_currentPage - 1) * _itemsPerPage;
-          final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-          final paginatedInvoices = (startIndex < totalItems)
-              ? filteredInvoices.sublist(startIndex, endIndex)
-              : <InvoiceModel>[];
-
           return Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Page Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          TranslationKeys.ordersManagement.tr(context),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          TranslationKeys.ordersSubtitle.tr(context),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.textTheme.bodySmall?.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Text(
+                  TranslationKeys.ordersManagement.tr(context),
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // AppDataTable for Store Invoices
                 Expanded(
                   child: AppDataTable<InvoiceModel>(
-                    items: paginatedInvoices,
+                    items: filteredInvoices,
                     selectable: true,
                     showIndexColumn: true,
-                    selectedItems: _selectedInvoices,
-                    onSelectionChanged: (selected) {
+                    onBulkDelete: (selected) {
                       setState(() {
-                        _selectedInvoices = selected;
-                      });
-                    },
-                    onBulkDelete: () {
-                      setState(() {
-                        for (var inv in _selectedInvoices) {
+                        for (var inv in selected) {
                           provider.invoices.removeWhere(
                             (item) => item.id == inv.id,
                           );
                         }
-                        _selectedInvoices.clear();
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedInvoices.length})',
+                            '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
                           ),
                           backgroundColor: Colors.red,
                         ),
                       );
                     },
-                    searchQuery: _searchQuery,
-                    onSearchChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                        _currentPage = 1;
-                      });
-                    },
+                    searchMatcher: (invoice, q) =>
+                        invoice.id.toLowerCase().contains(q) ||
+                        invoice.shippingAddress.city
+                            .get(context)
+                            .toLowerCase()
+                            .contains(q),
                     onFilterTap: () => _showFilterDialog(context),
-                    currentPage: _currentPage,
-                    totalPages: totalPages > 0 ? totalPages : 1,
-                    totalItems: totalItems,
-                    itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) =>
-                        setState(() => _currentPage = page),
-                    onItemsPerPageChanged: (rows) {
-                      setState(() {
-                        _itemsPerPage = rows;
-                        _currentPage = 1;
-                      });
-                    },
-                    emptyMessage: _searchQuery.isNotEmpty
-                        ? TranslationKeys.noMatchingResults.tr(context)
-                        : TranslationKeys.noDataAvailable.tr(context),
+                    emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                     onRowTap: (order) => changeScreen(
                       context,
                       OrderDetailsPage(orderId: order.id),

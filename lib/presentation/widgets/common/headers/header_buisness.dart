@@ -20,7 +20,8 @@ import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 
 class HeaderBuisness extends StatefulWidget implements PreferredSizeWidget {
   final bool isTransparent;
-  const HeaderBuisness({super.key, this.isTransparent = false});
+  final bool isPlatform;
+  const HeaderBuisness({super.key, this.isTransparent = false, this.isPlatform = false});
 
   @override
   Size get preferredSize => const Size.fromHeight(100);
@@ -55,7 +56,7 @@ class _HeaderBuisnessState extends State<HeaderBuisness> {
             padding: EdgeInsets.symmetric(horizontal: hPad),
             child: Row(
               children: [
-                const Logo(),
+                Logo(isPlatform: widget.isPlatform),
                 Spacer(),
                 if (!isMobile) ...[
                   // Language Toggle
@@ -74,9 +75,7 @@ class _HeaderBuisnessState extends State<HeaderBuisness> {
                           ButtonApp(
                             format: FormatButtonApp.icon,
                             icon: isDark ? Icons.light_mode : Icons.dark_mode,
-                            color: widget.isTransparent
-                                ? Colors.white
-                                : Theme.of(context).textTheme.bodyLarge?.color,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                             label: isDark ? 'Light Mode' : 'Dark Mode',
                             onPressed: () {
                               settings.setThemeMode(
@@ -85,13 +84,12 @@ class _HeaderBuisnessState extends State<HeaderBuisness> {
                             },
                           ),
                           const SizedBox(width: 4),
+                          
                           // Language Toggle
                           ButtonApp(
                             format: FormatButtonApp.icon,
                             icon: Icons.language,
-                            color: widget.isTransparent
-                                ? Colors.white
-                                : Theme.of(context).textTheme.bodyLarge?.color,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                             label: TranslationKeys.language.tr(context),
                             onPressed: () {
                               final newLang = currentLang == 'en' ? 'ar' : 'en';

@@ -194,13 +194,13 @@ class AppTheme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
-          return const Color(0xFF999999);
+          return Colors.white;
         }),
         trackColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) return primaryColor ?? const Color(0xFF4F46E5);
-          return const Color(0xFFE5E5E5);
+          return const Color(0xFFE0E0E0);
         }),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),
     );
   }
@@ -396,13 +396,14 @@ class AppTheme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return const Color(0xFF121212);
-          return const Color(0xFF707070);
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return const Color(0xFFB0B0B0);
         }),
         trackColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) return adjustedPrimary;
           return const Color(0xFF333333);
         }),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),
       useMaterial3: true,
     );

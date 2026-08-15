@@ -37,7 +37,7 @@ class FooterSection extends StatelessWidget {
                 ? _MobileFooter(useAdminTheme: useAdminTheme)
                 : _DesktopFooter(useAdminTheme: useAdminTheme),
           ),
-          const Copyright(),
+          const Copyright(isPlatform: true),
         ],
       ),
     );

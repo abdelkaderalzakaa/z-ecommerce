@@ -12,6 +12,7 @@ class ProductOfferModel {
   final int? getQuantity;
   final String? giftProductId;
   final String? giftName;
+  final String? buyProductId; // معرف المنتج المطلوب شراؤه في عرض Buy X Get Y
 
   const ProductOfferModel({
     required this.id,
@@ -27,6 +28,7 @@ class ProductOfferModel {
     this.getQuantity,
     this.giftProductId,
     this.giftName,
+    this.buyProductId,
   });
 
   /// Checks if the offer is currently valid and active
@@ -53,6 +55,7 @@ class ProductOfferModel {
       getQuantity: map['getQuantity'] as int?,
       giftProductId: map['giftProductId'],
       giftName: map['giftName'],
+      buyProductId: map['buyProductId'],
     );
   }
 
@@ -71,6 +74,7 @@ class ProductOfferModel {
       'getQuantity': getQuantity,
       'giftProductId': giftProductId,
       'giftName': giftName,
+      'buyProductId': buyProductId,
     };
   }
 
@@ -88,6 +92,7 @@ class ProductOfferModel {
     int? getQuantity,
     String? giftProductId,
     String? giftName,
+    String? buyProductId,
   }) {
     return ProductOfferModel(
       id: id ?? this.id,
@@ -103,6 +108,7 @@ class ProductOfferModel {
       getQuantity: getQuantity ?? this.getQuantity,
       giftProductId: giftProductId ?? this.giftProductId,
       giftName: giftName ?? this.giftName,
+      buyProductId: buyProductId ?? this.buyProductId,
     );
   }
 }

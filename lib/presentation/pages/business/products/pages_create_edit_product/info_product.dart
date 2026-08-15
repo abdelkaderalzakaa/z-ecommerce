@@ -33,6 +33,8 @@ class _InfoProductPageState extends State<InfoProductPage> {
   String? _selectedCategoryId;
   String? _selectedBrandId;
   String? _selectedBusinessId;
+  bool _isFreeShipping = false;
+  late TextEditingController _shippingCostController;
   bool _isSubmitting = false;
 
   @override
@@ -46,6 +48,9 @@ class _InfoProductPageState extends State<InfoProductPage> {
     _image2Controller = TextEditingController(text: p != null && p.images.length > 1 ? p.images[1] : '');
     _image3Controller = TextEditingController(text: p != null && p.images.length > 2 ? p.images[2] : '');
 
+    _isFreeShipping = p?.isFreeShipping ?? false;
+    _shippingCostController = TextEditingController(text: p?.shippingCost != null && p!.shippingCost > 0 ? p.shippingCost.toString() : '');
+
     _selectedCategoryId = p?.categoryId.isNotEmpty == true ? p?.categoryId : null;
     _selectedBrandId = p?.brandId?.isNotEmpty == true ? p?.brandId : null;
 
@@ -54,7 +59,11 @@ class _InfoProductPageState extends State<InfoProductPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CategoryProvider>().listenToAllCategories();
-      context.read<BrandProvider>().listenToAllBrands();
+      if (_selectedBusinessId != null) {
+        context.read<BrandProvider>().listenToBrandsByStore(_selectedBusinessId!);
+      } else {
+        context.read<BrandProvider>().listenToAllBrands();
+      }
     });
   }
 
@@ -65,6 +74,7 @@ class _InfoProductPageState extends State<InfoProductPage> {
     _image1Controller.dispose();
     _image2Controller.dispose();
     _image3Controller.dispose();
+    _shippingCostController.dispose();
     super.dispose();
   }
 
@@ -133,8 +143,11 @@ class _InfoProductPageState extends State<InfoProductPage> {
       variants: widget.product?.variants ?? [],
       discounts: widget.product?.discounts ?? [],
       offers: widget.product?.offers ?? [],
+      isActive: widget.product?.isActive ?? true,
       isFeatured: widget.product?.isFeatured ?? false,
       isTopSelling: widget.product?.isTopSelling ?? false,
+      isFreeShipping: _isFreeShipping,
+      shippingCost: _isFreeShipping ? 0.0 : (double.tryParse(_shippingCostController.text) ?? 0.0),
       ratings: widget.product?.ratings ?? [],
       createdAt: widget.product?.createdAt ?? DateTime.now(),
     );
@@ -257,7 +270,16 @@ class _InfoProductPageState extends State<InfoProductPage> {
                               child: Text(name),
                             );
                           }).toList(),
-                          onChanged: (val) => setState(() => _selectedBusinessId = val),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedBusinessId = val;
+                                _selectedCategoryId = null;
+                                _selectedBrandId = null;
+                              });
+                              context.read<BrandProvider>().listenToBrandsByStore(val);
+                            }
+                          },
                           validator: (v) =>
                               v == null ? TranslationKeys.required.tr(context) : null,
                         ),
@@ -281,13 +303,13 @@ class _InfoProductPageState extends State<InfoProductPage> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: _selectedCategoryId,
+                              value: categories.any((cat) => cat.id == _selectedCategoryId && _selectedBusinessId != null && cat.businessIds.contains(_selectedBusinessId!)) ? _selectedCategoryId : null,
                               decoration: InputDecoration(
                                 labelText: TranslationKeys.category.tr(context),
                                 border: const OutlineInputBorder(),
                                 prefixIcon: const Icon(Icons.category_rounded, size: 20),
                               ),
-                              items: categories.map((cat) {
+                              items: categories.where((cat) => _selectedBusinessId != null && cat.businessIds.contains(_selectedBusinessId!)).map((cat) {
                                 return DropdownMenuItem<String>(
                                   value: cat.id,
                                   child: Text(cat.label),
@@ -301,13 +323,13 @@ class _InfoProductPageState extends State<InfoProductPage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: _selectedBrandId,
+                              value: brands.any((b) => b.id == _selectedBrandId && _selectedBusinessId != null && b.businessIds.contains(_selectedBusinessId!)) ? _selectedBrandId : null,
                               decoration: const InputDecoration(
                                 labelText: 'العلامة التجارية (Brand)',
                                 border: OutlineInputBorder(),
                                 prefixIcon: Icon(Icons.branding_watermark_rounded, size: 20),
                               ),
-                              items: brands.map((b) {
+                              items: brands.where((b) => _selectedBusinessId != null && b.businessIds.contains(_selectedBusinessId!)).map((b) {
                                 return DropdownMenuItem<String>(
                                   value: b.id,
                                   child: Text(b.name),
@@ -365,6 +387,43 @@ class _InfoProductPageState extends State<InfoProductPage> {
                           prefixIcon: Icon(Icons.image_outlined, size: 20),
                         ),
                       ),
+                      const SizedBox(height: 24),
+
+                      // Shipping Section
+                      const Text(
+                        'خيارات الشحن والتوصيل (تظهر ضمن العروض)',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        title: const Text('شحن مجاني لكامل الأراضي اللبنانية'),
+                        subtitle: const Text('تفعيل شارة الشحن المجاني للمنتج'),
+                        value: _isFreeShipping,
+                        onChanged: (val) {
+                          setState(() {
+                            _isFreeShipping = val;
+                          });
+                        },
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      if (!_isFreeShipping) ...[
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _shippingCostController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: const InputDecoration(
+                            labelText: 'كلفة الشحن إلى كامل الأراضي اللبنانية (\$)',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.local_shipping_outlined, size: 20),
+                          ),
+                          validator: (v) {
+                            if (!_isFreeShipping && (v == null || v.trim().isEmpty)) {
+                              return 'يرجى تحديد كلفة الشحن أو تفعيل الشحن المجاني';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 ),

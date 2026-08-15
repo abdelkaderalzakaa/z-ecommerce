@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_categories_page.dart';
 import '../../widgets/super_admin/super_admin_app_bar.dart';
 import '../../widgets/super_admin/super_admin_sidebar.dart';
 import 'dashboard_overview_page.dart';
@@ -8,8 +9,7 @@ import 'business/businessess_management_page.dart';
 import 'orders/orders_management_page.dart';
 import 'users/users_management_page.dart';
 import 'offers/offers_management_page.dart';
-import 'categories/categories_management_page.dart';
-
+ 
 import 'platform_settings_page.dart';
 
 class SuperAdminHome extends StatefulWidget {
@@ -30,7 +30,7 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
     OrdersManagementPage(),
     UsersManagementPage(),
     OffersManagementPage(),
-    CategoriesManagementPage(),
+    StoreCategoriesPage(isSuperAdmin: true),
     PlatformSettingsPage(),
   ];
 

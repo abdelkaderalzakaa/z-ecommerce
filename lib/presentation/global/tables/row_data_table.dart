@@ -6,9 +6,8 @@ import 'app_table_column.dart';
 /// Helper widget for rendering table empty states.
 class TableEmptyState extends StatelessWidget {
   final String? emptyMessage;
-  final Widget? emptyWidget;
 
-  const TableEmptyState({super.key, this.emptyMessage, this.emptyWidget});
+  const TableEmptyState({super.key, this.emptyMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -17,26 +16,25 @@ class TableEmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(40.0),
-        child: emptyWidget ??
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.inbox_outlined,
-                  size: 48,
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  emptyMessage ?? TranslationKeys.noDataAvailable.tr(context),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: theme.textTheme.bodySmall?.color,
-                  ),
-                ),
-              ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 48,
+              color: theme.textTheme.bodySmall?.color?.withOpacity(0.4),
             ),
+            const SizedBox(height: 12),
+            Text(
+              emptyMessage ?? TranslationKeys.noDataAvailable.tr(context),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: theme.textTheme.bodySmall?.color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

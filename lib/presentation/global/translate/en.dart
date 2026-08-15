@@ -324,6 +324,8 @@ const Map<String, String> en = {
   TranslationKeys.minChars: 'Min 6 characters',
   TranslationKeys.cancel: 'Cancel',
   TranslationKeys.storesSubtitle: 'Browse and manage all registered stores on the platform',
+  TranslationKeys.dashboard: 'Dashboard',
+  TranslationKeys.reviews: 'Reviews',
   TranslationKeys.offersSubtitle: 'Create and manage marketing campaigns and discount coupons',
   TranslationKeys.categoriesSubtitle: 'Organize the main and sub-categories tree on the platform',
 
@@ -348,4 +350,13 @@ const Map<String, String> en = {
   TranslationKeys.storeSettingsSubtitle: 'Manage branding, logo, theme colors, contact & social links',
   TranslationKeys.productsSubtitle: 'Manage, add and update all your store products',
   TranslationKeys.ordersSubtitle: 'Track, process and update status of store orders',
+  TranslationKeys.storeOverview: 'Overview',
+  TranslationKeys.storeProductsTab: 'Products',
+  TranslationKeys.storeOffersTab: 'Offers',
+  TranslationKeys.storeOrdersTab: 'Orders',
+  TranslationKeys.storeCategoriesTab: 'Categories',
+  TranslationKeys.storeBrandsTab: 'Brands',
+  TranslationKeys.storeFollowersTab: 'Followers',
+  TranslationKeys.storeReviewsAndLikesTab: 'Reviews & Likes',
+  TranslationKeys.storeSettingsTab: 'Settings',
 };

@@ -110,7 +110,7 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
         builder: (innerContext) {
           return Scaffold(
             extendBodyBehindAppBar: true,
-            appBar: HeaderBuisness(isTransparent: !_isScrolled),
+            appBar: HeaderBuisness(isTransparent: !_isScrolled, isPlatform: true),
             body: SingleChildScrollView(
               controller: _scrollController,
               child: Column(
@@ -326,7 +326,6 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
               child: ButtonApp(
                 format: FormatButtonApp.icon,
                 icon: Icons.chevron_left,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
                 label: 'السابق',
                 onPressed: () {
                   _categoriesScrollController.animateTo(
@@ -438,7 +437,6 @@ class _BusinessEntryPageState extends State<BusinessEntryPage> {
               child: ButtonApp(
                 format: FormatButtonApp.icon,
                 icon: Icons.chevron_right,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
                 label: 'التالي',
                 onPressed: () {
                   _categoriesScrollController.animateTo(
@@ -1123,9 +1121,6 @@ class _StoreCardState extends State<_StoreCard> {
                             icon: _isLiked
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            color: _isLiked
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey[600],
                             label: 'إعجاب',
                             onPressed: () =>
                                 setState(() => _isLiked = !_isLiked),

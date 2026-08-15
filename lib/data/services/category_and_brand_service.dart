@@ -30,7 +30,7 @@ class CategoryAndBrandService {
   Stream<List<CategoryModel>> streamCategoriesByStore(String businessId) {
     return _firestore
         .collection(_categoriesCollection)
-        .where('businessId', isEqualTo: businessId)
+        .where('businessIds', arrayContains: businessId)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
@@ -43,13 +43,14 @@ class CategoryAndBrandService {
   Future<List<CategoryModel>> getCategories({String? businessId}) async {
     try {
       Query query = _firestore.collection(_categoriesCollection);
-      if (businessId != null) {
-        query = query.where('businessId', whereIn: [businessId, null]);
-      }
       final snapshot = await query.get();
-      return snapshot.docs
+      final all = snapshot.docs
           .map((doc) => CategoryModel.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .toList();
+      if (businessId != null) {
+        return all.where((c) => c.isGlobal || c.businessIds.contains(businessId)).toList();
+      }
+      return all;
     } catch (e) {
       debugPrint('Error getting categories: $e');
       return [];
@@ -107,7 +108,7 @@ class CategoryAndBrandService {
   Stream<List<BrandModel>> streamBrandsByStore(String businessId) {
     return _firestore
         .collection(_brandsCollection)
-        .where('businessId', isEqualTo: businessId)
+        .where('businessIds', arrayContains: businessId)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
@@ -120,13 +121,14 @@ class CategoryAndBrandService {
   Future<List<BrandModel>> getBrands({String? businessId}) async {
     try {
       Query query = _firestore.collection(_brandsCollection);
-      if (businessId != null) {
-        query = query.where('businessId', whereIn: [businessId, null]);
-      }
       final snapshot = await query.get();
-      return snapshot.docs
+      final all = snapshot.docs
           .map((doc) => BrandModel.fromJson({...doc.data() as Map<String, dynamic>, 'id': doc.id}))
           .toList();
+      if (businessId != null) {
+        return all.where((b) => b.isGlobal || b.businessIds.contains(businessId)).toList();
+      }
+      return all;
     } catch (e) {
       debugPrint('Error getting brands: $e');
       return [];

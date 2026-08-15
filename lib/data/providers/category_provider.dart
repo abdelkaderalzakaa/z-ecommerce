@@ -103,10 +103,11 @@ class CategoryProvider extends ChangeNotifier {
       if (id != null) {
         final newCategory = CategoryModel(
           id: id,
-          businessId: category.businessId,
+          businessIds: category.businessIds,
           label: category.label,
           bgColor: category.bgColor,
           icon: category.icon,
+          isGlobal: category.isGlobal,
         );
         _categories.add(newCategory);
         _isLoading = false;
@@ -120,6 +121,20 @@ class CategoryProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// 🔄 تفعيل أو تعطيل الفئة للمتجر
+  Future<bool> toggleCategoryStatus(CategoryModel category, String storeId, bool enable) async {
+    final List<String> updatedStoreIds = List<String>.from(category.businessIds);
+    if (enable) {
+      if (!updatedStoreIds.contains(storeId)) {
+        updatedStoreIds.add(storeId);
+      }
+    } else {
+      updatedStoreIds.remove(storeId);
+    }
+    final updatedCategory = category.copyWith(businessIds: updatedStoreIds);
+    return updateCategory(updatedCategory);
   }
 
   /// ✏️ تحديث فئة قائمة

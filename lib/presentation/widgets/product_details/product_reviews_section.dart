@@ -17,6 +17,8 @@ class ProductReviewsSection extends StatelessWidget {
     final commentController = TextEditingController();
     double selectedRating = 5.0;
 
+    bool isSubmitting = false;
+
     showDialog(
       context: context,
       builder: (context) {
@@ -40,7 +42,11 @@ class ProductReviewsSection extends StatelessWidget {
                     const Center(
                       child: Text(
                         'ما هو تقييمك للمنتج؟',
-                        style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -49,19 +55,18 @@ class ProductReviewsSection extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: List.generate(5, (index) {
                           final starRating = index + 1.0;
-                          return IconButton(
+                          return ButtonApp(
+                            format: FormatButtonApp.icon,
+                            label: "",
                             onPressed: () {
                               setDialogState(() {
                                 selectedRating = starRating;
                               });
                             },
-                            icon: Icon(
-                              starRating <= selectedRating
-                                  ? Icons.star_rounded
-                                  : Icons.star_outline_rounded,
-                              color: Colors.amber,
-                              size: 32,
-                            ),
+                            icon: starRating <= selectedRating
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            color: Colors.amber,
                           );
                         }),
                       ),
@@ -71,7 +76,10 @@ class ProductReviewsSection extends StatelessWidget {
                     // Name Field
                     const Text(
                       'اسمك الكريّم',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     TextField(
@@ -79,7 +87,10 @@ class ProductReviewsSection extends StatelessWidget {
                       decoration: const InputDecoration(
                         hintText: 'مثال: محمد أحمد',
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -87,7 +98,10 @@ class ProductReviewsSection extends StatelessWidget {
                     // Comment Field
                     const Text(
                       'ملاحظاتك وتعليقك',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     TextField(
@@ -96,7 +110,10 @@ class ProductReviewsSection extends StatelessWidget {
                       decoration: const InputDecoration(
                         hintText: 'اكتب رأيك الصادق في جودة المنتج والخدمة...',
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ],
@@ -104,7 +121,7 @@ class ProductReviewsSection extends StatelessWidget {
               ),
               actions: [
                 OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: isSubmitting ? null : () => Navigator.pop(context),
                   child: const Text('إلغاء'),
                 ),
                 ElevatedButton(
@@ -112,19 +129,25 @@ class ProductReviewsSection extends StatelessWidget {
                     backgroundColor: theme.primaryColor,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: () async {
-                    final name = nameController.text.trim();
-                    final comment = commentController.text.trim();
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          final name = nameController.text.trim();
+                          final comment = commentController.text.trim();
 
-                    if (name.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('يرجى كتابة الاسم لإضافة التقييم.'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                      return;
-                    }
+                          if (name.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('يرجى كتابة الاسم لإضافة التقييم.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          setDialogState(() {
+                            isSubmitting = true;
+                          });
 
                     final newRating = RatedUser(
                       id: 'rate_${DateTime.now().millisecondsSinceEpoch}',
@@ -137,10 +160,9 @@ class ProductReviewsSection extends StatelessWidget {
 
                     Navigator.pop(context);
 
-                    final success = await context.read<ProductProvider>().addRatingToProduct(
-                      product.id,
-                      newRating,
-                    );
+                    final success = await context
+                        .read<ProductProvider>()
+                        .addRatingToProduct(product.id, newRating);
 
                     if (context.mounted) {
                       if (success) {
@@ -153,7 +175,9 @@ class ProductReviewsSection extends StatelessWidget {
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('حدث خطأ أثناء إضافة التقييم. حاول مرة أخرى.'),
+                            content: Text(
+                              'حدث خطأ أثناء إضافة التقييم. حاول مرة أخرى.',
+                            ),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -187,10 +211,7 @@ class ProductReviewsSection extends StatelessWidget {
             children: [
               const Text(
                 'تقييمات وآراء العملاء',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               ButtonApp(
                 format: FormatButtonApp.outline,
@@ -231,10 +252,7 @@ class ProductReviewsSection extends StatelessWidget {
                           const SizedBox(width: 4),
                           const Text(
                             '/ 5.0',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -255,7 +273,9 @@ class ProductReviewsSection extends StatelessWidget {
                         'بناءً على ${ratings.length} تقييم',
                         style: TextStyle(
                           fontSize: 12,
-                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                          color: theme.textTheme.bodyMedium?.color?.withOpacity(
+                            0.6,
+                          ),
                         ),
                       ),
                     ],
@@ -307,12 +327,19 @@ class ProductReviewsSection extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 18,
-                            backgroundColor: theme.primaryColor.withOpacity(0.1),
-                            backgroundImage: r.userAvatar != null && r.userAvatar!.isNotEmpty
+                            backgroundColor: theme.primaryColor.withOpacity(
+                              0.1,
+                            ),
+                            backgroundImage:
+                                r.userAvatar != null && r.userAvatar!.isNotEmpty
                                 ? NetworkImage(r.userAvatar!)
                                 : null,
                             child: r.userAvatar == null || r.userAvatar!.isEmpty
-                                ? Icon(Icons.person_rounded, color: theme.primaryColor, size: 18)
+                                ? Icon(
+                                    Icons.person_rounded,
+                                    color: theme.primaryColor,
+                                    size: 18,
+                                  )
                                 : null,
                           ),
                           const SizedBox(width: 12),
@@ -321,7 +348,9 @@ class ProductReviewsSection extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  r.userName.isNotEmpty ? r.userName : 'مستخدم منصة Z',
+                                  r.userName.isNotEmpty
+                                      ? r.userName
+                                      : 'مستخدم منصة Z',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,

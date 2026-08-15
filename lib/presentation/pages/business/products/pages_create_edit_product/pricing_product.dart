@@ -32,33 +32,13 @@ class _PricingProductPageState extends State<PricingProductPage> {
   void _ensureDefaultVariant() {
     if (!_variants.any((v) => v.isDefault)) {
       if (_variants.isEmpty) {
-        _variants.add(const ProductVariant(
-          isDefault: true,
-          price: 0.0,
-          stock: 0,
-        ));
+        _variants.add(
+          const ProductVariant(isDefault: true, price: 0.0, stock: 0),
+        );
       } else {
         _variants[0] = _variants[0].copyWith(isDefault: true);
       }
     }
-  }
-
-  void _setDefault(int index) {
-    setState(() {
-      for (int i = 0; i < _variants.length; i++) {
-        _variants[i] = _variants[i].copyWith(isDefault: i == index);
-      }
-    });
-  }
-
-  void _addVariant() {
-    setState(() {
-      _variants.add(ProductVariant(
-        isDefault: _variants.isEmpty,
-        price: 0.0,
-        stock: 0,
-      ));
-    });
   }
 
   void _removeVariant(int index) {
@@ -125,9 +105,7 @@ class _PricingProductPageState extends State<PricingProductPage> {
     final p = widget.product;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('تسعير وخيارات المنتج'),
-      ),
+      appBar: AppBar(title: const Text('تسعير وخيارات المنتج')),
       body: SafeArea(
         child: Column(
           children: [
@@ -144,7 +122,9 @@ class _PricingProductPageState extends State<PricingProductPage> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+                          side: BorderSide(
+                            color: theme.dividerColor.withOpacity(0.12),
+                          ),
                         ),
                         color: theme.cardColor,
                         child: Padding(
@@ -165,7 +145,10 @@ class _PricingProductPageState extends State<PricingProductPage> {
                                       : null,
                                 ),
                                 child: p.images.isEmpty
-                                    ? const Icon(Icons.inventory_2_rounded, color: Colors.grey)
+                                    ? const Icon(
+                                        Icons.inventory_2_rounded,
+                                        color: Colors.grey,
+                                      )
                                     : null,
                               ),
                               const SizedBox(width: 16),
@@ -175,19 +158,30 @@ class _PricingProductPageState extends State<PricingProductPage> {
                                   children: [
                                     Text(
                                       '${p.category} ${p.brand != null ? "• ${p.brand}" : ""}',
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
                                       p.name,
-                                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       p.description,
-                                      style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color?.withOpacity(0.7)),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.textTheme.bodySmall?.color
+                                            ?.withOpacity(0.7),
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -206,10 +200,37 @@ class _PricingProductPageState extends State<PricingProductPage> {
                         children: [
                           const Text(
                             'خيارات وأسعار المنتج (Variants)',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           TextButton.icon(
-                            onPressed: _addVariant,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VariantFormPage(
+                                    onSave: (newVariant) {
+                                      setState(() {
+                                        if (newVariant.isDefault) {
+                                          for (
+                                            int i = 0;
+                                            i < _variants.length;
+                                            i++
+                                          ) {
+                                            _variants[i] = _variants[i]
+                                                .copyWith(isDefault: false);
+                                          }
+                                        }
+                                        _variants.add(newVariant);
+                                        _ensureDefaultVariant();
+                                      });
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
                             icon: const Icon(Icons.add),
                             label: const Text('إضافة خيار'),
                           ),
@@ -224,12 +245,17 @@ class _PricingProductPageState extends State<PricingProductPage> {
                           decoration: BoxDecoration(
                             color: theme.dividerColor.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+                            border: Border.all(
+                              color: theme.dividerColor.withOpacity(0.1),
+                            ),
                           ),
                           child: const Center(
                             child: Text(
                               'لا توجد خيارات مضافة حالياً. سيتم بيع المنتج كخيار واحد قياسي.',
-                              style: TextStyle(color: Colors.grey, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         )
@@ -238,158 +264,139 @@ class _PricingProductPageState extends State<PricingProductPage> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: _variants.length,
-                          separatorBuilder: (context, _) => const SizedBox(height: 12),
+                          separatorBuilder: (context, _) =>
+                              const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final variant = _variants[index];
 
-                            return Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: theme.cardColor,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
+                            final List<String> details = [];
+                            if (variant.name.isNotEmpty) {
+                              details.add(variant.name);
+                            }
+                            if (variant.size != null) {
+                              details.add(
+                                'المقاس: ${variant.size!.displayName}',
+                              );
+                            }
+                            if (variant.color != null) {
+                              details.add(
+                                'اللون: ${variant.color!.displayName(context)}',
+                              );
+                            }
+                            if (variant.material != null) {
+                              details.add(
+                                'المادة: ${variant.material!.displayName(context)}',
+                              );
+                            }
+                            if (variant.type != null) {
+                              details.add(
+                                'النوع: ${variant.type!.displayName(context)}',
+                              );
+                            }
+                            if (variant.weight != null) {
+                              details.add(
+                                'الوزن: ${variant.weight} ${variant.weightUnit?.displayName(context) ?? ''}',
+                              );
+                            }
+
+                            final detailText = details.isEmpty
+                                ? 'خيار قياسي'
+                                : details.join(' • ');
+
+                            return Card(
+                              elevation: 0,
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
                                   color: variant.isDefault
-                                      ? theme.primaryColor.withOpacity(0.5)
+                                      ? theme.primaryColor
                                       : theme.dividerColor.withOpacity(0.15),
                                   width: variant.isDefault ? 1.5 : 1.0,
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      // Size selection
-                                      Expanded(
-                                        flex: 2,
-                                        child: DropdownButtonFormField<ProductSize>(
-                                          value: variant.size,
-                                          decoration: const InputDecoration(
-                                            labelText: 'المقاس',
-                                            border: OutlineInputBorder(),
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                          ),
-                                          items: ProductSize.values.map((size) {
-                                            return DropdownMenuItem<ProductSize>(
-                                              value: size,
-                                              child: Text(size.name.toUpperCase()),
-                                            );
-                                          }).toList(),
-                                          onChanged: (val) {
-                                            _updateVariant(index, variant.copyWith(size: val));
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-
-                                      // Color selection
-                                      Expanded(
-                                        flex: 2,
-                                        child: DropdownButtonFormField<ProductColor>(
-                                          value: variant.color,
-                                          decoration: const InputDecoration(
-                                            labelText: 'اللون',
-                                            border: OutlineInputBorder(),
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                          ),
-                                          items: ProductColor.values.map((col) {
-                                            return DropdownMenuItem<ProductColor>(
-                                              value: col,
-                                              child: Text(col.name),
-                                            );
-                                          }).toList(),
-                                          onChanged: (val) {
-                                            _updateVariant(index, variant.copyWith(color: val));
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-
-                                      // Price input
-                                      Expanded(
-                                        flex: 2,
-                                        child: TextFormField(
-                                          key: ValueKey('price_${index}_${variant.isDefault}'),
-                                          initialValue: variant.price > 0 ? variant.price.toString() : '',
-                                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                          decoration: const InputDecoration(
-                                            labelText: 'سعر البيع (\$)',
-                                            border: OutlineInputBorder(),
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                          ),
-                                          validator: (v) => v == null || v.trim().isEmpty
-                                              ? TranslationKeys.required.tr(context)
-                                              : null,
-                                          onChanged: (val) {
-                                            final double p = double.tryParse(val) ?? 0.0;
-                                            _updateVariant(index, variant.copyWith(price: p));
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-
-                                      // Original Price input
-                                      Expanded(
-                                        flex: 2,
-                                        child: TextFormField(
-                                          key: ValueKey('orig_${index}_${variant.isDefault}'),
-                                          initialValue: variant.originalPrice != null && variant.originalPrice! > 0
-                                              ? variant.originalPrice.toString()
-                                              : '',
-                                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                          decoration: const InputDecoration(
-                                            labelText: 'السعر الأصلي (\$)',
-                                            border: OutlineInputBorder(),
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                          ),
-                                          onChanged: (val) {
-                                            final double? op = double.tryParse(val);
-                                            _updateVariant(index, variant.copyWith(originalPrice: op));
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-
-                                      // Stock input
-                                      Expanded(
-                                        flex: 2,
-                                        child: TextFormField(
-                                          key: ValueKey('stock_${index}_${variant.isDefault}'),
-                                          initialValue: variant.stock > 0 ? variant.stock.toString() : '',
-                                          keyboardType: TextInputType.number,
-                                          decoration: const InputDecoration(
-                                            labelText: 'الكمية',
-                                            border: OutlineInputBorder(),
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                          ),
-                                          validator: (v) => v == null || v.trim().isEmpty
-                                              ? TranslationKeys.required.tr(context)
-                                              : null,
-                                          onChanged: (val) {
-                                            final int s = int.tryParse(val) ?? 0;
-                                            _updateVariant(index, variant.copyWith(stock: s));
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-
-                                      // Set default icon button
-                                      IconButton(
-                                        icon: Icon(
-                                          variant.isDefault ? Icons.star : Icons.star_border,
-                                          color: Colors.amber,
-                                        ),
-                                        tooltip: variant.isDefault ? 'الخيار الافتراضي' : 'تعيين كافتراضي',
-                                        onPressed: () => _setDefault(index),
-                                      ),
-
-                                      // Delete button
-                                      IconButton(
-                                        icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                        onPressed: () => _removeVariant(index),
-                                      ),
-                                    ],
+                              color: theme.cardColor,
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                leading: Icon(
+                                  variant.isDefault
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: Colors.amber,
+                                ),
+                                title: Text(
+                                  detailText,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: variant.isActive
+                                        ? null
+                                        : theme.disabledColor,
+                                    decoration: variant.isActive
+                                        ? null
+                                        : TextDecoration.lineThrough,
                                   ),
-                                ],
+                                ),
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    'السعر: \$${variant.price.toStringAsFixed(2)} • الكمية: ${variant.stock}',
+                                    style: TextStyle(
+                                      color: variant.isActive
+                                          ? theme.textTheme.bodySmall?.color
+                                                ?.withOpacity(0.7)
+                                          : theme.disabledColor,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Active/Inactive toggle switch
+                                    Switch(
+                                      value: variant.isActive,
+                                      onChanged: (val) {
+                                        _updateVariant(
+                                          index,
+                                          variant.copyWith(isActive: val),
+                                        );
+                                      },
+                                    ),
+                                    ButtonApp(
+                                      format: FormatButtonApp.icon,
+                                      icon: Icons.edit_outlined,
+                                      label: "",
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                VariantFormPage(
+                                                  variant: variant,
+                                                  onSave: (updated) {
+                                                    _updateVariant(
+                                                      index,
+                                                      updated,
+                                                    );
+                                                  },
+                                                ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    ButtonApp(
+                                      format: FormatButtonApp.icon,
+                                      label: "",
+                                      icon: Icons.delete_outline,
+                                      color: Colors.red,
+                                      onPressed: () => _removeVariant(index),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -402,19 +409,31 @@ class _PricingProductPageState extends State<PricingProductPage> {
 
             // Bottom Action Buttons
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 12.0,
+              ),
               decoration: BoxDecoration(
                 color: theme.cardColor,
-                border: Border(top: BorderSide(color: theme.dividerColor.withOpacity(0.12))),
+                border: Border(
+                  top: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   OutlinedButton(
-                    onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     child: Text(TranslationKeys.cancel.tr(context)),
                   ),
@@ -431,5 +450,452 @@ class _PricingProductPageState extends State<PricingProductPage> {
         ),
       ),
     );
+  }
+}
+
+class VariantFormPage extends StatefulWidget {
+  final ProductVariant? variant;
+  final ValueChanged<ProductVariant> onSave;
+
+  const VariantFormPage({super.key, this.variant, required this.onSave});
+
+  @override
+  State<VariantFormPage> createState() => _VariantFormPageState();
+}
+
+class _VariantFormPageState extends State<VariantFormPage> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _priceController;
+  late TextEditingController _originalPriceController;
+  late TextEditingController _stockController;
+  late TextEditingController _weightController;
+
+  ProductSize? _size;
+  ProductColor? _color;
+  ProductMaterial? _material;
+  ProductType? _type;
+  WeightUnit? _weightUnit;
+  bool _isDefault = false;
+  bool _isActive = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final v = widget.variant;
+    _nameController = TextEditingController(text: v?.name ?? '');
+    _priceController = TextEditingController(
+      text: v != null && v.price > 0 ? v.price.toString() : '',
+    );
+    _originalPriceController = TextEditingController(
+      text: v?.originalPrice != null ? v!.originalPrice.toString() : '',
+    );
+    _stockController = TextEditingController(
+      text: v != null && v.stock >= 0 ? v.stock.toString() : '',
+    );
+    _weightController = TextEditingController(
+      text: v?.weight != null ? v!.weight.toString() : '',
+    );
+
+    _size = v?.size;
+    _color = v?.color;
+    _material = v?.material;
+    _type = v?.type;
+    _weightUnit = v?.weightUnit;
+    _isDefault = v?.isDefault ?? false;
+    _isActive = v?.isActive ?? true;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    _originalPriceController.dispose();
+    _stockController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.variant == null
+              ? (isAr ? 'إضافة خيار جديد' : 'Add New Variant')
+              : (isAr ? 'تعديل الخيار' : 'Edit Variant'),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'اسم الخيار (مثال: أحمر - XL)',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _priceController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: const InputDecoration(
+                                labelText: 'سعر البيع (\$)',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) => v == null || v.trim().isEmpty
+                                  ? TranslationKeys.required.tr(context)
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _stockController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'الكمية',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (v) => v == null || v.trim().isEmpty
+                                  ? TranslationKeys.required.tr(context)
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<ProductSize?>(
+                              value: _size,
+                              decoration: const InputDecoration(
+                                labelText: 'المقاس',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text('بلا مقاس'),
+                                ),
+                                ...ProductSize.values.map(
+                                  (s) => DropdownMenuItem(
+                                    value: s,
+                                    child: Text(s.displayName),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) => setState(() => _size = val),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: DropdownButtonFormField<ProductColor?>(
+                              value: _color,
+                              decoration: const InputDecoration(
+                                labelText: 'اللون',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text('بلا لون'),
+                                ),
+                                ...ProductColor.values.map(
+                                  (c) => DropdownMenuItem(
+                                    value: c,
+                                    child: Text(c.displayName(context)),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) => setState(() => _color = val),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<ProductMaterial?>(
+                              value: _material,
+                              decoration: const InputDecoration(
+                                labelText: 'المادة',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text('بلا مادة'),
+                                ),
+                                ...ProductMaterial.values.map(
+                                  (m) => DropdownMenuItem(
+                                    value: m,
+                                    child: Text(m.displayName(context)),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) =>
+                                  setState(() => _material = val),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: DropdownButtonFormField<ProductType?>(
+                              value: _type,
+                              decoration: const InputDecoration(
+                                labelText: 'النوع',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text('بلا نوع'),
+                                ),
+                                ...ProductType.values.map(
+                                  (t) => DropdownMenuItem(
+                                    value: t,
+                                    child: Text(t.displayName(context)),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) => setState(() => _type = val),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _weightController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: const InputDecoration(
+                                labelText: 'الوزن',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: DropdownButtonFormField<WeightUnit?>(
+                              value: _weightUnit,
+                              decoration: const InputDecoration(
+                                labelText: 'وحدة الوزن',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: null,
+                                  child: Text('بلا وحدة'),
+                                ),
+                                ...WeightUnit.values.map(
+                                  (u) => DropdownMenuItem(
+                                    value: u,
+                                    child: Text(u.displayName(context)),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) =>
+                                  setState(() => _weightUnit = val),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      CheckboxListTile(
+                        title: Text(
+                          isAr
+                              ? 'تعيين كخيار افتراضي للمنتج'
+                              : 'Set as default variant',
+                        ),
+                        value: _isDefault,
+                        onChanged: (val) =>
+                            setState(() => _isDefault = val ?? false),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      SwitchListTile(
+                        title: Text(isAr ? 'تفعيل الخيار' : 'Enable option'),
+                        value: _isActive,
+                        onChanged: (val) => setState(() => _isActive = val),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 12.0,
+              ),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                border: Border(
+                  top: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(TranslationKeys.cancel.tr(context)),
+                  ),
+                  ButtonApp(
+                    onPressed: () {
+                      if (!_formKey.currentState!.validate()) return;
+                      final newVariant = ProductVariant(
+                        isDefault: _isDefault,
+                        isActive: _isActive,
+                        name: _nameController.text.trim(),
+                        price: double.tryParse(_priceController.text) ?? 0.0,
+                        originalPrice: null,
+                        stock: int.tryParse(_stockController.text) ?? 0,
+                        size: _size,
+                        color: _color,
+                        material: _material,
+                        type: _type,
+                        weight: double.tryParse(_weightController.text),
+                        weightUnit: _weightUnit,
+                      );
+                      widget.onSave(newVariant);
+                      Navigator.pop(context);
+                    },
+                    icon: Icons.check,
+                    label: isAr ? 'حفظ الخيار' : 'Save Variant',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+extension ProductSizeExt on ProductSize {
+  String get displayName {
+    switch (this) {
+      case ProductSize.small:
+        return 'S (صغير)';
+      case ProductSize.medium:
+        return 'M (متوسط)';
+      case ProductSize.large:
+        return 'L (كبير)';
+      case ProductSize.xlarge:
+        return 'XL (كبير جداً)';
+      case ProductSize.xxlarge:
+        return 'XXL (كبير جداً جداً)';
+    }
+  }
+}
+
+extension ProductColorExt on ProductColor {
+  String displayName(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    switch (this) {
+      case ProductColor.red:
+        return isAr ? 'أحمر' : 'Red';
+      case ProductColor.blue:
+        return isAr ? 'أزرق' : 'Blue';
+      case ProductColor.black:
+        return isAr ? 'أسود' : 'Black';
+      case ProductColor.white:
+        return isAr ? 'أبيض' : 'White';
+      case ProductColor.green:
+        return isAr ? 'أخضر' : 'Green';
+      case ProductColor.yellow:
+        return isAr ? 'أصفر' : 'Yellow';
+    }
+  }
+}
+
+extension ProductMaterialExt on ProductMaterial {
+  String displayName(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    switch (this) {
+      case ProductMaterial.cotton:
+        return isAr ? 'قطن' : 'Cotton';
+      case ProductMaterial.leather:
+        return isAr ? 'جلد' : 'Leather';
+      case ProductMaterial.silk:
+        return isAr ? 'حرير' : 'Silk';
+      case ProductMaterial.wool:
+        return isAr ? 'صوف' : 'Wool';
+      case ProductMaterial.polyester:
+        return isAr ? 'بوليستر' : 'Polyester';
+      case ProductMaterial.wood:
+        return isAr ? 'خشب' : 'Wood';
+      case ProductMaterial.metal:
+        return isAr ? 'معدن' : 'Metal';
+      case ProductMaterial.plastic:
+        return isAr ? 'بلاستيك' : 'Plastic';
+    }
+  }
+}
+
+extension ProductTypeExt on ProductType {
+  String displayName(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    switch (this) {
+      case ProductType.casual:
+        return isAr ? 'كاجوال' : 'Casual';
+      case ProductType.formal:
+        return isAr ? 'رسمي' : 'Formal';
+      case ProductType.sport:
+        return isAr ? 'رياضي' : 'Sport';
+      case ProductType.classic:
+        return isAr ? 'كلاسيك' : 'Classic';
+    }
+  }
+}
+
+extension WeightUnitExt on WeightUnit {
+  String displayName(BuildContext context) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    switch (this) {
+      case WeightUnit.gram:
+        return isAr ? 'جرام' : 'g';
+      case WeightUnit.kilogram:
+        return isAr ? 'كيلوجرام' : 'kg';
+      case WeightUnit.pound:
+        return isAr ? 'رطل' : 'lb';
+    }
   }
 }

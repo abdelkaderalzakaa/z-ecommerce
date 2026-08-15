@@ -20,7 +20,10 @@ class ProductOffersTab extends StatelessWidget {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حذف العرض بنجاح!'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('تم حذف العرض بنجاح!'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -47,12 +50,61 @@ class ProductOffersTab extends StatelessWidget {
                 icon: Icons.add_circle_outline_rounded,
                 label: 'إضافة عرض جديد للمنتج',
                 onPressed: () {
-                  changeScreen(context, CreateEditProductOfferPage(product: product));
+                  changeScreen(
+                    context,
+                    CreateEditProductOfferPage(product: product),
+                  );
                 },
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          // Shipping Info Card
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+            ),
+            color: product.isFreeShipping ? Colors.green.withOpacity(0.05) : theme.cardColor,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    product.isFreeShipping ? Icons.local_shipping_rounded : Icons.local_shipping_outlined,
+                    color: product.isFreeShipping ? Colors.green : theme.primaryColor,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'حالة وتكلفة الشحن (معروض للعملاء ضمن العروض)',
+                          style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product.isFreeShipping
+                              ? 'شحن مجاني لكامل الأراضي اللبنانية'
+                              : 'كلفة الشحن: \$${product.shippingCost.toStringAsFixed(2)} لكامل الأراضي اللبنانية',
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          const Text(
+            'حملات البيع الترويجي النشطة (اشترِ X واحصل على Y)',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
 
           if (product.offers.isEmpty)
             Container(
@@ -86,7 +138,9 @@ class ProductOffersTab extends StatelessWidget {
                     color: theme.cardColor,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isValid ? theme.primaryColor.withOpacity(0.2) : theme.dividerColor.withOpacity(0.12),
+                      color: isValid
+                          ? theme.primaryColor.withOpacity(0.2)
+                          : theme.dividerColor.withOpacity(0.12),
                     ),
                   ),
                   child: Row(
@@ -94,7 +148,9 @@ class ProductOffersTab extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isValid ? theme.primaryColor.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                          color: isValid
+                              ? theme.primaryColor.withOpacity(0.1)
+                              : Colors.grey.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -112,19 +168,29 @@ class ProductOffersTab extends StatelessWidget {
                               children: [
                                 Text(
                                   offer.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: isValid ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                                    color: isValid
+                                        ? Colors.green.withOpacity(0.1)
+                                        : Colors.grey.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     isValid ? 'نشط' : 'منتهي / غير نشط',
                                     style: TextStyle(
-                                      color: isValid ? Colors.green : Colors.grey,
+                                      color: isValid
+                                          ? Colors.green
+                                          : Colors.grey,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -133,28 +199,46 @@ class ProductOffersTab extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'نوع العرض: ${offer.type} • الكوبون: ${offer.couponCode ?? "بدون"}',
-                              style: const TextStyle(fontSize: 12, color: Colors.black87),
+                             Text(
+                              'اشترِ ${offer.buyQuantity} قطع من "${context.watch<ProductProvider>().allProducts.firstWhere((p) => p.id == offer.buyProductId, orElse: () => product).name}" واحصل على ${offer.getQuantity} قطع من "${offer.giftName ?? 'منتج مجاني'}" مجاناً',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black87,
+                              ),
                             ),
-                            if (offer.startDate != null && offer.endDate != null) ...[
+                            if (offer.startDate != null &&
+                                offer.endDate != null) ...[
                               const SizedBox(height: 2),
                               Text(
                                 'صلاحية العرض: من ${offer.startDate!.toString().substring(0, 10)} إلى ${offer.endDate!.toString().substring(0, 10)}',
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit_note_rounded),
+                      ButtonApp(
+                        format: FormatButtonApp.icon,
+                        label: "",
+                        icon: Icons.edit_note_rounded,
                         onPressed: () {
-                          changeScreen(context, CreateEditProductOfferPage(product: product, offer: offer));
+                          changeScreen(
+                            context,
+                            CreateEditProductOfferPage(
+                              product: product,
+                              offer: offer,
+                            ),
+                          );
                         },
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                      ButtonApp(
+                        format: FormatButtonApp.icon,
+                        label: "",
+                        icon: Icons.delete_outline_rounded,
+                        color: Colors.red,
                         onPressed: () => _deleteOffer(context, offer.id),
                       ),
                     ],

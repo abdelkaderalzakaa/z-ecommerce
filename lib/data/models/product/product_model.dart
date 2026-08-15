@@ -35,6 +35,10 @@ class ProductModel {
   final bool isFeatured; // هل المنتج مميز؟
   final bool isTopSelling; // هل المنتج من الأكثر مبيعاً؟
 
+  // 6.2 الشحن والتوصيل
+  final bool isFreeShipping; // هل الشحن مجاني؟
+  final double shippingCost; // كلفة الشحن إلى كامل الأراضي اللبنانية (إن لم يكن مجانياً)
+
   // 7. التقييمات والمراجعات
   final List<RatedUser> ratings; // قائمة التقييمات التفصيلية
 
@@ -59,6 +63,8 @@ class ProductModel {
     this.isActive = true,
     this.isFeatured = false,
     this.isTopSelling = false,
+    this.isFreeShipping = false,
+    this.shippingCost = 0.0,
     this.ratings = const [],
     this.createdAt,
     this.updatedAt,
@@ -100,7 +106,7 @@ class ProductModel {
 
   /// السعر الأصلي قبل الخصم
   double get originalPrice {
-    return defaultVariant.originalPrice ?? defaultVariant.price;
+    return defaultVariant.price;
   }
 
   /// نسبة الخصم المئوية (مثل 15%) المحسوبة ديناميكياً
@@ -110,16 +116,13 @@ class ProductModel {
       if (activeDisc.isPercentage) {
         return activeDisc.value.round();
       } else {
-        final orig = originalPrice;
+        final orig = defaultVariant.price;
         if (orig > 0) {
           return ((activeDisc.value / orig) * 100).round();
         }
       }
     }
-    final orig = originalPrice;
-    final curr = basePrice;
-    if (orig <= curr || orig == 0) return null;
-    return (((orig - curr) / orig) * 100).round();
+    return null;
   }
 
   /// حساب السعر لمتغير محدد وتطبيق الخصم عليه إذا كان للمنتج خصم
@@ -169,6 +172,8 @@ class ProductModel {
       businessId: map['businessId'] ?? '',
       categoryId: map['categoryId'] ?? '',
       brandId: map['brandId'],
+      isFreeShipping: map['isFreeShipping'] ?? false,
+      shippingCost: map['shippingCost'] != null ? (map['shippingCost'] as num).toDouble() : 0.0,
       name: map['name'] ?? '',
       description: map['description'] ?? '',
       category: map['category'] ?? '',
@@ -221,6 +226,8 @@ class ProductModel {
       'isActive': isActive,
       'isFeatured': isFeatured,
       'isTopSelling': isTopSelling,
+      'isFreeShipping': isFreeShipping,
+      'shippingCost': shippingCost,
       'ratings': ratings.map((r) => r.toMap()).toList(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -252,6 +259,8 @@ class ProductModel {
     bool? isActive,
     bool? isFeatured,
     bool? isTopSelling,
+    bool? isFreeShipping,
+    double? shippingCost,
     List<RatedUser>? ratings,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -273,6 +282,8 @@ class ProductModel {
       isActive: isActive ?? this.isActive,
       isFeatured: isFeatured ?? this.isFeatured,
       isTopSelling: isTopSelling ?? this.isTopSelling,
+      isFreeShipping: isFreeShipping ?? this.isFreeShipping,
+      shippingCost: shippingCost ?? this.shippingCost,
       ratings: ratings ?? this.ratings,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

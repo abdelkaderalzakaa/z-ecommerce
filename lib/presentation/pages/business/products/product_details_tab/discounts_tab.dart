@@ -14,13 +14,18 @@ class ProductDiscountsTab extends StatelessWidget {
 
   void _deleteDiscount(BuildContext context, String discountId) async {
     final provider = context.read<ProductProvider>();
-    final updatedList = product.discounts.where((d) => d.id != discountId).toList();
+    final updatedList = product.discounts
+        .where((d) => d.id != discountId)
+        .toList();
     final updatedProduct = product.copyWith(discounts: updatedList);
     await provider.updateProduct(updatedProduct);
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حذف الخصم بنجاز!'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('تم حذف الخصم بنجاز!'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -47,7 +52,10 @@ class ProductDiscountsTab extends StatelessWidget {
                 icon: Icons.add_circle_outline_rounded,
                 label: 'إضافة خصم جديد',
                 onPressed: () {
-                  changeScreen(context, CreateEditDiscountPage(product: product));
+                  changeScreen(
+                    context,
+                    CreateEditDiscountPage(product: product),
+                  );
                 },
               ),
             ],
@@ -87,7 +95,9 @@ class ProductDiscountsTab extends StatelessWidget {
                     color: theme.cardColor,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isValid ? theme.primaryColor.withOpacity(0.2) : theme.dividerColor.withOpacity(0.12),
+                      color: isValid
+                          ? theme.primaryColor.withOpacity(0.2)
+                          : theme.dividerColor.withOpacity(0.12),
                     ),
                   ),
                   child: Row(
@@ -95,7 +105,9 @@ class ProductDiscountsTab extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: isValid ? Colors.red.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                          color: isValid
+                              ? Colors.red.withOpacity(0.1)
+                              : Colors.grey.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -113,19 +125,29 @@ class ProductDiscountsTab extends StatelessWidget {
                               children: [
                                 Text(
                                   d.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: isValid ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                                    color: isValid
+                                        ? Colors.green.withOpacity(0.1)
+                                        : Colors.grey.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     isValid ? 'نشط' : 'غير نشط / منتهي',
                                     style: TextStyle(
-                                      color: isValid ? Colors.green : Colors.grey,
+                                      color: isValid
+                                          ? Colors.green
+                                          : Colors.grey,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -136,26 +158,43 @@ class ProductDiscountsTab extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               'القيمة: ${d.value}${d.isPercentage ? "%" : "\$"} • النوع: ${d.type}',
-                              style: const TextStyle(fontSize: 12, color: Colors.black87),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black87,
+                              ),
                             ),
                             if (d.startDate != null && d.endDate != null) ...[
                               const SizedBox(height: 2),
                               Text(
                                 'صلاحية الخصم: من ${d.startDate!.toString().substring(0, 10)} إلى ${d.endDate!.toString().substring(0, 10)}',
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit_note_rounded),
+                      ButtonApp(
+                        format: FormatButtonApp.icon,
+                        label: "",
+                        icon: Icons.edit_note_rounded,
                         onPressed: () {
-                          changeScreen(context, CreateEditDiscountPage(product: product, discount: d));
+                          changeScreen(
+                            context,
+                            CreateEditDiscountPage(
+                              product: product,
+                              discount: d,
+                            ),
+                          );
                         },
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                      ButtonApp(
+                        format: FormatButtonApp.icon,
+                        label: "",
+                        icon: Icons.delete_outline_rounded,
+                        color: Colors.red,
                         onPressed: () => _deleteDiscount(context, d.id),
                       ),
                     ],
@@ -166,7 +205,10 @@ class ProductDiscountsTab extends StatelessWidget {
           const SizedBox(height: 32),
 
           // Badges / Promotion States
-          const Text('شارات الترويج والظهور', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'شارات الترويج والظهور',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -207,10 +249,14 @@ class ProductDiscountsTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isActive ? theme.primaryColor.withOpacity(0.06) : theme.dividerColor.withOpacity(0.04),
+        color: isActive
+            ? theme.primaryColor.withOpacity(0.06)
+            : theme.dividerColor.withOpacity(0.04),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isActive ? theme.primaryColor.withOpacity(0.2) : theme.dividerColor.withOpacity(0.12),
+          color: isActive
+              ? theme.primaryColor.withOpacity(0.2)
+              : theme.dividerColor.withOpacity(0.12),
         ),
       ),
       child: Row(
@@ -227,7 +273,10 @@ class ProductDiscountsTab extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(

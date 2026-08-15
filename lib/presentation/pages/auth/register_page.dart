@@ -17,7 +17,7 @@ import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
-import 'package:z_ecommerce/presentation/pages/business/admin_business_home.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/admin_business_home.dart';
 
 class RegisterPage extends StatefulWidget {
   final String? redirectTo;

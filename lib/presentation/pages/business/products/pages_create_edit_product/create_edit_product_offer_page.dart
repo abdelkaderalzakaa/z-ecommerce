@@ -33,18 +33,12 @@ class _CreateEditProductOfferPageState extends State<CreateEditProductOfferPage>
   late TextEditingController _giftNameController;
   late TextEditingController _giftProductIdController;
 
-  String _selectedType = 'bundle_discount';
+  String? _selectedBuyProductId;
+  String? _selectedGetProductId;
   DateTime? _startDate;
   DateTime? _endDate;
 
   bool _isSubmitting = false;
-
-  final List<Map<String, String>> _offerTypes = [
-    {'value': 'bundle_discount', 'label': 'حزمة خصم (Bundle Discount)'},
-    {'value': 'buy_x_get_y', 'label': 'اشترِ X واحصل على Y مجاناً'},
-    {'value': 'gift', 'label': 'هدية مجانية عند الشراء (Free Gift)'},
-    {'value': 'free_shipping', 'label': 'شحن مجاني (Free Shipping)'},
-  ];
 
   @override
   void initState() {
@@ -60,7 +54,8 @@ class _CreateEditProductOfferPageState extends State<CreateEditProductOfferPage>
     _giftNameController = TextEditingController(text: o?.giftName ?? '');
     _giftProductIdController = TextEditingController(text: o?.giftProductId ?? '');
 
-    _selectedType = o?.type ?? 'bundle_discount';
+    _selectedBuyProductId = o?.buyProductId ?? widget.product.id;
+    _selectedGetProductId = o?.giftProductId;
     _startDate = o?.startDate;
     _endDate = o?.endDate;
   }
@@ -108,10 +103,21 @@ class _CreateEditProductOfferPageState extends State<CreateEditProductOfferPage>
 
     final id = isEdit ? widget.offer!.id : 'offer_${DateTime.now().millisecondsSinceEpoch}';
     
+    // Resolve gift product name
+    final allProducts = provider.allProducts.where((p) => p.businessId == widget.product.businessId).toList();
+    String? resolvedGiftName;
+    if (_selectedGetProductId != null) {
+      try {
+        resolvedGiftName = allProducts.firstWhere((p) => p.id == _selectedGetProductId).name;
+      } catch (_) {
+        resolvedGiftName = widget.offer?.giftName;
+      }
+    }
+
     final newOffer = ProductOfferModel(
       id: id,
       name: _nameController.text.trim(),
-      type: _selectedType,
+      type: 'buy_x_get_y',
       couponCode: _couponCodeController.text.trim().isEmpty ? null : _couponCodeController.text.trim(),
       startDate: _startDate,
       endDate: _endDate,
@@ -120,8 +126,9 @@ class _CreateEditProductOfferPageState extends State<CreateEditProductOfferPage>
       minOrderAmount: double.tryParse(_minOrderController.text),
       buyQuantity: int.tryParse(_buyQtyController.text),
       getQuantity: int.tryParse(_getQtyController.text),
-      giftProductId: _giftProductIdController.text.trim().isEmpty ? null : _giftProductIdController.text.trim(),
-      giftName: _giftNameController.text.trim().isEmpty ? null : _giftNameController.text.trim(),
+      buyProductId: _selectedBuyProductId,
+      giftProductId: _selectedGetProductId,
+      giftName: resolvedGiftName,
     );
 
     final List<ProductOfferModel> updatedOffers = List<ProductOfferModel>.from(widget.product.offers);
@@ -246,79 +253,100 @@ class _CreateEditProductOfferPageState extends State<CreateEditProductOfferPage>
                       ),
                       const SizedBox(height: 16),
 
-                      // Offer Type selection
+                      // Buy X Get Y Product and Quantity details
+                      const Text(
+                        'تفاصيل عرض (اشترِ X واحصل على Y مجاناً)',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Purchase Product Selector
                       DropdownButtonFormField<String>(
-                        value: _selectedType,
+                        value: _selectedBuyProductId,
                         decoration: const InputDecoration(
-                          labelText: 'نوع العرض والتكتيك الترويجي',
+                          labelText: 'المنتج المطلوب شراؤه (Buy X)',
                           border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.shopping_bag_outlined),
                         ),
-                        items: _offerTypes.map((type) {
+                        items: context
+                            .watch<ProductProvider>()
+                            .allProducts
+                            .where((p) => p.businessId == widget.product.businessId)
+                            .map((p) {
                           return DropdownMenuItem<String>(
-                            value: type['value'],
-                            child: Text(type['label']!),
+                            value: p.id,
+                            child: Text(p.name),
                           );
                         }).toList(),
                         onChanged: (val) {
-                          if (val != null) {
-                            setState(() => _selectedType = val);
-                          }
+                          setState(() {
+                            _selectedBuyProductId = val;
+                          });
+                        },
+                        validator: (v) => v == null ? 'يرجى اختيار المنتج المطلوب شراؤه' : null,
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Purchase quantity
+                      TextFormField(
+                        controller: _buyQtyController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'الكمية المطلوبة من المنتج السابق (X)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.onetwothree_rounded),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'مطلوب';
+                          if (int.tryParse(v) == null || int.parse(v) <= 0) return 'يجب إدخال عدد أكبر من 0';
+                          return null;
                         },
                       ),
                       const SizedBox(height: 16),
 
-                      // Dynamic Fields
-                      if (_selectedType == 'buy_x_get_y') ...[
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: _buyQtyController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'الكمية المطلوبة (Buy X)',
-                                  border: OutlineInputBorder(),
-                                ),
-                                validator: (v) => v == null || v.trim().isEmpty ? 'مطلوب' : null,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _getQtyController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'الكمية المجانية الممنوحة (Get Y)',
-                                  border: OutlineInputBorder(),
-                                ),
-                                validator: (v) => v == null || v.trim().isEmpty ? 'مطلوب' : null,
-                              ),
-                            ),
-                          ],
+                      // Free Product Selector
+                      DropdownButtonFormField<String>(
+                        value: _selectedGetProductId,
+                        decoration: const InputDecoration(
+                          labelText: 'المنتج المجاني الممنوح (Get Y)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.card_giftcard_rounded),
                         ),
-                        const SizedBox(height: 16),
-                      ],
+                        items: context
+                            .watch<ProductProvider>()
+                            .allProducts
+                            .where((p) => p.businessId == widget.product.businessId)
+                            .map((p) {
+                          return DropdownMenuItem<String>(
+                            value: p.id,
+                            child: Text(p.name),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedGetProductId = val;
+                          });
+                        },
+                        validator: (v) => v == null ? 'يرجى اختيار المنتج المجاني الممنوح' : null,
+                      ),
+                      const SizedBox(height: 12),
 
-                      if (_selectedType == 'gift') ...[
-                        TextFormField(
-                          controller: _giftNameController,
-                          decoration: const InputDecoration(
-                            labelText: 'اسم الهدية المجانية الممنوحة للعميل',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.card_giftcard_rounded),
-                          ),
-                          validator: (v) => v == null || v.trim().isEmpty ? 'اسم الهدية مطلوب' : null,
+                      // Free quantity
+                      TextFormField(
+                        controller: _getQtyController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'الكمية المجانية الممنوحة (Y)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.onetwothree_rounded),
                         ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _giftProductIdController,
-                          decoration: const InputDecoration(
-                            labelText: 'معرف الهدية كمنتج من المتجر (ID - اختياري)',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'مطلوب';
+                          if (int.tryParse(v) == null || int.parse(v) <= 0) return 'يجب إدخال عدد أكبر من 0';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
 
                       Row(
                         children: [

@@ -4,17 +4,18 @@ import 'package:z_ecommerce/data/models/order/invoice_model.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/business/orders/business_orders_management_page.dart';
-import 'package:z_ecommerce/presentation/pages/business/products/store_products_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/business_orders_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_products_management_page.dart';
 
 class StoreDashboardOverviewPage extends StatelessWidget {
   final String businessId;
 
-  const StoreDashboardOverviewPage({super.key, this.businessId = 'cmp_001'});
+  const StoreDashboardOverviewPage({super.key, required this.businessId});
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +25,14 @@ class StoreDashboardOverviewPage extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer2<ProductProvider, InvoiceProvider>(
         builder: (context, productProvider, invoiceProvider, child) {
-          
-          final myStoreProducts = productProvider.allProducts;
+          final currentStoreId =
+              context.read<BusinessProvider>().selectedBusiness?.id ??
+              context.read<AuthProvider>().currentUser?.businessId ??
+              businessId;
+          final myStoreProducts = productProvider.allProducts
+              .where((p) => p.businessId == currentStoreId)
+              .toList();
 
-          
           final totalProductsCount = myStoreProducts.length;
 
           // Average Rating for my store products
@@ -41,7 +46,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -49,25 +54,14 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          TranslationKeys.storeDashboardTitle.tr(context),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Expanded(
+                      child: Text(
+                        TranslationKeys.storeDashboardTitle.tr(context),
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          TranslationKeys.storeDashboardSubtitle.tr(context),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.textTheme.bodySmall?.color,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -128,7 +122,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                           color: const Color(0xFF4F46E5),
                           onTap: () {},
                         ),
-                       
+
                         _buildKpiCard(
                           context,
                           title: TranslationKeys.storeRating.tr(context),
@@ -363,7 +357,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-       ],
+        ],
       ),
     );
   }

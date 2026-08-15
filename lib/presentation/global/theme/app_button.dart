@@ -159,16 +159,17 @@ class ButtonApp extends StatelessWidget {
       case FormatButtonApp.icon:
         buttonWidget = Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-
+            color: baseColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: baseColor),
           ),
           child: InkWell(
             radius: radius,
             borderRadius: BorderRadius.circular(radius),
             onTap: currentOnPressed,
-            child: iconWidget,
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: Icon(icon, size: 21, color: baseColor),
+            ),
           ),
         );
         break;

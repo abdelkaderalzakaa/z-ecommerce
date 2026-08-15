@@ -103,10 +103,11 @@ class BrandProvider extends ChangeNotifier {
       if (id != null) {
         final newBrand = BrandModel(
           id: id,
-          businessId: brand.businessId,
+          businessIds: brand.businessIds,
           name: brand.name,
           logoUrl: brand.logoUrl,
           description: brand.description,
+          isGlobal: brand.isGlobal,
         );
         _brands.add(newBrand);
         _isLoading = false;
@@ -120,6 +121,20 @@ class BrandProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// 🔄 تفعيل أو تعطيل الماركة للمتجر
+  Future<bool> toggleBrandStatus(BrandModel brand, String storeId, bool enable) async {
+    final List<String> updatedStoreIds = List<String>.from(brand.businessIds);
+    if (enable) {
+      if (!updatedStoreIds.contains(storeId)) {
+        updatedStoreIds.add(storeId);
+      }
+    } else {
+      updatedStoreIds.remove(storeId);
+    }
+    final updatedBrand = brand.copyWith(businessIds: updatedStoreIds);
+    return updateBrand(updatedBrand);
   }
 
   /// ✏️ تحديث ماركة قائمة

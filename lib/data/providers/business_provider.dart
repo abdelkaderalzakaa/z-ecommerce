@@ -46,8 +46,6 @@ class BusinessProvider with ChangeNotifier {
             orElse: () => _businessSettings!,
           );
           _businessSettings = updated;
-        } else if (activeBusinesses.isNotEmpty) {
-          _businessSettings = activeBusinesses.first;
         }
         notifyListeners();
       },
@@ -66,9 +64,6 @@ class BusinessProvider with ChangeNotifier {
 
     try {
       _businesses = await _userService.getAllBusinesses();
-      if (_businessSettings == null && _businesses.isNotEmpty) {
-        _businessSettings = _businesses.first;
-      }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

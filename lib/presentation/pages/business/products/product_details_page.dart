@@ -7,7 +7,8 @@ import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/products/pages_create_edit_product/info_product.dart';
-import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart' as customer;
+import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart'
+    as customer;
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/details_template.dart';
 
@@ -37,19 +38,17 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
-        final productIndex = provider.allProducts.indexWhere((p) => p.id == widget.productId);
+        final productIndex = provider.allProducts.indexWhere(
+          (p) => p.id == widget.productId,
+        );
         if (productIndex == -1) {
           return Scaffold(
             appBar: AppBar(
               title: Text(TranslationKeys.productDetails.tr(context)),
             ),
-            body: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -58,7 +57,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         return DetailsTemplate(
           title: TranslationKeys.productDetails.tr(context),
           name: product.name,
-          subtitle: '${TranslationKeys.category.tr(context)}: ${product.category} • ${product.id}',
+          subtitle:
+              '${TranslationKeys.category.tr(context)}: ${product.category} • ${product.id}',
           avatarUrl: product.images.isNotEmpty ? product.images.first : null,
           fallbackIcon: Icons.inventory_2_rounded,
           statusBadge: TableStatusBadge.fromStatus(
@@ -67,10 +67,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 : TranslationKeys.statusInactive.tr(context),
           ),
           onEdit: () {
-            changeScreen(
-              context,
-              InfoProductPage(product: product),
-            );
+            changeScreen(context, InfoProductPage(product: product));
           },
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -78,7 +75,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               // Active/Inactive Switch
               Switch(
                 value: product.isActive,
-                activeColor: theme.primaryColor,
                 onChanged: (val) async {
                   final updated = product.copyWith(isActive: val);
                   await provider.updateProduct(updated);
@@ -86,9 +82,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ),
               const SizedBox(width: 8),
               // Customer preview button (Eye icon)
-              IconButton(
-                icon: Icon(Icons.visibility_outlined, color: theme.primaryColor),
-                tooltip: 'عرض تفاصيل المنتج للعميل',
+              ButtonApp(
+                format: FormatButtonApp.icon,
+                icon: Icons.visibility_outlined,
+                label: 'عرض تفاصيل المنتج للعميل',
                 onPressed: () {
                   changeScreen(
                     context,

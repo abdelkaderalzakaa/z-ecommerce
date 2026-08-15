@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
-import '../../widgets/admin_store/store_owner_app_bar.dart';
-import '../../widgets/admin_store/store_owner_sidebar.dart';
-import 'branding/business_branding_page.dart';
-import 'dashboard/store_dashboard_overview_page.dart';
-import 'products/store_products_management_page.dart';
-import 'categories_brands/store_categories_brands_page.dart';
-import 'orders/business_orders_management_page.dart';
-import 'offers/store_offers_management_page.dart';
-import 'reviews/store_reviews_management_page.dart';
-import 'settings/store_owner_settings_page.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import '../../../widgets/admin_store/store_owner_app_bar.dart';
+import '../../../widgets/admin_store/store_owner_sidebar.dart';
+import '../branding/business_branding_page.dart';
+import 'store_dashboard_overview_page.dart';
+import 'store_products_management_page.dart';
+import 'store_categories_page.dart';
+import 'store_brands_page.dart';
+import 'business_orders_management_page.dart';
+import 'store_offers_management_page.dart';
+import 'store_reviews_management_page.dart';
+import 'store_owner_settings_page.dart';
+import 'store_followers_page.dart';
 
 class AdminStore extends StatefulWidget {
   const AdminStore({super.key});
@@ -24,12 +27,25 @@ class _AdminStoreState extends State<AdminStore> {
   bool _isSidebarCollapsed = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthProvider>().currentUser;
+      if (user != null && user.businessId != null) {
+        context.read<BusinessProvider>().selectBusiness(user.businessId!);
+      }
+    });
+  }
+
   List<Widget> _getPages(String businessId) => [
-    const StoreDashboardOverviewPage(),
+    StoreDashboardOverviewPage(businessId: businessId),
     const StoreProductsManagementPage(),
-    const StoreCategoriesBrandsPage(),
-    const BusinessOrdersManagementPage(),
     StoreOffersManagementPage(businessId: businessId),
+    BusinessOrdersManagementPage(businessId: businessId),
+    const StoreCategoriesPage(),
+    const StoreBrandsPage(),
+    const StoreFollowersPage(),
     const StoreReviewsManagementPage(),
     const StoreOwnerSettingsPage(),
   ];

@@ -324,6 +324,8 @@ const Map<String, String> ar = {
   TranslationKeys.minChars: '٦ أحرف على الأقل',
   TranslationKeys.cancel: 'إلغاء',
   TranslationKeys.storesSubtitle: 'استعراض ومتابعة كافة المتاجر المسجلة في المنصة',
+  TranslationKeys.dashboard: 'لوحة التحكم',
+  TranslationKeys.reviews: 'التقييمات',
   TranslationKeys.offersSubtitle: 'إنشاء ومتابعة الحملات التسويقية وكوبونات الخصم للمتاجر',
   TranslationKeys.categoriesSubtitle: 'تنظيم شجرة الأقسام الرئيسية والفرعية في المنصة',
 
@@ -348,4 +350,13 @@ const Map<String, String> ar = {
   TranslationKeys.storeSettingsSubtitle: 'تعديل الهوية، الشعار، ألوان الثيم، التواصل وشبكات التواصل الاجتماعي',
   TranslationKeys.productsSubtitle: 'إدارة وإضافة وتحديث كافة منتجاتك في المتجر',
   TranslationKeys.ordersSubtitle: 'متابعة ومعالجة الطلبات الواردة لمتجرك وتحديث حالتها',
+  TranslationKeys.storeOverview: 'نظرة عامة',
+  TranslationKeys.storeProductsTab: 'المنتجات',
+  TranslationKeys.storeOffersTab: 'العروض',
+  TranslationKeys.storeOrdersTab: 'الطلبات',
+  TranslationKeys.storeCategoriesTab: 'الفئات',
+  TranslationKeys.storeBrandsTab: 'العلامات التجارية',
+  TranslationKeys.storeFollowersTab: 'المتابعات',
+  TranslationKeys.storeReviewsAndLikesTab: 'التقييمات والإعجابات',
+  TranslationKeys.storeSettingsTab: 'إعدادات',
 };

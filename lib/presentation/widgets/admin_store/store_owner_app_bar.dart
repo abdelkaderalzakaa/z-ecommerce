@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../global/locale_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../data/providers/business_provider.dart';
+import '../../../data/providers/auth_provider.dart';
 import '../../global/settings_provider.dart';
 import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';
@@ -26,7 +27,8 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final localeProvider = Provider.of<LocaleProvider>(context);
-    final businessProvider = Provider.of<BusinessProvider>(context);
+    final businessProvider = context.watch<BusinessProvider>();
+    final authProvider = context.watch<AuthProvider>();
     final isArabic = localeProvider.locale.languageCode == 'ar';
     final storeTheme = businessProvider.selectedBusiness?.theme;
     final primaryColor = storeTheme?.primaryColorValue ?? theme.primaryColor;
@@ -36,6 +38,7 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
         ? (isArabic ? nameObj.ar : nameObj.en)
         : TranslationKeys.mainStore.tr(context);
     final logoUrl = storeTheme?.logoUrl;
+    final userName = authProvider.currentUser?.name ?? storeName;
 
     return AppBar(
       elevation: 0,
@@ -189,24 +192,19 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: theme.primaryColor.withOpacity(0.15),
-                  backgroundImage: logoUrl != null
-                      ? NetworkImage(logoUrl)
-                      : null,
-                  child: logoUrl == null
-                      ? Text(
-                          'S',
-                          style: TextStyle(
-                            color: theme.primaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        )
-                      : null,
+                  child: Text(
+                    userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                    style: TextStyle(
+                      color: theme.primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
                 if (!isMobile) ...[
                   const SizedBox(width: 8),
                   Text(
-                    storeName,
+                    userName,
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

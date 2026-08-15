@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/store_create_edit_category_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/store_create_edit_category_page.dart';
 
 class CategoryTab extends StatelessWidget {
   final BusinessModel store;

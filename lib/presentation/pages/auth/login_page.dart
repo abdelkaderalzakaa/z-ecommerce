@@ -4,7 +4,7 @@ import 'package:z_ecommerce/presentation/pages/auth/forgot_password_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
-import 'package:z_ecommerce/presentation/pages/business/admin_business_home.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/admin_business_home.dart';
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
@@ -59,6 +59,9 @@ class _LoginPageState extends State<LoginPage> {
         if (role == UserRole.superAdmin) {
           changeScreenUntill(context, const SuperAdminHome());
         } else if (role == UserRole.businessOwner) {
+          if (authProvider.currentUser?.businessId != null) {
+            await context.read<BusinessProvider>().selectBusiness(authProvider.currentUser!.businessId!);
+          }
           changeScreenUntill(context, const AdminStore());
         } else {
           final destination = widget.redirectTo ?? '/';
@@ -141,7 +144,6 @@ class _LoginPageState extends State<LoginPage> {
                         scale: 0.8,
                         child: Switch(
                           value: _rememberMe,
-                          activeColor: Theme.of(context).primaryColor,
                           onChanged: (val) {
                             setState(() => _rememberMe = val);
                           },

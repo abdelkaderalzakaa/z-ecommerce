@@ -26,6 +26,8 @@ class OfferModel {
   final int? buyQuantity;
   final int? getQuantity;
   final double? pointsMultiplier;
+  final String? categoryId;
+  final String? brandId;
 
   const OfferModel({
     required this.id,
@@ -50,6 +52,8 @@ class OfferModel {
     this.buyQuantity,
     this.getQuantity,
     this.pointsMultiplier,
+    this.categoryId,
+    this.brandId,
   });
 
   // ==========================================
@@ -93,6 +97,8 @@ class OfferModel {
       'buyQuantity': buyQuantity,
       'getQuantity': getQuantity,
       'pointsMultiplier': pointsMultiplier,
+      'categoryId': categoryId,
+      'brandId': brandId,
     };
   }
 
@@ -128,6 +134,8 @@ class OfferModel {
       buyQuantity: map['buyQuantity'],
       getQuantity: map['getQuantity'],
       pointsMultiplier: (map['pointsMultiplier'] ?? 0.0)?.toDouble(),
+      categoryId: map['categoryId'],
+      brandId: map['brandId'],
     );
   }
 

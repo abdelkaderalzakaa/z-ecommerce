@@ -18,7 +18,7 @@ import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_theme.dart';
 import 'presentation/pages/customer/business_page.dart';
 import 'presentation/pages/super_admin/super_admin_home.dart';
-import 'presentation/pages/business/admin_business_home.dart';
+import 'presentation/pages/business/home/admin_business_home.dart';
 import 'data/models/auth/user_model.dart';
 import 'presentation/pages/auth/banned_page.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -146,6 +146,13 @@ class _AppRootRouterState extends State<AppRootRouter> {
           case UserRole.superAdmin:
             return const SuperAdminHome();
           case UserRole.businessOwner:
+            if (user.businessId != null) {
+              Future.microtask(() {
+                if (context.read<BusinessProvider>().selectedBusiness?.id != user.businessId) {
+                  context.read<BusinessProvider>().selectBusiness(user.businessId!);
+                }
+              });
+            }
             return const AdminStore();
           case UserRole.customer:
             return const BusinessEntryPage();

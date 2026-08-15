@@ -8,7 +8,8 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
 class Logo extends StatelessWidget {
-  const Logo({super.key});
+  final bool isPlatform;
+  const Logo({super.key, this.isPlatform = false});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class Logo extends StatelessWidget {
     final saName = superAdmin?.localizationAdmin.name.get(context);
     final platformName = (saName != null && saName.isNotEmpty) ? saName : 'z-matajer';
     
-    final bName = selectedBusiness?.localization.name.get(context);
+    final bName = isPlatform ? null : selectedBusiness?.localization.name.get(context);
     final displayName = (bName != null && bName.isNotEmpty) ? bName : platformName;
 
     return Text(
@@ -33,7 +34,8 @@ class Logo extends StatelessWidget {
 }
 
 class Copyright extends StatelessWidget {
-  const Copyright({super.key});
+  final bool isPlatform;
+  const Copyright({super.key, this.isPlatform = false});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,7 @@ class Copyright extends StatelessWidget {
     final saName = superAdmin?.localizationAdmin.name.get(context);
     final platformName = (saName != null && saName.isNotEmpty) ? saName : 'z-matajer';
     
-    final bName = selectedBusiness?.localization.name.get(context);
+    final bName = isPlatform ? null : selectedBusiness?.localization.name.get(context);
     final displayName = (bName != null && bName.isNotEmpty) ? bName : platformName;
 
     return Padding(

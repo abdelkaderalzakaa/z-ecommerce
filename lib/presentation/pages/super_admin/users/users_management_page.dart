@@ -26,11 +26,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
   final UserService _userService = UserService();
   bool _isLoading = true;
   List<UserModel> _allFetchedUsers = [];
-  String _searchQuery = '';
   String _selectedRoleFilter = 'all';
-  List<UserModel> _selectedUsers = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
 
   @override
   void initState() {
@@ -62,26 +58,12 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
     final List<UserModel> allUsers = _allFetchedUsers;
 
     final filteredUsers = allUsers.where((user) {
-      final matchesQuery =
-          _searchQuery.isEmpty ||
-          user.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          user.email.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          user.id.toLowerCase().contains(_searchQuery.toLowerCase());
-
       final matchesRole =
           _selectedRoleFilter == 'all' ||
           user.role.name.toLowerCase() == _selectedRoleFilter.toLowerCase();
 
-      return matchesQuery && matchesRole;
+      return matchesRole;
     }).toList();
-
-    final totalItems = filteredUsers.length;
-    final totalPages = (totalItems / _itemsPerPage).ceil();
-    final startIndex = (_currentPage - 1) * _itemsPerPage;
-    final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-    final paginatedUsers = (startIndex < totalItems)
-        ? filteredUsers.sublist(startIndex, endIndex)
-        : <UserModel>[];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -93,26 +75,11 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
             // Full Height Expanded AppDataTable for UserModel
             Expanded(
               child: AppDataTable<UserModel>(
-                items: paginatedUsers,
+                items: filteredUsers,
                 selectable: true,
                 showIndexColumn: true,
-                selectedItems: _selectedUsers,
-                onSelectionChanged: (selected) {
-                  setState(() {
-                    _selectedUsers = selected;
-                  });
-                },
-                onBulkDelete: () {
-                  setState(() {
-                    _selectedUsers.clear();
-                  });
-                },
-                searchQuery: _searchQuery,
-                onSearchChanged: (val) {
-                  setState(() {
-                    _searchQuery = val;
-                    _currentPage = 1;
-                  });
+                onBulkDelete: (selected) {
+                  // Bulk delete action placeholder
                 },
                 primaryActionButton: ButtonApp(
                   onPressed: () =>
@@ -121,20 +88,11 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                   label: TranslationKeys.addNewUser.tr(context),
                 ),
                 onFilterTap: () => _showFilterDialog(context),
-                currentPage: _currentPage,
-                totalPages: totalPages > 0 ? totalPages : 1,
-                totalItems: totalItems,
-                itemsPerPage: _itemsPerPage,
-                onPageChanged: (page) => setState(() => _currentPage = page),
-                onItemsPerPageChanged: (rows) {
-                  setState(() {
-                    _itemsPerPage = rows;
-                    _currentPage = 1;
-                  });
-                },
-                emptyMessage: _searchQuery.isNotEmpty
-                    ? TranslationKeys.noMatchingResults.tr(context)
-                    : TranslationKeys.noDataAvailable.tr(context),
+                searchMatcher: (u, q) =>
+                    u.name.toLowerCase().contains(q.toLowerCase()) ||
+                    u.email.toLowerCase().contains(q.toLowerCase()) ||
+                    u.id.toLowerCase().contains(q.toLowerCase()),
+                emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                 onRowTap: (user) =>
                     changeScreen(context, UserDetailsPage(userId: user.id)),
                 columns: [

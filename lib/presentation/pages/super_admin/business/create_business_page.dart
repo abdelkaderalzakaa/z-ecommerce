@@ -12,6 +12,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/add_edit_template.dart';
+import 'package:z_ecommerce/data/services/user_service.dart';
 
 class CreateBusinessPage extends StatefulWidget {
   const CreateBusinessPage({super.key});
@@ -45,70 +46,80 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
     setState(() => _isSubmitting = true);
 
     final businessProvider = context.read<BusinessProvider>();
+    final userService = UserService();
 
     // Generate IDs
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     final storeId = 'cmp_${timestamp.substring(timestamp.length - 8)}';
-    final ownerId = 'usr_${timestamp.substring(timestamp.length - 8)}';
-
-    // بناء UserModel للمالك
-    final newOwner = UserModel(
-      id: ownerId,
-      name: _ownerNameController.text.trim(),
-      email: _ownerEmailController.text.trim(),
-      role: UserRole.businessOwner,
-      businessId: storeId,
-      phoneNumber: _contactPhoneController.text.trim(),
-      createdAt: DateTime.now(),
-    );
-
-    // بناء LocalizationAdmin للمتجر
-    final localization = LocalizationAdmin(
-      name: LocalizedString(
-        en: _storeNameEnController.text.trim(),
-        ar: _storeNameArController.text.trim(),
-      ),
-      slogan: const LocalizedString(en: '', ar: ''),
-      description: const LocalizedString(en: '', ar: ''),
-      footerDescription: const LocalizedString(en: '', ar: ''),
-      aboutUs: const LocalizedString(en: '', ar: ''),
-      termsAndConditions: const LocalizedString(en: '', ar: ''),
-      privacyPolicy: const LocalizedString(en: '', ar: ''),
-    );
-
-    // بناء CurrencyStore
-    final currency = CurrencyStore(
-      id: 'curr_usd',
-      code: 'USD',
-      symbol: '\$',
-      name: 'US Dollar',
-      exchangeRate: 1.0,
-      isPrimary: true,
-    );
-
-    final newStore = BusinessModel(
-      id: '',
-      owner: newOwner,
-      businessType: _selectedBusinessType,
-      theme: const ThemeAdmin(
-        primaryColor: '#000000',
-        secondaryColor: '#FFFFFF',
-        backgroundColor: '#F9FAFB',
-        surfaceColor: '#FFFFFF',
-        textColor: '#111827',
-        fontFamily: 'Cairo',
-        fontScale: 1.0,
-        buttonRadius: 12.0,
-        cardRadius: 16.0,
-        inputRadius: 10.0,
-      ),
-      localization: localization,
-      currency: currency,
-      status: 'Active',
-      createdAt: DateTime.now(),
-    );
 
     try {
+      // Create owner account in Firebase Auth
+      final ownerId = await userService.createNewAuthUserWithoutLoggingOut(
+        _ownerEmailController.text.trim(),
+        _ownerPasswordController.text.trim(),
+      );
+
+      if (ownerId == null) {
+        throw Exception(TranslationKeys.errorCreatingStore.tr(context));
+      }
+
+      // بناء UserModel للمالك باستخدام الـ UID الصحيح
+      final newOwner = UserModel(
+        id: ownerId,
+        name: _ownerNameController.text.trim(),
+        email: _ownerEmailController.text.trim(),
+        role: UserRole.businessOwner,
+        businessId: storeId,
+        phoneNumber: _contactPhoneController.text.trim(),
+        createdAt: DateTime.now(),
+      );
+
+      // بناء LocalizationAdmin للمتجر
+      final localization = LocalizationAdmin(
+        name: LocalizedString(
+          en: _storeNameEnController.text.trim(),
+          ar: _storeNameArController.text.trim(),
+        ),
+        slogan: const LocalizedString(en: '', ar: ''),
+        description: const LocalizedString(en: '', ar: ''),
+        footerDescription: const LocalizedString(en: '', ar: ''),
+        aboutUs: const LocalizedString(en: '', ar: ''),
+        termsAndConditions: const LocalizedString(en: '', ar: ''),
+        privacyPolicy: const LocalizedString(en: '', ar: ''),
+      );
+
+      // بناء CurrencyStore
+      final currency = CurrencyStore(
+        id: 'curr_usd',
+        code: 'USD',
+        symbol: '\$',
+        name: 'US Dollar',
+        exchangeRate: 1.0,
+        isPrimary: true,
+      );
+
+      final newStore = BusinessModel(
+        id: storeId,
+        owner: newOwner,
+        businessType: _selectedBusinessType,
+        theme: const ThemeAdmin(
+          primaryColor: '#000000',
+          secondaryColor: '#FFFFFF',
+          backgroundColor: '#F9FAFB',
+          surfaceColor: '#FFFFFF',
+          textColor: '#111827',
+          fontFamily: 'Cairo',
+          fontScale: 1.0,
+          buttonRadius: 12.0,
+          cardRadius: 16.0,
+          inputRadius: 10.0,
+        ),
+        localization: localization,
+        currency: currency,
+        status: 'Active',
+        createdAt: DateTime.now(),
+      );
+
       await businessProvider.saveBusiness(newStore);
       setState(() => _isSubmitting = false);
 
@@ -126,8 +137,7 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              businessProvider.errorMessage ??
-                  TranslationKeys.errorCreatingStore.tr(context),
+              businessProvider.errorMessage ?? e.toString(),
             ),
             backgroundColor: Colors.red,
           ),

@@ -97,7 +97,7 @@ class _OffersTabState extends State<OffersTab> {
                           Switch(
                             value: offer.isActive,
                             onChanged: (val) {
-                              // Optional: call provider to toggle isActive state
+                              // TODO : Optional: call provider to toggle isActive state
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('تم تغيير حالة العرض'),

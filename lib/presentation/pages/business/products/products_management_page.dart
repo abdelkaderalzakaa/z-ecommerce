@@ -20,11 +20,6 @@ class ProductsManagementPage extends StatefulWidget {
 }
 
 class _ProductsManagementPageState extends State<ProductsManagementPage> {
-  String _searchQuery = '';
-  List<ProductModel> _selectedProducts = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
-
   @override
   void initState() {
     super.initState();
@@ -35,83 +30,39 @@ class _ProductsManagementPageState extends State<ProductsManagementPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
-        final filteredProducts = provider.allProducts.where((product) {
-          final titleStr = product.name.toLowerCase();
-          final matchesQuery =
-              _searchQuery.isEmpty ||
-              titleStr.contains(_searchQuery.toLowerCase()) ||
-              product.id.toLowerCase().contains(_searchQuery.toLowerCase());
-          return matchesQuery;
-        }).toList();
-
-        final totalItems = filteredProducts.length;
-        final totalPages = (totalItems / _itemsPerPage).ceil();
-        final startIndex = (_currentPage - 1) * _itemsPerPage;
-        final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-        final paginatedProducts = (startIndex < totalItems)
-            ? filteredProducts.sublist(startIndex, endIndex)
-            : <ProductModel>[];
-
         return Scaffold(
           backgroundColor: Colors.transparent,
           body: Padding(
             padding: const EdgeInsets.all(10),
             child: AppDataTable<ProductModel>(
-              items: paginatedProducts,
+              items: provider.allProducts,
               selectable: true,
               showIndexColumn: true,
-              selectedItems: _selectedProducts,
-              onSelectionChanged: (selected) {
-                setState(() {
-                  _selectedProducts = selected;
-                });
-              },
               primaryActionButton: ButtonApp(
                 onPressed: () =>
                     changeScreen(context, const InfoProductPage()),
                 icon: Icons.add,
                 label: TranslationKeys.addNewProduct.tr(context),
               ),
-              onBulkDelete: () {
-                for (var p in _selectedProducts) {
+              onBulkDelete: (selected) {
+                for (var p in selected) {
                   provider.deleteProduct(p.id);
                 }
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      '${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})',
+                      '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
                     ),
                     backgroundColor: Colors.red,
                   ),
                 );
-                setState(() {
-                  _selectedProducts.clear();
-                });
               },
-              searchQuery: _searchQuery,
-              onSearchChanged: (val) {
-                setState(() {
-                  _searchQuery = val;
-                  _currentPage = 1;
-                });
-              },
-              currentPage: _currentPage,
-              totalPages: totalPages > 0 ? totalPages : 1,
-              totalItems: totalItems,
-              itemsPerPage: _itemsPerPage,
-              onPageChanged: (page) => setState(() => _currentPage = page),
-              onItemsPerPageChanged: (rows) {
-                setState(() {
-                  _itemsPerPage = rows;
-                  _currentPage = 1;
-                });
-              },
-              emptyMessage: _searchQuery.isNotEmpty
-                  ? TranslationKeys.noMatchingResults.tr(context)
-                  : TranslationKeys.noDataAvailable.tr(context),
+              searchMatcher: (p, q) =>
+                  p.name.toLowerCase().contains(q.toLowerCase()) ||
+                  p.id.toLowerCase().contains(q.toLowerCase()),
+              emptyMessage: TranslationKeys.noDataAvailable.tr(context),
               onRowTap: (product) => changeScreen(
                 context,
                 ProductDetailsPage(productId: product.id),

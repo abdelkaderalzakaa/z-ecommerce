@@ -21,39 +21,21 @@ class OrdersManagementPage extends StatefulWidget {
 }
 
 class _OrdersManagementPageState extends State<OrdersManagementPage> {
-  String _searchQuery = '';
   String _selectedStatusFilter = 'all';
-  List<InvoiceModel> _selectedOrders = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
-
     return Consumer<InvoiceProvider>(
       builder: (context, provider, child) {
         final allOrders = provider.invoices;
 
         final filteredOrders = allOrders.where((order) {
-          final matchesQuery =
-              _searchQuery.isEmpty ||
-              order.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              order.storeId.toLowerCase().contains(_searchQuery.toLowerCase());
           final matchesStatus =
               _selectedStatusFilter == 'all' ||
               order.status.name.toLowerCase() ==
                   _selectedStatusFilter.toLowerCase();
-          return matchesQuery && matchesStatus;
+          return matchesStatus;
         }).toList();
-
-        final totalItems = filteredOrders.length;
-        final totalPages = (totalItems / _itemsPerPage).ceil();
-        final startIndex = (_currentPage - 1) * _itemsPerPage;
-        final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-        final paginatedOrders = (startIndex < totalItems)
-            ? filteredOrders.sublist(startIndex, endIndex)
-            : <InvoiceModel>[];
 
         return Scaffold(
           backgroundColor: Colors.transparent,
@@ -65,51 +47,24 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                 // Full Height Expanded AppDataTable for InvoiceModel
                 Expanded(
                   child: AppDataTable<InvoiceModel>(
-                    items: paginatedOrders,
+                    items: filteredOrders,
                     selectable: true,
                     showIndexColumn: true,
-                    selectedItems: _selectedOrders,
-                    onSelectionChanged: (selected) {
-                      setState(() {
-                        _selectedOrders = selected;
-                      });
-                    },
-                    onBulkDelete: () {
+                    onBulkDelete: (selected) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedOrders.length})',
+                            '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
                           ),
                           backgroundColor: Colors.red,
                         ),
                       );
-                      setState(() {
-                        _selectedOrders.clear();
-                      });
                     },
-                    searchQuery: _searchQuery,
-                    onSearchChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                        _currentPage = 1;
-                      });
-                    },
+                    searchMatcher: (order, q) =>
+                        order.id.toLowerCase().contains(q) ||
+                        order.storeId.toLowerCase().contains(q),
                     onFilterTap: () => _showFilterDialog(context),
-                    currentPage: _currentPage,
-                    totalPages: totalPages > 0 ? totalPages : 1,
-                    totalItems: totalItems,
-                    itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) =>
-                        setState(() => _currentPage = page),
-                    onItemsPerPageChanged: (rows) {
-                      setState(() {
-                        _itemsPerPage = rows;
-                        _currentPage = 1;
-                      });
-                    },
-                    emptyMessage: _searchQuery.isNotEmpty
-                        ? TranslationKeys.noMatchingResults.tr(context)
-                        : TranslationKeys.noDataAvailable.tr(context),
+                    emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                     onRowTap: (order) => changeScreen(
                       context,
                       OrderDetailsPage(orderId: order.id),

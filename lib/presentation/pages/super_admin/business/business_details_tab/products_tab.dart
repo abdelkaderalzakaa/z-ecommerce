@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
@@ -22,11 +21,6 @@ class ProductsTab extends StatefulWidget {
 }
 
 class _ProductsTabState extends State<ProductsTab> {
-  String _searchQuery = '';
-  List<ProductModel> _selectedProducts = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
-
   @override
   void initState() {
     super.initState();
@@ -40,47 +34,24 @@ class _ProductsTabState extends State<ProductsTab> {
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
         final storeProducts = provider.allProducts.where((p) {
-          final belongsToStore = p.businessId == widget.store.id;
-          final titleStr = p.name.toLowerCase();
-          final matchesQuery =
-              _searchQuery.isEmpty ||
-              titleStr.contains(_searchQuery.toLowerCase()) ||
-              p.id.toLowerCase().contains(_searchQuery.toLowerCase());
-          return belongsToStore && matchesQuery;
+          return p.businessId == widget.store.id;
         }).toList();
 
-        final totalItems = storeProducts.length;
-        final totalPages = (totalItems / _itemsPerPage).ceil();
-        final startIndex = (_currentPage - 1) * _itemsPerPage;
-        final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-        final paginatedProducts = (startIndex < totalItems)
-            ? storeProducts.sublist(startIndex, endIndex)
-            : <ProductModel>[];
-
         return Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(10),
           child: AppDataTable<ProductModel>(
-            items: paginatedProducts,
+            items: storeProducts,
             selectable: true,
             showIndexColumn: true,
-            selectedItems: _selectedProducts,
-            onSelectionChanged: (selected) {
-              setState(() {
-                _selectedProducts = selected;
-              });
-            },
-            onBulkDelete: () {
+            onBulkDelete: (selected) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    '${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})',
+                    '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
                   ),
                   backgroundColor: Colors.red,
                 ),
               );
-              setState(() {
-                _selectedProducts.clear();
-              });
             },
             primaryActionButton: ButtonApp(
               onPressed: () {
@@ -92,30 +63,13 @@ class _ProductsTabState extends State<ProductsTab> {
                   ),
                 );
               },
-              icon: Icons.add ,
-              label: 'إضافة منتج' ,
+              icon: Icons.add,
+              label: 'إضافة منتج',
             ),
-            searchQuery: _searchQuery,
-            onSearchChanged: (val) {
-              setState(() {
-                _searchQuery = val;
-                _currentPage = 1;
-              });
-            },
-            currentPage: _currentPage,
-            totalPages: totalPages > 0 ? totalPages : 1,
-            totalItems: totalItems,
-            itemsPerPage: _itemsPerPage,
-            onPageChanged: (page) => setState(() => _currentPage = page),
-            onItemsPerPageChanged: (rows) {
-              setState(() {
-                _itemsPerPage = rows;
-                _currentPage = 1;
-              });
-            },
-            emptyMessage: _searchQuery.isNotEmpty
-                ? TranslationKeys.noMatchingResults.tr(context)
-                : TranslationKeys.noDataAvailable.tr(context),
+            searchMatcher: (p, q) =>
+                p.name.toLowerCase().contains(q.toLowerCase()) ||
+                p.id.toLowerCase().contains(q.toLowerCase()),
+            emptyMessage: TranslationKeys.noDataAvailable.tr(context),
             columns: [
               AppTableColumn<ProductModel>(
                 title: TranslationKeys.product.tr(context),

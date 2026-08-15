@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -17,40 +18,26 @@ class StoreReviewsManagementPage extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer<ProductProvider>(
         builder: (context, productProvider, child) {
-          final products = productProvider.allProducts;
+          final currentStoreId =
+              context.read<BusinessProvider>().selectedBusiness?.id ??
+              context.read<AuthProvider>().currentUser?.businessId;
+          final products = productProvider.allProducts
+              .where((p) => p.businessId == currentStoreId)
+              .toList();
 
           return Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Page Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          TranslationKeys.reviews.tr(context),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          TranslationKeys.storeRating.tr(context),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.textTheme.bodySmall?.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Text(
+                  TranslationKeys.reviews.tr(context),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // Reviews Cards Stream
                 Expanded(
@@ -65,15 +52,20 @@ class StoreReviewsManagementPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: theme.cardColor,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: theme.dividerColor.withOpacity(0.12)),
+                          border: Border.all(
+                            color: theme.dividerColor.withOpacity(0.12),
+                          ),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TableImageTextCell(
                               title: p.name,
-                              subtitle: '${p.reviewsCount} ${TranslationKeys.reviews.tr(context)}',
-                              imageUrl: p.images.isNotEmpty ? p.images.first : null,
+                              subtitle:
+                                  '${p.reviewsCount} ${TranslationKeys.reviews.tr(context)}',
+                              imageUrl: p.images.isNotEmpty
+                                  ? p.images.first
+                                  : null,
                               fallbackIcon: Icons.shopping_bag_outlined,
                             ),
                             const Spacer(),
@@ -81,18 +73,29 @@ class StoreReviewsManagementPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFFEF3C7),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.star_rounded, size: 16, color: Color(0xFFD97706)),
+                                      const Icon(
+                                        Icons.star_rounded,
+                                        size: 16,
+                                        color: Color(0xFFD97706),
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
                                         '⭐ ${p.rating.toStringAsFixed(1)}',
-                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFD97706)),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFFD97706),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -101,13 +104,26 @@ class StoreReviewsManagementPage extends StatelessWidget {
                                 OutlinedButton.icon(
                                   onPressed: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('${TranslationKeys.reviews.tr(context)} "${p.name}"')),
+                                      SnackBar(
+                                        content: Text(
+                                          '${TranslationKeys.reviews.tr(context)} "${p.name}"',
+                                        ),
+                                      ),
                                     );
                                   },
-                                  icon: const Icon(Icons.rate_review_outlined, size: 14),
-                                  label: Text(TranslationKeys.viewDetails.tr(context), style: const TextStyle(fontSize: 11)),
+                                  icon: const Icon(
+                                    Icons.rate_review_outlined,
+                                    size: 14,
+                                  ),
+                                  label: Text(
+                                    TranslationKeys.viewDetails.tr(context),
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
                                   ),
                                 ),
                               ],

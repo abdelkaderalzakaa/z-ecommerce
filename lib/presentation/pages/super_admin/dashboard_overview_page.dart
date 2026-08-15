@@ -12,7 +12,7 @@ import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/super_admin/categories/categories_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_categories_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/offers/offers_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/orders/orders_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/products/product_details_page.dart';
@@ -527,7 +527,7 @@ class DashboardOverviewPage extends StatelessWidget {
                 icon: Icons.arrow_forward_rounded,
                 label: 'انتقال للتصنيفات',
                 onPressed: () =>
-                    changeScreen(context, const CategoriesManagementPage()),
+                    changeScreen(context, const StoreCategoriesPage(isSuperAdmin: true)),
               ),
             ],
           ),

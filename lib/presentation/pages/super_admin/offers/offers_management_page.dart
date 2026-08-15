@@ -19,38 +19,10 @@ class OffersManagementPage extends StatefulWidget {
 }
 
 class _OffersManagementPageState extends State<OffersManagementPage> {
-  String _searchQuery = '';
-  List<OfferModel> _selectedOffers = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
-
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
-
     return Consumer<OfferProvider>(
       builder: (context, provider, child) {
-        final filteredOffers = provider.activeOffers.where((offer) {
-          final titleStr = offer.name.get(context).toLowerCase();
-          final matchesQuery =
-              _searchQuery.isEmpty ||
-              titleStr.contains(_searchQuery.toLowerCase()) ||
-              offer.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              (offer.couponCode != null &&
-                  offer.couponCode!.toLowerCase().contains(
-                    _searchQuery.toLowerCase(),
-                  ));
-          return matchesQuery;
-        }).toList();
-
-        final totalItems = filteredOffers.length;
-        final totalPages = (totalItems / _itemsPerPage).ceil();
-        final startIndex = (_currentPage - 1) * _itemsPerPage;
-        final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-        final paginatedOffers = (startIndex < totalItems)
-            ? filteredOffers.sublist(startIndex, endIndex)
-            : <OfferModel>[];
-
         return Scaffold(
           backgroundColor: Colors.transparent,
           body: Padding(
@@ -58,34 +30,24 @@ class _OffersManagementPageState extends State<OffersManagementPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // Full Height Expanded AppDataTable for OfferModel
                 Expanded(
                   child: AppDataTable<OfferModel>(
-                    items: paginatedOffers,
+                    items: provider.activeOffers,
                     selectable: true,
                     showIndexColumn: true,
-                    selectedItems: _selectedOffers,
-                    onSelectionChanged: (selected) {
-                      setState(() {
-                        _selectedOffers = selected;
-                      });
-                    },
                     primaryActionButton: ButtonApp(
                       onPressed: () =>
                           changeScreen(context, const CreateEditOfferPage()),
                       icon: Icons.add,
                       label: TranslationKeys.addNewOffer.tr(context),
                     ),
-                    onBulkDelete: () async {
-                      final count = _selectedOffers.length;
-                      for (var o in _selectedOffers) {
+                    onBulkDelete: (selected) async {
+                      final count = selected.length;
+                      for (var o in selected) {
                         await provider.deleteOffer(o.id);
                       }
                       if (!mounted) return;
-                      setState(() {
-                        _selectedOffers.clear();
-                      });
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -95,28 +57,12 @@ class _OffersManagementPageState extends State<OffersManagementPage> {
                         ),
                       );
                     },
-                    searchQuery: _searchQuery,
-                    onSearchChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                        _currentPage = 1;
-                      });
-                    },
-                    currentPage: _currentPage,
-                    totalPages: totalPages > 0 ? totalPages : 1,
-                    totalItems: totalItems,
-                    itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) =>
-                        setState(() => _currentPage = page),
-                    onItemsPerPageChanged: (rows) {
-                      setState(() {
-                        _itemsPerPage = rows;
-                        _currentPage = 1;
-                      });
-                    },
-                    emptyMessage: _searchQuery.isNotEmpty
-                        ? TranslationKeys.noMatchingResults.tr(context)
-                        : TranslationKeys.noDataAvailable.tr(context),
+                    searchMatcher: (o, q) =>
+                        o.name.get(context).toLowerCase().contains(q.toLowerCase()) ||
+                        o.id.toLowerCase().contains(q.toLowerCase()) ||
+                        (o.couponCode != null &&
+                            o.couponCode!.toLowerCase().contains(q.toLowerCase())),
+                    emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                     columns: [
                       AppTableColumn<OfferModel>(
                         title: TranslationKeys.offerMarketing.tr(context),

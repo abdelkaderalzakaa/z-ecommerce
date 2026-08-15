@@ -351,5 +351,14 @@ class TranslationKeys {
   static const String storeSettingsTitle = 'store_settings_title';
   static const String storeSettingsSubtitle = 'store_settings_subtitle';
   static const String productsSubtitle = 'products_subtitle';
+  static const String storeOverview = 'store_overview';
+  static const String storeProductsTab = 'store_products_tab';
+  static const String storeOffersTab = 'store_offers_tab';
+  static const String storeOrdersTab = 'store_orders_tab';
+  static const String storeCategoriesTab = 'store_categories_tab';
+  static const String storeBrandsTab = 'store_brands_tab';
+  static const String storeFollowersTab = 'store_followers_tab';
+  static const String storeReviewsAndLikesTab = 'store_reviews_and_likes_tab';
+  static const String storeSettingsTab = 'store_settings_tab';
   static const String ordersSubtitle = 'orders_subtitle';
 }

@@ -3,6 +3,8 @@ import 'package:z_ecommerce/presentation/global/core/constants/product_enums.dar
 /// Represents a specific product variant with unique attributes, price, and stock.
 class ProductVariant {
   final bool isDefault;
+  final bool isActive;
+  final String name;
   final ProductSize? size;
   final ProductColor? color;
   final ProductMaterial? material;
@@ -21,6 +23,8 @@ class ProductVariant {
 
   const ProductVariant({
     this.isDefault = false,
+    this.isActive = true,
+    this.name = '',
     this.size,
     this.color,
     this.material,
@@ -36,6 +40,7 @@ class ProductVariant {
   String get variantKey {
     final List<String> parts = [];
     if (isDefault) parts.add('default');
+    if (name.isNotEmpty) parts.add('name:$name');
     if (size != null) parts.add('size:${size!.name}');
     if (color != null) parts.add('color:${color!.name}');
     if (material != null) parts.add('material:${material!.name}');
@@ -51,6 +56,8 @@ class ProductVariant {
   factory ProductVariant.fromMap(Map<String, dynamic> map) {
     return ProductVariant(
       isDefault: map['isDefault'] as bool? ?? false,
+      isActive: map['isActive'] as bool? ?? true,
+      name: map['name'] as String? ?? '',
       size: _enumFromString(ProductSize.values, map['size']),
       color: _enumFromString(ProductColor.values, map['color']),
       material: _enumFromString(ProductMaterial.values, map['material']),
@@ -67,6 +74,8 @@ class ProductVariant {
   Map<String, dynamic> toMap() {
     return {
       'isDefault': isDefault,
+      'isActive': isActive,
+      'name': name,
       'size': size?.name,
       'color': color?.name,
       'material': material?.name,
@@ -92,6 +101,8 @@ class ProductVariant {
   /// Creates a copy of this [ProductVariant] with modified fields.
   ProductVariant copyWith({
     bool? isDefault,
+    bool? isActive,
+    String? name,
     ProductSize? size,
     ProductColor? color,
     ProductMaterial? material,
@@ -104,6 +115,8 @@ class ProductVariant {
   }) {
     return ProductVariant(
       isDefault: isDefault ?? this.isDefault,
+      isActive: isActive ?? this.isActive,
+      name: name ?? this.name,
       size: size ?? this.size,
       color: color ?? this.color,
       material: material ?? this.material,
@@ -121,6 +134,8 @@ class ProductVariant {
     if (identical(this, other)) return true;
     return other is ProductVariant &&
         other.isDefault == isDefault &&
+        other.isActive == isActive &&
+        other.name == name &&
         other.size == size &&
         other.color == color &&
         other.material == material &&
@@ -136,6 +151,8 @@ class ProductVariant {
   int get hashCode {
     return Object.hash(
       isDefault,
+      isActive,
+      name,
       size,
       color,
       material,
@@ -152,6 +169,8 @@ class ProductVariant {
   factory ProductVariant.empty() {
     return const ProductVariant(
       isDefault: false,
+      isActive: true,
+      name: '',
       price: 0.0,
       stock: 0,
     );

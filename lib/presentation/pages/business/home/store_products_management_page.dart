@@ -24,11 +24,6 @@ class StoreProductsManagementPage extends StatefulWidget {
 
 class _StoreProductsManagementPageState
     extends State<StoreProductsManagementPage> {
-  String _searchQuery = '';
-  List<ProductModel> _selectedProducts = [];
-  int _currentPage = 1;
-  int _itemsPerPage = 10;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -41,115 +36,55 @@ class _StoreProductsManagementPageState
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) {
           final filteredProducts = provider.allProducts.where((product) {
-            final belongsToStore =
-                currentStoreId == null || product.businessId == currentStoreId;
-            final titleStr = product.name.toLowerCase();
-            final matchesQuery =
-                _searchQuery.isEmpty ||
-                titleStr.contains(_searchQuery.toLowerCase()) ||
-                product.id.toLowerCase().contains(_searchQuery.toLowerCase());
-            return belongsToStore && matchesQuery;
+            return currentStoreId == null ||
+                product.businessId == currentStoreId;
           }).toList();
 
-          final totalItems = filteredProducts.length;
-          final totalPages = (totalItems / _itemsPerPage).ceil();
-          final startIndex = (_currentPage - 1) * _itemsPerPage;
-          final endIndex = (startIndex + _itemsPerPage).clamp(0, totalItems);
-          final paginatedProducts = (startIndex < totalItems)
-              ? filteredProducts.sublist(startIndex, endIndex)
-              : <ProductModel>[];
-
           return Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Page Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          TranslationKeys.productsManagement.tr(context),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          TranslationKeys.productsSubtitle.tr(context),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.textTheme.bodySmall?.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                    ButtonApp(
-                      onPressed: () => changeScreen(
-                        context,
-                        InfoProductPage(businessId: currentStoreId),
-                      ),
-                      icon:  Icons.add,  
-                      label: TranslationKeys.addNewProduct.tr(context) 
-                    ),
-                  ],
+                Text(
+                  TranslationKeys.productsManagement.tr(context),
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 10),
 
                 // AppDataTable for Store Products
                 Expanded(
                   child: AppDataTable<ProductModel>(
-                    items: paginatedProducts,
+                    items: filteredProducts,
                     selectable: true,
                     showIndexColumn: true,
-                    selectedItems: _selectedProducts,
-                    onSelectionChanged: (selected) {
-                      setState(() {
-                        _selectedProducts = selected;
-                      });
-                    },
-                    onBulkDelete: () {
-                      for (var p in _selectedProducts) {
+                    primaryActionButton: ButtonApp(
+                      onPressed: () => changeScreen(
+                        context,
+                        InfoProductPage(businessId: currentStoreId),
+                      ),
+                      icon: Icons.add,
+                      label: TranslationKeys.addNewProduct.tr(context),
+                    ),
+                    onBulkDelete: (selected) {
+                      for (var p in selected) {
                         provider.deleteProduct(p.id);
                       }
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            '${TranslationKeys.deleteSelected.tr(context)} (${_selectedProducts.length})',
+                            '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
                           ),
                           backgroundColor: Colors.red,
                         ),
                       );
-                      setState(() {
-                        _selectedProducts.clear();
-                      });
                     },
-                    searchQuery: _searchQuery,
-                    onSearchChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                        _currentPage = 1;
-                      });
-                    },
-                    currentPage: _currentPage,
-                    totalPages: totalPages > 0 ? totalPages : 1,
-                    totalItems: totalItems,
-                    itemsPerPage: _itemsPerPage,
-                    onPageChanged: (page) =>
-                        setState(() => _currentPage = page),
-                    onItemsPerPageChanged: (rows) {
-                      setState(() {
-                        _itemsPerPage = rows;
-                        _currentPage = 1;
-                      });
-                    },
-                    emptyMessage: _searchQuery.isNotEmpty
-                        ? TranslationKeys.noMatchingResults.tr(context)
-                        : TranslationKeys.noDataAvailable.tr(context),
+                    searchMatcher: (p, q) =>
+                        p.name.toLowerCase().contains(q.toLowerCase()) ||
+                        p.id.toLowerCase().contains(q.toLowerCase()),
+                    emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                     onRowTap: (product) => changeScreen(
                       context,
                       ProductDetailsPage(productId: product.id),
