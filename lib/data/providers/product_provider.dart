@@ -10,7 +10,7 @@ class ProductProvider extends ChangeNotifier {
 
   List<ProductModel> _allProducts = [];
   List<ProductModel> _storeProducts = [];
-  ProductModel? _selectedProduct;
+  ProductModel _selectedProduct = ProductModel.empty();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -19,7 +19,8 @@ class ProductProvider extends ChangeNotifier {
   // Getters
   List<ProductModel> get allProducts => _allProducts;
   List<ProductModel> get storeProducts => _storeProducts;
-  ProductModel? get selectedProduct => _selectedProduct;
+  ProductModel get selectedProduct => _selectedProduct;
+  bool get selectedProductIsEmpty => _selectedProduct.isEmpty;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -108,16 +109,18 @@ class ProductProvider extends ChangeNotifier {
   }
 
   /// البحث عن منتج بواسطة المعرف `productId`
-  Future<ProductModel?> fetchProductById(String productId) async {
+  Future<ProductModel> fetchProductById(String productId) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _selectedProduct = await _productService.getProductById(productId);
+      final result = await _productService.getProductById(productId);
+      _selectedProduct = result ?? ProductModel.empty();
       return _selectedProduct;
     } catch (e) {
       _errorMessage = e.toString();
-      return null;
+      _selectedProduct = ProductModel.empty();
+      return _selectedProduct;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -153,10 +156,17 @@ class ProductProvider extends ChangeNotifier {
       final docId = await _productService.addProduct(product);
       if (docId != null) {
         final newProduct = product.copyWith(id: docId);
-        if (!_allProducts.any((p) => p.id == newProduct.id)) {
+        final allIndex = _allProducts.indexWhere((p) => p.id == newProduct.id);
+        if (allIndex != -1) {
+          _allProducts[allIndex] = newProduct;
+        } else {
           _allProducts.add(newProduct);
         }
-        if (!_storeProducts.any((p) => p.id == newProduct.id)) {
+        
+        final storeIndex = _storeProducts.indexWhere((p) => p.id == newProduct.id);
+        if (storeIndex != -1) {
+          _storeProducts[storeIndex] = newProduct;
+        } else {
           _storeProducts.add(newProduct);
         }
         _isLoading = false;
@@ -187,7 +197,7 @@ class ProductProvider extends ChangeNotifier {
         final storeIndex = _storeProducts.indexWhere((p) => p.id == product.id);
         if (storeIndex != -1) _storeProducts[storeIndex] = product;
 
-        if (_selectedProduct?.id == product.id) {
+        if (_selectedProduct.id == product.id) {
           _selectedProduct = product;
         }
 
@@ -215,8 +225,8 @@ class ProductProvider extends ChangeNotifier {
       if (success) {
         _allProducts.removeWhere((p) => p.id == productId);
         _storeProducts.removeWhere((p) => p.id == productId);
-        if (_selectedProduct?.id == productId) {
-          _selectedProduct = null;
+        if (_selectedProduct.id == productId) {
+          _selectedProduct = ProductModel.empty();
         }
         _isLoading = false;
         notifyListeners();
@@ -229,6 +239,17 @@ class ProductProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// 🔄 تبديل حالة تفعيل المنتج (Toggle Active Status)
+  Future<bool> toggleProductStatus(String productId, bool newStatus) async {
+    final index = _allProducts.indexWhere((p) => p.id == productId);
+    if (index == -1) return false;
+
+    final product = _allProducts[index];
+    final updatedProduct = product.copyWith(isActive: newStatus);
+
+    return await updateProduct(updatedProduct);
   }
 
   /// ⭐ إضافة تقييم ومراجعة للمنتج (`RatedUser`)

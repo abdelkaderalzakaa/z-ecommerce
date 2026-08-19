@@ -18,8 +18,28 @@ import '../../../widgets/cart/cart_items_list.dart';
 import '../../../widgets/cart/order_summary.dart';
 import 'package:z_ecommerce/presentation/pages/customer/cart/cart_page.dart';
 
-class CartPage extends StatelessWidget {
+import '../../../../data/providers/offer_provider.dart';
+
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final offerProvider = context.read<OfferProvider>();
+        // Assuming storeOffers contains the offers for the current store context
+        final allOffers = [...offerProvider.activeOffers, ...offerProvider.storeOffers];
+        context.read<CartProvider>().runOffersEngine(allOffers);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +53,7 @@ class CartPage extends StatelessWidget {
         fallbackRoute: 'shop',
         paths: [
           TranslationKeys.home.tr(context),
-          '${TranslationKeys.checkout.tr(context).split(' ').first}:${context.watch<CartProvider>().cartCount(context.read<BusinessProvider>().selectedBusiness?.id)} ${TranslationKeys.items.tr(context)}',
+          '${TranslationKeys.checkout.tr(context).split(' ').first}:${context.watch<CartProvider>().cartCount(context.read<BusinessProvider>().selectedBusiness.id)} ${TranslationKeys.items.tr(context)}',
         ],
         isCartActive: false,
       ),
@@ -62,7 +82,7 @@ class CartPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 80),
-            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
+            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness.id),
           ],
         ),
       ),

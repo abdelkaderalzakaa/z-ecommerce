@@ -19,8 +19,7 @@ class StoreReviewsManagementPage extends StatelessWidget {
       body: Consumer<ProductProvider>(
         builder: (context, productProvider, child) {
           final currentStoreId =
-              context.read<BusinessProvider>().selectedBusiness?.id ??
-              context.read<AuthProvider>().currentUser?.businessId;
+              context.read<BusinessProvider>().selectedBusiness.id;
           final products = productProvider.allProducts
               .where((p) => p.businessId == currentStoreId)
               .toList();

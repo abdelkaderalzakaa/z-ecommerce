@@ -155,7 +155,7 @@ class _BrandColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          business?.localization.name.get(context) ?? "لا يوجد بيانات",
+          business.localization.name.get(context),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w900,
@@ -165,8 +165,7 @@ class _BrandColumn extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          business?.localization.footerDescription.get(context) ??
-              "لا يوجد بيانات",
+          business.localization.footerDescription.get(context),
           style: TextStyle(
             fontSize: 14,
             height: 1.6,

@@ -1,6 +1,7 @@
 import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
+import 'package:z_ecommerce/data/models/super_admin/platform_settings.dart';
 import '../auth/user_model.dart';
 
 class SuperAdminModel {
@@ -10,6 +11,7 @@ class SuperAdminModel {
   final List<SocialModel> socials;
   final LocalizationAdmin localizationAdmin;
   final ThemeAdmin themeAdmin;
+  final PlatformSettings platformSettings;
   
   // 2. التواريخ
   final DateTime? createdAt;
@@ -22,7 +24,8 @@ class SuperAdminModel {
     required this.socials,
     required this.localizationAdmin,
     required this.themeAdmin,
-  });
+    PlatformSettings? platformSettings,
+  }) : platformSettings = platformSettings ?? PlatformSettings.empty();
 
   // ==========================================
   // 🧮 Getters & Helpers
@@ -55,6 +58,9 @@ class SuperAdminModel {
       themeAdmin: map['themeAdmin'] != null
           ? ThemeAdmin.fromMap(map['themeAdmin'])
           : ThemeAdmin.empty(),
+      platformSettings: map['platformSettings'] != null
+          ? PlatformSettings.fromMap(map['platformSettings'])
+          : PlatformSettings.empty(),
     );
   }
 
@@ -67,6 +73,7 @@ class SuperAdminModel {
       'updatedAt': updatedAt?.toIso8601String(),
       'localizationAdmin': localizationAdmin.toMap(),
       'themeAdmin': themeAdmin.toMap(),
+      'platformSettings': platformSettings.toMap(),
     };
   }
 
@@ -77,6 +84,7 @@ class SuperAdminModel {
     DateTime? updatedAt,
     LocalizationAdmin? localizationAdmin,
     ThemeAdmin? themeAdmin,
+    PlatformSettings? platformSettings,
   }) {
     return SuperAdminModel(
       user: user ?? this.user,
@@ -85,6 +93,7 @@ class SuperAdminModel {
       updatedAt: updatedAt ?? this.updatedAt,
       localizationAdmin: localizationAdmin ?? this.localizationAdmin,
       themeAdmin: themeAdmin ?? this.themeAdmin,
+      platformSettings: platformSettings ?? this.platformSettings,
     );
   }
 
@@ -95,6 +104,7 @@ class SuperAdminModel {
       socials: const [],
       localizationAdmin: LocalizationAdmin.empty(),
       themeAdmin: ThemeAdmin.empty(),
+      platformSettings: PlatformSettings.empty(),
     );
   }
 }

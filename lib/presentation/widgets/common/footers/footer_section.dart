@@ -5,7 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../data/models/common/social_media.dart';
 import '../../../../data/providers/business_provider.dart';
-import '../../../../data/providers/super_admin_provider.dart';
+import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
+
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/logo.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../global/translate/app_localizations.dart';

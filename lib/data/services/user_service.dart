@@ -17,8 +17,8 @@ import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
 import 'package:z_ecommerce/data/models/store/followers_store.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
-/// users => role businesses => 
-/// users => role super_admins => 
+/// users => role businesses =>
+/// users => role super_admins =>
 /// users => role customers
 ///
 class UserService {
@@ -36,6 +36,12 @@ class UserService {
 
   /// حفظ أو تحديث بيانات UserModel الأساسية في مجموعة users
   Future<void> saveUser(UserModel user) async {
+    if (user.id.isEmpty) {
+      debugPrint(
+        '[UserService] Blocked: Attempted to save a user with empty ID.',
+      );
+      return;
+    }
     try {
       await _firestore
           .collection(_usersCollection)
@@ -48,7 +54,10 @@ class UserService {
   }
 
   /// إنشاء مستخدم في Authentication دون تسجيل خروج الأدمن الحالي
-  Future<String?> createNewAuthUserWithoutLoggingOut(String email, String password) async {
+  Future<String?> createNewAuthUserWithoutLoggingOut(
+    String email,
+    String password,
+  ) async {
     try {
       final secondaryApp = await Firebase.initializeApp(
         name: 'SecondaryApp_${DateTime.now().millisecondsSinceEpoch}',
@@ -72,10 +81,9 @@ class UserService {
   /// تغيير حالة تنشيط أو حظر المستخدم
   Future<void> updateUserStatus(String userId, bool isActive) async {
     try {
-      await _firestore
-          .collection(_usersCollection)
-          .doc(userId)
-          .update({'isActive': isActive});
+      await _firestore.collection(_usersCollection).doc(userId).update({
+        'isActive': isActive,
+      });
       debugPrint('User status updated successfully: $userId to $isActive');
     } catch (e) {
       debugPrint('Error updating user status: $e');
@@ -108,7 +116,9 @@ class UserService {
         try {
           return UserModel.fromJson(doc.data());
         } catch (_) {
-          return UserModel.fromJson(doc.data()); // just use fromJson which we verified exists
+          return UserModel.fromJson(
+            doc.data(),
+          ); // just use fromJson which we verified exists
         }
       }).toList();
     } catch (e) {
@@ -129,7 +139,10 @@ class UserService {
       } else if (role == UserRole.businessOwner) {
         await _firestore.collection(_businessesCollection).doc(userId).delete();
       } else if (role == UserRole.superAdmin) {
-        await _firestore.collection(_superAdminsCollection).doc(userId).delete();
+        await _firestore
+            .collection(_superAdminsCollection)
+            .doc(userId)
+            .delete();
       }
       debugPrint('User deleted from Firestore successfully: $userId');
     } catch (e) {
@@ -143,6 +156,12 @@ class UserService {
 
   /// إنشاء أو تحديث بيانات المتجر/النشاط التجاري في مجموعة businesses
   Future<void> saveBusiness(BusinessModel business) async {
+    if (business.isEmpty) {
+      debugPrint(
+        '[UserService] Blocked: Attempted to save a business with empty ID.',
+      );
+      return;
+    }
     try {
       // 1. حفظ UserModel أولاً في users إن وجد
       if (business.owner != null) {
@@ -180,7 +199,9 @@ class UserService {
   Future<List<BusinessModel>> getAllBusinesses() async {
     try {
       final snapshot = await _firestore.collection(_businessesCollection).get();
-        return snapshot.docs.map((doc) => BusinessModel.fromMap(doc.data(), doc.id)).toList();
+      return snapshot.docs
+          .map((doc) => BusinessModel.fromMap(doc.data(), doc.id))
+          .toList();
     } catch (e) {
       debugPrint('Error fetching businesses: $e');
       return [];
@@ -267,12 +288,78 @@ class UserService {
     return null;
   }
 
+  /// البث المباشر لإعدادات السوبر أدمن العامة للمنصة
+  Stream<SuperAdminModel?> streamPlatformSuperAdmin() {
+    return _firestore
+        .collection(_superAdminsCollection)
+        .limit(1)
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.docs.isNotEmpty) {
+            final doc = snapshot.docs.first;
+            return SuperAdminModel.fromMap(doc.data(), docId: doc.id);
+          }
+          return null;
+        });
+  }
+
+  /// تحديث إعدادات المنصة لمدير النظام
+  Future<void> updateSuperAdminPlatformSettings({
+    required String adminId,
+    required dynamic platformSettings,
+  }) async {
+    try {
+      await _firestore.collection(_superAdminsCollection).doc(adminId).update({
+        'platformSettings': platformSettings,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint('Error updating platform settings: $e');
+    }
+  }
+
+  /// تحديث الثيم (ThemeAdmin) لمدير النظام
+  Future<void> updateSuperAdminTheme({
+    required String adminId,
+    required Map<String, dynamic> theme,
+  }) async {
+    try {
+      await _firestore.collection(_superAdminsCollection).doc(adminId).update({
+        'themeAdmin': theme,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint('Error updating super admin theme: $e');
+    }
+  }
+
+  /// تحديث بيانات الترجمة والنصوص (LocalizationAdmin) لمدير النظام
+  Future<void> updateSuperAdminLocalization({
+    required String adminId,
+    required Map<String, dynamic> localization,
+  }) async {
+    try {
+      await _firestore.collection(_superAdminsCollection).doc(adminId).update({
+        'localizationAdmin': localization,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint('Error updating super admin localization: $e');
+    }
+  }
+
   // ==========================================
   // 🛒 4. CustomerModel (إدارة العملاء)
   // ==========================================
 
   /// حفظ أو تحديث بيانات العميل في مجموعة customers
   Future<void> saveCustomer(CustomerModel customer) async {
+    if (customer.isEmpty) {
+      debugPrint(
+        '[UserService] Blocked: Attempted to save a customer with empty ID.',
+      );
+      return;
+    }
     try {
       // 1. حفظ UserModel الأساسي
       await saveUser(customer.user);
@@ -327,10 +414,13 @@ class UserService {
     required List<SocialModel> socials,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'socials': socials.map((e) => e.toMap()).toList(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore
+          .collection(_businessesCollection)
+          .doc(businessId)
+          .update({
+            'socials': socials.map((e) => e.toMap()).toList(),
+            'updatedAt': DateTime.now().toIso8601String(),
+          });
     } catch (e) {
       debugPrint('Error updating business socials: $e');
     }
@@ -356,10 +446,12 @@ class UserService {
     required BusinessVisitModel visit,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'visits': FieldValue.arrayUnion([visit.toMap()]),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore.collection(_businessesCollection).doc(businessId).update(
+        {
+          'visits': FieldValue.arrayUnion([visit.toMap()]),
+          'updatedAt': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e) {
       debugPrint('Error adding business visit: $e');
     }
@@ -371,26 +463,15 @@ class UserService {
     required LocalizationAdmin localization,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'localization': localization.toMap(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore
+          .collection(_businessesCollection)
+          .doc(businessId)
+          .update({
+            'localization': localization.toMap(),
+            'updatedAt': DateTime.now().toIso8601String(),
+          });
     } catch (e) {
       debugPrint('Error updating business localization: $e');
-    }
-  }
-
-  Future<void> updateSuperAdminLocalization({
-    required String adminId,
-    required LocalizationAdmin localization,
-  }) async {
-    try {
-      await _firestore.collection(_superAdminsCollection).doc(adminId).update({
-        'localizationAdmin': localization.toMap(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
-    } catch (e) {
-      debugPrint('Error updating super admin localization: $e');
     }
   }
 
@@ -400,10 +481,12 @@ class UserService {
     required CurrencyStore currency,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'currency': currency.toMap(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore.collection(_businessesCollection).doc(businessId).update(
+        {
+          'currency': currency.toMap(),
+          'updatedAt': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e) {
       debugPrint('Error updating business currency: $e');
     }
@@ -415,10 +498,9 @@ class UserService {
     required ThemeAdmin theme,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'theme': theme.toMap(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore.collection(_businessesCollection).doc(businessId).update(
+        {'theme': theme.toMap(), 'updatedAt': DateTime.now().toIso8601String()},
+      );
     } catch (e) {
       debugPrint('Error updating business theme: $e');
     }
@@ -427,10 +509,13 @@ class UserService {
   // --- 👍 Business Likes (إدارة اللايكات والإعجابات) ---
   Future<void> incrementBusinessLikes(String businessId) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'likes': FieldValue.increment(1),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore
+          .collection(_businessesCollection)
+          .doc(businessId)
+          .update({
+            'likes': FieldValue.increment(1),
+            'updatedAt': DateTime.now().toIso8601String(),
+          });
     } catch (e) {
       debugPrint('Error incrementing business likes: $e');
     }
@@ -438,10 +523,13 @@ class UserService {
 
   Future<void> decrementBusinessLikes(String businessId) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'likes': FieldValue.increment(-1),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore
+          .collection(_businessesCollection)
+          .doc(businessId)
+          .update({
+            'likes': FieldValue.increment(-1),
+            'updatedAt': DateTime.now().toIso8601String(),
+          });
     } catch (e) {
       debugPrint('Error decrementing business likes: $e');
     }
@@ -453,10 +541,12 @@ class UserService {
     required FollowersStore follower,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'followersUsers': FieldValue.arrayUnion([follower.toMap()]),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore.collection(_businessesCollection).doc(businessId).update(
+        {
+          'followersUsers': FieldValue.arrayUnion([follower.toMap()]),
+          'updatedAt': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e) {
       debugPrint('Error adding follower: $e');
     }
@@ -467,10 +557,12 @@ class UserService {
     required FollowersStore follower,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'followersUsers': FieldValue.arrayRemove([follower.toMap()]),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore.collection(_businessesCollection).doc(businessId).update(
+        {
+          'followersUsers': FieldValue.arrayRemove([follower.toMap()]),
+          'updatedAt': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e) {
       debugPrint('Error removing follower: $e');
     }
@@ -482,10 +574,12 @@ class UserService {
     required RatedUser rating,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'ratings': FieldValue.arrayUnion([rating.toMap()]),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore.collection(_businessesCollection).doc(businessId).update(
+        {
+          'ratings': FieldValue.arrayUnion([rating.toMap()]),
+          'updatedAt': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e) {
       debugPrint('Error adding rating: $e');
     }
@@ -511,10 +605,13 @@ class UserService {
     required List<AddressModel> addresses,
   }) async {
     try {
-      await _firestore.collection(_businessesCollection).doc(businessId).update({
-        'addAddress': addresses.map((e) => e.toMap()).toList(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      await _firestore
+          .collection(_businessesCollection)
+          .doc(businessId)
+          .update({
+            'addAddress': addresses.map((e) => e.toMap()).toList(),
+            'updatedAt': DateTime.now().toIso8601String(),
+          });
     } catch (e) {
       debugPrint('Error updating business addresses: $e');
     }

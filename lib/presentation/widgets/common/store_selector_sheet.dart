@@ -14,7 +14,7 @@ class StoreSelectorSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final businessProvider = context.watch<BusinessProvider>();
     final businesses = businessProvider.businesses;
-    final currentStoreId = businessProvider.selectedBusiness?.id;
+    final currentStoreId = businessProvider.selectedBusiness.id;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),

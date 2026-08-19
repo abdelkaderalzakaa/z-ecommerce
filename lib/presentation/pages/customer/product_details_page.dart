@@ -54,9 +54,7 @@ class ProductDetailsPage extends StatelessWidget {
               child: isMobile
                   ? Column(
                       children: [
-                        ProductGallery(
-                          images: product.images,
-                        ),
+                        ProductGallery(images: product.images),
                         const SizedBox(height: 24),
                         ProductInfo(product: product),
                       ],
@@ -68,11 +66,7 @@ class ProductDetailsPage extends StatelessWidget {
                           flex: 1,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ProductGallery(
-                                images: product.images,
-                              ),
-                            ],
+                            children: [ProductGallery(images: product.images)],
                           ),
                         ),
                         const SizedBox(width: 40),

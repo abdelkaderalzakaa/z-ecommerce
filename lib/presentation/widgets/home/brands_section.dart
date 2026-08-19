@@ -67,7 +67,7 @@ class _BrandsSectionState extends State<BrandsSection> {
           return Center(
             child: _BrandItem(
               brand: brand,
-              businessId: businessSettings?.id ?? '',
+              businessId: businessSettings.id,
             ),
           );
         },

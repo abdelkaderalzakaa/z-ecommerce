@@ -1,15 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
-import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/data/providers/review_provider.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/models/shared/review_model.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 
-class ProductReviewsSection extends StatelessWidget {
+class ProductReviewsSection extends StatefulWidget {
   final ProductModel product;
 
   const ProductReviewsSection({super.key, required this.product});
+
+  @override
+  State<ProductReviewsSection> createState() => _ProductReviewsSectionState();
+}
+
+class _ProductReviewsSectionState extends State<ProductReviewsSection> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ReviewProvider>().listenToProductReviews(widget.product.id);
+    });
+  }
 
   void _showAddReviewDialog(BuildContext context) {
     final theme = Theme.of(context);
@@ -149,10 +164,25 @@ class ProductReviewsSection extends StatelessWidget {
                             isSubmitting = true;
                           });
 
-                    final newRating = RatedUser(
-                      id: 'rate_${DateTime.now().millisecondsSinceEpoch}',
-                      userId: 'user_${DateTime.now().millisecondsSinceEpoch}',
+                    final authProvider = context.read<AuthProvider>();
+                    if (!authProvider.isAuthenticated) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('يرجى تسجيل الدخول أولاً لإضافة تقييم.'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+
+                    final newReview = ReviewModel(
+                      id: '',
+                      userId: authProvider.currentUser!.id,
                       userName: name,
+                      userAvatar: authProvider.currentUser!.avatarUrl,
+                      targetId: widget.product.id,
+                      targetType: 'product',
+                      businessId: widget.product.businessId,
                       rating: selectedRating,
                       comment: comment.isNotEmpty ? comment : null,
                       createdAt: DateTime.now(),
@@ -161,8 +191,8 @@ class ProductReviewsSection extends StatelessWidget {
                     Navigator.pop(context);
 
                     final success = await context
-                        .read<ProductProvider>()
-                        .addRatingToProduct(product.id, newRating);
+                        .read<ReviewProvider>()
+                        .addReview(newReview);
 
                     if (context.mounted) {
                       if (success) {
@@ -198,7 +228,14 @@ class ProductReviewsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hPad = ResponsiveLayout.horizontalPadding(context);
-    final ratings = product.ratings;
+    
+    return Consumer<ReviewProvider>(
+      builder: (context, reviewProvider, child) {
+        final ratings = reviewProvider.productReviews;
+        double avgRating = 0.0;
+        if (ratings.isNotEmpty) {
+          avgRating = ratings.map((r) => r.rating).reduce((a, b) => a + b) / ratings.length;
+        }
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 16.0),
@@ -243,7 +280,7 @@ class ProductReviewsSection extends StatelessWidget {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            product.rating.toStringAsFixed(1),
+                            avgRating.toStringAsFixed(1),
                             style: const TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.bold,
@@ -260,7 +297,7 @@ class ProductReviewsSection extends StatelessWidget {
                       Row(
                         children: List.generate(5, (index) {
                           return Icon(
-                            index < product.rating.round()
+                            index < avgRating.round()
                                 ? Icons.star_rounded
                                 : Icons.star_outline_rounded,
                             color: Colors.amber,
@@ -398,6 +435,8 @@ class ProductReviewsSection extends StatelessWidget {
             ),
         ],
       ),
+    );
+      },
     );
   }
 }

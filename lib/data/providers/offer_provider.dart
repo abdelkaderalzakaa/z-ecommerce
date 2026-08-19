@@ -125,7 +125,12 @@ class OfferProvider extends ChangeNotifier {
       final docId = await _offerService.addOffer(offer);
       if (docId != null) {
         final newOffer = OfferModel.fromMap({...offer.toMap(), 'id': docId});
-        _storeOffers.add(newOffer);
+        final storeIndex = _storeOffers.indexWhere((o) => o.id == newOffer.id);
+        if (storeIndex != -1) {
+          _storeOffers[storeIndex] = newOffer;
+        } else {
+          _storeOffers.add(newOffer);
+        }
         _isLoading = false;
         notifyListeners();
         return true;

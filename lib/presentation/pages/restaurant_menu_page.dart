@@ -220,17 +220,17 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
   Widget build(BuildContext context) {
     final businessProvider = Provider.of<BusinessProvider>(context);
     final business = businessProvider.selectedBusiness;
-    final themeInfo = business?.theme;
-    final storeName = business?.localization.name.ar ?? 'مطعم وكافيه السعادة';
+    final themeInfo = business.theme;
+    final storeName = business.localization.name.ar;
     final themeStyle = 'chalkboard';
 
     Color primaryColor =
-        themeInfo?.primaryColorValue ?? const Color(0xFF4F46E5);
-    Color bgColor = themeInfo?.backgroundColorValue ?? const Color(0xFFF9FAFB);
+        themeInfo.primaryColorValue;
+    Color bgColor = themeInfo.backgroundColorValue;
     Color surfaceColor =
-        themeInfo?.surfaceColorValue ?? const Color(0xFFFFFFFF);
-    Color textColor = themeInfo?.textColorValue ?? const Color(0xFF111827);
-    final fontFamily = themeInfo?.fontFamily ?? 'Cairo';
+        themeInfo.surfaceColorValue;
+    Color textColor = themeInfo.textColorValue;
+    final fontFamily = themeInfo.fontFamily;
 
     if (themeStyle == 'chalkboard') {
       bgColor = const Color(0xFF121212);
@@ -260,10 +260,10 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
             CircleAvatar(
               radius: 16,
               backgroundColor: primaryColor.withOpacity(0.12),
-              backgroundImage: themeInfo?.logoUrl != null
-                  ? NetworkImage(themeInfo!.logoUrl!)
+              backgroundImage: themeInfo.logoUrl != null
+                  ? NetworkImage(themeInfo.logoUrl!)
                   : null,
-              child: themeInfo?.logoUrl == null
+              child: themeInfo.logoUrl == null
                   ? Icon(
                       Icons.restaurant_menu_rounded,
                       color: primaryColor,

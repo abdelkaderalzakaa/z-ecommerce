@@ -11,7 +11,7 @@ import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/store_create_edit_brand_page.dart';
-
+ 
 class StoreBrandsPage extends StatefulWidget {
   final bool isSuperAdmin;
   const StoreBrandsPage({super.key, this.isSuperAdmin = false});
@@ -26,8 +26,7 @@ class _StoreBrandsPageState extends State<StoreBrandsPage> {
     final theme = Theme.of(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
     final currentStoreId =
-        businessProvider.selectedBusiness?.id ??
-        context.watch<AuthProvider>().currentUser?.businessId;
+        businessProvider.selectedBusiness.id;
 
     final headerTitle = widget.isSuperAdmin
         ? 'إدارة العلامات التجارية العامة'
@@ -64,8 +63,7 @@ class _StoreBrandsPageState extends State<StoreBrandsPage> {
                     if (widget.isSuperAdmin) {
                       return true;
                     } else {
-                      return currentStoreId != null &&
-                             b.businessIds.contains(currentStoreId);
+                      return b.businessIds.contains(currentStoreId);
                     }
                   }).toList();
 
@@ -168,7 +166,6 @@ class _StoreBrandsPageState extends State<StoreBrandsPage> {
                             }
                             if (b.isGlobal) {
                               final isEnabled =
-                                  currentStoreId != null &&
                                   b.businessIds.contains(currentStoreId);
                               return Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -184,27 +181,25 @@ class _StoreBrandsPageState extends State<StoreBrandsPage> {
                                   Switch(
                                     value: isEnabled,
                                     onChanged: (val) async {
-                                      if (currentStoreId != null) {
-                                        await brandProvider.toggleBrandStatus(
-                                          b,
-                                          currentStoreId,
-                                          val,
-                                        );
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                val
-                                                    ? 'تم تفعيل العلامة "${b.name}" لمتجرك'
-                                                    : 'تم تعطيل العلامة "${b.name}" لمتجرك',
-                                              ),
+                                      await brandProvider.toggleBrandStatus(
+                                        b,
+                                        currentStoreId,
+                                        val,
+                                      );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              val
+                                                  ? 'تم تفعيل العلامة "${b.name}" لمتجرك'
+                                                  : 'تم تعطيل العلامة "${b.name}" لمتجرك',
                                             ),
-                                          );
-                                        }
+                                          ),
+                                        );
                                       }
-                                    },
+                                                                        },
                                   ),
                                 ],
                               );

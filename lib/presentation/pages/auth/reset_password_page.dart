@@ -1,21 +1,18 @@
-import 'package:z_ecommerce/data/providers/auth_provider.dart';
-import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
-import 'package:z_ecommerce/presentation/pages/auth/auth_success_page.dart';
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/business_provider.dart';
-import '../../global/translate/localized_string.dart';
-import '../../widgets/auth/auth_split_layout.dart';
-import '../../widgets/auth/password_field.dart';
-import '../../widgets/auth/primary_auth_button.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/auth/auth_success_page.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/auth_split_layout.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/password_field.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/primary_auth_button.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  const ResetPasswordPage({
-    super.key,
-  });
+  const ResetPasswordPage({super.key});
 
   @override
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
@@ -25,6 +22,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -38,11 +36,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final confirmPassword = _confirmPasswordController.text;
 
     if (password.isEmpty || password != confirmPassword) {
+      setState(() {
+        _errorMessage = TranslationKeys.passwordsDoNotMatch.tr(context);
+      });
       return;
     }
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     final authProvider = context.read<AuthProvider>();
@@ -56,11 +58,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
           AuthSuccessPage(
             title: TranslationKeys.passwordReset.tr(context),
             message: TranslationKeys.passwordResetSuccessMessage.tr(context),
-            buttonLabel: TranslationKeys.continueToLogin.tr(context),
+            buttonLabel: TranslationKeys.signIn.tr(context),
           ),
         );
       } else {
         setState(() {
+          _errorMessage = authProvider.errorMessage ?? "فشل تحديث كلمة المرور";
         });
       }
     }
@@ -78,18 +81,36 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         en: 'Your new password must be different from previously used passwords.',
       ),
       children: [
+        if (_errorMessage != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.red.withOpacity(0.3)),
+            ),
+            child: Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.red, fontSize: 13),
+            ),
+          ),
+        ],
+
         PasswordField(
           controller: _passwordController,
           label: TranslationKeys.password.tr(context),
-          hintText: TranslationKeys.mustBeAtLeast8.tr(context),
+          hintText: '••••••••••••',
         ),
         const SizedBox(height: 20),
         PasswordField(
           controller: _confirmPasswordController,
           label: TranslationKeys.confirmPassword.tr(context),
-          hintText: TranslationKeys.mustBeAtLeast8.tr(context),
+          hintText: '••••••••••••',
         ),
         const SizedBox(height: 32),
+
         SizedBox(
           width: double.infinity,
           child: PrimaryAuthButton(
@@ -98,9 +119,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             isLoading: _isLoading,
           ),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 24),
+
         Center(
           child: ButtonApp(
+            format: FormatButtonApp.text,
             onPressed: () {
               Navigator.pop(context);
             },

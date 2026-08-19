@@ -23,14 +23,12 @@ class OffersSection extends StatelessWidget {
         final businessId = context
             .watch<BusinessProvider>()
             .selectedBusiness
-            ?.id;
+            .id;
         var activeOffers = provider.activeOffers;
-        if (businessId != null) {
-          activeOffers = activeOffers
-              .where((o) => o.businessId == businessId)
-              .toList();
-        }
-        if (activeOffers.isEmpty) return const SizedBox.shrink();
+        activeOffers = activeOffers
+            .where((o) => o.businessId == businessId)
+            .toList();
+              if (activeOffers.isEmpty) return const SizedBox.shrink();
 
         final bundles = activeOffers.where((o) => o.type == 'bundle').toList();
         final discounts = activeOffers

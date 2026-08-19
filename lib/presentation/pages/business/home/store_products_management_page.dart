@@ -13,6 +13,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/products/pages_create_edit_product/info_product.dart';
 import 'package:z_ecommerce/presentation/pages/business/products/product_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart' hide ProductDetailsPage;
 
 class StoreProductsManagementPage extends StatefulWidget {
   const StoreProductsManagementPage({super.key});
@@ -28,16 +29,14 @@ class _StoreProductsManagementPageState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currentStoreId =
-        context.watch<BusinessProvider>().selectedBusiness?.id ??
-        context.read<AuthProvider>().currentUser?.businessId;
+        context.watch<BusinessProvider>().selectedBusiness.id;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) {
           final filteredProducts = provider.allProducts.where((product) {
-            return currentStoreId == null ||
-                product.businessId == currentStoreId;
+            return product.businessId == currentStoreId;
           }).toList();
 
           return Padding(

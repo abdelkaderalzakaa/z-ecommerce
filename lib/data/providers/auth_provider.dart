@@ -76,7 +76,9 @@ class AuthProvider with ChangeNotifier {
       );
 
       if (credential?.user != null) {
-        final existingUser = await _userService.getUserById(credential!.user!.uid);
+        final existingUser = await _userService.getUserById(
+          credential!.user!.uid,
+        );
         if (existingUser != null) {
           await setCurrentUser(existingUser);
         }
@@ -277,10 +279,17 @@ class AuthProvider with ChangeNotifier {
   /// إضافة عنوان جديد للعميل الحالي
   Future<void> addAddress(AddressModel address) async {
     if (_currentCustomer == null && _currentUser != null) {
-      _currentCustomer = CustomerModel(user: _currentUser!, addresses: [address]);
+      _currentCustomer = CustomerModel(
+        user: _currentUser!,
+        addresses: [address],
+      );
     } else if (_currentCustomer != null) {
-      final updatedAddresses = List<AddressModel>.from(_currentCustomer!.addresses)..add(address);
-      _currentCustomer = _currentCustomer!.copyWith(addresses: updatedAddresses);
+      final updatedAddresses = List<AddressModel>.from(
+        _currentCustomer!.addresses,
+      )..add(address);
+      _currentCustomer = _currentCustomer!.copyWith(
+        addresses: updatedAddresses,
+      );
     }
 
     if (_currentCustomer != null) {
@@ -292,8 +301,12 @@ class AuthProvider with ChangeNotifier {
   /// حذف عنوان للعميل الحالي
   Future<void> deleteAddress(String addressId) async {
     if (_currentCustomer != null) {
-      final updatedAddresses = _currentCustomer!.addresses.where((a) => a.id != addressId).toList();
-      _currentCustomer = _currentCustomer!.copyWith(addresses: updatedAddresses);
+      final updatedAddresses = _currentCustomer!.addresses
+          .where((a) => a.id != addressId)
+          .toList();
+      _currentCustomer = _currentCustomer!.copyWith(
+        addresses: updatedAddresses,
+      );
       await _userService.saveCustomer(_currentCustomer!);
       notifyListeners();
     }

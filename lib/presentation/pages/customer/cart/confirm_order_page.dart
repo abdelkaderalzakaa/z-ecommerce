@@ -113,7 +113,7 @@ class ConfirmOrderPage extends StatelessWidget {
             const SizedBox(height: 80),
             FooterBuisness(
               idBuisness:
-                  context.read<BusinessProvider>().selectedBusiness?.id ?? '',
+                  context.read<BusinessProvider>().selectedBusiness.id,
             ),
           ],
         ),

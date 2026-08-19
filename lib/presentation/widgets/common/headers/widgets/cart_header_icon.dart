@@ -59,7 +59,7 @@ class _CartHeaderIconState extends State<CartHeaderIcon>
   @override
   Widget build(BuildContext context) {
     final businessId =
-        context.read<BusinessProvider>().selectedBusiness?.id;
+        context.read<BusinessProvider>().selectedBusiness.id;
     final cartCount = context.watch<CartProvider>().cartCount(businessId);
 
     if (!_isFirstBuild && cartCount > _previousCount) {

@@ -109,7 +109,12 @@ class BrandProvider extends ChangeNotifier {
           description: brand.description,
           isGlobal: brand.isGlobal,
         );
-        _brands.add(newBrand);
+        final index = _brands.indexWhere((b) => b.id == newBrand.id);
+        if (index != -1) {
+          _brands[index] = newBrand;
+        } else {
+          _brands.add(newBrand);
+        }
         _isLoading = false;
         notifyListeners();
         return true;

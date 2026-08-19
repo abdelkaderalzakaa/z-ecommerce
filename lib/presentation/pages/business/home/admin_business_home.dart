@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
-import '../../../widgets/admin_store/store_owner_app_bar.dart';
-import '../../../widgets/admin_store/store_owner_sidebar.dart';
-import '../branding/business_branding_page.dart';
-import 'store_dashboard_overview_page.dart';
-import 'store_products_management_page.dart';
-import 'store_categories_page.dart';
-import 'store_brands_page.dart';
-import 'business_orders_management_page.dart';
-import 'store_offers_management_page.dart';
-import 'store_reviews_management_page.dart';
-import 'store_owner_settings_page.dart';
-import 'store_followers_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/business_orders_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_brands_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_categories_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_dashboard_overview_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_followers_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_offers_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_owner_settings_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_products_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_reviews_management_page.dart';
+import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_app_bar.dart';
+import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_sidebar.dart';
 
 class AdminStore extends StatefulWidget {
   const AdminStore({super.key});
@@ -58,7 +57,7 @@ class _AdminStoreState extends State<AdminStore> {
     final businessProvider = context.watch<BusinessProvider>();
     final store = businessProvider.businessSettings;
     
-    if (store != null && store.isInactive) {
+    if (store.isInactive) {
       return Scaffold(
         body: Center(
           child: Column(
@@ -130,7 +129,7 @@ class _AdminStoreState extends State<AdminStore> {
             child: IndexedStack(
               index: _selectedIndex,
               children: _getPages(
-                context.watch<BusinessProvider>().businessSettings?.id ?? '',
+                context.watch<BusinessProvider>().businessSettings.id,
               ),
             ),
           ),

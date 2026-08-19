@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_colors.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
 class SocialLoginButtons extends StatelessWidget {
   final VoidCallback? onGooglePressed;
@@ -10,16 +13,18 @@ class SocialLoginButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Auth UI is strictly Light Mode only
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: OutlinedButton(
         onPressed: onGooglePressed ?? () {},
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
+          backgroundColor: isDark ? theme.colorScheme.surface : Colors.white,
           side: const BorderSide(
-            color: Color(0xFFE2E8F0),
+            color: AppColors.cardBorder,
             width: 1,
           ),
           shape: RoundedRectangleBorder(
@@ -30,10 +35,9 @@ class SocialLoginButtons extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Google G Logo
             Container(
-              width: 22,
-              height: 22,
+              width: 24,
+              height: 24,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
               ),
@@ -49,12 +53,12 @@ class SocialLoginButtons extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Text(
-              'Continue with Google',
+            Text(
+              TranslationKeys.continueWithGoogle.tr(context),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0F172A),
+                color: theme.textTheme.bodyLarge?.color,
               ),
             ),
           ],

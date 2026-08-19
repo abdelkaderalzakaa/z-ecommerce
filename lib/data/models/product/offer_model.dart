@@ -73,6 +73,8 @@ class OfferModel {
     return remainingHours >= 0 && remainingHours <= 24;
   }
 
+  bool get isEmpty => id.isEmpty;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

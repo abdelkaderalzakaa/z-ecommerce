@@ -32,6 +32,8 @@ enum BusinessType {
     required this.ar,
   });
 
+  String get name => toString().split('.').last;
+
   static BusinessType fromString(String? value) {
     return BusinessType.values.firstWhere(
       (e) => e.name == value,
@@ -61,6 +63,7 @@ enum SocialPlatform {
 enum CartItemType {
   product,
   offer,
+  gift, // Added for free gift items from offers
 }
 enum OrderStatus {
   pending,
@@ -70,4 +73,17 @@ enum OrderStatus {
   shipped,
   delivered,
   cancelled;
+}
+
+enum PaymentMethod {
+  cashOnDelivery,
+  creditCard,
+  digitalWallet;
+}
+
+enum PaymentStatus {
+  pending,
+  paid,
+  failed,
+  refunded;
 }

@@ -11,7 +11,7 @@ import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/store_create_edit_category_page.dart';
-
+ 
 class StoreCategoriesPage extends StatefulWidget {
   final bool isSuperAdmin;
   const StoreCategoriesPage({super.key, this.isSuperAdmin = false});
@@ -26,8 +26,7 @@ class _StoreCategoriesPageState extends State<StoreCategoriesPage> {
     final theme = Theme.of(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
     final currentStoreId =
-        businessProvider.selectedBusiness?.id ??
-        context.watch<AuthProvider>().currentUser?.businessId;
+        businessProvider.selectedBusiness.id;
 
     final headerTitle = widget.isSuperAdmin
         ? 'إدارة الفئات العامة'
@@ -53,8 +52,7 @@ class _StoreCategoriesPageState extends State<StoreCategoriesPage> {
                     if (widget.isSuperAdmin) {
                       return true;
                     } else {
-                      return currentStoreId != null &&
-                             c.businessIds.contains(currentStoreId);
+                      return c.businessIds.contains(currentStoreId);
                     }
                   }).toList();
 
@@ -179,7 +177,6 @@ class _StoreCategoriesPageState extends State<StoreCategoriesPage> {
                             }
                             if (c.isGlobal) {
                               final isEnabled =
-                                  currentStoreId != null &&
                                   c.businessIds.contains(currentStoreId);
                               return Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -195,27 +192,25 @@ class _StoreCategoriesPageState extends State<StoreCategoriesPage> {
                                   Switch(
                                     value: isEnabled,
                                     onChanged: (val) async {
-                                      if (currentStoreId != null) {
-                                        await catProvider.toggleCategoryStatus(
-                                          c,
-                                          currentStoreId,
-                                          val,
-                                        );
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                val
-                                                    ? 'تم تفعيل الفئة "${c.label}" لمتجرك'
-                                                    : 'تم تعطيل الفئة "${c.label}" لمتجرك',
-                                              ),
+                                      await catProvider.toggleCategoryStatus(
+                                        c,
+                                        currentStoreId,
+                                        val,
+                                      );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              val
+                                                  ? 'تم تفعيل الفئة "${c.label}" لمتجرك'
+                                                  : 'تم تعطيل الفئة "${c.label}" لمتجرك',
                                             ),
-                                          );
-                                        }
+                                          ),
+                                        );
                                       }
-                                    },
+                                                                        },
                                   ),
                                 ],
                               );

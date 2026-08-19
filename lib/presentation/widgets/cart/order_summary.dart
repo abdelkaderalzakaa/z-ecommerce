@@ -40,9 +40,9 @@ class _OrderSummaryState extends State<OrderSummary> {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
-    final currency = selectedBusiness?.currency.symbol ?? '\$';
+    final currency = selectedBusiness.currency.symbol;
 
-    final businessId = selectedBusiness?.id;
+    final businessId = selectedBusiness.id;
     final cartProvider = context.watch<CartProvider>();
 
     final baseSubtotal = cartProvider.subTotal(businessId);

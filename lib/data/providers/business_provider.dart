@@ -13,7 +13,7 @@ class BusinessProvider with ChangeNotifier {
   final UserService _userService = UserService();
 
   List<BusinessModel> _businesses = [];
-  BusinessModel? _businessSettings;
+  BusinessModel _businessSettings = BusinessModel.empty();
   bool _isLoading = false;
   String? _errorMessage;
   StreamSubscription<List<BusinessModel>>? _businessSubscription;
@@ -26,8 +26,9 @@ class BusinessProvider with ChangeNotifier {
   /// المتاجر المعتمدة (نشط ومعتمد)
   List<BusinessModel> get verifiedBusinesses => _businesses.where((b) => b.isVerified).toList();
 
-  BusinessModel? get businessSettings => _businessSettings;
-  BusinessModel? get selectedBusiness => _businessSettings;
+  BusinessModel get businessSettings => _businessSettings;
+  BusinessModel get selectedBusiness => _businessSettings;
+  bool get businessSettingsIsEmpty => _businessSettings.isEmpty;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -40,10 +41,10 @@ class BusinessProvider with ChangeNotifier {
     _businessSubscription = _userService.streamBusinesses().listen(
       (list) {
         _businesses = list;
-        if (_businessSettings != null) {
+        if (!_businessSettings.isEmpty) {
           final updated = list.firstWhere(
-            (b) => b.id == _businessSettings!.id,
-            orElse: () => _businessSettings!,
+            (b) => b.id == _businessSettings.id,
+            orElse: () => _businessSettings,
           );
           _businessSettings = updated;
         }
@@ -103,7 +104,7 @@ class BusinessProvider with ChangeNotifier {
       } else {
         _businesses.add(business);
       }
-      if (_businessSettings?.id == business.id) {
+      if (_businessSettings.id == business.id) {
         _businessSettings = business;
       }
     } catch (e) {

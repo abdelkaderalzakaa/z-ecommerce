@@ -13,8 +13,7 @@ import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/offers/create_edit_offer_page.dart';
-import 'package:z_ecommerce/presentation/pages/business/products/pages_create_edit_product/create_edit_product_offer_page.dart';
-
+import 'package:z_ecommerce/presentation/pages/business/products/pages_create_edit_product/create_edit_product_offer_page.dart'; 
 class UnifiedOffer {
   final String id;
   final String title;

@@ -74,6 +74,7 @@ class BusinessModel {
   bool get isVerified => status == 'Active & Verified';
   bool get isPending => status == 'Pending';
   bool get isInactive => status == 'Inactive' || status == null;
+  bool get isEmpty => id.isEmpty;
 
   BusinessModel({
     required this.id,

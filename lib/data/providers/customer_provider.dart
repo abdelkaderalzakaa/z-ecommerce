@@ -8,12 +8,13 @@ class CustomerProvider with ChangeNotifier {
   final UserService _userService = UserService();
 
   List<CustomerModel> _customers = [];
-  CustomerModel? _selectedCustomer;
+  CustomerModel _selectedCustomer = CustomerModel.empty();
   bool _isLoading = false;
   String? _errorMessage;
 
   List<CustomerModel> get customers => List.unmodifiable(_customers);
-  CustomerModel? get selectedCustomer => _selectedCustomer;
+  CustomerModel get selectedCustomer => _selectedCustomer;
+  bool get selectedCustomerIsEmpty => _selectedCustomer.isEmpty;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -34,16 +35,18 @@ class CustomerProvider with ChangeNotifier {
   }
 
   /// جلب عميل محدد بالـ ID
-  Future<CustomerModel?> fetchCustomerById(String customerId) async {
+  Future<CustomerModel> fetchCustomerById(String customerId) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _selectedCustomer = await _userService.getCustomerById(customerId);
+      final result = await _userService.getCustomerById(customerId);
+      _selectedCustomer = result ?? CustomerModel.empty();
       return _selectedCustomer;
     } catch (e) {
       _errorMessage = e.toString();
-      return null;
+      _selectedCustomer = CustomerModel.empty();
+      return _selectedCustomer;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -62,7 +65,7 @@ class CustomerProvider with ChangeNotifier {
       } else {
         _customers.add(customer);
       }
-      if (_selectedCustomer?.id == customer.id) {
+      if (_selectedCustomer.id == customer.id) {
         _selectedCustomer = customer;
       }
       await _userService.saveCustomer(customer);

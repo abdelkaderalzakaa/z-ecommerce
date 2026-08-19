@@ -151,6 +151,8 @@ class TranslationKeys {
   static const String productDetails = 'product_details';
   static const String shop = 'shop';
   static const String showingProductsTemplate = 'showing_products_template';
+  static const String showMore = 'show_more';
+  static const String showLess = 'show_less';
   static const String sortBy = 'sort_by';
   static const String mostPopular = 'most_popular';
   static const String newest = 'newest';
@@ -249,6 +251,7 @@ class TranslationKeys {
   static const String usersManagement = 'users_management';
   static const String offersManagement = 'offers_management';
   static const String categoriesManagement = 'categories_management';
+  static const String reportedReviews = 'reported_reviews';
   static const String superAdminControlPanel = 'super_admin_control_panel';
   static const String totalStores = 'total_stores';
   static const String totalRevenue = 'total_revenue';
@@ -361,4 +364,57 @@ class TranslationKeys {
   static const String storeReviewsAndLikesTab = 'store_reviews_and_likes_tab';
   static const String storeSettingsTab = 'store_settings_tab';
   static const String ordersSubtitle = 'orders_subtitle';
+
+  // Business Entry Keys
+  static const String businessPlatformBadge = 'business_platform_badge';
+  static const String businessHeroTitle = 'business_hero_title';
+  static const String businessHeroSubtitle = 'business_hero_subtitle';
+  static const String exploreStores = 'explore_stores';
+  static const String joinAsMerchant = 'join_as_merchant';
+  static const String verifiedStoresTitle = 'verified_stores_title';
+  static const String searchBusinessHint = 'search_business_hint';
+  static const String allCategories = 'all_categories';
+  static const String topBusinesses = 'top_businesses';
+  static const String viewAllBusinesses = 'view_all_businesses';
+  static const String topProducts = 'top_products';
+  static const String viewAllProducts = 'view_all_products';
+  static const String topCategories = 'top_categories';
+  static const String viewAllCategories = 'view_all_categories';
+  static const String whyOurPlatform = 'why_our_platform';
+  static const String ownABusiness = 'own_a_business';
+  static const String joinMerchantTitle = 'join_merchant_title';
+  static const String joinMerchantDesc = 'join_merchant_desc';
+  static const String easyOrderManagement = 'easy_order_management';
+  static const String fullAnalyticsDashboard = 'full_analytics_dashboard';
+  static const String technicalSupportShipping = 'technical_support_shipping';
+  static const String registerStoreNow = 'register_store_now';
+  static const String activeStoresNow = 'active_stores_now';
+  static const String enterStore = 'enter_store';
+  static const String searchResultsFor = 'search_results_for';
+  static const String selectedCategoryResults = 'selected_category_results';
+  static const String noProductsAvailable = 'no_products_available';
+  static const String noCategoriesAvailable = 'no_categories_available';
+  static const String fastDeliveryTitle = 'fast_delivery_title';
+  static const String fastDeliveryDesc = 'fast_delivery_desc';
+  static const String growingCommunityTitle = 'growing_community_title';
+  static const String growingCommunityDesc = 'growing_community_desc';
+  static const String topRatingsTitle = 'top_ratings_title';
+  static const String topRatingsDesc = 'top_ratings_desc';
+  static const String or = 'or';
+  static const String continueWithGoogle = 'continue_with_google';
+
+  // Static Pages Keys
+  static const String sendMessage = 'send_message';
+  static const String yourName = 'your_name';
+  static const String yourEmail = 'your_email';
+  static const String messageSubject = 'message_subject';
+  static const String yourMessage = 'your_message';
+  static const String messageSentSuccess = 'message_sent_success';
+  static const String ourMission = 'our_mission';
+  static const String ourValues = 'our_values';
+  static const String platformStats = 'platform_stats';
+  static const String termsSubtitle = 'terms_subtitle';
+  static const String privacySubtitle = 'privacy_subtitle';
 }
+
+

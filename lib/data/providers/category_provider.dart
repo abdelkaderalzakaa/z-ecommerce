@@ -109,7 +109,12 @@ class CategoryProvider extends ChangeNotifier {
           icon: category.icon,
           isGlobal: category.isGlobal,
         );
-        _categories.add(newCategory);
+        final index = _categories.indexWhere((c) => c.id == newCategory.id);
+        if (index != -1) {
+          _categories[index] = newCategory;
+        } else {
+          _categories.add(newCategory);
+        }
         _isLoading = false;
         notifyListeners();
         return true;

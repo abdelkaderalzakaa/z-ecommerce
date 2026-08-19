@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
-import '../../data/models/order/invoice_model.dart';
+import '../../data/models/order/order_model.dart';
+import '../../data/models/order/order_item_model.dart';
+import '../../data/providers/order_provider.dart';
 import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
 import '../widgets/common/headers/header_details.dart';
@@ -12,18 +14,18 @@ import '../../data/providers/business_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import '../../presentation/global/core/constants/enum_data.dart';
-import 'package:z_ecommerce/presentation/pages/order_details_page.dart';
-class OrderDetailsPage extends StatelessWidget {
-  final InvoiceModel invoice;
 
-  const OrderDetailsPage({super.key, required this.invoice});
+class OrderDetailsPage extends StatelessWidget {
+  final OrderModel order;
+
+  const OrderDetailsPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
-    final currency = selectedBusiness?.currency.symbol ?? '\$';
+    final currency = selectedBusiness.currency.symbol;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -64,13 +66,13 @@ class OrderDetailsPage extends StatelessWidget {
                             Text(
                               TranslationKeys.orderNumber
                                   .tr(context)
-                                  .replaceAll('{id}', invoice.id),
+                                  .replaceAll('{id}', order.id),
                               style: AppTextStyles.heroTitle(
                                 context,
                                 isMobile,
                               ).copyWith(fontSize: 24),
                             ),
-                            _StatusBadge(status: invoice.status),
+                            _StatusBadge(status: order.status),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -81,7 +83,7 @@ class OrderDetailsPage extends StatelessWidget {
                                 '{date}',
                                 DateFormat(
                                   'MMMM d, yyyy - h:mm a',
-                                ).format(invoice.createdAt),
+                                ).format(order.createdAt),
                               ),
                           style: TextStyle(
                             color: AppColors.textSecondary,
@@ -101,7 +103,7 @@ class OrderDetailsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            FooterBuisness(idBuisness: invoice.storeId),
+            FooterBuisness(idBuisness: order.businessId),
           ],
         ),
       ),
@@ -112,8 +114,6 @@ class OrderDetailsPage extends StatelessWidget {
     return Column(
       children: [
         _buildItemsCard(context, currency),
-        const SizedBox(height: 24),
-        _buildAddressCard(context),
         const SizedBox(height: 24),
         _buildSummaryCard(context, currency),
       ],
@@ -129,8 +129,6 @@ class OrderDetailsPage extends StatelessWidget {
           child: Column(
             children: [
               _buildItemsCard(context, currency),
-              const SizedBox(height: 24),
-              _buildAddressCard(context),
             ],
           ),
         ),
@@ -156,62 +154,40 @@ class OrderDetailsPage extends StatelessWidget {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: invoice.items.length,
-            separatorBuilder: (context, index) =>
-                const Divider(height: 32, color: AppColors.divider),
-            itemBuilder: (context, index) {
-              final item = invoice.items[index];
-              return CartItemWidget(
-                title: item.product?.name ?? item.offer?.name.get(context) ?? TranslationKeys.defaultText.tr(context),
-                size:
-                    item.selectedVariant?.size?.name ??
-                    TranslationKeys.defaultText.tr(context),
-                color: item.selectedVariant?.color?.name ?? TranslationKeys.defaultText.tr(context),
-                price: item.unitPrice,
-                quantity: item.quantity,
-                isReadOnly: true,
+          FutureBuilder<List<OrderItemModel>>(
+            future: context.read<OrderProvider>().getOrderItems(order.id),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text('An error occurred.'));
+              }
+              final items = snapshot.data ?? [];
+              if (items.isEmpty) {
+                return Center(child: Text(TranslationKeys.notAvailable.tr(context)));
+              }
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: items.length,
+                separatorBuilder: (context, index) =>
+                    const Divider(height: 32, color: AppColors.divider),
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return CartItemWidget(
+                    title: item.productName,
+                    size: item.variantName ?? TranslationKeys.notAvailable.tr(context),
+                    color: TranslationKeys.notAvailable.tr(context),
+                    price: item.unitPrice,
+                    quantity: item.quantity,
+                    isReadOnly: true,
+                    isGift: item.unitPrice == 0.0,
+                    isBundle: false,
+                  );
+                },
               );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddressCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            TranslationKeys.shippingAddress.tr(context),
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          if (invoice.shippingAddress.title.isNotEmpty) ...[
-            Text(
-              invoice.shippingAddress.title,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-            ),
-            const SizedBox(height: 4),
-          ],
-          Text(
-            invoice.shippingAddress.getFormattedAddress(langCode: Localizations.localeOf(context).languageCode),
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              height: 1.5,
-              fontSize: 15,
-            ),
+            }
           ),
         ],
       ),
@@ -236,26 +212,21 @@ class OrderDetailsPage extends StatelessWidget {
           const SizedBox(height: 24),
           _SummaryRow(
             label: TranslationKeys.subtotal.tr(context),
-            value: '$currency${invoice.subtotal.toStringAsFixed(2)}',
+            value: '$currency${order.subTotal.toStringAsFixed(2)}',
           ),
           const SizedBox(height: 16),
           _SummaryRow(
             label: TranslationKeys.discount.tr(context),
-            value: '-$currency${invoice.discount.toStringAsFixed(2)}',
+            value: '-$currency${0.0.toStringAsFixed(2)}', // TODO: order discount if available
             isDiscount: true,
           ),
           const SizedBox(height: 16),
           _SummaryRow(
-            label: TranslationKeys.tax.tr(context),
-            value: '${currency}0.00',
-          ),
-          const SizedBox(height: 16),
-          _SummaryRow(
             label: TranslationKeys.deliveryFee.tr(context),
-            value: '$currency${invoice.shippingCost.toStringAsFixed(2)}',
+            value: '$currency${order.shippingCost.toStringAsFixed(2)}',
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 20),
+            padding: EdgeInsets.symmetric(vertical: 16),
             child: Divider(color: AppColors.divider),
           ),
           Row(
@@ -269,7 +240,7 @@ class OrderDetailsPage extends StatelessWidget {
                 ),
               ),
               Text(
-                '$currency${invoice.total.toStringAsFixed(2)}',
+                '$currency${order.storeTotal.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

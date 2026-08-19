@@ -9,6 +9,7 @@ class DiscountModel {
   final String? productId;
   final bool isActive;
   final String? description;
+  final int priority; // Used to sort discounts deterministicly. Higher or lower value takes precedence based on implementation. Default is 0.
 
   const DiscountModel({
     required this.id,
@@ -21,6 +22,7 @@ class DiscountModel {
     this.productId,
     this.isActive = true,
     this.description,
+    this.priority = 0,
   });
 
   /// Checks if the discount is currently valid and active
@@ -44,6 +46,7 @@ class DiscountModel {
       productId: map['productId'],
       isActive: map['isActive'] ?? true,
       description: map['description'],
+      priority: map['priority'] ?? 0,
     );
   }
 
@@ -59,6 +62,7 @@ class DiscountModel {
       'productId': productId,
       'isActive': isActive,
       'description': description,
+      'priority': priority,
     };
   }
 
@@ -73,6 +77,7 @@ class DiscountModel {
     String? productId,
     bool? isActive,
     String? description,
+    int? priority,
   }) {
     return DiscountModel(
       id: id ?? this.id,
@@ -85,6 +90,7 @@ class DiscountModel {
       productId: productId ?? this.productId,
       isActive: isActive ?? this.isActive,
       description: description ?? this.description,
+      priority: priority ?? this.priority,
     );
   }
 }

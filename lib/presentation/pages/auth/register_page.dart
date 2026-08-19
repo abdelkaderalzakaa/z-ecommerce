@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
-import 'package:provider/provider.dart';
-import '../../../data/providers/auth_provider.dart';
-import '../../../data/models/auth/user_model.dart';
-import '../../../data/providers/business_provider.dart';
-import '../../global/translate/localized_string.dart';
-import '../../widgets/auth/auth_split_layout.dart';
-import '../../widgets/auth/auth_text_field.dart';
-import '../../widgets/auth/password_field.dart';
-import '../../widgets/auth/primary_auth_button.dart';
-import '../../widgets/auth/social_login_buttons.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_colors.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
-import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/admin_business_home.dart';
+import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
-import 'package:z_ecommerce/presentation/pages/business/home/admin_business_home.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/auth_split_layout.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/password_field.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/primary_auth_button.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/social_login_buttons.dart';
 
 class RegisterPage extends StatefulWidget {
   final String? redirectTo;
@@ -37,6 +37,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _phoneController = TextEditingController();
 
   bool _agreeToTerms = false;
+  bool _isLoading = false;
   String? _errorMessage;
 
   @override
@@ -68,6 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    setState(() => _isLoading = true);
     final authProvider = context.read<AuthProvider>();
     final fullName =
         '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
@@ -80,17 +82,17 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     if (mounted) {
+      setState(() => _isLoading = false);
       if (success) {
         final role = authProvider.currentUser?.role;
         if (role == UserRole.superAdmin) {
           changeScreenUntill(context, const SuperAdminHome());
-        } else if (role == UserRole.businessOwner ||
-            role == UserRole.businessOwner) {
+        } else if (role == UserRole.businessOwner) {
           changeScreenUntill(context, const AdminStore());
         } else {
           final destination = widget.redirectTo ?? '/';
           if (destination == '/') {
-            changeScreenUntill(context, const BusinessPage());
+            changeScreenUntill(context, const BusinessEntry());
           } else {
             Navigator.pushReplacementNamed(context, destination);
           }
@@ -107,28 +109,67 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return AuthSplitLayout(
       pageTitle: const LocalizedString(
         ar: 'أنشئ حسابك الجديد',
-        en: 'Create your new account',
+        en: 'Create New Account',
       ),
       pageSubtitle: const LocalizedString(
         ar: 'انضم إلينا اليوم واستمتع بتجربة فريدة ومميزة.',
-        en: 'Join us today and enjoy a unique experience.',
+        en: 'Join us today & enjoy an extraordinary shopping experience.',
       ),
       children: [
+        if (_errorMessage != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.accent.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.accent.withOpacity(0.4)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, color: AppColors.accent, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // First Name & Last Name Row
               Row(
                 children: [
                   Expanded(
                     child: AuthTextField(
                       controller: _firstNameController,
                       label: TranslationKeys.firstName.tr(context),
-                      hintText: 'John',
+                      hintText: 'الاسم الأول',
+                      prefixIcon: Icons.person_outline,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return TranslationKeys.requiredField.tr(context);
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -136,155 +177,171 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: AuthTextField(
                       controller: _lastNameController,
                       label: TranslationKeys.lastName.tr(context),
-                      hintText: 'Doe',
+                      hintText: 'الاسم الأخير',
+                      prefixIcon: Icons.person_outline,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return TranslationKeys.requiredField.tr(context);
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
+
+              // Email Field
               AuthTextField(
                 controller: _emailController,
                 label: TranslationKeys.email.tr(context),
                 hintText: 'alex.jordan@gmail.com',
                 prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return TranslationKeys.emailRequired.tr(context);
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
-              AuthTextField(
-                controller: _phoneController,
-                label: 'رقم الهاتف',
-                hintText: '+966 50 123 4567',
-                prefixIcon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 16),
+
+              // Password & Confirm Password
               PasswordField(
                 controller: _passwordController,
                 label: TranslationKeys.password.tr(context),
                 hintText: '••••••••••••',
+                validator: (val) {
+                  if (val == null || val.length < 6) {
+                    return TranslationKeys.passwordRequired.tr(context);
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               PasswordField(
                 controller: _confirmPasswordController,
                 label: TranslationKeys.confirmPassword.tr(context),
                 hintText: '••••••••••••',
+                validator: (val) {
+                  if (val == null || val.isEmpty) {
+                    return TranslationKeys.confirmYourPassword.tr(context);
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
+              // Terms Agreement Checkbox
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Checkbox(
-                    value: _agreeToTerms,
-                    activeColor: Theme.of(context).primaryColor,
-                    onChanged: (val) =>
-                        setState(() => _agreeToTerms = val ?? false),
-                  ),
-                  Expanded(
-                    child: Text(
-                      const LocalizedString(
-                        ar: 'أوافق على الشروط والأحكام وسياسة الخصوصية',
-                        en: 'I agree to the Terms, Conditions & Privacy Policy',
-                      ).get(context),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                  SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Checkbox(
+                      value: _agreeToTerms,
+                      activeColor: theme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
                       ),
+                      onChanged: (val) {
+                        setState(() => _agreeToTerms = val ?? false);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Wrap(
+                      children: [
+                        Text(
+                          TranslationKeys.iAgreeToThe.tr(context),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                        Text(
+                          TranslationKeys.termsConditions.tr(context),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryColor,
+                          ),
+                        ),
+                        Text(
+                          TranslationKeys.andPrivacyPolicy.tr(context),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 13),
-                ),
-              ],
-
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryAuthButton(
-                  label: TranslationKeys.signUp.tr(context),
-                  onPressed: _handleRegister,
-                  isLoading: context.watch<AuthProvider>().isLoading,
-                ),
+
+              // Register Submit Button
+              PrimaryAuthButton(
+                label: TranslationKeys.createAccount.tr(context),
+                onPressed: _handleRegister,
+                isLoading: _isLoading,
               ),
+              const SizedBox(height: 20),
 
-              if (true) ...[
-                const SizedBox(height: 20),
-                SocialLoginButtons(
-                  onGooglePressed: () async {
-                    final navigator = Navigator.of(context);
-                    final authProvider = context.read<AuthProvider>();
-                    final success = await authProvider.signInWithGoogle();
-                    if (mounted && success) {
-                      final role = authProvider.currentUser?.role;
-                      if (role == UserRole.superAdmin) {
-                        navigator.pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (_) => const SuperAdminHome(),
-                          ),
-                          (route) => false,
-                        );
-                      } else if (role == UserRole.businessOwner) {
-                        navigator.pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const AdminStore()),
-                          (route) => false,
-                        );
-                      } else {
-                        final destination = widget.redirectTo ?? '/';
-                        if (destination == '/') {
-                          navigator.pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const BusinessPage(),
-                            ),
-                            (route) => false,
-                          );
-                        } else {
-                          navigator.pushReplacementNamed(destination);
-                        }
-                      }
-                    } else if (mounted && !success) {
-                      setState(() {
-                        _errorMessage =
-                            authProvider.errorMessage ??
-                            'فشل إنشاء الحساب عبر غوغل';
-                      });
-                    }
-                  },
-                ),
-              ],
-
-              const SizedBox(height: 24),
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      TranslationKeys.alreadyHaveAccount.tr(context),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                    const SizedBox(width: 4),
-                    InkWell(
-                      onTap: () {
-                        changeScreen(
-                          context,
-                          LoginPage(redirectTo: widget.redirectTo),
-                        );
-                      },
-                      child: Text(
-                        TranslationKeys.signIn.tr(context),
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+              // Divider
+              Row(
+                children: [
+                  const Expanded(child: Divider(color: AppColors.divider)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      TranslationKeys.or.tr(context),
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 13,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const Expanded(child: Divider(color: AppColors.divider)),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Social Login
+              SocialLoginButtons(
+                onGooglePressed: () {},
+              ),
+              const SizedBox(height: 24),
+
+              // Login Page Link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    TranslationKeys.alreadyHaveAccount.tr(context),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: theme.textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      changeScreen(context, LoginPage(redirectTo: widget.redirectTo));
+                    },
+                    child: Text(
+                      TranslationKeys.signIn.tr(context),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryColor,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

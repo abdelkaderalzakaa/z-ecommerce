@@ -37,6 +37,7 @@ class InvoiceModel {
 
   double get total => subtotal - discount + shippingCost;
  OrderStatus get status =>history.last.status ;
+ bool get isEmpty => id.isEmpty;
   void updateStatus(
     OrderStatus newStatus,
     String userId,

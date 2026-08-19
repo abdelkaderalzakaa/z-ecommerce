@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../global/core/constants/app_constants.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_colors.dart';
 
 class AuthTextField extends StatelessWidget {
   final String label;
@@ -25,16 +25,18 @@ class AuthTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Auth UI is strictly Light Mode only
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF0F172A),
+            color: theme.textTheme.bodyLarge?.color,
           ),
         ),
         const SizedBox(height: 8),
@@ -43,29 +45,35 @@ class AuthTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           validator: validator,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: Color(0xFF0F172A),
+            color: theme.textTheme.bodyLarge?.color,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF8FAFC),
+            fillColor: isDark ? theme.colorScheme.surface : Colors.grey.shade100,
             hintText: hintText,
-            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
-            prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: const Color(0xFF64748B)) : null,
+            hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+            prefixIcon: prefixIcon != null
+                ? Icon(prefixIcon, size: 20, color: theme.primaryColor.withOpacity(0.8))
+                : null,
             suffixIcon: suffixIcon,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: const BorderSide(color: AppColors.cardBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF635BFF), width: 1.5),
+              borderSide: BorderSide(color: theme.primaryColor, width: 1.8),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: const BorderSide(color: AppColors.accent, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.accent, width: 1.8),
             ),
           ),
         ),

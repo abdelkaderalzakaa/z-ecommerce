@@ -48,9 +48,9 @@ class OrderItemsTab extends StatelessWidget {
                 final item = items[index];
                 final itemTotal = item.unitPrice * item.quantity;
 
-                final images = item.product?.images ?? [];
-                final hasImage = images.isNotEmpty && images.first.startsWith('http');
-                final itemName = item.product?.name ?? item.offer?.name.get(context) ?? 'Unknown';
+                final imgUrl = item.productImage;
+                final hasImage = imgUrl != null && imgUrl.isNotEmpty && imgUrl.startsWith('http');
+                final itemName = item.productName ?? item.offerName ?? 'منتج / عرض';
 
                 return Card(
                   elevation: 0,
@@ -70,7 +70,7 @@ class OrderItemsTab extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             image: hasImage
                                 ? DecorationImage(
-                                    image: NetworkImage(images.first),
+                                    image: NetworkImage(imgUrl),
                                     fit: BoxFit.cover,
                                   )
                                 : null,

@@ -86,6 +86,10 @@ class OfferService {
 
   /// ➕ إضافة عرض جديد وإرجاع المعرف المُنشأ
   Future<String?> addOffer(OfferModel offer) async {
+    if (offer.isEmpty) {
+      debugPrint('[OfferService] Blocked: Attempted to add an empty offer.');
+      return null;
+    }
     try {
       final docRef = await _firestore.collection(_collection).add(offer.toMap());
       debugPrint('Offer added successfully: ${docRef.id}');
@@ -98,6 +102,10 @@ class OfferService {
 
   /// ✏️ تحديث بيانات عرض قائم
   Future<bool> updateOffer(OfferModel offer) async {
+    if (offer.isEmpty) {
+      debugPrint('[OfferService] Blocked: Attempted to update with an empty offer.');
+      return false;
+    }
     try {
       await _firestore.collection(_collection).doc(offer.id).update(offer.toMap());
       debugPrint('Offer updated successfully: ${offer.id}');

@@ -87,9 +87,9 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
     final theme = Theme.of(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
     final business = businessProvider.selectedBusiness;
-    final storeTheme = business?.theme;
-    final storeName = business?.localization.name.ar ?? 'متجري الرقمي';
-    final storeLogo = storeTheme?.logoUrl;
+    final storeTheme = business.theme;
+    final storeName = business.localization.name.ar;
+    final storeLogo = storeTheme.logoUrl;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -100,7 +100,7 @@ class _StoreOwnerProfilePageState extends State<StoreOwnerProfilePage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
-                color: storeTheme?.surfaceColorValue ?? theme.cardColor,
+                color: storeTheme.surfaceColorValue,
                 border: Border(
                   bottom: BorderSide(
                     color: theme.dividerColor.withOpacity(0.12),

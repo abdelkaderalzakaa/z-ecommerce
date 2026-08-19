@@ -30,6 +30,7 @@ class CustomerModel {
 
   /// معرف العميل المباشر من UserModel
   String get id => user.id;
+  bool get isEmpty => id.isEmpty;
 
   /// الحصول على العنوان الافتراضي
   AddressModel? get defaultAddress {

@@ -71,9 +71,9 @@ class StoreOwnerSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
-    final storeTheme = businessProvider.selectedBusiness?.theme;
-    final primaryColor = storeTheme?.primaryColorValue ?? theme.primaryColor;
-    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
+    final storeTheme = businessProvider.selectedBusiness.theme;
+    final primaryColor = storeTheme.primaryColorValue;
+    final fontFamily = storeTheme.fontFamily;
     final width = isCollapsed ? 70.0 : 240.0;
 
     return AnimatedContainer(
@@ -118,7 +118,7 @@ class StoreOwnerSidebar extends StatelessWidget {
                       color: isSelected
                           ? primaryColor.withOpacity(0.12)
                           : Colors.transparent,
-                      borderRadius: storeTheme?.buttonBorderRadius ?? BorderRadius.circular(12),
+                      borderRadius: storeTheme.buttonBorderRadius,
                       border: isSelected
                           ? Border.all(
                               color: primaryColor.withOpacity(0.3),

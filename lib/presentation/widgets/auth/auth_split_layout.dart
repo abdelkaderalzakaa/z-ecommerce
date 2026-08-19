@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
+import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/settings_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
-import '../../global/translate/localized_string.dart';
-import '../../../data/providers/business_provider.dart';
-import '../../../data/providers/super_admin_provider.dart';
-import '../../global/core/responsive/responsive_layout.dart';
-import '../../global/theme/app_theme.dart';
-import '../../global/settings_provider.dart';
-import '../../global/navigation.dart';
-import '../../pages/customer/home_page.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_colors.dart';
+import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
+import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 
 class AuthSplitLayout extends StatelessWidget {
   final LocalizedString pageTitle;
@@ -24,64 +23,80 @@ class AuthSplitLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final superAdminProvider = context.watch<SuperAdminProvider>();
-    final superAdmin = superAdminProvider.currentSuperAdmin;
-    final themeAdmin = superAdmin?.themeAdmin;
-    final settings = context.watch<SettingsProvider>();
-
-    final bool isDark =
-        settings.themeMode == ThemeMode.dark ||
-        (settings.themeMode == ThemeMode.system &&
-            MediaQuery.of(context).platformBrightness == Brightness.dark);
-
-    final dynamicTheme = AppTheme.getThemeFromAdmin(themeAdmin, isDark);
-
+    final theme = Theme.of(context);
     final isMobile = ResponsiveLayout.isMobile(context);
-    final primaryColor = dynamicTheme.primaryColor;
-    final bgCanvasColor = dynamicTheme.scaffoldBackgroundColor;
 
     return Scaffold(
-      backgroundColor: bgCanvasColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Center(
           child: isMobile
-              ? _buildFormSection(context, primaryColor, dynamicTheme)
-              : Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        dynamicTheme.scaffoldBackgroundColor,
-                        dynamicTheme.cardColor,
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.cardBorder),
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.shadowColor.withOpacity(0.08),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
+                    padding: const EdgeInsets.all(20),
+                    child: _buildFormSection(context, theme.primaryColor, theme),
                   ),
+                )
+              : Container(
                   height: MediaQuery.of(context).size.height,
+                  decoration: BoxDecoration(
+                    color: theme.scaffoldBackgroundColor,
+                  ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Left Side - Visual Image & Quote Banner
+                      // Left Side - Visual Banner Section
                       Expanded(
                         flex: 5,
                         child: _buildVisualSection(
                           context,
-                          dynamicTheme,
-                          primaryColor,
+                          theme,
+                          theme.primaryColor,
                         ),
                       ),
-                      Container(color: dynamicTheme.dividerColor, width: 1),
+                      Container(color: AppColors.cardBorder, width: 1),
+
                       // Right Side - Form Section
                       Expanded(
                         flex: 6,
                         child: Container(
-                          color: dynamicTheme.scaffoldBackgroundColor,
-                          padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                          color: theme.scaffoldBackgroundColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
                           child: Center(
-                            child: _buildFormSection(
-                              context,
-                              primaryColor,
-                              dynamicTheme,
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 500),
+                              padding: const EdgeInsets.all(28),
+                              decoration: BoxDecoration(
+                                color: theme.cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: AppColors.cardBorder),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.shadowColor.withOpacity(0.06),
+                                    blurRadius: 24,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: _buildFormSection(
+                                context,
+                                theme.primaryColor,
+                                theme,
+                              ),
                             ),
                           ),
                         ),
@@ -96,154 +111,205 @@ class AuthSplitLayout extends StatelessWidget {
 
   Widget _buildVisualSection(
     BuildContext context,
-    ThemeData dynamicTheme,
+    ThemeData theme,
     Color primaryColor,
   ) {
     final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
     final logoUrl = superAdmin?.themeAdmin.logoUrl ?? '';
     final brandName =
-        superAdmin?.localizationAdmin.name.get(context) ?? 'z-matajer';
-    return Stack(
-      children: [
-        // Brand Header (Logo / Name)
-        Positioned(
-          top: 36,
-          left: 36,
-          right: 36,
-          child: Row(
+        superAdmin?.localizationAdmin.name.get(context) ?? 'Z-MATAJER';
+
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            primaryColor,
+            primaryColor.withOpacity(0.8),
+            theme.scaffoldBackgroundColor,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Header Logo & Brand Title
+          Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: logoUrl.isNotEmpty
                     ? Image.network(
                         logoUrl,
-                        width: 28,
-                        height: 28,
+                        width: 32,
+                        height: 32,
                         errorBuilder: (_, _, _) =>
-                            Icon(Icons.hub, color: primaryColor, size: 24),
+                            Icon(Icons.storefront_rounded, color: primaryColor, size: 28),
                       )
-                    : Icon(Icons.hub_rounded, color: primaryColor, size: 24),
+                    : Icon(Icons.storefront_rounded, color: primaryColor, size: 28),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Text(
                 brandName,
-                style: TextStyle(
-                  color: primaryColor,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
-        ),
-        // Quote Card Overlay at Bottom
-        Positioned(
-          bottom: 36,
-          left: 36,
-          right: 36,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                superAdmin?.localizationAdmin.description.get(context) ??
-                    'سجل الآن لتجربة تسوق فريدة مع z-matajer. احصل على أفضل العروض والميزات الحصرية.',
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'لماذا تسجل معنا؟',
-                style: TextStyle(
-                  color: primaryColor,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'تسوق آمن، توصيل سريع، ودعم متواصل',
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildFormSection(
-    BuildContext context,
-    Color primaryColor,
-    ThemeData dynamicTheme,
-  ) {
-    return Theme(
-      data: dynamicTheme,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
+          // Central Hero Illustration / Badge Feature Highlight
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withOpacity(0.3)),
+              ),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.security_rounded,
+                    size: 64,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "تسوق آمن وحماية كاملة للبيانات",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "منصة متكاملة تربط المتاجر بالعملاء بتجربة شحن وتصفح موثوقة.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Bottom Quote Card Overlay
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(0.35)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: ButtonApp(
-                    format: FormatButtonApp.icon,
-                    onPressed: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      } else {
-                        changeScreenUntill(context, const HomePage());
-                      }
-                    },
-                    icon: Icons.arrow_back,
-                    label: 'رجوع',
+                Text(
+                  superAdmin?.localizationAdmin.description.get(context) ??
+                      'انضم اليوم لتجربة تسوق سريعة وموثوقة واستكشف آلاف المنتجات والمتاجر الممتازة.',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
+                const SizedBox(height: 12),
+                Row(
+                  children: const [
+                    Icon(Icons.verified_rounded, color: Colors.amber, size: 18),
+                    SizedBox(width: 6),
                     Text(
-                      pageTitle.get(context),
+                      "منصة تجارية موثوقة ومعتمدة",
                       style: TextStyle(
-                        color: dynamicTheme.textTheme.bodyLarge?.color,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      pageSubtitle.get(context),
-                      style: TextStyle(
-                        color: dynamicTheme.textTheme.bodyMedium?.color,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            const SizedBox(height: 32),
-            // Form Fields and Children
-            ...children,
+  Widget _buildFormSection(
+    BuildContext context,
+    Color primaryColor,
+    ThemeData theme,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            ButtonApp(
+              format: FormatButtonApp.icon,
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  changeScreenUntill(context, const HomePage());
+                }
+              },
+              icon: Icons.arrow_back,
+              label: '',
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    pageTitle.get(context),
+                    style: TextStyle(
+                      color: theme.textTheme.bodyLarge?.color,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    pageSubtitle.get(context),
+                    style: TextStyle(
+                      color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-      ),
+        const SizedBox(height: 24),
+        ...children,
+      ],
     );
   }
 }

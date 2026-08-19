@@ -73,6 +73,8 @@ class ProductModel {
   // ==========================================
   // 🧮 Dynamic Getters & Helpers
   // ==========================================
+  
+  bool get isEmpty => id.isEmpty;
 
   /// الحصول على المتغير الافتراضي
   ProductVariant get defaultVariant {
@@ -91,10 +93,20 @@ class ProductModel {
   /// هل المنتج متوفر (إجمالي المخزون أكبر من 0)
   bool get isAvailable => totalStock > 0;
 
+  /// الحصول على الخصم الفعال بناءً على الأولوية
+  DiscountModel? get activeDiscount {
+    final validDiscounts = discounts.where((d) => d.isValid).toList();
+    if (validDiscounts.isEmpty) return null;
+    
+    // Sort by priority ASC (lower number means higher priority)
+    validDiscounts.sort((a, b) => a.priority.compareTo(b.priority));
+    return validDiscounts.first;
+  }
+
   /// السعر الأساسي للمنتج بعد تطبيق الخصم (في حال عدم تحديد متغيّر)
   double get basePrice {
-    final activeDisc = discounts.firstWhere((d) => d.isValid, orElse: () => const DiscountModel(id: '', name: '', type: '', value: 0, isActive: false));
-    if (activeDisc.isActive && activeDisc.value > 0) {
+    final activeDisc = activeDiscount;
+    if (activeDisc != null && activeDisc.isActive && activeDisc.value > 0) {
       if (activeDisc.isPercentage) {
         return defaultVariant.price * (1 - (activeDisc.value / 100));
       } else {
@@ -111,8 +123,8 @@ class ProductModel {
 
   /// نسبة الخصم المئوية (مثل 15%) المحسوبة ديناميكياً
   int? get discountPercent {
-    final activeDisc = discounts.firstWhere((d) => d.isValid, orElse: () => const DiscountModel(id: '', name: '', type: '', value: 0, isActive: false));
-    if (activeDisc.isActive && activeDisc.value > 0) {
+    final activeDisc = activeDiscount;
+    if (activeDisc != null && activeDisc.isActive && activeDisc.value > 0) {
       if (activeDisc.isPercentage) {
         return activeDisc.value.round();
       } else {
@@ -127,8 +139,16 @@ class ProductModel {
 
   /// حساب السعر لمتغير محدد وتطبيق الخصم عليه إذا كان للمنتج خصم
   double getPriceForVariant(ProductVariant variant) {
-    if (!hasDiscount) return variant.price;
-    return variant.price * (1 - (discountPercent! / 100));
+    final activeDisc = activeDiscount;
+    if (activeDisc == null || !activeDisc.isActive || activeDisc.value <= 0) {
+      return variant.price;
+    }
+    
+    if (activeDisc.isPercentage) {
+      return variant.price * (1 - (activeDisc.value / 100));
+    } else {
+      return (variant.price - activeDisc.value).clamp(0.0, double.infinity);
+    }
   }
 
   /// قائمة المتغيرات المتوفرة فقط (التي كميتها أكبر من 0)

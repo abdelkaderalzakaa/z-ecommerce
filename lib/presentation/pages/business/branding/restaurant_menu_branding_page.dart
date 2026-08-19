@@ -45,22 +45,19 @@ class _RestaurantMenuBrandingPageState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final theme = context.read<BusinessProvider>().selectedBusiness?.theme;
-      if (theme != null) {
-        setState(() {
-          // _isRestaurantMenuEnabled = theme.isRestaurantMenuEnabled;
-          // _restaurantMenuLayout = theme.restaurantMenuLayout;
-          // _restaurantMenuThemeStyle = theme.restaurantMenuThemeStyle;
-          // _showCaloriesBadges = theme.showCaloriesBadges;
-          // _showAllergensBadges = theme.showAllergensBadges;
-          // _enableTableOrderQR = theme.enableTableOrderQR;
-          // _menuCoverTitleController.text = theme.menuCoverTitle;
-          // _menuCoverSubtitleController.text = theme.menuCoverSubtitle;
-          // _menuOfferBadgeController.text = theme.menuOfferBadgeText;
-          // _menuContactPhoneController.text = theme.menuContactPhone;
+      setState(() {
+        // _isRestaurantMenuEnabled = theme.isRestaurantMenuEnabled;
+        // _restaurantMenuLayout = theme.restaurantMenuLayout;
+        // _restaurantMenuThemeStyle = theme.restaurantMenuThemeStyle;
+        // _showCaloriesBadges = theme.showCaloriesBadges;
+        // _showAllergensBadges = theme.showAllergensBadges;
+        // _enableTableOrderQR = theme.enableTableOrderQR;
+        // _menuCoverTitleController.text = theme.menuCoverTitle;
+        // _menuCoverSubtitleController.text = theme.menuCoverSubtitle;
+        // _menuOfferBadgeController.text = theme.menuOfferBadgeText;
+        // _menuContactPhoneController.text = theme.menuContactPhone;
+      });
         });
-      }
-    });
   }
 
   @override
@@ -76,7 +73,7 @@ class _RestaurantMenuBrandingPageState
     setState(() => _isSaving = true);
     final businessProvider = context.read<BusinessProvider>();
     final currentBusiness = businessProvider.selectedBusiness;
-    final currentTheme = currentBusiness?.theme ?? ThemeAdmin.empty();
+    final currentTheme = currentBusiness.theme;
 
     final updatedTheme = ThemeAdmin(
       primaryColor: currentTheme.primaryColor,
@@ -93,10 +90,8 @@ class _RestaurantMenuBrandingPageState
       coverBannerUrl: currentTheme.coverBannerUrl,
     );
 
-    if (currentBusiness != null) {
-      await businessProvider.updateTheme(currentBusiness.id, updatedTheme);
-    }
-    setState(() => _isSaving = false);
+    await businessProvider.updateTheme(currentBusiness.id, updatedTheme);
+      setState(() => _isSaving = false);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -120,7 +115,7 @@ class _RestaurantMenuBrandingPageState
     final theme = Theme.of(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
     final themeAdmin =
-        businessProvider.selectedBusiness?.theme ?? ThemeAdmin.empty();
+        businessProvider.selectedBusiness.theme;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

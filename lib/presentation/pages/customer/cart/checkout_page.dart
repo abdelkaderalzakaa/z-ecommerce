@@ -49,8 +49,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       final businessProvider = context.read<BusinessProvider>();
       final methods =
-          businessProvider.selectedBusiness?.paymentMethods ??
-          [PaymentMethodType.cashOnDelivery];
+          businessProvider.selectedBusiness.paymentMethods;
       if (methods.isNotEmpty) {
         setState(() {
           _selectedPaymentMethod = methods.first;
@@ -76,7 +75,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
 
-    final businessId = context.read<BusinessProvider>().selectedBusiness?.id;
+    final businessId = context.read<BusinessProvider>().selectedBusiness.id;
 
     if (cartProvider.items(businessId).isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -201,7 +200,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             const SizedBox(height: 80),
             FooterBuisness(
               idBuisness:
-                  context.read<BusinessProvider>().selectedBusiness?.id ?? '',
+                  context.read<BusinessProvider>().selectedBusiness.id,
             ),
           ],
         ),
@@ -502,8 +501,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return Consumer<BusinessProvider>(
       builder: (context, businessProvider, child) {
         final methods =
-            businessProvider.selectedBusiness?.paymentMethods ??
-            [PaymentMethodType.cashOnDelivery];
+            businessProvider.selectedBusiness.paymentMethods;
 
         if (methods.isEmpty) {
           return const SizedBox.shrink();

@@ -9,7 +9,6 @@ class StoreFollowersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = context.watch<BusinessProvider>().selectedBusiness;
-    if (store == null) return const Center(child: CircularProgressIndicator());
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(

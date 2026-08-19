@@ -79,17 +79,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final businessProvider = Provider.of<BusinessProvider>(context);
-    final storeTheme = businessProvider.selectedBusiness?.theme;
+    final storeTheme = businessProvider.selectedBusiness.theme;
 
     final primaryColor =
-        storeTheme?.primaryColorValue ?? Theme.of(context).primaryColor;
+        storeTheme.primaryColorValue;
     final secondaryColor =
-        storeTheme?.secondaryColorValue ?? const Color(0xFF10B981);
+        storeTheme.secondaryColorValue;
     final bgColor =
-        storeTheme?.backgroundColorValue ??
-        Theme.of(context).scaffoldBackgroundColor;
+        storeTheme.backgroundColorValue;
     final fontFamily =
-        storeTheme?.fontFamily != null && storeTheme!.fontFamily.isNotEmpty
+        storeTheme.fontFamily.isNotEmpty
         ? storeTheme.fontFamily
         : 'Cairo';
 
@@ -138,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                   NewsletterSection(key: _newsletterKey),
                   FooterBuisness(
                     idBuisness:
-                        context.read<BusinessProvider>().selectedBusiness?.id ?? '',
+                        context.read<BusinessProvider>().selectedBusiness.id,
                   ),
                 ],
               ),

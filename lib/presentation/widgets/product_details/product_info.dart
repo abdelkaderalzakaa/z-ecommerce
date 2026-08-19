@@ -11,6 +11,9 @@ import '../../pages/customer/cart/cart_page.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/product_enums.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/providers/like_provider.dart';
+import 'package:z_ecommerce/data/models/shared/like_model.dart';
 
 class ProductInfo extends StatefulWidget {
   final ProductModel product;
@@ -23,6 +26,8 @@ class ProductInfo extends StatefulWidget {
 class _ProductInfoState extends State<ProductInfo> {
   int _selectedVariantIndex = 0;
   int? _localQuantity;
+  bool _isTitleExpanded = false;
+  bool _isDescExpanded = false;
 
   void _selectAttribute({
     ProductSize? size,
@@ -36,7 +41,10 @@ class _ProductInfoState extends State<ProductInfo> {
   }) {
     final product = widget.product;
     final current = product.variants.isNotEmpty
-        ? product.variants[_selectedVariantIndex.clamp(0, product.variants.length - 1)]
+        ? product.variants[_selectedVariantIndex.clamp(
+            0,
+            product.variants.length - 1,
+          )]
         : product.defaultVariant;
 
     final targetSize = size ?? current.size;
@@ -59,7 +67,9 @@ class _ProductInfoState extends State<ProductInfo> {
       if (color != null && v.color != color) continue;
       if (material != null && v.material != material) continue;
       if (type != null && v.type != type) continue;
-      if (changeWeight && (v.weight != weight || v.weightUnit != weightUnit)) continue;
+      if (changeWeight && (v.weight != weight || v.weightUnit != weightUnit)) {
+        continue;
+      }
       if (name != null && v.name != name) continue;
 
       // Scoring how well it matches other current/target attributes
@@ -90,11 +100,27 @@ class _ProductInfoState extends State<ProductInfo> {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     final List<Widget> selectors = [];
 
-    final sizes = product.variants.map((v) => v.size).whereType<ProductSize>().toSet().toList();
-    final colors = product.variants.map((v) => v.color).whereType<ProductColor>().toSet().toList();
-    final materials = product.variants.map((v) => v.material).whereType<ProductMaterial>().toSet().toList();
-    final types = product.variants.map((v) => v.type).whereType<ProductType>().toSet().toList();
-    
+    final sizes = product.variants
+        .map((v) => v.size)
+        .whereType<ProductSize>()
+        .toSet()
+        .toList();
+    final colors = product.variants
+        .map((v) => v.color)
+        .whereType<ProductColor>()
+        .toSet()
+        .toList();
+    final materials = product.variants
+        .map((v) => v.material)
+        .whereType<ProductMaterial>()
+        .toSet()
+        .toList();
+    final types = product.variants
+        .map((v) => v.type)
+        .whereType<ProductType>()
+        .toSet()
+        .toList();
+
     final weights = product.variants
         .where((v) => v.weight != null)
         .map((v) => MapEntry(v.weight!, v.weightUnit))
@@ -109,181 +135,202 @@ class _ProductInfoState extends State<ProductInfo> {
 
     // Size Selector
     if (sizes.isNotEmpty) {
-      selectors.add(_buildSelectorSection(
-        title: isAr ? 'المقاس:' : 'Size:',
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: sizes.map((size) {
-            final isSelected = selectedVariant.size == size;
-            return ChoiceChip(
-              label: Text(size.displayName),
-              selected: isSelected,
-              selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-              checkmarkColor: Theme.of(context).primaryColor,
-              onSelected: (selected) {
-                if (selected) {
-                  _selectAttribute(size: size);
-                }
-              },
-            );
-          }).toList(),
+      selectors.add(
+        _buildSelectorSection(
+          title: isAr ? 'المقاس:' : 'Size:',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: sizes.map((size) {
+              final isSelected = selectedVariant.size == size;
+              return ChoiceChip(
+                label: Text(size.displayName),
+                selected: isSelected,
+                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).primaryColor,
+                onSelected: (selected) {
+                  if (selected) {
+                    _selectAttribute(size: size);
+                  }
+                },
+              );
+            }).toList(),
+          ),
         ),
-      ));
+      );
     }
 
     // Color Selector
     if (colors.isNotEmpty) {
-      selectors.add(_buildSelectorSection(
-        title: isAr ? 'اللون:' : 'Color:',
-        child: Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: colors.map((color) {
-            final isSelected = selectedVariant.color == color;
-            final flutterColor = color.flutterColor;
-            return InkWell(
-              onTap: () => _selectAttribute(color: color),
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: flutterColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected
-                        ? Theme.of(context).primaryColor
-                        : Colors.grey.withOpacity(0.4),
-                    width: isSelected ? 3 : 1,
+      selectors.add(
+        _buildSelectorSection(
+          title: isAr ? 'اللون:' : 'Color:',
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: colors.map((color) {
+              final isSelected = selectedVariant.color == color;
+              final flutterColor = color.flutterColor;
+              return InkWell(
+                onTap: () => _selectAttribute(color: color),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: flutterColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.withOpacity(0.4),
+                      width: isSelected ? 3 : 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).primaryColor.withOpacity(0.4),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : [],
                   ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: Theme.of(context).primaryColor.withOpacity(0.4),
-                            blurRadius: 6,
-                            spreadRadius: 2,
-                          )
-                        ]
-                      : [],
+                  child: isSelected
+                      ? Icon(
+                          Icons.check,
+                          color: flutterColor.computeLuminance() > 0.5
+                              ? Colors.black
+                              : Colors.white,
+                          size: 18,
+                        )
+                      : null,
                 ),
-                child: isSelected
-                    ? Icon(
-                        Icons.check,
-                        color: flutterColor.computeLuminance() > 0.5
-                            ? Colors.black
-                            : Colors.white,
-                        size: 18,
-                      )
-                    : null,
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
-      ));
+      );
     }
 
     // Material Selector
     if (materials.isNotEmpty) {
-      selectors.add(_buildSelectorSection(
-        title: isAr ? 'المادة:' : 'Material:',
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: materials.map((material) {
-            final isSelected = selectedVariant.material == material;
-            return ChoiceChip(
-              label: Text(material.displayName(context)),
-              selected: isSelected,
-              selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-              checkmarkColor: Theme.of(context).primaryColor,
-              onSelected: (selected) {
-                if (selected) {
-                  _selectAttribute(material: material);
-                }
-              },
-            );
-          }).toList(),
+      selectors.add(
+        _buildSelectorSection(
+          title: isAr ? 'المادة:' : 'Material:',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: materials.map((material) {
+              final isSelected = selectedVariant.material == material;
+              return ChoiceChip(
+                label: Text(material.displayName(context)),
+                selected: isSelected,
+                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).primaryColor,
+                onSelected: (selected) {
+                  if (selected) {
+                    _selectAttribute(material: material);
+                  }
+                },
+              );
+            }).toList(),
+          ),
         ),
-      ));
+      );
     }
 
     // Type Selector
     if (types.isNotEmpty) {
-      selectors.add(_buildSelectorSection(
-        title: isAr ? 'النوع:' : 'Type:',
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: types.map((type) {
-            final isSelected = selectedVariant.type == type;
-            return ChoiceChip(
-              label: Text(type.displayName(context)),
-              selected: isSelected,
-              selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-              checkmarkColor: Theme.of(context).primaryColor,
-              onSelected: (selected) {
-                if (selected) {
-                  _selectAttribute(type: type);
-                }
-              },
-            );
-          }).toList(),
+      selectors.add(
+        _buildSelectorSection(
+          title: isAr ? 'النوع:' : 'Type:',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: types.map((type) {
+              final isSelected = selectedVariant.type == type;
+              return ChoiceChip(
+                label: Text(type.displayName(context)),
+                selected: isSelected,
+                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).primaryColor,
+                onSelected: (selected) {
+                  if (selected) {
+                    _selectAttribute(type: type);
+                  }
+                },
+              );
+            }).toList(),
+          ),
         ),
-      ));
+      );
     }
 
     // Weight Selector
     if (weights.isNotEmpty) {
-      selectors.add(_buildSelectorSection(
-        title: isAr ? 'الوزن:' : 'Weight:',
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: weights.map((entry) {
-            final weight = entry.key;
-            final unit = entry.value;
-            final isSelected = selectedVariant.weight == weight && selectedVariant.weightUnit == unit;
-            final labelText = '${weight.toStringAsFixed(weight == weight.toInt() ? 0 : 1)} ${unit?.displayName(context) ?? ''}';
-            return ChoiceChip(
-              label: Text(labelText.trim()),
-              selected: isSelected,
-              selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-              checkmarkColor: Theme.of(context).primaryColor,
-              onSelected: (selected) {
-                if (selected) {
-                  _selectAttribute(weight: weight, weightUnit: unit, changeWeight: true);
-                }
-              },
-            );
-          }).toList(),
+      selectors.add(
+        _buildSelectorSection(
+          title: isAr ? 'الوزن:' : 'Weight:',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: weights.map((entry) {
+              final weight = entry.key;
+              final unit = entry.value;
+              final isSelected =
+                  selectedVariant.weight == weight &&
+                  selectedVariant.weightUnit == unit;
+              final labelText =
+                  '${weight.toStringAsFixed(weight == weight.toInt() ? 0 : 1)} ${unit?.displayName(context) ?? ''}';
+              return ChoiceChip(
+                label: Text(labelText.trim()),
+                selected: isSelected,
+                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).primaryColor,
+                onSelected: (selected) {
+                  if (selected) {
+                    _selectAttribute(
+                      weight: weight,
+                      weightUnit: unit,
+                      changeWeight: true,
+                    );
+                  }
+                },
+              );
+            }).toList(),
+          ),
         ),
-      ));
+      );
     }
 
     // Custom Names / Other Options
     if (names.isNotEmpty) {
-      selectors.add(_buildSelectorSection(
-        title: isAr ? 'الخيارات المتاحة:' : 'Available Options:',
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: names.map((name) {
-            final isSelected = selectedVariant.name == name;
-            return ChoiceChip(
-              label: Text(name),
-              selected: isSelected,
-              selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-              checkmarkColor: Theme.of(context).primaryColor,
-              onSelected: (selected) {
-                if (selected) {
-                  _selectAttribute(name: name);
-                }
-              },
-            );
-          }).toList(),
+      selectors.add(
+        _buildSelectorSection(
+          title: isAr ? 'الخيارات المتاحة:' : 'Available Options:',
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: names.map((name) {
+              final isSelected = selectedVariant.name == name;
+              return ChoiceChip(
+                label: Text(name),
+                selected: isSelected,
+                selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                checkmarkColor: Theme.of(context).primaryColor,
+                onSelected: (selected) {
+                  if (selected) {
+                    _selectAttribute(name: name);
+                  }
+                },
+              );
+            }).toList(),
+          ),
         ),
-      ));
+      );
     }
 
     return selectors;
@@ -312,17 +359,25 @@ class _ProductInfoState extends State<ProductInfo> {
     final product = widget.product;
     final cartProvider = context.watch<CartProvider>();
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
-    final currency = selectedBusiness?.currency.symbol ?? '\$';
-    final businessId = selectedBusiness?.id;
+    final currency = selectedBusiness.currency.symbol;
+    final businessId = selectedBusiness.id;
 
-    final hasVariants = product.variants.isNotEmpty && product.variants.length > 1;
+    final hasVariants =
+        product.variants.isNotEmpty && product.variants.length > 1;
     final selectedVariant = product.variants.isNotEmpty
-        ? product.variants[_selectedVariantIndex.clamp(0, product.variants.length - 1)]
+        ? product.variants[_selectedVariantIndex.clamp(
+            0,
+            product.variants.length - 1,
+          )]
         : product.defaultVariant;
 
     final cartItemIndex = cartProvider
         .items(businessId)
-        .indexWhere((item) => item.product?.id == product.id && item.selectedVariant == selectedVariant);
+        .indexWhere(
+          (item) =>
+              item.productId == product.id &&
+              item.selectedVariant == selectedVariant,
+        );
     final cartItem = cartItemIndex >= 0
         ? cartProvider.items(businessId)[cartItemIndex]
         : null;
@@ -338,20 +393,123 @@ class _ProductInfoState extends State<ProductInfo> {
     bool showCheckmark = isInCart;
 
     final double activePrice = product.getPriceForVariant(selectedVariant);
-    final double activeOriginalPrice = selectedVariant.originalPrice ?? selectedVariant.price;
-    final bool hasDisc = product.hasDiscount || (selectedVariant.originalPrice != null && selectedVariant.originalPrice! > selectedVariant.price);
+    final double activeOriginalPrice =
+        selectedVariant.originalPrice ?? selectedVariant.price;
+    final bool hasDisc =
+        product.hasDiscount ||
+        (selectedVariant.originalPrice != null &&
+            selectedVariant.originalPrice! > selectedVariant.price);
     final int? activeDiscountPercent = product.discountPercent;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          product.name,
-          style: AppTextStyles.heroTitle(context, isMobile).copyWith(
-            fontSize: isMobile ? 24 : 40,
-            letterSpacing: 0,
-            height: 1.2,
-          ),
+        Builder(
+          builder: (context) {
+            final words = product.name.split(' ');
+            final isLongTitle = words.length > 9;
+            final displayText = (_isTitleExpanded || !isLongTitle)
+                ? product.name
+                : '${words.take(9).join(' ')}...';
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayText,
+                        style: AppTextStyles.heroTitle(context, isMobile)
+                            .copyWith(
+                              fontSize: isMobile ? 24 : 40,
+                              letterSpacing: 0,
+                              height: 1.2,
+                            ),
+                      ),
+                    ),
+                    Consumer2<AuthProvider, LikeProvider>(
+                      builder: (context, authProvider, likeProvider, child) {
+                        final isFavorite = likeProvider.hasLiked(product.id);
+                        final likesCount = likeProvider.getLikesCount(
+                          product.id,
+                        );
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () async {
+                                if (authProvider.isAuthenticated) {
+                                  final like = LikeModel(
+                                    id: '',
+                                    userId: authProvider.currentUser!.id,
+                                    targetId: product.id,
+                                    targetType: 'product',
+                                    createdAt: DateTime.now(),
+                                  );
+                                  await likeProvider.toggleLike(like);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        TranslationKeys.pleaseLoginToSaveItems
+                                            .tr(context),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              icon: Icon(
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorite ? Colors.red : Colors.grey,
+                                size: isMobile ? 28 : 36,
+                              ),
+                            ),
+                            if (likesCount > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  '$likesCount',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                if (isLongTitle)
+                  InkWell(
+                    onTap: () =>
+                        setState(() => _isTitleExpanded = !_isTitleExpanded),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                      child: Text(
+                        _isTitleExpanded
+                            ? TranslationKeys.showLess.tr(context)
+                            : TranslationKeys.showMore.tr(context),
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
         Row(
           children: [
@@ -398,13 +556,17 @@ class _ProductInfoState extends State<ProductInfo> {
         Row(
           children: [
             Icon(
-              selectedVariant.stock > 0 ? Icons.check_circle_outline : Icons.remove_circle_outline,
+              selectedVariant.stock > 0
+                  ? Icons.check_circle_outline
+                  : Icons.remove_circle_outline,
               color: selectedVariant.stock > 0 ? Colors.green : Colors.red,
               size: 16,
             ),
             const SizedBox(width: 6),
             Text(
-              selectedVariant.stock > 0 ? 'الكمية المتوفرة: ${selectedVariant.stock}' : 'غير متوفر في المخزون',
+              selectedVariant.stock > 0
+                  ? 'الكمية المتوفرة: ${selectedVariant.stock}'
+                  : 'غير متوفر في المخزون',
               style: TextStyle(
                 color: selectedVariant.stock > 0 ? Colors.green : Colors.red,
                 fontSize: 13,
@@ -414,11 +576,51 @@ class _ProductInfoState extends State<ProductInfo> {
           ],
         ),
         const SizedBox(height: 20),
-        Text(
-          product.description,
-          style: AppTextStyles.bodyText(
-            context,
-          ).copyWith(fontSize: isMobile ? 14 : 16),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final style = AppTextStyles.bodyText(
+              context,
+            ).copyWith(fontSize: isMobile ? 14 : 16);
+            final textPainter = TextPainter(
+              text: TextSpan(text: product.description, style: style),
+              maxLines: 3,
+              textDirection: Directionality.of(context),
+            )..layout(maxWidth: constraints.maxWidth);
+
+            final isLongDescription = textPainter.didExceedMaxLines;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.description,
+                  style: style,
+                  maxLines: _isDescExpanded ? null : 3,
+                  overflow: _isDescExpanded
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
+                ),
+                if (isLongDescription)
+                  InkWell(
+                    onTap: () =>
+                        setState(() => _isDescExpanded = !_isDescExpanded),
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                      child: Text(
+                        _isDescExpanded
+                            ? TranslationKeys.showLess.tr(context)
+                            : TranslationKeys.showMore.tr(context),
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
         if (hasVariants) ...[
           Padding(
@@ -436,7 +638,7 @@ class _ProductInfoState extends State<ProductInfo> {
           isInCart: showCheckmark,
           buttonText: buttonText,
           onQuantityChanged: (val) {
-            if (isInCart && businessId != null) {
+            if (isInCart) {
               cartProvider.updateQuantity(
                 businessId: businessId,
                 itemId: cartItem.id,
@@ -449,15 +651,15 @@ class _ProductInfoState extends State<ProductInfo> {
           onPrimaryAction: () {
             if (isInCart) {
               changeScreen(context, const CartPage());
-            } else if (businessId != null) {
+            } else {
               cartProvider.addProductToCart(
                 businessId: businessId,
                 product: product,
                 quantity: displayQuantity,
                 selectedVariant: selectedVariant,
               );
-              setState(() => _localQuantity = null);
             }
+            setState(() => _localQuantity = null);
           },
         ),
       ],
@@ -489,11 +691,16 @@ extension ProductColorExt on ProductColor {
 extension ProductSizeExt on ProductSize {
   String get displayName {
     switch (this) {
-      case ProductSize.small: return 'S';
-      case ProductSize.medium: return 'M';
-      case ProductSize.large: return 'L';
-      case ProductSize.xlarge: return 'XL';
-      case ProductSize.xxlarge: return 'XXL';
+      case ProductSize.small:
+        return 'S';
+      case ProductSize.medium:
+        return 'M';
+      case ProductSize.large:
+        return 'L';
+      case ProductSize.xlarge:
+        return 'XL';
+      case ProductSize.xxlarge:
+        return 'XXL';
     }
   }
 }
@@ -502,14 +709,22 @@ extension ProductMaterialExt on ProductMaterial {
   String displayName(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     switch (this) {
-      case ProductMaterial.cotton: return isAr ? 'قطن' : 'Cotton';
-      case ProductMaterial.leather: return isAr ? 'جلد' : 'Leather';
-      case ProductMaterial.silk: return isAr ? 'حرير' : 'Silk';
-      case ProductMaterial.wool: return isAr ? 'صوف' : 'Wool';
-      case ProductMaterial.polyester: return isAr ? 'بوليستر' : 'Polyester';
-      case ProductMaterial.wood: return isAr ? 'خشب' : 'Wood';
-      case ProductMaterial.metal: return isAr ? 'معدن' : 'Metal';
-      case ProductMaterial.plastic: return isAr ? 'بلاستيك' : 'Plastic';
+      case ProductMaterial.cotton:
+        return isAr ? 'قطن' : 'Cotton';
+      case ProductMaterial.leather:
+        return isAr ? 'جلد' : 'Leather';
+      case ProductMaterial.silk:
+        return isAr ? 'حرير' : 'Silk';
+      case ProductMaterial.wool:
+        return isAr ? 'صوف' : 'Wool';
+      case ProductMaterial.polyester:
+        return isAr ? 'بوليستر' : 'Polyester';
+      case ProductMaterial.wood:
+        return isAr ? 'خشب' : 'Wood';
+      case ProductMaterial.metal:
+        return isAr ? 'معدن' : 'Metal';
+      case ProductMaterial.plastic:
+        return isAr ? 'بلاستيك' : 'Plastic';
     }
   }
 }
@@ -518,10 +733,14 @@ extension ProductTypeExt on ProductType {
   String displayName(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     switch (this) {
-      case ProductType.casual: return isAr ? 'كاجوال' : 'Casual';
-      case ProductType.formal: return isAr ? 'رسمي' : 'Formal';
-      case ProductType.sport: return isAr ? 'رياضي' : 'Sport';
-      case ProductType.classic: return isAr ? 'كلاسيك' : 'Classic';
+      case ProductType.casual:
+        return isAr ? 'كاجوال' : 'Casual';
+      case ProductType.formal:
+        return isAr ? 'رسمي' : 'Formal';
+      case ProductType.sport:
+        return isAr ? 'رياضي' : 'Sport';
+      case ProductType.classic:
+        return isAr ? 'كلاسيك' : 'Classic';
     }
   }
 }
@@ -530,9 +749,12 @@ extension WeightUnitExt on WeightUnit {
   String displayName(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
     switch (this) {
-      case WeightUnit.gram: return isAr ? 'جرام' : 'g';
-      case WeightUnit.kilogram: return isAr ? 'كيلوجرام' : 'kg';
-      case WeightUnit.pound: return isAr ? 'رطل' : 'lb';
+      case WeightUnit.gram:
+        return isAr ? 'جرام' : 'g';
+      case WeightUnit.kilogram:
+        return isAr ? 'كيلوجرام' : 'kg';
+      case WeightUnit.pound:
+        return isAr ? 'رطل' : 'lb';
     }
   }
 }

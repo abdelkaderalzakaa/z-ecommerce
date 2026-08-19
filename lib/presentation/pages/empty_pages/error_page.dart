@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
+import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
 
 import '../../global/locale_provider.dart';
-import 'package:z_ecommerce/presentation/pages/customer/business_entry_page.dart';
-
+ 
 class ErrorPage extends StatelessWidget {
   final Exception? error;
   final String? errorMessage;
@@ -81,7 +81,7 @@ class ErrorPage extends StatelessWidget {
                 onPressed: () {
                   // If they are inside a company context, maybe go to that company's home.
                   // But usually safest to just clear stack and go to entry
-                  changeScreenReplacement(context, const BusinessEntryPage());
+                  changeScreenReplacement(context, const BusinessEntry());
                 },
                 icon: Icons.home_rounded,
                 label: isAr ? 'العودة للصفحة الرئيسية' : 'Return to Home',

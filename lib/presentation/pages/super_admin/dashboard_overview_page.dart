@@ -13,9 +13,10 @@ import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_categories_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/offers/offers_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/orders/orders_management_page.dart';
-import 'package:z_ecommerce/presentation/pages/business/products/product_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/products/product_details_page.dart' hide ProductDetailsPage;
 import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/business/businessess_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/users/users_management_page.dart';
@@ -643,7 +644,7 @@ class DashboardOverviewPage extends StatelessWidget {
           ...displayProducts.map((p) {
             return InkWell(
               onTap: () =>
-                  changeScreen(context, ProductDetailsPage(productId: p.id)),
+                  changeScreen(context, ProductDetailsPage(product: p)),
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 10),

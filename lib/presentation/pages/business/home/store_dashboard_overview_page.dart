@@ -26,9 +26,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
       body: Consumer2<ProductProvider, InvoiceProvider>(
         builder: (context, productProvider, invoiceProvider, child) {
           final currentStoreId =
-              context.read<BusinessProvider>().selectedBusiness?.id ??
-              context.read<AuthProvider>().currentUser?.businessId ??
-              businessId;
+              context.read<BusinessProvider>().selectedBusiness.id;
           final myStoreProducts = productProvider.allProducts
               .where((p) => p.businessId == currentStoreId)
               .toList();
@@ -188,14 +186,14 @@ class StoreDashboardOverviewPage extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
-    final storeTheme = businessProvider.selectedBusiness?.theme;
-    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
+    final storeTheme = businessProvider.selectedBusiness.theme;
+    final fontFamily = storeTheme.fontFamily;
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: storeTheme?.cardBorderRadius ?? BorderRadius.circular(16),
+        borderRadius: storeTheme.cardBorderRadius,
         border: Border.all(color: color.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
@@ -217,8 +215,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.12),
                   borderRadius:
-                      storeTheme?.buttonBorderRadius ??
-                      BorderRadius.circular(12),
+                      storeTheme.buttonBorderRadius,
                 ),
                 child: Icon(icon, color: color, size: 20),
               ),
@@ -243,8 +240,7 @@ class StoreDashboardOverviewPage extends StatelessWidget {
                   fontFamily: fontFamily,
                   fontSize: 12,
                   color:
-                      storeTheme?.textColorValue.withOpacity(0.6) ??
-                      theme.textTheme.bodySmall?.color,
+                      storeTheme.textColorValue.withOpacity(0.6),
                 ),
               ),
             ],

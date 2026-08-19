@@ -103,7 +103,7 @@ class CategoriesPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 80),
-            FooterBuisness(idBuisness: category?.businessId ?? brand?.businessId ?? context.read<BusinessProvider>().selectedBusiness?.id ?? ''),
+            FooterBuisness(idBuisness: category?.businessId ?? brand?.businessId ?? context.read<BusinessProvider>().selectedBusiness.id),
           ],
         ),
       ),

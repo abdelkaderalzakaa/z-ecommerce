@@ -111,6 +111,10 @@ class ProductService {
 
   /// ➕ إضافة منتج جديد وإرجاع المعرف المُنشأ
   Future<String?> addProduct(ProductModel product) async {
+    if (product.isEmpty) {
+      debugPrint('[ProductService] Blocked: Attempted to add an empty product.');
+      return null;
+    }
     try {
       await _firestore.collection(_collection).doc(product.id).set(product.toMap());
       debugPrint('Product added successfully with ID: ${product.id}');
@@ -123,6 +127,10 @@ class ProductService {
 
   /// ✏️ تحديث بيانات منتج قائم
   Future<bool> updateProduct(ProductModel product) async {
+    if (product.isEmpty) {
+      debugPrint('[ProductService] Blocked: Attempted to update with an empty product.');
+      return false;
+    }
     try {
       final updatedData = product.toMap();
       updatedData['updatedAt'] = DateTime.now().toIso8601String();

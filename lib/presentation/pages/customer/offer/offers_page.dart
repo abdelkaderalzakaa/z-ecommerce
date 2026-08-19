@@ -73,12 +73,10 @@ class OffersPage extends StatelessWidget {
             Consumer<OfferProvider>(
               builder: (context, provider, child) {
                 final businessId =
-                    context.watch<BusinessProvider>().selectedBusiness?.id;
+                    context.watch<BusinessProvider>().selectedBusiness.id;
                 var offers = provider.activeOffers;
-                if (businessId != null) {
-                  offers = offers.where((o) => o.businessId == businessId).toList();
-                }
-
+                offers = offers.where((o) => o.businessId == businessId).toList();
+              
                 // Filter by offerType if provided
                 if (offerType != null) {
                   if (offerType == 'coupon') {

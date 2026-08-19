@@ -1,16 +1,15 @@
-import 'package:z_ecommerce/data/providers/auth_provider.dart';
-import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
-import 'package:z_ecommerce/presentation/pages/auth/reset_password_page.dart';
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/business_provider.dart';
-import '../../global/translate/localized_string.dart';
-import '../../widgets/auth/auth_split_layout.dart';
-import '../../widgets/auth/auth_text_field.dart';
-import '../../widgets/auth/primary_auth_button.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/auth/reset_password_page.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/auth_split_layout.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
+import 'package:z_ecommerce/presentation/widgets/auth/primary_auth_button.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -22,6 +21,7 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -35,6 +35,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     final authProvider = context.read<AuthProvider>();
@@ -43,9 +44,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     if (mounted) {
       setState(() => _isLoading = false);
       if (success) {
-        changeScreen(context, ResetPasswordPage());
+        changeScreen(context, const ResetPasswordPage());
       } else {
-        setState(() {});
+        setState(() {
+          _errorMessage = authProvider.errorMessage ?? "حدث خطأ أثناء إرسال البريد";
+        });
       }
     }
   }
@@ -62,6 +65,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         en: 'No worries, enter your email and we will send you reset instructions.',
       ),
       children: [
+        if (_errorMessage != null) ...[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.red.withOpacity(0.3)),
+            ),
+            child: Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.red, fontSize: 13),
+            ),
+          ),
+        ],
+
         AuthTextField(
           controller: _emailController,
           label: TranslationKeys.email.tr(context),
@@ -70,6 +90,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 32),
+
         SizedBox(
           width: double.infinity,
           child: PrimaryAuthButton(
@@ -78,9 +99,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             isLoading: _isLoading,
           ),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 24),
+
         Center(
           child: ButtonApp(
+            format: FormatButtonApp.text,
             onPressed: () {
               Navigator.pop(context);
             },

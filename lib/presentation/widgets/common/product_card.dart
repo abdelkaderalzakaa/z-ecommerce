@@ -11,6 +11,8 @@ import '../../../data/providers/business_provider.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/data/providers/like_provider.dart';
+import 'package:z_ecommerce/data/models/shared/like_model.dart';
 
 class ProductCard extends StatefulWidget {
   final ProductModel product;
@@ -128,17 +130,21 @@ class _ProductImagePlaceholder extends StatelessWidget {
           Positioned(
             top: 12,
             right: 12,
-            child: Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                final isFavorite =
-                    authProvider.currentCustomer?.wishlist.contains(
-                      product.id,
-                    ) ??
-                    false;
+            child: Consumer2<AuthProvider, LikeProvider>(
+              builder: (context, authProvider, likeProvider, child) {
+                final isFavorite = likeProvider.hasLiked(product.id);
 
                 return InkWell(
-                  onTap: () {
+                  onTap: () async {
                     if (authProvider.isAuthenticated) {
+                      final like = LikeModel(
+                        id: '',
+                        userId: authProvider.currentUser!.id,
+                        targetId: product.id,
+                        targetType: 'product',
+                        createdAt: DateTime.now(),
+                      );
+                      await likeProvider.toggleLike(like);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -179,31 +185,32 @@ class _ProductImagePlaceholder extends StatelessWidget {
             right: 12,
             child: Consumer2<CartProvider, BusinessProvider>(
               builder: (context, cartProvider, businessProvider, child) {
-                final businessId = businessProvider.selectedBusiness?.id;
+                final businessId = businessProvider.selectedBusiness.id;
                 final isInCart = cartProvider
                     .items(businessId)
-                    .any((item) => item.product?.id == product.id);
+                    .any((item) => item.productId == product.id);
                 return InkWell(
                   onTap: () {
                     if (isInCart) {
                       changeScreen(context, const CartPage());
-                    } else if (businessId != null) {
+                    } else {
                       cartProvider.addProductToCart(
-                        businessId: businessId,
-                        product: product,
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Item added to cart'),
-                          duration: const Duration(seconds: 2),
-                          action: SnackBarAction(
-                            label: 'View Cart',
-                            onPressed: () =>
-                                changeScreen(context, const CartPage()),
-                          ),
-                        ),
-                      );
+                      businessId: businessId,
+                      product: product,
+                    );
                     }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Item added to cart'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'View Cart',
+                          onPressed: () =>
+                              changeScreen(context, const CartPage()),
+                        ),
+                      ),
+                    );
+                  
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -277,7 +284,7 @@ class _PriceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
-    final currency = selectedBusiness?.currency.symbol ?? '\$';
+    final currency = selectedBusiness.currency.symbol;
 
     return Row(
       children: [

@@ -7,7 +7,6 @@ import 'package:z_ecommerce/data/services/order_service.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 class InvoiceProvider with ChangeNotifier {
-  final OrderService _orderService = OrderService();
   final List<InvoiceModel> _invoices = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -45,7 +44,8 @@ class InvoiceProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final storeOrders = await _orderService.getOrdersByStore(storeId);
+      // Mocked for now as we transition to OrderProvider
+      final storeOrders = <InvoiceModel>[];
       for (var order in storeOrders) {
         final index = _invoices.indexWhere((i) => i.id == order.id);
         if (index >= 0) {
@@ -69,9 +69,8 @@ class InvoiceProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final customerOrders = await _orderService.getOrdersByCustomer(
-        customerId,
-      );
+      // Mocked for now as we transition to OrderProvider
+      final customerOrders = <InvoiceModel>[];
       for (var order in customerOrders) {
         final index = _invoices.indexWhere((i) => i.id == order.id);
         if (index >= 0) {
@@ -91,49 +90,15 @@ class InvoiceProvider with ChangeNotifier {
   /// الاستماع التلقائي المباشر لطلبات المتجر (Real-time Stream)
   void listenToStoreOrders(String storeId) {
     _storeOrdersSubscription?.cancel();
-    _storeOrdersSubscription = _orderService
-        .streamOrdersByStore(storeId)
-        .listen(
-          (storeOrders) {
-            for (var order in storeOrders) {
-              final index = _invoices.indexWhere((i) => i.id == order.id);
-              if (index >= 0) {
-                _invoices[index] = order;
-              } else {
-                _invoices.add(order);
-              }
-            }
-            notifyListeners();
-          },
-          onError: (error) {
-            _errorMessage = error.toString();
-            notifyListeners();
-          },
-        );
+    // Mocked for now
+    _storeOrdersSubscription = const Stream<List<InvoiceModel>>.empty().listen((_) {});
   }
 
   /// الاستماع التلقائي المباشر لطلبات العميل (Real-time Stream)
   void listenToCustomerOrders(String customerId) {
     _customerOrdersSubscription?.cancel();
-    _customerOrdersSubscription = _orderService
-        .streamOrdersByCustomer(customerId)
-        .listen(
-          (customerOrders) {
-            for (var order in customerOrders) {
-              final index = _invoices.indexWhere((i) => i.id == order.id);
-              if (index >= 0) {
-                _invoices[index] = order;
-              } else {
-                _invoices.add(order);
-              }
-            }
-            notifyListeners();
-          },
-          onError: (error) {
-            _errorMessage = error.toString();
-            notifyListeners();
-          },
-        );
+    // Mocked for now
+    _customerOrdersSubscription = const Stream<List<InvoiceModel>>.empty().listen((_) {});
   }
 
   /// Create and add a new invoice (Order creation via OrderService)
@@ -181,11 +146,12 @@ class InvoiceProvider with ChangeNotifier {
     _invoices.add(newInvoice);
 
     // 2. التخزين في السيرفس / Firestore
-    final createdServerOrder = await _orderService.createOrder(newInvoice);
+    // Mocked for now
+    // final createdServerOrder = await _orderService.createOrder(newInvoice);
 
     _isLoading = false;
     notifyListeners();
-    return createdServerOrder ?? newInvoice;
+    return newInvoice; // createdServerOrder ?? newInvoice;
   }
 
   /// Update invoice status and sync with OrderService
@@ -203,13 +169,8 @@ class InvoiceProvider with ChangeNotifier {
       notifyListeners();
 
       // 2. تحديث في السيرفس
-      return await _orderService.updateOrderStatus(
-        orderId: id,
-        newStatus: newStatus,
-        changedByUserId: userId,
-        userRole: userRole,
-        note: note,
-      );
+      // Mocked for now
+      return true;
     }
     return false;
   }

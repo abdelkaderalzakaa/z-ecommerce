@@ -257,14 +257,14 @@ class _OfferCardState extends State<OfferCard>
                                     final businessId = context
                                         .read<BusinessProvider>()
                                         .selectedBusiness
-                                        ?.id;
+                                        .id;
                                     final isInCart =
                                         mainIdToCheck != null &&
                                         cart
                                             .items(businessId)
                                             .any(
                                               (item) =>
-                                                  item.product!.id ==
+                                                  item.productId ==
                                                   mainIdToCheck,
                                             );
 
@@ -479,8 +479,7 @@ class _OfferCardState extends State<OfferCard>
   }
 
   void _addToCart(BuildContext context) {
-    final businessId = context.read<BusinessProvider>().selectedBusiness?.id;
-    if (businessId == null) return;
+    final businessId = context.read<BusinessProvider>().selectedBusiness.id;
     final cart = context.read<CartProvider>();
     final products = context.read<ProductProvider>().allProducts;
 

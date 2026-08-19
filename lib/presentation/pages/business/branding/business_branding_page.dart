@@ -43,28 +43,26 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
       final currentThemeAdmin = context
           .read<BusinessProvider>()
           .selectedBusiness
-          ?.theme;
-      if (currentThemeAdmin != null) {
-        setState(() {
-          _primaryColorHex = currentThemeAdmin.primaryColor;
-          _secondaryColorHex = currentThemeAdmin.secondaryColor;
-          _backgroundColorHex = currentThemeAdmin.backgroundColor;
-          _surfaceColorHex = currentThemeAdmin.surfaceColor;
-          _textColorHex = currentThemeAdmin.textColor;
-          _selectedFontFamily = currentThemeAdmin.fontFamily;
-          _fontScale = currentThemeAdmin.fontScale;
-          _buttonRadius = currentThemeAdmin.buttonRadius;
-          _cardRadius = currentThemeAdmin.cardRadius;
-          _inputRadius = currentThemeAdmin.inputRadius;
-          if (currentThemeAdmin.logoUrl != null) {
-            _logoUrl = currentThemeAdmin.logoUrl!;
-          }
-          if (currentThemeAdmin.coverBannerUrl != null) {
-            _coverBannerUrl = currentThemeAdmin.coverBannerUrl!;
-          }
+          .theme;
+      setState(() {
+        _primaryColorHex = currentThemeAdmin.primaryColor;
+        _secondaryColorHex = currentThemeAdmin.secondaryColor;
+        _backgroundColorHex = currentThemeAdmin.backgroundColor;
+        _surfaceColorHex = currentThemeAdmin.surfaceColor;
+        _textColorHex = currentThemeAdmin.textColor;
+        _selectedFontFamily = currentThemeAdmin.fontFamily;
+        _fontScale = currentThemeAdmin.fontScale;
+        _buttonRadius = currentThemeAdmin.buttonRadius;
+        _cardRadius = currentThemeAdmin.cardRadius;
+        _inputRadius = currentThemeAdmin.inputRadius;
+        if (currentThemeAdmin.logoUrl != null) {
+          _logoUrl = currentThemeAdmin.logoUrl!;
+        }
+        if (currentThemeAdmin.coverBannerUrl != null) {
+          _coverBannerUrl = currentThemeAdmin.coverBannerUrl!;
+        }
+      });
         });
-      }
-    });
   }
 
   // Color Palette Presets
@@ -177,13 +175,11 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
     await Future.delayed(const Duration(milliseconds: 400));
     if (mounted) {
       final business = context.read<BusinessProvider>().selectedBusiness;
-      if (business != null) {
-        context.read<BusinessProvider>().updateTheme(
-          business.id,
-          _currentTheme,
-        );
-      }
-    }
+      context.read<BusinessProvider>().updateTheme(
+        business.id,
+        _currentTheme,
+      );
+        }
     setState(() => _isSaving = false);
 
     if (mounted) {

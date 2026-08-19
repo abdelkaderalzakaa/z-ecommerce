@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/presentation/pages/business/profile/store_owner_profile_page.dart';
 import '../../global/locale_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import '../../../data/providers/business_provider.dart';
@@ -8,7 +9,6 @@ import '../../global/settings_provider.dart';
 import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
-import '../../pages/business/profile/store_owner_profile_page.dart';
 
 class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isMobile;
@@ -30,14 +30,12 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
     final businessProvider = context.watch<BusinessProvider>();
     final authProvider = context.watch<AuthProvider>();
     final isArabic = localeProvider.locale.languageCode == 'ar';
-    final storeTheme = businessProvider.selectedBusiness?.theme;
-    final primaryColor = storeTheme?.primaryColorValue ?? theme.primaryColor;
-    final fontFamily = storeTheme?.fontFamily ?? 'Cairo';
-    final nameObj = businessProvider.selectedBusiness?.localization.name;
-    final storeName = nameObj != null
-        ? (isArabic ? nameObj.ar : nameObj.en)
-        : TranslationKeys.mainStore.tr(context);
-    final logoUrl = storeTheme?.logoUrl;
+    final storeTheme = businessProvider.selectedBusiness.theme;
+    final primaryColor = storeTheme.primaryColorValue;
+    final fontFamily = storeTheme.fontFamily;
+    final nameObj = businessProvider.selectedBusiness.localization.name;
+    final storeName = (isArabic ? nameObj.ar : nameObj.en);
+    final logoUrl = storeTheme.logoUrl;
     final userName = authProvider.currentUser?.name ?? storeName;
 
     return AppBar(
@@ -63,7 +61,7 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
             decoration: BoxDecoration(
               color: primaryColor.withOpacity(0.12),
               borderRadius:
-                  storeTheme?.cardBorderRadius ?? BorderRadius.circular(10),
+                  storeTheme.cardBorderRadius,
               border: Border.all(color: primaryColor.withOpacity(0.2)),
               image: logoUrl != null
                   ? DecorationImage(
@@ -87,7 +85,7 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
                   fontFamily: fontFamily,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: storeTheme?.textColorValue,
+                  color: storeTheme.textColorValue,
                 ),
               ),
               Text(
