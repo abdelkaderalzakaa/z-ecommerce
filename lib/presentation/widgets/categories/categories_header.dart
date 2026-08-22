@@ -29,7 +29,8 @@ class CategoriesHeader extends StatelessWidget {
     return Consumer2<ProductProvider, CategoryProvider>(
       builder: (context, provider, categoryProvider, child) {
         final totalItems = provider.allProducts.length;
-        final showingText = '$totalItems items';
+        final isAr = Localizations.localeOf(context).languageCode == 'ar';
+        final showingText = isAr ? 'إجمالي المنتجات المعروضة: $totalItems منتج' : 'Total products: $totalItems items';
 
         final searchField = TextField(
           decoration: InputDecoration(

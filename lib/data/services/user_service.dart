@@ -179,6 +179,20 @@ class UserService {
     }
   }
 
+  /// تحديث حالة المتجر (نشط/غير نشط/معلق) فقط دون المساس بباقي البيانات
+  Future<void> updateBusinessStatus(String businessId, String newStatus) async {
+    try {
+      await _firestore
+          .collection(_businessesCollection)
+          .doc(businessId)
+          .update({'status': newStatus});
+      debugPrint('Business status updated successfully: $businessId to $newStatus');
+    } catch (e) {
+      debugPrint('Error updating business status: $e');
+      rethrow;
+    }
+  }
+
   /// جلب بيانات المتجر بالمعرف
   Future<BusinessModel?> getBusinessById(String businessId) async {
     try {

@@ -65,7 +65,13 @@ class BusinessModel {
   final List<RatedUser> ratings;
   final List<BusinessVisitModel> visits;
 
-  // 5. الحالة والتواريخ
+  // 5. التحكم بالخصائص والتفاعلات (Permissions & Recommendations)
+  final bool allowFollow;
+  final bool allowLikes;
+  final bool allowReviews;
+  final bool isRecommended;
+
+  // 6. الحالة والتواريخ
   final String? status; // 'Active', 'Active & Verified', 'Pending', 'Inactive'
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -91,6 +97,10 @@ class BusinessModel {
     this.followersUsers = const [],
     this.ratings = const [],
     this.visits = const [],
+    this.allowFollow = true,
+    this.allowLikes = true,
+    this.allowReviews = true,
+    this.isRecommended = false,
     this.status,
     this.createdAt,
     this.updatedAt,
@@ -111,6 +121,10 @@ class BusinessModel {
     List<FollowersStore>? followersUsers,
     List<RatedUser>? ratings,
     List<BusinessVisitModel>? visits,
+    bool? allowFollow,
+    bool? allowLikes,
+    bool? allowReviews,
+    bool? isRecommended,
     String? status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -130,6 +144,10 @@ class BusinessModel {
       followersUsers: followersUsers ?? this.followersUsers,
       ratings: ratings ?? this.ratings,
       visits: visits ?? this.visits,
+      allowFollow: allowFollow ?? this.allowFollow,
+      allowLikes: allowLikes ?? this.allowLikes,
+      allowReviews: allowReviews ?? this.allowReviews,
+      isRecommended: isRecommended ?? this.isRecommended,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -296,6 +314,10 @@ class BusinessModel {
               ?.map((e) => BusinessVisitModel.fromMap(e, e['id'] ?? ''))
               .toList() ??
           [],
+      allowFollow: map['allowFollow'] ?? true,
+      allowLikes: map['allowLikes'] ?? true,
+      allowReviews: map['allowReviews'] ?? true,
+      isRecommended: map['isRecommended'] ?? false,
       status: map['status'],
       createdAt: map['createdAt'] != null
           ? DateTime.tryParse(map['createdAt'])
@@ -322,6 +344,10 @@ class BusinessModel {
       'followersUsers': followersUsers.map((e) => e.toMap()).toList(),
       'ratings': ratings.map((e) => e.toMap()).toList(),
       'visits': visits.map((e) => e.toMap()).toList(),
+      'allowFollow': allowFollow,
+      'allowLikes': allowLikes,
+      'allowReviews': allowReviews,
+      'isRecommended': isRecommended,
       'status': status,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),

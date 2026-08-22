@@ -60,22 +60,45 @@ class _AdminStoreState extends State<AdminStore> {
     if (store.isInactive) {
       return Scaffold(
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.block, size: 100, color: Colors.red),
-              const SizedBox(height: 24),
-              const Text(
-                'عذراً، هذا المتجر غير مفعل حالياً',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'لا يمكنك الوصول إلى لوحة تحكم المتجر لأن حالته غير نشطة.\nالرجاء التواصل مع الإدارة للتفعيل.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.block, size: 90, color: Colors.red),
+                const SizedBox(height: 24),
+                const Text(
+                  'عذراً، هذا المتجر غير مفعل حالياً',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'لا يمكنك الوصول إلى لوحة تحكم المتجر لأن حالته غير نشطة.\nالرجاء التواصل مع الإدارة للتفعيل.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15, color: Colors.grey, height: 1.5),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: const Text(
+                    'تسجيل الخروج',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () async {
+                    await context.read<AuthProvider>().signOut();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       );

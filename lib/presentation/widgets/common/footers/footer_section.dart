@@ -15,6 +15,9 @@ import 'package:z_ecommerce/presentation/pages/customer/static/about_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/contact_us_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/terms_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/static/privacy_policy_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/customer_addresses_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/social_media_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/payment_methods_page.dart';
 
 class FooterSection extends StatelessWidget {
   final bool useAdminTheme;
@@ -77,6 +80,27 @@ class _DesktopFooter extends StatelessWidget {
                 ),
               ),
               (
+                label: Localizations.localeOf(context).languageCode == 'ar' ? 'وسائل التواصل الاجتماعي' : 'Social Media',
+                onTap: () => changeScreen(
+                  context,
+                  const SocialMediaPage(),
+                ),
+              ),
+              (
+                label: Localizations.localeOf(context).languageCode == 'ar' ? 'طرق الدفع المتاحة' : 'Payment Methods',
+                onTap: () => changeScreen(
+                  context,
+                  const PaymentMethodsPage(),
+                ),
+              ),
+              (
+                label: Localizations.localeOf(context).languageCode == 'ar' ? 'عناوين التوصيل' : 'Delivery Addresses',
+                onTap: () => changeScreen(
+                  context,
+                  const CustomerAddressesPage(),
+                ),
+              ),
+              (
                 label: TranslationKeys.termsConditions.tr(context),
                 onTap: () => changeScreen(
                   context,
@@ -124,6 +148,27 @@ class _MobileFooter extends StatelessWidget {
               onTap: () => changeScreen(
                 context,
                 ContactUsPage(useAdminTheme: useAdminTheme),
+              ),
+            ),
+            (
+              label: Localizations.localeOf(context).languageCode == 'ar' ? 'وسائل التواصل الاجتماعي' : 'Social Media',
+              onTap: () => changeScreen(
+                context,
+                const SocialMediaPage(),
+              ),
+            ),
+            (
+              label: Localizations.localeOf(context).languageCode == 'ar' ? 'طرق الدفع المتاحة' : 'Payment Methods',
+              onTap: () => changeScreen(
+                context,
+                const PaymentMethodsPage(),
+              ),
+            ),
+            (
+              label: Localizations.localeOf(context).languageCode == 'ar' ? 'عناوين التوصيل' : 'Delivery Addresses',
+              onTap: () => changeScreen(
+                context,
+                const CustomerAddressesPage(),
               ),
             ),
             (

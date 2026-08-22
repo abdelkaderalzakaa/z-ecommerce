@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
@@ -76,13 +77,28 @@ class _ProfilePageState extends State<ProfilePage> {
 
   List<String> _buildTabs(BuildContext context) {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
+    final authProvider = context.watch<AuthProvider>();
+    final userId = authProvider.currentUser?.id ?? '';
+
+    final businessProvider = context.watch<BusinessProvider>();
+    final myStoresCount = userId.isNotEmpty
+        ? businessProvider.businesses.where((b) => b.owner?.id == userId).length
+        : 0;
+
+    final customer = authProvider.currentCustomer;
+    final followingCount = userId.isNotEmpty
+        ? businessProvider.businesses.where((b) => b.followersUsers.any((f) => f.userId == userId)).length
+        : 0;
+    final wishlistCount = customer?.wishlist.length ?? 0;
+    final addressesCount = customer?.addresses.length ?? 0;
+
     return [
       TranslationKeys.myAccount.tr(context),
-      TranslationKeys.myStores.tr(context),
-      isAr ? 'المتاجر التي أتابعها' : 'Following',
+      '${TranslationKeys.myStores.tr(context)} ($myStoresCount)',
+      isAr ? 'المتاجر التي أتابعها ($followingCount)' : 'Following ($followingCount)',
       TranslationKeys.orders.tr(context),
-      TranslationKeys.wishlist.tr(context),
-      TranslationKeys.addresses.tr(context),
+      '${TranslationKeys.wishlist.tr(context)} ($wishlistCount)',
+      '${TranslationKeys.addresses.tr(context)} ($addressesCount)',
       TranslationKeys.settings.tr(context),
     ];
   }

@@ -89,11 +89,11 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: Text(
-                    TranslationKeys.superAdminDashboard.tr(context),
+                    SuperAdminSidebar.items[_selectedIndex].titleKey.tr(context),
                     style: const TextStyle(
-                      fontSize: 21,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

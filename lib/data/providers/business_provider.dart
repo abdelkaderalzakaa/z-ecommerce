@@ -117,12 +117,35 @@ class BusinessProvider with ChangeNotifier {
 
   /// 🔄 تحديث حالة المتجر (نشط/غير نشط)
   Future<void> updateStoreStatus(String businessId, String newStatus) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _userService.updateBusinessStatus(businessId, newStatus);
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// ⚙️ تحديث صلاحيات وإعدادات البزنس (السماح بالمتابعة، الإعجابات، التقييمات، والتوصية)
+  Future<void> updatePermissions(
+    String businessId, {
+    bool? allowFollow,
+    bool? allowLikes,
+    bool? allowReviews,
+    bool? isRecommended,
+  }) async {
     final index = _businesses.indexWhere((b) => b.id == businessId);
     if (index >= 0) {
-      final businessMap = _businesses[index].toMap();
-      businessMap['status'] = newStatus;
-      final updatedBusiness = BusinessModel.fromMap(businessMap, businessId);
-      await saveBusiness(updatedBusiness);
+      final updated = _businesses[index].copyWith(
+        allowFollow: allowFollow,
+        allowLikes: allowLikes,
+        allowReviews: allowReviews,
+        isRecommended: isRecommended,
+      );
+      await saveBusiness(updated);
     }
   }
 

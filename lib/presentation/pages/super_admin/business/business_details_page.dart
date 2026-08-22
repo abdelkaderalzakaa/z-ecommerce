@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/core/services/excel_export_service.dart';
+import 'package:z_ecommerce/core/services/excel_import_service.dart';
+import 'package:z_ecommerce/data/models/store/business_model.dart';
+import 'package:z_ecommerce/data/providers/brand_provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/category_provider.dart';
+import 'package:z_ecommerce/data/providers/offer_provider.dart';
+import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/brand_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/category_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/followers_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/offers_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/overview_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/permissions_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/products_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/reviews_tab.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/details_template.dart';
-import 'package:z_ecommerce/core/services/excel_export_service.dart';
-import 'package:z_ecommerce/core/services/excel_import_service.dart';
-import 'package:z_ecommerce/data/models/store/business_model.dart';
 
-import 'business_details_tab/overview_tab.dart';
-import 'business_details_tab/products_tab.dart';
-import 'business_details_tab/offers_tab.dart';
-import 'business_details_tab/category_tab.dart';
-import 'business_details_tab/brand_tab.dart';
-import 'business_details_tab/followers_tab.dart';
-import 'business_details_tab/reviews_tab.dart';
+import 'create_business_page.dart';
 
 class BusinessDetailsPage extends StatelessWidget {
   final String storeId;
@@ -25,12 +32,22 @@ class BusinessDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BusinessProvider>(
-      builder: (context, provider, child) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+
+    return Consumer5<BusinessProvider, ProductProvider, OfferProvider, CategoryProvider, BrandProvider>(
+      builder: (context, provider, productProvider, offerProvider, categoryProvider, brandProvider, child) {
         final store = provider.businesses.firstWhere(
           (s) => s.id == storeId,
           orElse: () => provider.businesses.first,
         );
+
+        // Dynamic Counts per Tab
+        final productsCount = productProvider.allProducts.where((p) => p.businessId == store.id).length;
+        final offersCount = offerProvider.activeOffers.where((o) => o.businessId == store.id).length;
+        final categoriesCount = categoryProvider.categories.where((c) => c.businessId == store.id).length;
+        final brandsCount = brandProvider.brands.where((b) => b.businessId == store.id).length;
+        final followersCount = store.followersUsers.length;
+        final reviewsCount = store.ratings.length;
 
         // Calculate readiness based on filled fields
         int readinessScore = 0;
@@ -40,12 +57,14 @@ class BusinessDetailsPage extends StatelessWidget {
         if (store.socials.isNotEmpty) readinessScore += 20;
         if (store.paymentMethods.isNotEmpty) readinessScore += 20;
 
-        String readinessText = readinessScore == 100
-            ? 'جاهز بالكامل'
-            : 'قيد التجهيز ($readinessScore%)';
-        Color readinessColor = readinessScore == 100
-            ? Colors.green
-            : Colors.orange;
+        final bool isBelowLaunchThreshold = readinessScore < 60;
+
+        // Automatically update status if readiness is below threshold
+        if (isBelowLaunchThreshold && store.isActive) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            provider.updateStoreStatus(store.id, 'Inactive');
+          });
+        }
 
         return DetailsTemplate(
           title: TranslationKeys.storeDetailsTitle.tr(context),
@@ -56,28 +75,13 @@ class BusinessDetailsPage extends StatelessWidget {
           fallbackIcon: Icons.storefront_rounded,
           statusBadge: TableStatusBadge.fromStatus(store.status ?? 'Active'),
           headerMetrics: [
-            // Readiness Level
-            Chip(
-              avatar: Icon(
-                Icons.check_circle_outline,
-                color: readinessColor,
-                size: 16,
-              ),
-              label: Text(
-                readinessText,
-                style: TextStyle(color: readinessColor, fontSize: 12),
-              ),
-              backgroundColor: readinessColor.withOpacity(0.1),
-              side: BorderSide.none,
-            ),
-            const SizedBox(width: 8),
             // Import Button
             ButtonApp(
               onPressed: () async {
                 await ExcelImportService.importData(context, store.id);
               },
               icon: Icons.upload_rounded,
-              label: 'استيراد بيانات',
+              label: isAr ? 'استيراد بيانات' : 'Import Data',
               color: Colors.green,
             ),
             const SizedBox(width: 8),
@@ -85,7 +89,7 @@ class BusinessDetailsPage extends StatelessWidget {
             ButtonApp(
               onPressed: () async {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('جاري تجهيز الملف للتصدير...')),
+                  SnackBar(content: Text(isAr ? 'جاري تجهيز الملف للتصدير...' : 'Preparing export file...')),
                 );
                 try {
                   await ExcelExportService.exportBusinessData(
@@ -93,15 +97,15 @@ class BusinessDetailsPage extends StatelessWidget {
                     store.id,
                   );
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('تم تصدير البيانات بنجاح!'),
+                    SnackBar(
+                      content: Text(isAr ? 'تم تصدير البيانات بنجاح!' : 'Data exported successfully!'),
                       backgroundColor: Colors.green,
                     ),
                   );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('حدث خطأ أثناء التصدير: \$e'),
+                      content: Text(isAr ? 'حدث خطأ أثناء التصدير: $e' : 'Export failed: $e'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -109,66 +113,26 @@ class BusinessDetailsPage extends StatelessWidget {
               },
               icon: Icons.download_rounded,
               color: Colors.amber,
-              label: 'تصدير بيانات المتجر',
+              label: isAr ? 'تصدير بيانات المتجر' : 'Export Store Data',
             ),
             const SizedBox(width: 8),
-            // Status Menu
-            PopupMenuButton<String>(
-              child: ButtonApp(
-                onPressed: null,
-                icon: Icons.edit_note,
-                label: 'تغيير الحالة',
-              ),
-              onSelected: (val) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('تم تغيير حالة المتجر إلى: \$val')),
-                );
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'Active', child: Text('نشط')),
-                const PopupMenuItem(
-                  value: 'Active & Verified',
-                  child: Text('نشط ومعتمد'),
-                ),
-                const PopupMenuItem(
-                  value: 'Pending',
-                  child: Text('معلق (قيد الانتظار)'),
-                ),
-                const PopupMenuItem(value: 'Inactive', child: Text('غير نشط')),
-              ],
-            ),
-            const SizedBox(width: 8),
-            // Pause / Close
-            ButtonApp(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('تم إيقاف المتجر مؤقتاً.')),
-                );
-              },
-              icon: Icons.pause_circle_filled,
-              label: 'إيقاف مؤقت',
-            ),
           ],
           onEdit: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${TranslationKeys.editAddress.tr(context)} "${store.localization.name.get(context)}"',
-                ),
-              ),
-            );
+            changeScreen(context, CreateBusinessPage(businessToEdit: store));
           },
-          tabs: const [
-            Tab(text: 'نظرة عامة'),
-            Tab(text: 'المنتجات'),
-            Tab(text: 'العروض'),
-            Tab(text: 'الفئات'),
-            Tab(text: 'العلامات التجارية'),
-            Tab(text: 'المتابعات'),
-            Tab(text: 'التقييمات والإعجابات'),
+          tabs: [
+            Tab(text: isAr ? 'نظرة عامة' : 'Overview'),
+            Tab(text: isAr ? 'صلاحيات التفاعل' : 'Permissions'),
+            Tab(text: isAr ? 'المنتجات ($productsCount)' : 'Products ($productsCount)'),
+            Tab(text: isAr ? 'العروض ($offersCount)' : 'Offers ($offersCount)'),
+            Tab(text: isAr ? 'الفئات ($categoriesCount)' : 'Categories ($categoriesCount)'),
+            Tab(text: isAr ? 'العلامات التجارية ($brandsCount)' : 'Brands ($brandsCount)'),
+            Tab(text: isAr ? 'المتابعات ($followersCount)' : 'Followers ($followersCount)'),
+            Tab(text: isAr ? 'التقييمات والآراء ($reviewsCount)' : 'Reviews ($reviewsCount)'),
           ],
           tabViews: [
             OverviewTab(store: store),
+            PermissionsTab(store: store),
             ProductsTab(store: store),
             OffersTab(store: store),
             CategoryTab(store: store),

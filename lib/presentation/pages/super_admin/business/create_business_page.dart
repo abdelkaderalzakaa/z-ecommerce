@@ -15,7 +15,9 @@ import 'package:z_ecommerce/presentation/widgets/templates/add_edit_template.dar
 import 'package:z_ecommerce/data/services/user_service.dart';
 
 class CreateBusinessPage extends StatefulWidget {
-  const CreateBusinessPage({super.key});
+  final BusinessModel? businessToEdit;
+
+  const CreateBusinessPage({super.key, this.businessToEdit});
 
   @override
   State<CreateBusinessPage> createState() => _CreateBusinessPageState();
@@ -40,6 +42,21 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
 
   bool _isSubmitting = false;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.businessToEdit != null) {
+      final b = widget.businessToEdit!;
+      _storeNameEnController.text = b.localization.name.en;
+      _storeNameArController.text = b.localization.name.ar;
+      _contactEmailController.text = b.owner?.email ?? '';
+      _contactPhoneController.text = b.owner?.phoneNumber ?? '';
+      _ownerNameController.text = b.owner?.name ?? '';
+      _ownerEmailController.text = b.owner?.email ?? '';
+      _selectedBusinessType = b.businessType;
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -48,11 +65,61 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
     final businessProvider = context.read<BusinessProvider>();
     final userService = UserService();
 
-    // Generate IDs
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final storeId = 'cmp_${timestamp.substring(timestamp.length - 8)}';
-
     try {
+      if (widget.businessToEdit != null) {
+        final existing = widget.businessToEdit!;
+        final updatedOwner = existing.owner?.copyWith(
+          name: _ownerNameController.text.trim(),
+          email: _ownerEmailController.text.trim(),
+          phoneNumber: _contactPhoneController.text.trim(),
+        ) ?? UserModel(
+          id: existing.id,
+          name: _ownerNameController.text.trim(),
+          email: _ownerEmailController.text.trim(),
+          role: UserRole.businessOwner,
+          phoneNumber: _contactPhoneController.text.trim(),
+          createdAt: DateTime.now(),
+        );
+
+        final updatedLocalization = LocalizationAdmin(
+          name: LocalizedString(
+            en: _storeNameEnController.text.trim(),
+            ar: _storeNameArController.text.trim(),
+          ),
+          slogan: existing.localization.slogan,
+          description: existing.localization.description,
+          footerDescription: existing.localization.footerDescription,
+          aboutUs: existing.localization.aboutUs,
+          termsAndConditions: existing.localization.termsAndConditions,
+          privacyPolicy: existing.localization.privacyPolicy,
+        );
+
+        final updatedStore = existing.copyWith(
+          owner: updatedOwner,
+          businessType: _selectedBusinessType,
+          localization: updatedLocalization,
+          updatedAt: DateTime.now(),
+        );
+
+        await businessProvider.saveBusiness(updatedStore);
+        setState(() => _isSubmitting = false);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم تحديث بيانات البزنس بنجاح!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
+        return;
+      }
+
+      // Generate IDs
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final storeId = 'cmp_${timestamp.substring(timestamp.length - 8)}';
+
       // Create owner account in Firebase Auth
       final ownerId = await userService.createNewAuthUserWithoutLoggingOut(
         _ownerEmailController.text.trim(),
@@ -148,13 +215,15 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isEdit = widget.businessToEdit != null;
+
     return AddEditTemplate(
-      title: TranslationKeys.createNewStore.tr(context),
-      subtitle: TranslationKeys.createNewStoreSubtitle.tr(context),
-      isEditMode: false,
+      title: isEdit ? 'تعديل بيانات البزنس' : TranslationKeys.createNewStore.tr(context),
+      subtitle: isEdit ? 'تحديث البيانات الأساسية ومعلومات حساب المالك' : TranslationKeys.createNewStoreSubtitle.tr(context),
+      isEditMode: isEdit,
       formKey: _formKey,
-      submitLabel: TranslationKeys.createStoreAndOwner.tr(context),
-      submitIcon: Icons.storefront_rounded,
+      submitLabel: isEdit ? 'حفظ التعديلات' : TranslationKeys.createStoreAndOwner.tr(context),
+      submitIcon: isEdit ? Icons.save_rounded : Icons.storefront_rounded,
       onSubmit: _submit,
       isSubmitting: _isSubmitting,
       cancelLabel: TranslationKeys.cancel.tr(context),

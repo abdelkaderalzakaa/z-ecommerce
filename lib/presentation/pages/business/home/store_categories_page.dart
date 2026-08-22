@@ -39,11 +39,13 @@ class _StoreCategoriesPageState extends State<StoreCategoriesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              headerTitle,
-              style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
+            if (!widget.isSuperAdmin) ...[
+              Text(
+                headerTitle,
+                style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+            ],
 
             Expanded(
               child: Consumer<CategoryProvider>(

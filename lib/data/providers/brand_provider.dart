@@ -15,7 +15,7 @@ class BrandProvider extends ChangeNotifier {
   StreamSubscription<List<BrandModel>>? _brandsSubscription;
 
   // Getters
-  List<BrandModel> get brands => _brands;
+  List<BrandModel> get brands => _brands.isNotEmpty ? _brands : [];
   BrandModel? get selectedBrand => _selectedBrand;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -30,19 +30,21 @@ class BrandProvider extends ChangeNotifier {
     notifyListeners();
 
     _brandsSubscription?.cancel();
-    _brandsSubscription = _service.streamBrandsByStore(businessId).listen(
-      (brandsList) {
-        _brands = brandsList;
-        _isLoading = false;
-        _errorMessage = null;
-        notifyListeners();
-      },
-      onError: (error) {
-        _errorMessage = error.toString();
-        _isLoading = false;
-        notifyListeners();
-      },
-    );
+    _brandsSubscription = _service
+        .streamBrandsByStore(businessId)
+        .listen(
+          (brandsList) {
+            _brands = brandsList.isNotEmpty ? brandsList : [];
+            _isLoading = false;
+            _errorMessage = null;
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = error.toString();
+            _isLoading = false;
+            notifyListeners();
+          },
+        );
   }
 
   /// الاستماع لجميع الماركات في المنصة
@@ -53,7 +55,7 @@ class BrandProvider extends ChangeNotifier {
     _brandsSubscription?.cancel();
     _brandsSubscription = _service.streamAllBrands().listen(
       (brandsList) {
-        _brands = brandsList;
+        _brands = brandsList.isNotEmpty ? brandsList : [];
         _isLoading = false;
         _errorMessage = null;
         notifyListeners();
@@ -77,9 +79,11 @@ class BrandProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _brands = await _service.getBrands(businessId: businessId);
+      final fetched = await _service.getBrands(businessId: businessId);
+      _brands = fetched.isNotEmpty ? fetched : [];
     } catch (e) {
       _errorMessage = e.toString();
+      _brands = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -99,50 +103,23 @@ class BrandProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final id = await _service.addBrand(brand);
-      if (id != null) {
-        final newBrand = BrandModel(
-          id: id,
-          businessIds: brand.businessIds,
-          name: brand.name,
-          logoUrl: brand.logoUrl,
-          description: brand.description,
-          isGlobal: brand.isGlobal,
-        );
-        final index = _brands.indexWhere((b) => b.id == newBrand.id);
-        if (index != -1) {
-          _brands[index] = newBrand;
-        } else {
-          _brands.add(newBrand);
-        }
-        _isLoading = false;
+      final newId = await _service.addBrand(brand);
+      if (newId != null) {
+        final newBrand = brand.copyWith(id: newId);
+        _brands = [..._brands, newBrand];
         notifyListeners();
         return true;
       }
-      return false;
     } catch (e) {
       _errorMessage = e.toString();
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return false;
     }
+    return false;
   }
 
-  /// 🔄 تفعيل أو تعطيل الماركة للمتجر
-  Future<bool> toggleBrandStatus(BrandModel brand, String storeId, bool enable) async {
-    final List<String> updatedStoreIds = List<String>.from(brand.businessIds);
-    if (enable) {
-      if (!updatedStoreIds.contains(storeId)) {
-        updatedStoreIds.add(storeId);
-      }
-    } else {
-      updatedStoreIds.remove(storeId);
-    }
-    final updatedBrand = brand.copyWith(businessIds: updatedStoreIds);
-    return updateBrand(updatedBrand);
-  }
-
-  /// ✏️ تحديث ماركة قائمة
+  /// ✏️ تحديث ماركة
   Future<bool> updateBrand(BrandModel brand) async {
     _isLoading = true;
     _errorMessage = null;
@@ -154,21 +131,48 @@ class BrandProvider extends ChangeNotifier {
         final index = _brands.indexWhere((b) => b.id == brand.id);
         if (index != -1) {
           _brands[index] = brand;
+          notifyListeners();
         }
-        if (_selectedBrand?.id == brand.id) {
-          _selectedBrand = brand;
+        return true;
+      } else {
+        // Fallback for memory list if offline
+        final index = _brands.indexWhere((b) => b.id == brand.id);
+        if (index != -1) {
+          _brands[index] = brand;
+          notifyListeners();
         }
-        _isLoading = false;
-        notifyListeners();
         return true;
       }
-      return false;
     } catch (e) {
       _errorMessage = e.toString();
+      final index = _brands.indexWhere((b) => b.id == brand.id);
+      if (index != -1) {
+        _brands[index] = brand;
+        notifyListeners();
+      }
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return false;
     }
+    return false;
+  }
+
+  /// 🔄 تفعيل أو إيقاف ماركة لمتجر محدد
+  Future<bool> toggleBrandStatus(
+    BrandModel brand,
+    String businessId,
+    bool enable,
+  ) async {
+    final currentIds = List<String>.from(brand.businessIds);
+    if (enable) {
+      if (!currentIds.contains(businessId)) {
+        currentIds.add(businessId);
+      }
+    } else {
+      currentIds.remove(businessId);
+    }
+    final updatedBrand = brand.copyWith(businessIds: currentIds);
+    return await updateBrand(updatedBrand);
   }
 
   /// 🗑️ حذف ماركة
@@ -181,20 +185,16 @@ class BrandProvider extends ChangeNotifier {
       final success = await _service.deleteBrand(brandId);
       if (success) {
         _brands.removeWhere((b) => b.id == brandId);
-        if (_selectedBrand?.id == brandId) {
-          _selectedBrand = null;
-        }
-        _isLoading = false;
         notifyListeners();
         return true;
       }
-      return false;
     } catch (e) {
       _errorMessage = e.toString();
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return false;
     }
+    return false;
   }
 
   @override

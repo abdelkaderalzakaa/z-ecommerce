@@ -9,6 +9,7 @@ import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
 import 'package:z_ecommerce/data/providers/follower_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/locale_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_colors.dart';
@@ -116,7 +117,6 @@ class _BusinessEntryState extends State<BusinessEntry> {
             SectionSearchAndCategory(
               searchController: _searchController,
               categoryScrollController: _categoryScrollController,
-              categories: categories,
               searchQuery: _searchQuery,
               selectedCategory: _selectedCategory,
               onSearchChanged: (query) => setState(() => _searchQuery = query),
@@ -298,7 +298,6 @@ class SectionHero extends StatelessWidget {
                         fontSize: isMobile ? 24 : 36,
                         fontWeight: FontWeight.bold,
                         color: theme.primaryColor,
-                        height: 1.25,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -456,7 +455,6 @@ class SectionHero extends StatelessWidget {
 class SectionSearchAndCategory extends StatelessWidget {
   final TextEditingController searchController;
   final ScrollController categoryScrollController;
-  final List<CategoryModel> categories;
   final String searchQuery;
   final String? selectedCategory;
   final ValueChanged<String> onSearchChanged;
@@ -467,7 +465,6 @@ class SectionSearchAndCategory extends StatelessWidget {
     super.key,
     required this.searchController,
     required this.categoryScrollController,
-    required this.categories,
     required this.searchQuery,
     required this.selectedCategory,
     required this.onSearchChanged,
@@ -555,7 +552,7 @@ class SectionSearchAndCategory extends StatelessWidget {
                         controller: categoryScrollController,
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
-                        itemCount: categories.length + 1,
+                        itemCount: BusinessType.values.length + 1,
                         itemBuilder: (context, index) {
                           if (index == 0) {
                             final isSelected = selectedCategory == null;
@@ -604,13 +601,14 @@ class SectionSearchAndCategory extends StatelessWidget {
                             );
                           }
 
-                          final cat = categories[index - 1];
-                          final isSelected = selectedCategory == cat.id;
-                          final color = cat.bgColor;
+                          final type = BusinessType.values[index - 1];
+                          final isSelected = selectedCategory == type.name;
+                          final color = theme.primaryColor;
+                          final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
                           return GestureDetector(
                             onTap: () =>
-                                onCategorySelected(isSelected ? null : cat.id),
+                                onCategorySelected(isSelected ? null : type.name),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -632,13 +630,13 @@ class SectionSearchAndCategory extends StatelessWidget {
                                     ),
                                   ),
                                   child: Icon(
-                                    cat.icon ?? Icons.category,
+                                    type.icon,
                                     color: isSelected ? Colors.white : color,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  cat.label,
+                                  isAr ? type.ar : type.en,
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: isSelected

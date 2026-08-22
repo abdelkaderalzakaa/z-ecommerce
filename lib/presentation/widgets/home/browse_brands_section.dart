@@ -19,9 +19,12 @@ class BrowseBrandsSection extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return Consumer<BrandProvider>(
-      builder: (context, provider, child) {
-        final brands = provider.brands;
+    return Consumer2<BrandProvider, BusinessProvider>(
+      builder: (context, brandProvider, businessProvider, child) {
+        final businessId = businessProvider.selectedBusiness.id;
+        final brands = brandProvider.brands
+            .where((b) => b.businessIds.contains(businessId) || b.isGlobal)
+            .toList();
         if (brands.isEmpty) return const SizedBox.shrink();
 
         return Container(

@@ -15,7 +15,7 @@ import '../../widgets/home/browse_categories_section.dart';
 import '../../widgets/home/browse_brands_section.dart';
 import '../../widgets/home/discounted_products_section.dart';
 import '../../widgets/home/offers_section.dart';
-import '../../widgets/home/newsletter_section.dart';
+import '../../widgets/home/top_reviews_section.dart';
 import '../../widgets/common/footers/footer_section.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,9 +30,11 @@ class _HomePageState extends State<HomePage> {
 
   final GlobalKey _heroKey = GlobalKey();
   final GlobalKey _newArrivalsKey = GlobalKey();
-  final GlobalKey _topSellingKey = GlobalKey();
   final GlobalKey _browseCategoriesKey = GlobalKey();
-  final GlobalKey _newsletterKey = GlobalKey();
+  final GlobalKey _topSellingKey = GlobalKey();
+  final GlobalKey _offersKey = GlobalKey();
+  final GlobalKey _browseBrandsKey = GlobalKey();
+  final GlobalKey _reviewsKey = GlobalKey();
 
   @override
   void initState() {
@@ -56,9 +58,11 @@ class _HomePageState extends State<HomePage> {
     final GlobalKey? key = switch (section) {
       'hero' => _heroKey,
       'newArrivals' => _newArrivalsKey,
-      'topSelling' => _topSellingKey,
       'browseCategories' => _browseCategoriesKey,
-      'newsletter' => _newsletterKey,
+      'topSelling' => _topSellingKey,
+      'offers' => _offersKey,
+      'browseBrands' => _browseBrandsKey,
+      'reviews' => _reviewsKey,
       _ => null,
     };
 
@@ -81,14 +85,10 @@ class _HomePageState extends State<HomePage> {
     final businessProvider = Provider.of<BusinessProvider>(context);
     final storeTheme = businessProvider.selectedBusiness.theme;
 
-    final primaryColor =
-        storeTheme.primaryColorValue;
-    final secondaryColor =
-        storeTheme.secondaryColorValue;
-    final bgColor =
-        storeTheme.backgroundColorValue;
-    final fontFamily =
-        storeTheme.fontFamily.isNotEmpty
+    final primaryColor = storeTheme.primaryColorValue;
+    final secondaryColor = storeTheme.secondaryColorValue;
+    final bgColor = storeTheme.backgroundColorValue;
+    final fontFamily = storeTheme.fontFamily.isNotEmpty
         ? storeTheme.fontFamily
         : 'Cairo';
 
@@ -115,29 +115,26 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   HeroSection(key: _heroKey),
                   const BrandsSection(),
-                  const OffersSection(sectionType: 'bundles'),
                   const SizedBox(height: 72),
                   NewArrivalsSection(key: _newArrivalsKey),
                   const SizedBox(height: 72),
-                  const BrowseBrandsSection(),
-                  Divider(
-                    color: Theme.of(innerContext).dividerColor,
-                    height: 1,
-                  ),
-                  const OffersSection(sectionType: 'coupons'),
+                  BrowseCategoriesSection(key: _browseCategoriesKey),
                   const SizedBox(height: 72),
                   TopSellingSection(key: _topSellingKey),
                   const SizedBox(height: 72),
-                  const DiscountedProductsSection(),
+                  OffersSection(key: _offersKey),
                   const SizedBox(height: 72),
-                  BrowseCategoriesSection(key: _browseCategoriesKey),
+                  BrowseBrandsSection(key: _browseBrandsKey),
                   const SizedBox(height: 72),
-                  const OffersSection(sectionType: 'deals'),
-                  const SizedBox(height: 72),
-                  NewsletterSection(key: _newsletterKey),
+                  if (businessProvider.selectedBusiness.allowReviews) ...[
+                    TopReviewsSection(key: _reviewsKey),
+                    const SizedBox(height: 72),
+                  ],
                   FooterBuisness(
-                    idBuisness:
-                        context.read<BusinessProvider>().selectedBusiness.id,
+                    idBuisness: context
+                        .read<BusinessProvider>()
+                        .selectedBusiness
+                        .id,
                   ),
                 ],
               ),

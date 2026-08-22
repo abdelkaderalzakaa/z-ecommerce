@@ -491,14 +491,22 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                             themeInfo?.buttonBorderRadius ??
                             BorderRadius.circular(12),
                       ),
-                      child: Text(
-                        _categories[index],
-                        style: TextStyle(
-                          fontFamily: fontFamily,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: isSel ? Colors.white : primaryColor,
-                        ),
+                      child: Builder(
+                        builder: (context) {
+                          final catName = _categories[index];
+                          final count = index == 0
+                              ? _menuItems.length
+                              : _menuItems.where((m) => m.category == catName).length;
+                          return Text(
+                            '$catName ($count)',
+                            style: TextStyle(
+                              fontFamily: fontFamily,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: isSel ? Colors.white : primaryColor,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

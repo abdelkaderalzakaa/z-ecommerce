@@ -19,9 +19,14 @@ class NewArrivalsSection extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return Consumer<ProductProvider>(
-      builder: (context, provider, child) {
-        final products = provider.allProducts.take(4).toList();
+    return Consumer2<ProductProvider, BusinessProvider>(
+      builder: (context, productProvider, businessProvider, child) {
+        final businessId = businessProvider.selectedBusiness.id;
+        final storeProducts = productProvider.allProducts
+            .where((p) => p.businessId == businessId)
+            .toList();
+        final products = storeProducts.take(4).toList();
+        if (products.isEmpty) return const SizedBox.shrink();
 
         return Padding(
           padding: EdgeInsets.symmetric(
@@ -35,10 +40,10 @@ class NewArrivalsSection extends StatelessWidget {
               isMobile
                   ? _MobileProductGrid(products: products)
                   : _DesktopProductGrid(products: products),
-          const SizedBox(height: 36),
-          ViewAllButton(onTap: () {
-            changeScreen(context, const CategoriesPage());
-          }),
+              const SizedBox(height: 36),
+              ViewAllButton(onTap: () {
+                changeScreen(context, const CategoriesPage());
+              }),
             ],
           ),
         );

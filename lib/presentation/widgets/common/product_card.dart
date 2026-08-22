@@ -127,10 +127,11 @@ class _ProductImagePlaceholder extends StatelessWidget {
                 ),
               ),
             ),
-          Positioned(
-            top: 12,
-            right: 12,
-            child: Consumer2<AuthProvider, LikeProvider>(
+          if (context.watch<BusinessProvider>().selectedBusiness.allowLikes)
+            Positioned(
+              top: 12,
+              right: 12,
+              child: Consumer2<AuthProvider, LikeProvider>(
               builder: (context, authProvider, likeProvider, child) {
                 final isFavorite = likeProvider.hasLiked(product.id);
 

@@ -19,37 +19,21 @@ class _FollowersTabState extends State<FollowersTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'المتابعات للمتجر',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Row(
-              children: [
-                const Text('تفعيل المتابعات'),
-                Switch(
-                  value: followersEnabled,
-                  onChanged: (val) {
-                    setState(() {
-                      followersEnabled = val;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(val ? 'تم تفعيل ميزة المتابعات' : 'تم إيقاف ميزة المتابعات')),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: const Text(
+            'المتابعات للمتجر',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         if (widget.store.followersUsers.isEmpty)
-          const Center(child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: Text('لا يوجد متابعون لهذا المتجر حتى الآن.'),
-          ))
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('لا يوجد متابعون لهذا المتجر حتى الآن.'),
+            ),
+          )
         else
           ListView.builder(
             shrinkWrap: true,
@@ -61,11 +45,17 @@ class _FollowersTabState extends State<FollowersTab> {
                 margin: const EdgeInsets.only(bottom: 8.0),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: follower.userAvatar != null ? NetworkImage(follower.userAvatar!) : null,
-                    child: follower.userAvatar == null ? const Icon(Icons.person) : null,
+                    backgroundImage: follower.userAvatar != null
+                        ? NetworkImage(follower.userAvatar!)
+                        : null,
+                    child: follower.userAvatar == null
+                        ? const Icon(Icons.person)
+                        : null,
                   ),
                   title: Text(follower.userName ?? 'مستخدم غير معروف'),
-                  subtitle: Text('تاريخ المتابعة: ${follower.followedAt.toLocal().toString().split(' ')[0]}'),
+                  subtitle: Text(
+                    'تاريخ المتابعة: ${follower.followedAt.toLocal().toString().split(' ')[0]}',
+                  ),
                 ),
               );
             },

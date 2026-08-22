@@ -429,7 +429,8 @@ class _ProductInfoState extends State<ProductInfo> {
                             ),
                       ),
                     ),
-                    Consumer2<AuthProvider, LikeProvider>(
+                    if (context.watch<BusinessProvider>().selectedBusiness.allowLikes)
+                      Consumer2<AuthProvider, LikeProvider>(
                       builder: (context, authProvider, likeProvider, child) {
                         final isFavorite = likeProvider.hasLiked(product.id);
                         final likesCount = likeProvider.getLikesCount(

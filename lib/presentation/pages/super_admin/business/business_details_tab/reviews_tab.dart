@@ -21,57 +21,18 @@ class _ReviewsTabState extends State<ReviewsTab> {
     final ratings = widget.store.ratings;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'التقييمات والإعجابات',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Row(
-                children: [
-                  const Text('التقييمات:'),
-                  Switch(
-                    value: reviewsEnabled,
-                    onChanged: (val) {
-                      setState(() {
-                        reviewsEnabled = val;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            val ? 'تم تفعيل التقييمات' : 'تم إيقاف التقييمات',
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 16),
-                  const Text('الإعجابات:'),
-                  Switch(
-                    value: likesEnabled,
-                    onChanged: (val) {
-                      setState(() {
-                        likesEnabled = val;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            val ? 'تم تفعيل الإعجابات' : 'تم إيقاف الإعجابات',
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: const Text(
+              'التقييمات والإعجابات',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
           // Rating Summary List
           if (ratings.isEmpty)

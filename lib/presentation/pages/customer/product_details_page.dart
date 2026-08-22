@@ -82,8 +82,10 @@ class ProductDetailsPage extends StatelessWidget {
             const SizedBox(height: 24),
             ProductOffersSection(product: product),
 
-            const SizedBox(height: 24),
-            ProductReviewsSection(product: product),
+            if (context.watch<BusinessProvider>().selectedBusiness.allowReviews) ...[
+              const SizedBox(height: 24),
+              ProductReviewsSection(product: product),
+            ],
 
             const SizedBox(height: 64),
             FooterBuisness(idBuisness: product.businessId),

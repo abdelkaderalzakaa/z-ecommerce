@@ -9,6 +9,10 @@ import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/cart_hea
 import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/account_header_icon.dart';
 import '../../../../data/providers/cart_provider.dart';
 import '../../../../data/providers/business_provider.dart';
+import '../../../../data/providers/category_provider.dart';
+import '../../../../data/providers/brand_provider.dart';
+import '../../../../data/providers/offer_provider.dart';
+import '../../../../data/providers/product_provider.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import '../../../global/settings_provider.dart';
@@ -42,6 +46,19 @@ class _HeaderHomeState extends State<HeaderHome> {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
     final hPad = ResponsiveLayout.horizontalPadding(context);
+
+    final categoryProvider = context.watch<CategoryProvider>();
+    final brandProvider = context.watch<BrandProvider>();
+    final offerProvider = context.watch<OfferProvider>();
+    final productProvider = context.watch<ProductProvider>();
+    final businessProvider = context.watch<BusinessProvider>();
+    final selectedBusiness = businessProvider.selectedBusiness;
+    final businessId = selectedBusiness.id;
+
+    final hasCategories = categoryProvider.categories.isNotEmpty;
+    final hasBrands = brandProvider.brands.isNotEmpty;
+    final hasOffers = offerProvider.activeOffers.any((o) => o.businessId == businessId) ||
+        productProvider.allProducts.any((p) => p.businessId == businessId && (p.discounts.isNotEmpty || p.offers.isNotEmpty));
 
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -78,7 +95,6 @@ class _HeaderHomeState extends State<HeaderHome> {
                       }
                     },
                   ),
-
                   _NavLink(
                     label: TranslationKeys.newArrivals.tr(context),
                     onTap: () {
@@ -89,6 +105,17 @@ class _HeaderHomeState extends State<HeaderHome> {
                       }
                     },
                   ),
+                  if (hasCategories)
+                    _NavLink(
+                      label: TranslationKeys.categories.tr(context),
+                      onTap: () {
+                        if (ModalRoute.of(context)?.isFirst == true) {
+                          widget.onNavTap('browseCategories');
+                        } else {
+                          changeScreen(context, const CategoriesPage());
+                        }
+                      },
+                    ),
                   _NavLink(
                     label: TranslationKeys.topSelling.tr(context),
                     onTap: () {
@@ -99,22 +126,39 @@ class _HeaderHomeState extends State<HeaderHome> {
                       }
                     },
                   ),
-                  _NavLink(
-                    label: TranslationKeys.offers.tr(context),
-                    onTap: () {
-                      changeScreen(context, const OffersPage());
-                    },
-                  ),
-                  _NavLink(
-                    label: TranslationKeys.categories.tr(context),
-                    onTap: () {
-                      if (ModalRoute.of(context)?.isFirst == true) {
-                        widget.onNavTap('browseCategories');
-                      } else {
-                        changeScreen(context, const CategoriesPage());
-                      }
-                    },
-                  ),
+                  if (hasOffers)
+                    _NavLink(
+                      label: TranslationKeys.offers.tr(context),
+                      onTap: () {
+                        if (ModalRoute.of(context)?.isFirst == true) {
+                          widget.onNavTap('offers');
+                        } else {
+                          changeScreen(context, const OffersPage());
+                        }
+                      },
+                    ),
+                  if (hasBrands)
+                    _NavLink(
+                      label: TranslationKeys.brands.tr(context),
+                      onTap: () {
+                        if (ModalRoute.of(context)?.isFirst == true) {
+                          widget.onNavTap('browseBrands');
+                        } else {
+                          changeScreen(context, const HomePage());
+                        }
+                      },
+                    ),
+                  if (selectedBusiness.allowReviews)
+                    _NavLink(
+                      label: 'أفضل التعليقات',
+                      onTap: () {
+                        if (ModalRoute.of(context)?.isFirst == true) {
+                          widget.onNavTap('reviews');
+                        } else {
+                          changeScreen(context, const HomePage());
+                        }
+                      },
+                    ),
                 ],
                 Spacer(),
                 if (!isMobile) ...[

@@ -19,16 +19,13 @@ class BrowseCategoriesSection extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return Consumer<CategoryProvider>(
-      builder: (context, provider, child) {
-        final categories = provider.categories;
+    return Consumer2<CategoryProvider, BusinessProvider>(
+      builder: (context, categoryProvider, businessProvider, child) {
+        final businessId = businessProvider.selectedBusiness.id;
+        final categories = categoryProvider.categories
+            .where((c) => c.businessIds.contains(businessId) || c.isGlobal)
+            .toList();
         if (categories.isEmpty) return const SizedBox.shrink();
-
-        // We only show grid if we have at least 4 categories, otherwise we could pad with something else.
-        // For now, if length < 4, let's just return shrink or safely slice it.
-        // Or we can just check if empty and then render dynamically. But since the grid is hardcoded to 4,
-        // let's ensure we have at least 4, or don't show the grid.
-        if (categories.length < 4) return const SizedBox.shrink();
 
         return Container(
           margin: EdgeInsets.symmetric(horizontal: hPad),
@@ -60,6 +57,22 @@ class _DesktopCategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (categories.length < 4) {
+      return Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        alignment: WrapAlignment.center,
+        children: categories
+            .map(
+              (cat) => SizedBox(
+                width: 280,
+                child: _CategoryCard(data: cat, height: 220),
+              ),
+            )
+            .toList(),
+      );
+    }
+
     return Column(
       children: [
         Row(
@@ -100,6 +113,19 @@ class _MobileCategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (categories.length < 4) {
+      return Column(
+        children: categories
+            .map(
+              (cat) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _CategoryCard(data: cat, height: 160),
+              ),
+            )
+            .toList(),
+      );
+    }
+
     return Column(
       children: [
         Row(

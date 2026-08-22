@@ -47,7 +47,11 @@ class _BrandsSectionState extends State<BrandsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final brands = context.watch<BrandProvider>().brands;
+    final businessId = context.watch<BusinessProvider>().selectedBusiness.id;
+    final allBrands = context.watch<BrandProvider>().brands;
+    final brands = allBrands
+        .where((b) => b.businessIds.contains(businessId) || b.isGlobal)
+        .toList();
 
     if (brands.isEmpty) return const SizedBox();
 

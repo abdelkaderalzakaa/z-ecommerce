@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
-
+import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/business/store_manage_addresses_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/store_manage_payment_methods_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/store_manage_socials_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/create_business_page.dart';
 
 class OverviewTab extends StatelessWidget {
   final BusinessModel store;
@@ -12,11 +18,28 @@ class OverviewTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     final totalOrders = store.orders;
-    final totalFollowers = store.followersCount;
-    final totalVisitors = store.visitorsCount;
-    final rating = store.rating.toStringAsFixed(1);
+    final totalFollowers = store.followersUsers.length;
+    final totalVisitors = store.visits.length;
+
+    final hasRatings = store.ratings.isNotEmpty;
+    final double avgRating = hasRatings
+        ? (store.ratings.map((r) => r.rating).reduce((a, b) => a + b) / store.ratings.length)
+        : 0.0;
+    final String ratingDisplay = hasRatings ? avgRating.toStringAsFixed(1) : (isAr ? 'جديد' : 'New');
+
+    final ownerName = store.owner?.name.isNotEmpty == true ? store.owner!.name : (isAr ? 'غير محدد' : 'Not set');
+    final ownerEmail = store.owner?.email.isNotEmpty == true ? store.owner!.email : (isAr ? 'غير محدد' : 'Not set');
+    final ownerPhone = store.owner?.phoneNumber.isNotEmpty == true ? store.owner!.phoneNumber : (isAr ? 'غير محدد' : 'Not set');
+    final regDate = store.createdAt != null
+        ? store.createdAt!.toLocal().toString().split(' ')[0]
+        : (isAr ? 'غير محدد' : 'Not set');
+
+    final storeName = store.localization.name.get(context);
+    final storeDesc = store.localization.description.get(context);
+    final storeSlogan = store.localization.slogan.get(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -25,10 +48,11 @@ class OverviewTab extends StatelessWidget {
         children: [
           Text(
             TranslationKeys.overviewTab.tr(context),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
-          // Metric Cards Row
+          const SizedBox(height: 18),
+
+          // SECTION 1: 📊 الإحصائيات والأداء (Analytics & Performance Metrics)
           Row(
             children: [
               _buildMetricCard(
@@ -49,63 +73,24 @@ class OverviewTab extends StatelessWidget {
               const SizedBox(width: 16),
               _buildMetricCard(
                 context,
-                'المتابعون',
+                isAr ? 'المتابعون' : 'Followers',
                 '$totalFollowers',
                 Icons.people_rounded,
-                Colors.orange,
+                AppColors.green,
               ),
               const SizedBox(width: 16),
               _buildMetricCard(
                 context,
                 TranslationKeys.rating.tr(context),
-                '⭐ $rating',
+                '⭐ $ratingDisplay',
                 Icons.star_rounded,
-                Colors.amber,
+                AppColors.star,
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
-          // Account Info Card
-          _buildSectionCard(
-            context: context,
-            title: 'معلومات الحساب',
-            icon: Icons.person,
-            children: [
-              _buildInfoRow('اسم المالك:', store.owner?.name ?? 'غير محدد'),
-              _buildInfoRow('البريد الإلكتروني:', store.owner?.email ?? 'غير محدد'),
-              _buildInfoRow('رقم الهاتف:', store.owner?.phoneNumber ?? 'غير محدد'),
-              _buildInfoRow('تاريخ التسجيل:', store.createdAt?.toLocal().toString().split(' ')[0] ?? 'غير محدد'),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Locations Card
-          _buildSectionCard(
-            context: context,
-            title: 'المواقع والفروع',
-            icon: Icons.location_on,
-            children: store.addAddress.isEmpty 
-              ? [const Text('لا توجد عناوين مضافة')]
-              : store.addAddress.map((addr) => _buildInfoRow(addr.title, '\${addr.city.get(context)} - \${addr.street}')).toList(),
-          ),
-          const SizedBox(height: 24),
-
-          // Store Info Card
-          _buildSectionCard(
-            context: context,
-            title: 'معلومات المتجر الأساسية',
-            icon: Icons.store,
-            children: [
-              _buildInfoRow('الاسم:', store.localization.name.get(context)),
-              _buildInfoRow('الوصف:', store.localization.description.get(context)),
-              _buildInfoRow('الشعار (Slogan):', store.localization.slogan.get(context)),
-              _buildInfoRow('العملة:', store.currency.code),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Analytics Overview Card
+          // Analytics Overview Chart Container
           Card(
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -113,7 +98,7 @@ class OverviewTab extends StatelessWidget {
               side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -130,9 +115,9 @@ class OverviewTab extends StatelessWidget {
                       Icon(Icons.analytics_rounded, color: theme.primaryColor),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   Container(
-                    height: 220,
+                    height: 180,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: theme.scaffoldBackgroundColor,
@@ -147,14 +132,14 @@ class OverviewTab extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.bar_chart_rounded,
-                            size: 48,
+                            size: 44,
                             color: theme.primaryColor.withOpacity(0.5),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           Text(
-                            'مخطط تحليل أداء المبيعات والزيارات اليومية',
+                            isAr ? 'مخطط تحليل أداء المبيعات والزيارات اليومية' : 'Sales performance & daily visits chart',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               color: theme.textTheme.bodySmall?.color,
                             ),
                           ),
@@ -165,6 +150,177 @@ class OverviewTab extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+          const SizedBox(height: 24),
+
+          // SECTION 2: 🏪 معلومات المتجر والمالك (Store & Owner Information)
+          _buildSectionCard(
+            context: context,
+            title: isAr ? 'معلومات المتجر والمالك' : 'Store & Owner Information',
+            icon: Icons.storefront_outlined,
+            actionWidget: ButtonApp(
+              format: FormatButtonApp.outline,
+              label: isAr ? 'تعديل بيانات البزنس والمالك' : 'Edit Business & Owner',
+              icon: Icons.edit_outlined,
+              fontSize: 12,
+              onPressed: () {
+                changeScreen(context, CreateBusinessPage(businessToEdit: store));
+              },
+            ),
+            children: [
+              _buildInfoRow(isAr ? 'اسم المتجر:' : 'Store Name:', storeName.isNotEmpty ? storeName : '---'),
+              _buildInfoRow(isAr ? 'نوع النشاط:' : 'Business Type:', store.businessType.name),
+              _buildInfoRow(isAr ? 'اسم المالك:' : 'Owner Name:', ownerName),
+              _buildInfoRow(isAr ? 'البريد الإلكتروني:' : 'Owner Email:', ownerEmail),
+              _buildInfoRow(isAr ? 'رقم الهاتف:' : 'Phone Number:', ownerPhone),
+              _buildInfoRow(isAr ? 'تاريخ التسجيل:' : 'Reg Date:', regDate),
+              _buildInfoRow(isAr ? 'العملة الرسمية:' : 'Currency:', '${store.currency.name} (${store.currency.symbol})'),
+              _buildInfoRow(isAr ? 'الشعار (Slogan):' : 'Slogan:', storeSlogan.isNotEmpty ? storeSlogan : (isAr ? 'لم يدرج شعار بعد' : 'No slogan')),
+              _buildInfoRow(isAr ? 'الوصف:' : 'Description:', storeDesc.isNotEmpty ? storeDesc : (isAr ? 'لم يدرج وصف بعد' : 'No description')),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // SECTION 3: 📍 عناوين المواقع والفروع (Locations & Branches)
+          _buildSectionCard(
+            context: context,
+            title: isAr ? 'عناوين المواقع والفروع' : 'Locations & Branches',
+            icon: Icons.location_on_outlined,
+            actionWidget: ButtonApp(
+              format: FormatButtonApp.outline,
+              label: isAr ? 'إدارة وتعديل العناوين' : 'Manage & Edit Addresses',
+              icon: Icons.map_outlined,
+              fontSize: 12,
+              onPressed: () {
+                changeScreen(context, StoreManageAddressesPage(store: store));
+              },
+            ),
+            children: store.addAddress.isEmpty
+                ? [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        isAr ? 'لا توجد عناوين مضافة بعد للمتجر' : 'No branch locations added yet',
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      ),
+                    ),
+                  ]
+                : store.addAddress.map((addr) {
+                    final fullFormatted = addr.getFormattedAddress(langCode: isAr ? 'ar' : 'en');
+                    return _buildInfoRow(
+                      addr.title.isNotEmpty ? addr.title : (isAr ? 'عنوان فرعي' : 'Branch Address'),
+                      fullFormatted.isNotEmpty ? fullFormatted : addr.street,
+                    );
+                  }).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          // SECTION 4: 📲 وسائل وقنوات التواصل (Social Media Channels)
+          _buildSectionCard(
+            context: context,
+            title: isAr ? 'وسائل وقنوات التواصل' : 'Social Media Channels',
+            icon: Icons.share_outlined,
+            actionWidget: ButtonApp(
+              format: FormatButtonApp.outline,
+              label: isAr ? 'إدارة وتعديل وسائل التواصل' : 'Manage Social Media',
+              icon: Icons.alternate_email_outlined,
+              fontSize: 12,
+              onPressed: () {
+                changeScreen(context, StoreManageSocialsPage(store: store));
+              },
+            ),
+            children: store.socials.isEmpty
+                ? [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        isAr ? 'لم يدرج المتجر وسائل تواصل بعد' : 'No social media channels added yet',
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      ),
+                    ),
+                  ]
+                : store.socials.map((social) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.link, size: 18, color: social.color),
+                          const SizedBox(width: 8),
+                          Text(
+                            social.title.get(context),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              social.url,
+                              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          // SECTION 5: 💳 وسائل وطرق الدفع المعتمدة (Payment Methods)
+          _buildSectionCard(
+            context: context,
+            title: isAr ? 'طرق ووسائل الدفع المعتمدة' : 'Accepted Payment Methods',
+            icon: Icons.credit_card_outlined,
+            actionWidget: ButtonApp(
+              format: FormatButtonApp.outline,
+              label: isAr ? 'إدارة وطرق الدفع' : 'Manage Payment Methods',
+              icon: Icons.payments_outlined,
+              fontSize: 12,
+              onPressed: () {
+                changeScreen(context, StoreManagePaymentMethodsPage(store: store));
+              },
+            ),
+            children: store.paymentMethods.isEmpty
+                ? [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        isAr ? 'لم يحدد المتجر طرق الدفع بعد' : 'No payment methods selected yet',
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      ),
+                    ),
+                  ]
+                : [
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: store.paymentMethods.map((pm) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: theme.primaryColor.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_circle_outline, size: 16, color: theme.primaryColor),
+                              const SizedBox(width: 6),
+                              Text(
+                                pm.name,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
           ),
         ],
       ),
@@ -228,6 +384,7 @@ class OverviewTab extends StatelessWidget {
     required BuildContext context,
     required String title,
     required IconData icon,
+    Widget? actionWidget,
     required List<Widget> children,
   }) {
     final theme = Theme.of(context);
@@ -243,16 +400,22 @@ class OverviewTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(icon, color: theme.primaryColor),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Icon(icon, color: theme.primaryColor),
+                    const SizedBox(width: 10),
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
+                ?actionWidget,
               ],
             ),
-            const Divider(height: 32),
+            const Divider(height: 28),
             ...children,
           ],
         ),
@@ -262,19 +425,22 @@ class OverviewTab extends StatelessWidget {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 10.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 140,
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textMuted, fontSize: 13),
             ),
           ),
           Expanded(
-            child: Text(value),
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
