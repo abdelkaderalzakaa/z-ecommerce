@@ -35,9 +35,10 @@ class _BrandTabState extends State<BrandTab> {
       builder: (context, brandProvider, child) {
         final allBrands = brandProvider.brands;
         final filteredBrands = allBrands.where((b) {
+          final matchesStore = b.businessIds.contains(widget.store.id);
           final matchesSearch = b.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
               (b.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
-          return matchesSearch;
+          return matchesStore && matchesSearch;
         }).toList();
 
         return SingleChildScrollView(

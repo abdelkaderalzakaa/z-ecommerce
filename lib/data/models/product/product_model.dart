@@ -34,13 +34,19 @@ class ProductModel {
   final bool isActive; // هل المنتج نشط؟
   final bool isFeatured; // هل المنتج مميز؟
   final bool isTopSelling; // هل المنتج من الأكثر مبيعاً؟
+  final bool isRecommended; // هل المنتج موصى به من السوبر أدمن؟
 
   // 6.2 الشحن والتوصيل
   final bool isFreeShipping; // هل الشحن مجاني؟
-  final double shippingCost; // كلفة الشحن إلى كامل الأراضي اللبنانية (إن لم يكن مجانياً)
+  final double
+  shippingCost; // كلفة الشحن إلى كامل الأراضي اللبنانية (إن لم يكن مجانياً)
+
+  // 6.3 التسعير المجاني
+  final bool isFreeProduct; // هل المنتج مجاني بالكامل؟
 
   // 7. التقييمات والمراجعات
   final List<RatedUser> ratings; // قائمة التقييمات التفصيلية
+  final bool isActiveRatings; // هل مسموح عرض وإضافة التقييمات لهذا المنتج؟
 
   // 8. التواريخ
   final DateTime? createdAt;
@@ -60,11 +66,14 @@ class ProductModel {
     this.variants = const [],
     this.discounts = const [],
     this.offers = const [],
-    this.isActive = true,
+    this.isActive = false, // جعل المنتج غير نشط بشكل افتراضي حتى يتم تسعيره
     this.isFeatured = false,
     this.isTopSelling = false,
+    this.isRecommended = false,
     this.isFreeShipping = false,
     this.shippingCost = 0.0,
+    this.isFreeProduct = false,
+    this.isActiveRatings = true,
     this.ratings = const [],
     this.createdAt,
     this.updatedAt,
@@ -73,7 +82,7 @@ class ProductModel {
   // ==========================================
   // 🧮 Dynamic Getters & Helpers
   // ==========================================
-  
+
   bool get isEmpty => id.isEmpty;
 
   /// الحصول على المتغير الافتراضي
@@ -81,7 +90,10 @@ class ProductModel {
     if (variants.isEmpty) {
       return const ProductVariant(isDefault: true, price: 0.0, stock: 0);
     }
-    return variants.firstWhere((v) => v.isDefault, orElse: () => variants.first);
+    return variants.firstWhere(
+      (v) => v.isDefault,
+      orElse: () => variants.first,
+    );
   }
 
   /// إجمالي مخزون المنتج المجمع من كافة المتغيرات
@@ -97,7 +109,7 @@ class ProductModel {
   DiscountModel? get activeDiscount {
     final validDiscounts = discounts.where((d) => d.isValid).toList();
     if (validDiscounts.isEmpty) return null;
-    
+
     // Sort by priority ASC (lower number means higher priority)
     validDiscounts.sort((a, b) => a.priority.compareTo(b.priority));
     return validDiscounts.first;
@@ -110,7 +122,10 @@ class ProductModel {
       if (activeDisc.isPercentage) {
         return defaultVariant.price * (1 - (activeDisc.value / 100));
       } else {
-        return (defaultVariant.price - activeDisc.value).clamp(0.0, double.infinity);
+        return (defaultVariant.price - activeDisc.value).clamp(
+          0.0,
+          double.infinity,
+        );
       }
     }
     return defaultVariant.price;
@@ -143,7 +158,7 @@ class ProductModel {
     if (activeDisc == null || !activeDisc.isActive || activeDisc.value <= 0) {
       return variant.price;
     }
-    
+
     if (activeDisc.isPercentage) {
       return variant.price * (1 - (activeDisc.value / 100));
     } else {
@@ -175,7 +190,10 @@ class ProductModel {
   /// متوسط التقييمات المحسوب ديناميكياً من مصفوفة ratings
   double get rating {
     if (ratings.isEmpty) return 0.0;
-    final totalSum = ratings.fold<double>(0.0, (sum, item) => sum + item.rating);
+    final totalSum = ratings.fold<double>(
+      0.0,
+      (sum, item) => sum + item.rating,
+    );
     return double.parse((totalSum / ratings.length).toStringAsFixed(1));
   }
 
@@ -193,30 +211,49 @@ class ProductModel {
       categoryId: map['categoryId'] ?? '',
       brandId: map['brandId'],
       isFreeShipping: map['isFreeShipping'] ?? false,
-      shippingCost: map['shippingCost'] != null ? (map['shippingCost'] as num).toDouble() : 0.0,
+      shippingCost: map['shippingCost'] != null
+          ? (map['shippingCost'] as num).toDouble()
+          : 0.0,
       name: map['name'] ?? '',
       description: map['description'] ?? '',
       category: map['category'] ?? '',
       brand: map['brand'],
       images: List<String>.from(map['images'] ?? []),
       thumbnail: map['thumbnail'],
-      variants: (map['variants'] as List<dynamic>?)
-              ?.map((e) => ProductVariant.fromMap(Map<String, dynamic>.from(e as Map)))
+      variants:
+          (map['variants'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    ProductVariant.fromMap(Map<String, dynamic>.from(e as Map)),
+              )
               .toList() ??
           const [],
-      discounts: (map['discounts'] as List<dynamic>?)
-              ?.map((e) => DiscountModel.fromMap(Map<String, dynamic>.from(e as Map)))
+      discounts:
+          (map['discounts'] as List<dynamic>?)
+              ?.map(
+                (e) =>
+                    DiscountModel.fromMap(Map<String, dynamic>.from(e as Map)),
+              )
               .toList() ??
           const [],
-      offers: (map['offers'] as List<dynamic>?)
-              ?.map((e) => ProductOfferModel.fromMap(Map<String, dynamic>.from(e as Map)))
+      offers:
+          (map['offers'] as List<dynamic>?)
+              ?.map(
+                (e) => ProductOfferModel.fromMap(
+                  Map<String, dynamic>.from(e as Map),
+                ),
+              )
               .toList() ??
           const [],
-      isActive: map['isActive'] ?? true,
-      isFeatured: map['isFeatured'] ?? false,
-      isTopSelling: map['isTopSelling'] ?? false,
-      ratings: (map['ratings'] as List<dynamic>?)
-              ?.map((e) => RatedUser.fromMap(Map<String, dynamic>.from(e as Map)))
+      isActive: map['isActive'] as bool? ?? false,
+      isFeatured: map['isFeatured'] as bool? ?? false,
+      isTopSelling: map['isTopSelling'] as bool? ?? false,
+      isRecommended: map['isRecommended'] as bool? ?? false,
+      isFreeProduct: map['isFreeProduct'] as bool? ?? false,
+      isActiveRatings: map['isActiveRatings'] as bool? ?? true,
+      ratings:
+          (map['ratings'] as List<dynamic>?)
+              ?.map((r) => RatedUser.fromMap(r as Map<String, dynamic>))
               .toList() ??
           const [],
       createdAt: map['createdAt'] != null
@@ -246,8 +283,11 @@ class ProductModel {
       'isActive': isActive,
       'isFeatured': isFeatured,
       'isTopSelling': isTopSelling,
+      'isRecommended': isRecommended,
       'isFreeShipping': isFreeShipping,
       'shippingCost': shippingCost,
+      'isFreeProduct': isFreeProduct,
+      'isActiveRatings': isActiveRatings,
       'ratings': ratings.map((r) => r.toMap()).toList(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
@@ -279,8 +319,11 @@ class ProductModel {
     bool? isActive,
     bool? isFeatured,
     bool? isTopSelling,
+    bool? isRecommended,
     bool? isFreeShipping,
     double? shippingCost,
+    bool? isFreeProduct,
+    bool? isActiveRatings,
     List<RatedUser>? ratings,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -302,8 +345,11 @@ class ProductModel {
       isActive: isActive ?? this.isActive,
       isFeatured: isFeatured ?? this.isFeatured,
       isTopSelling: isTopSelling ?? this.isTopSelling,
+      isRecommended: isRecommended ?? this.isRecommended,
       isFreeShipping: isFreeShipping ?? this.isFreeShipping,
       shippingCost: shippingCost ?? this.shippingCost,
+      isFreeProduct: isFreeProduct ?? this.isFreeProduct,
+      isActiveRatings: isActiveRatings ?? this.isActiveRatings,
       ratings: ratings ?? this.ratings,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

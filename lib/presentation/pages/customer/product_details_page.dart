@@ -80,7 +80,8 @@ class ProductDetailsPage extends StatelessWidget {
             const RelatedProducts(),
 
             const SizedBox(height: 24),
-            ProductOffersSection(product: product),
+            if (context.watch<BusinessProvider>().selectedBusiness.allowOffers)
+              ProductOffersSection(product: product),
 
             if (context.watch<BusinessProvider>().selectedBusiness.allowReviews) ...[
               const SizedBox(height: 24),

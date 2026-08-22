@@ -21,10 +21,12 @@ class _PricingProductPageState extends State<PricingProductPage> {
   final _formKey = GlobalKey<FormState>();
   List<ProductVariant> _variants = [];
   bool _isSubmitting = false;
+  bool _isFreeProduct = false;
 
   @override
   void initState() {
     super.initState();
+    _isFreeProduct = widget.product.isFreeProduct;
     _variants = List<ProductVariant>.from(widget.product.variants);
     _ensureDefaultVariant();
   }
@@ -79,9 +81,15 @@ class _PricingProductPageState extends State<PricingProductPage> {
       variants: _variants,
       isFeatured: widget.product.isFeatured,
       isTopSelling: widget.product.isTopSelling,
+      isFreeShipping: widget.product.isFreeShipping,
+      shippingCost: widget.product.shippingCost,
+      isFreeProduct: _isFreeProduct,
       ratings: widget.product.ratings,
       createdAt: widget.product.createdAt,
       updatedAt: DateTime.now(),
+      // The status activation logic will be handled manually by the admin,
+      // but we maintain the current status when updating prices.
+      isActive: widget.product.isActive,
     );
 
     await provider.updateProduct(updatedProduct);
@@ -192,7 +200,32 @@ class _PricingProductPageState extends State<PricingProductPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+                      
+                      // Free Product Toggle
+                      SwitchListTile(
+                        title: const Text(
+                          'تحديد كمنتج مجاني (Free)',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: const Text(
+                          'تفعيل هذا الخيار سيجعل المنتج مجانياً بالكامل وسيتم تصفير كافة الأسعار السابقة.',
+                        ),
+                        value: _isFreeProduct,
+                        activeColor: Colors.green,
+                        onChanged: (val) {
+                          setState(() {
+                            _isFreeProduct = val;
+                            if (val) {
+                              // Reset prices to 0 if it becomes free
+                              for (int i = 0; i < _variants.length; i++) {
+                                _variants[i] = _variants[i].copyWith(price: 0.0);
+                              }
+                            }
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
 
                       // Variants Header
                       Row(
@@ -211,6 +244,7 @@ class _PricingProductPageState extends State<PricingProductPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => VariantFormPage(
+                                    isFreeProduct: _isFreeProduct,
                                     onSave: (newVariant) {
                                       setState(() {
                                         if (newVariant.isDefault) {
@@ -377,6 +411,7 @@ class _PricingProductPageState extends State<PricingProductPage> {
                                             builder: (context) =>
                                                 VariantFormPage(
                                                   variant: variant,
+                                                  isFreeProduct: _isFreeProduct,
                                                   onSave: (updated) {
                                                     _updateVariant(
                                                       index,
@@ -455,9 +490,15 @@ class _PricingProductPageState extends State<PricingProductPage> {
 
 class VariantFormPage extends StatefulWidget {
   final ProductVariant? variant;
-  final ValueChanged<ProductVariant> onSave;
+  final bool isFreeProduct;
+  final Function(ProductVariant) onSave;
 
-  const VariantFormPage({super.key, this.variant, required this.onSave});
+  const VariantFormPage({
+    super.key,
+    this.variant,
+    this.isFreeProduct = false,
+    required this.onSave,
+  });
 
   @override
   State<VariantFormPage> createState() => _VariantFormPageState();
@@ -467,10 +508,10 @@ class _VariantFormPageState extends State<VariantFormPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _priceController;
-  late TextEditingController _originalPriceController;
   late TextEditingController _stockController;
   late TextEditingController _weightController;
 
+  bool _isUnlimitedStock = false;
   ProductSize? _size;
   ProductColor? _color;
   ProductMaterial? _material;
@@ -485,11 +526,9 @@ class _VariantFormPageState extends State<VariantFormPage> {
     final v = widget.variant;
     _nameController = TextEditingController(text: v?.name ?? '');
     _priceController = TextEditingController(
-      text: v != null && v.price > 0 ? v.price.toString() : '',
+      text: widget.isFreeProduct ? '0' : (v != null && v.price > 0 ? v.price.toString() : ''),
     );
-    _originalPriceController = TextEditingController(
-      text: v?.originalPrice != null ? v!.originalPrice.toString() : '',
-    );
+    _isUnlimitedStock = v != null && v.stock == -1;
     _stockController = TextEditingController(
       text: v != null && v.stock >= 0 ? v.stock.toString() : '',
     );
@@ -510,7 +549,6 @@ class _VariantFormPageState extends State<VariantFormPage> {
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
-    _originalPriceController.dispose();
     _stockController.dispose();
     _weightController.dispose();
     super.dispose();
@@ -541,46 +579,54 @@ class _VariantFormPageState extends State<VariantFormPage> {
                     children: [
                       TextFormField(
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'اسم الخيار (مثال: أحمر - XL)',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: isAr ? 'اسم الخيار (اختياري، مثلاً: أحمر - XL)' : 'Variant Name (Optional)',
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _priceController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: const InputDecoration(
-                                labelText: 'سعر البيع (\$)',
-                                border: OutlineInputBorder(),
+                      if (!widget.isFreeProduct) ...[
+                        TextFormField(
+                          controller: _priceController,
+                          keyboardType:
+                              const TextInputType.numberWithOptions(
+                                decimal: true,
                               ),
-                              validator: (v) => v == null || v.trim().isEmpty
-                                  ? TranslationKeys.required.tr(context)
-                                  : null,
-                            ),
+                          decoration: InputDecoration(
+                            labelText: isAr ? 'سعر البيع (\$)' : 'Sale Price (\$)',
+                            border: const OutlineInputBorder(),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _stockController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'الكمية',
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (v) => v == null || v.trim().isEmpty
-                                  ? TranslationKeys.required.tr(context)
-                                  : null,
-                            ),
-                          ),
-                        ],
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return TranslationKeys.required.tr(context);
+                            }
+                            final val = double.tryParse(v);
+                            if (val == null || val < 0) {
+                              return isAr ? 'لا يمكن أن يكون السعر أقل من صفر' : 'Price cannot be less than zero';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      SwitchListTile(
+                        title: Text(isAr ? 'كمية غير محدودة' : 'Unlimited quantity'),
+                        value: _isUnlimitedStock,
+                        onChanged: (val) => setState(() => _isUnlimitedStock = val),
+                        contentPadding: EdgeInsets.zero,
                       ),
+                      if (!_isUnlimitedStock)
+                        TextFormField(
+                          controller: _stockController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: isAr ? 'الكمية' : 'Quantity',
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (v) => v == null || v.trim().isEmpty
+                              ? TranslationKeys.required.tr(context)
+                              : null,
+                        ),
 
                       const SizedBox(height: 16),
                       Row(
@@ -779,13 +825,14 @@ class _VariantFormPageState extends State<VariantFormPage> {
                   ButtonApp(
                     onPressed: () {
                       if (!_formKey.currentState!.validate()) return;
+                      final nameVal = _nameController.text.trim();
                       final newVariant = ProductVariant(
                         isDefault: _isDefault,
                         isActive: _isActive,
-                        name: _nameController.text.trim(),
+                        name: nameVal.isEmpty ? (isAr ? 'الخيار الأساسي' : 'Main Variant') : nameVal,
                         price: double.tryParse(_priceController.text) ?? 0.0,
                         originalPrice: null,
-                        stock: int.tryParse(_stockController.text) ?? 0,
+                        stock: _isUnlimitedStock ? -1 : (int.tryParse(_stockController.text) ?? 0),
                         size: _size,
                         color: _color,
                         material: _material,

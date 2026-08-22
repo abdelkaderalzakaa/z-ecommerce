@@ -89,20 +89,27 @@ class TableImageTextCell extends StatelessWidget {
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(8),
-            image: (imageUrl != null && imageUrl!.startsWith('http'))
-                ? DecorationImage(
-                    image: NetworkImage(imageUrl!),
-                    fit: BoxFit.cover,
-                  )
-                : null,
           ),
-          child: (imageUrl == null || !imageUrl!.startsWith('http'))
-              ? Icon(
+          child: (imageUrl != null && imageUrl!.startsWith('http'))
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        fallbackIcon,
+                        size: 18,
+                        color: fgColor,
+                      );
+                    },
+                  ),
+                )
+              : Icon(
                   fallbackIcon,
                   size: 18,
                   color: fgColor,
-                )
-              : null,
+                ),
         ),
         const SizedBox(width: 10),
         Flexible(

@@ -377,6 +377,9 @@ class TranslationKeys {
   static const String topBusinesses = 'top_businesses';
   static const String viewAllBusinesses = 'view_all_businesses';
   static const String topProducts = 'top_products';
+  static const String recommendedProducts = 'recommended_products';
+  static const String freeProducts = 'free_products';
+  static const String free = 'free';
   static const String viewAllProducts = 'view_all_products';
   static const String topCategories = 'top_categories';
   static const String viewAllCategories = 'view_all_categories';
@@ -415,6 +418,42 @@ class TranslationKeys {
   static const String platformStats = 'platform_stats';
   static const String termsSubtitle = 'terms_subtitle';
   static const String privacySubtitle = 'privacy_subtitle';
-}
+  static const String storeSlogan = 'store_slogan';
+  static const String storeDescription = 'store_description';
+  static const String topBrands = 'top_brands';
 
+  // Filters & Highlights Keys
+  static const String recommended = 'recommended';
+  static const String bestSellers = 'best_sellers';
+  static const String mostLiked = 'most_liked';
+  static const String onSale = 'on_sale';
+  static const String productDetailsFilter = 'product_details_filter';
+  static const String material = 'material';
+  static const String type = 'type';
+  static const String weight = 'weight';
+  static const String options = 'options';
+  static const String clearFilters = 'clear_filters';
+  static const String applyFilters = 'apply_filters';
+  static const String activeFilters = 'active_filters';
+  static const String allBrands = 'all_brands';
+  static const String noMatchingProducts = 'no_matching_products';
+  static const String noMatchingProductsSubtitle = 'no_matching_products_subtitle';
+  static const String quickFilters = 'quick_filters';
+  static const String filterByBrand = 'filter_by_brand';
+  static const String filterByCategory = 'filter_by_category';
+  static const String selectMaterial = 'select_material';
+  static const String selectType = 'select_type';
+  static const String cotton = 'cotton';
+  static const String leather = 'leather';
+  static const String silk = 'silk';
+  static const String wool = 'wool';
+  static const String polyester = 'polyester';
+  static const String wood = 'wood';
+  static const String metal = 'metal';
+  static const String plastic = 'plastic';
+  static const String casual = 'casual';
+  static const String formal = 'formal';
+  static const String sport = 'sport';
+  static const String classic = 'classic';
+}
 

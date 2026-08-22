@@ -135,6 +135,7 @@ class BusinessProvider with ChangeNotifier {
     bool? allowFollow,
     bool? allowLikes,
     bool? allowReviews,
+    bool? allowOffers,
     bool? isRecommended,
   }) async {
     final index = _businesses.indexWhere((b) => b.id == businessId);
@@ -143,6 +144,7 @@ class BusinessProvider with ChangeNotifier {
         allowFollow: allowFollow,
         allowLikes: allowLikes,
         allowReviews: allowReviews,
+        allowOffers: allowOffers,
         isRecommended: isRecommended,
       );
       await saveBusiness(updated);

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/product_provider.dart';
 
 class ProductOverviewTab extends StatelessWidget {
   final ProductModel product;
@@ -124,6 +125,135 @@ class ProductOverviewTab extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 24),
+          
+          // Product Properties / Status Section
+          const Row(
+            children: [
+              Icon(Icons.tune_rounded, size: 20, color: Colors.grey),
+              SizedBox(width: 8),
+              Text(
+                'حالات وخصائص المنتج',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+            ),
+            color: theme.cardColor,
+            child: Column(
+              children: [
+                _buildStatusItem(
+                  context,
+                  title: 'المنتج نشط',
+                  subtitle: product.isActive 
+                    ? 'المنتج يظهر للعملاء في نتائج البحث والتصنيفات' 
+                    : 'المنتج مخفي بالكامل ولن يظهر للعملاء',
+                  isActive: product.isActive,
+                  icon: Icons.visibility_rounded,
+                  onChanged: (val) {
+                    if (val) {
+                      // عند التنشيط، تأكد أن المنتج مسعر أو مجاني
+                      final hasPrices = product.variants.isNotEmpty && product.variants.any((v) => v.price > 0);
+                      if (!hasPrices && !product.isFreeProduct) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('يجب تسعير المنتج أولاً قبل تنشيطه، إما بإضافة تسعير أو تعيينه كمنتج مجاني بالكامل.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                    }
+                    context.read<ProductProvider>().updateProduct(product.copyWith(isActive: val));
+                  },
+                ),
+                Divider(height: 1, color: theme.dividerColor.withOpacity(0.1)),
+                _buildStatusItem(
+                  context,
+                  title: 'منتج مميز',
+                  subtitle: product.isFeatured
+                    ? 'سيظهر في قسم المنتجات المميزة بالصفحة الرئيسية'
+                    : 'غير معروض في قسم المنتجات المميزة',
+                  isActive: product.isFeatured,
+                  icon: Icons.star_rounded,
+                  onChanged: (val) {
+                    context.read<ProductProvider>().updateProduct(product.copyWith(isFeatured: val));
+                  },
+                ),
+                Divider(height: 1, color: theme.dividerColor.withOpacity(0.1)),
+                _buildStatusItem(
+                  context,
+                  title: 'الأكثر مبيعاً',
+                  subtitle: product.isTopSelling
+                    ? 'يحمل شارة الأكثر مبيعاً ويظهر في الأقسام الخاصة به'
+                    : 'منتج اعتيادي',
+                  isActive: product.isTopSelling,
+                  icon: Icons.trending_up_rounded,
+                  onChanged: (val) {
+                    context.read<ProductProvider>().updateProduct(product.copyWith(isTopSelling: val));
+                  },
+                ),
+                Divider(height: 1, color: theme.dividerColor.withOpacity(0.1)),
+                _buildStatusItem(
+                  context,
+                  title: 'منتج مجاني بالكامل',
+                  subtitle: product.isFreeProduct
+                    ? 'المنتج مجاني للعميل، لن يتم الدفع عند الشراء'
+                    : 'منتج مدفوع يخضع لتسعير الخيارات المتاحة',
+                  isActive: product.isFreeProduct,
+                  icon: Icons.card_giftcard_rounded,
+                  onChanged: (val) {
+                    if (!val && product.isActive) {
+                      final hasPrices = product.variants.isNotEmpty && product.variants.any((v) => v.price > 0);
+                      if (!hasPrices) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('لا يمكن إلغاء المجانية عن منتج نشط ليس له سعر. يرجى تسعيره أولاً أو إيقاف تنشيطه.'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+                    }
+                    context.read<ProductProvider>().updateProduct(product.copyWith(isFreeProduct: val));
+                  },
+                ),
+                Divider(height: 1, color: theme.dividerColor.withOpacity(0.1)),
+                _buildStatusItem(
+                  context,
+                  title: 'شحن مجاني',
+                  subtitle: product.isFreeShipping
+                    ? 'سيتم إلغاء تكاليف الشحن على هذا المنتج أثناء الدفع'
+                    : 'يخضع لرسوم الشحن الاعتيادية',
+                  isActive: product.isFreeShipping,
+                  icon: Icons.local_shipping_rounded,
+                  onChanged: (val) {
+                    context.read<ProductProvider>().updateProduct(product.copyWith(isFreeShipping: val));
+                  },
+                ),
+                Divider(height: 1, color: theme.dividerColor.withOpacity(0.1)),
+                _buildStatusItem(
+                  context,
+                  title: 'تفعيل التقييمات',
+                  subtitle: product.isActiveRatings
+                    ? 'العملاء يستطيعون رؤية التقييمات وكتابة تقييم جديد'
+                    : 'قسم التقييمات مخفي ولن تظهر المراجعات للعميل',
+                  isActive: product.isActiveRatings,
+                  icon: Icons.reviews_rounded,
+                  onChanged: (val) {
+                    context.read<ProductProvider>().updateProduct(product.copyWith(isActiveRatings: val));
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
           // 1. Description Section
           Card(
             elevation: 0,
@@ -219,6 +349,47 @@ class ProductOverviewTab extends StatelessWidget {
                   ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusItem(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required bool isActive,
+    required IconData icon,
+    required Function(bool)? onChanged,
+  }) {
+    final theme = Theme.of(context);
+    final color = isActive ? Colors.green : Colors.grey;
+
+    return SwitchListTile(
+      value: isActive,
+      onChanged: onChanged,
+      activeColor: Colors.green,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      secondary: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: color, size: 22),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 12,
+          color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+        ),
       ),
     );
   }

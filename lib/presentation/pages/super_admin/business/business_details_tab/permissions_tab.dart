@@ -465,6 +465,44 @@ class PermissionsTab extends StatelessWidget {
                       },
                     ),
                   ),
+                  const SizedBox(height: 12),
+
+                  /// 2.4 العروض (Offers)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.scaffoldBackgroundColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: theme.dividerColor.withOpacity(0.08)),
+                    ),
+                    child: SwitchListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      secondary: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.local_offer_rounded, color: Colors.purple),
+                      ),
+                      title: const Text(
+                        'السماح بإنشاء العروض',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      subtitle: const Text('إظهار/إخفاء نظام العروض الترويجية في المتجر والمنتجات'),
+                      value: currentStore.allowOffers,
+                      onChanged: (val) async {
+                        await businessProvider.updatePermissions(currentStore.id, allowOffers: val);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(val ? 'تم تفعيل خاصية العروض للمتجر والمنتجات' : 'تم تعطيل خاصية العروض للمتجر والمنتجات'),
+                              backgroundColor: val ? Colors.green : Colors.orange,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

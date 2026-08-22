@@ -70,6 +70,7 @@ class BusinessModel {
   final bool allowLikes;
   final bool allowReviews;
   final bool isRecommended;
+  final bool allowOffers;
 
   // 6. الحالة والتواريخ
   final String? status; // 'Active', 'Active & Verified', 'Pending', 'Inactive'
@@ -100,6 +101,7 @@ class BusinessModel {
     this.allowFollow = true,
     this.allowLikes = true,
     this.allowReviews = true,
+    this.allowOffers = false,
     this.isRecommended = false,
     this.status,
     this.createdAt,
@@ -124,6 +126,7 @@ class BusinessModel {
     bool? allowFollow,
     bool? allowLikes,
     bool? allowReviews,
+    bool? allowOffers,
     bool? isRecommended,
     String? status,
     DateTime? createdAt,
@@ -147,6 +150,7 @@ class BusinessModel {
       allowFollow: allowFollow ?? this.allowFollow,
       allowLikes: allowLikes ?? this.allowLikes,
       allowReviews: allowReviews ?? this.allowReviews,
+      allowOffers: allowOffers ?? this.allowOffers,
       isRecommended: isRecommended ?? this.isRecommended,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
@@ -317,6 +321,7 @@ class BusinessModel {
       allowFollow: map['allowFollow'] ?? true,
       allowLikes: map['allowLikes'] ?? true,
       allowReviews: map['allowReviews'] ?? true,
+      allowOffers: map['allowOffers'] ?? false,
       isRecommended: map['isRecommended'] ?? false,
       status: map['status'],
       createdAt: map['createdAt'] != null
@@ -347,6 +352,7 @@ class BusinessModel {
       'allowFollow': allowFollow,
       'allowLikes': allowLikes,
       'allowReviews': allowReviews,
+      'allowOffers': allowOffers,
       'isRecommended': isRecommended,
       'status': status,
       'createdAt': createdAt?.toIso8601String(),

@@ -39,39 +39,7 @@ class _ProductsTabState extends State<ProductsTab> {
 
         final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
-        return Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Count Header Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.2)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.inventory_2_outlined, size: 20, color: Theme.of(context).primaryColor),
-                    const SizedBox(width: 8),
-                    Text(
-                      isAr
-                          ? 'إجمالي عدد منتجات المتجر: ${storeProducts.length} منتج'
-                          : 'Total Store Products: ${storeProducts.length} items',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
+        return Expanded(
                 child: AppDataTable<ProductModel>(
                   items: storeProducts,
                   selectable: true,
@@ -141,6 +109,31 @@ class _ProductsTabState extends State<ProductsTab> {
                       ),
                     ),
                     AppTableColumn<ProductModel>(
+                      title: TranslationKeys.recommendedProducts.tr(context),
+                      flex: 1,
+                      sortable: true,
+                      sortKey: (p) => p.isRecommended ? 1 : 0,
+                      cellBuilder: (p) => Switch(
+                        value: p.isRecommended,
+                        onChanged: (val) {
+                          if (val && p.basePrice == 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('لا يمكن تعيين منتج سعره صفر كمنتج موصى به'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+                          final updated = p.copyWith(isRecommended: val);
+                          Provider.of<ProductProvider>(
+                            context,
+                            listen: false,
+                          ).updateProduct(updated);
+                        },
+                      ),
+                    ),
+                    AppTableColumn<ProductModel>(
                       title: TranslationKeys.actions.tr(context),
                       width: 70,
                       alignment: Alignment.center,
@@ -173,10 +166,8 @@ class _ProductsTabState extends State<ProductsTab> {
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        );
+              )
+           ;
       },
     );
   }

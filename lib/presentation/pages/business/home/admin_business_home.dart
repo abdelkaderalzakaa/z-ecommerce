@@ -8,11 +8,13 @@ import 'package:z_ecommerce/presentation/pages/business/home/store_categories_pa
 import 'package:z_ecommerce/presentation/pages/business/home/store_dashboard_overview_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_followers_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_offers_management_page.dart';
-import 'package:z_ecommerce/presentation/pages/business/home/store_owner_settings_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/settings/store_owner_settings_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_products_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_reviews_management_page.dart';
 import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_app_bar.dart';
 import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_sidebar.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/data/models/store/business_model.dart';
 
 class AdminStore extends StatefulWidget {
   const AdminStore({super.key});
@@ -37,17 +39,63 @@ class _AdminStoreState extends State<AdminStore> {
     });
   }
 
-  List<Widget> _getPages(String businessId) => [
-    StoreDashboardOverviewPage(businessId: businessId),
-    const StoreProductsManagementPage(),
-    StoreOffersManagementPage(businessId: businessId),
-    BusinessOrdersManagementPage(businessId: businessId),
-    const StoreCategoriesPage(),
-    const StoreBrandsPage(),
-    const StoreFollowersPage(),
-    const StoreReviewsManagementPage(),
-    const StoreOwnerSettingsPage(),
-  ];
+  List<Widget> _getPages(BusinessModel store) {
+    return [
+      StoreDashboardOverviewPage(businessId: store.id),
+      const StoreProductsManagementPage(),
+      if (store.allowOffers) StoreOffersManagementPage(businessId: store.id),
+      BusinessOrdersManagementPage(businessId: store.id),
+      const StoreCategoriesPage(),
+      const StoreBrandsPage(),
+      if (store.allowFollow) const StoreFollowersPage(),
+      if (store.allowReviews || store.allowLikes) const StoreReviewsManagementPage(),
+      const StoreOwnerSettingsPage(),
+    ];
+  }
+
+  List<StoreOwnerSidebarItem> _getSidebarItems(BusinessModel store) {
+    return [
+      const StoreOwnerSidebarItem(
+        titleKey: TranslationKeys.storeOverview,
+        icon: Icons.dashboard_rounded,
+      ),
+      const StoreOwnerSidebarItem(
+        titleKey: TranslationKeys.storeProductsTab,
+        icon: Icons.inventory_2_rounded,
+      ),
+      if (store.allowOffers)
+        const StoreOwnerSidebarItem(
+          titleKey: TranslationKeys.storeOffersTab,
+          icon: Icons.local_offer_rounded,
+        ),
+      const StoreOwnerSidebarItem(
+        titleKey: TranslationKeys.storeOrdersTab,
+        icon: Icons.shopping_cart_rounded,
+      ),
+      const StoreOwnerSidebarItem(
+        titleKey: TranslationKeys.storeCategoriesTab,
+        icon: Icons.category_rounded,
+      ),
+      const StoreOwnerSidebarItem(
+        titleKey: TranslationKeys.storeBrandsTab,
+        icon: Icons.branding_watermark_rounded,
+      ),
+      if (store.allowFollow)
+        const StoreOwnerSidebarItem(
+          titleKey: TranslationKeys.storeFollowersTab,
+          icon: Icons.people_alt_rounded,
+        ),
+      if (store.allowReviews || store.allowLikes)
+        const StoreOwnerSidebarItem(
+          titleKey: TranslationKeys.storeReviewsAndLikesTab,
+          icon: Icons.star_rounded,
+        ),
+      const StoreOwnerSidebarItem(
+        titleKey: TranslationKeys.storeSettingsTab,
+        icon: Icons.settings_rounded,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +104,11 @@ class _AdminStoreState extends State<AdminStore> {
     
     final businessProvider = context.watch<BusinessProvider>();
     final store = businessProvider.businessSettings;
+    final pages = _getPages(store);
+    
+    if (_selectedIndex >= pages.length) {
+      _selectedIndex = pages.length - 1;
+    }
     
     if (store.isInactive) {
       return Scaffold(
@@ -116,6 +169,7 @@ class _AdminStoreState extends State<AdminStore> {
           ? Drawer(
               child: SafeArea(
                 child: StoreOwnerSidebar(
+                  items: _getSidebarItems(store),
                   selectedIndex: _selectedIndex,
                   onItemSelected: (index) {
                     setState(() {
@@ -133,6 +187,7 @@ class _AdminStoreState extends State<AdminStore> {
           // Sidebar for Desktop & Large Screens
           if (!isMobile)
             StoreOwnerSidebar(
+              items: _getSidebarItems(store),
               selectedIndex: _selectedIndex,
               isCollapsed: _isSidebarCollapsed,
               onToggleCollapse: () {
@@ -151,9 +206,7 @@ class _AdminStoreState extends State<AdminStore> {
           Expanded(
             child: IndexedStack(
               index: _selectedIndex,
-              children: _getPages(
-                context.watch<BusinessProvider>().businessSettings.id,
-              ),
+              children: _getPages(store),
             ),
           ),
         ],

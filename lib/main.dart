@@ -22,6 +22,7 @@ import 'data/providers/review_provider.dart';
 import 'data/providers/like_provider.dart';
 import 'data/providers/follower_provider.dart';
 import 'data/providers/customer_provider.dart';
+import 'data/providers/product_filter_provider.dart';
 import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_theme.dart';
 import 'presentation/pages/customer/business_page.dart'; 
@@ -66,6 +67,7 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LikeProvider()),
         ChangeNotifierProvider(create: (_) => FollowerProvider()),
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
+        ChangeNotifierProvider(create: (_) => ProductFilterProvider()),
       ],
       child: Consumer3<SettingsProvider, LocaleProvider, BusinessProvider>(
         builder: (context, settings, localeProvider, businessProvider, child) {

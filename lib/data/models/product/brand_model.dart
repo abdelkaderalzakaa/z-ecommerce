@@ -5,6 +5,7 @@ class BrandModel {
   final String? logoUrl;
   final String? description;
   final bool isGlobal; // هل الماركة عامة للجميع؟
+  final bool isRecommended; // هل الماركة موصى بها من السوبر أدمن؟
 
   String? get businessId => businessIds.isNotEmpty ? businessIds.first : null;
 
@@ -15,6 +16,7 @@ class BrandModel {
     this.logoUrl,
     this.description,
     this.isGlobal = false,
+    this.isRecommended = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -25,6 +27,7 @@ class BrandModel {
       'logoUrl': logoUrl,
       'description': description,
       'isGlobal': isGlobal,
+      'isRecommended': isRecommended,
     };
   }
 
@@ -36,6 +39,7 @@ class BrandModel {
       logoUrl: json['logoUrl'],
       description: json['description'],
       isGlobal: json['isGlobal'] ?? false,
+      isRecommended: json['isRecommended'] ?? false,
     );
   }
 
@@ -46,6 +50,7 @@ class BrandModel {
     String? logoUrl,
     String? description,
     bool? isGlobal,
+    bool? isRecommended,
   }) {
     return BrandModel(
       id: id ?? this.id,
@@ -54,6 +59,7 @@ class BrandModel {
       logoUrl: logoUrl ?? this.logoUrl,
       description: description ?? this.description,
       isGlobal: isGlobal ?? this.isGlobal,
+      isRecommended: isRecommended ?? this.isRecommended,
     );
   }
 

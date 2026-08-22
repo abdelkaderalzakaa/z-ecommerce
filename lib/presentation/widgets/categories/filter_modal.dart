@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../global/core/constants/app_constants.dart';
 import 'filter_sidebar.dart';
 
 void showFilterModal(BuildContext context, {String? categoryLabel, String? brandName}) {
@@ -10,9 +9,9 @@ void showFilterModal(BuildContext context, {String? categoryLabel, String? brand
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (context) {
+    builder: (modalContext) {
       return DraggableScrollableSheet(
-        initialChildSize: 0.9,
+        initialChildSize: 0.85,
         minChildSize: 0.5,
         maxChildSize: 0.95,
         expand: false,
@@ -28,10 +27,16 @@ void showFilterModal(BuildContext context, {String? categoryLabel, String? brand
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
+              const SizedBox(height: 8),
               Expanded(
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  child: FilterSidebar( categoryLabel: categoryLabel, brandName: brandName),
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: FilterSidebar(
+                    categoryLabel: categoryLabel,
+                    brandName: brandName,
+                    onApply: () => Navigator.pop(modalContext),
+                  ),
                 ),
               ),
             ],

@@ -84,6 +84,13 @@ class BusinessPermissionsStatusWidget extends StatelessWidget {
                   icon: Icons.rate_review_rounded,
                   color: business.allowReviews ? Colors.amber : Colors.red,
                 ),
+
+                /// العروض
+                _StatusBadge(
+                  label: business.allowOffers ? 'العروض مفعلة' : 'العروض معطلة',
+                  icon: Icons.local_offer_rounded,
+                  color: business.allowOffers ? Colors.purple : Colors.red,
+                ),
               ],
             ),
           ],

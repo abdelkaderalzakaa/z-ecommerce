@@ -34,6 +34,7 @@ class _InfoProductPageState extends State<InfoProductPage> {
   String? _selectedBrandId;
   String? _selectedBusinessId;
   bool _isFreeShipping = false;
+  bool _isActiveRatings = true;
   late TextEditingController _shippingCostController;
   bool _isSubmitting = false;
 
@@ -49,6 +50,7 @@ class _InfoProductPageState extends State<InfoProductPage> {
     _image3Controller = TextEditingController(text: p != null && p.images.length > 2 ? p.images[2] : '');
 
     _isFreeShipping = p?.isFreeShipping ?? false;
+    _isActiveRatings = p?.isActiveRatings ?? true;
     _shippingCostController = TextEditingController(text: p?.shippingCost != null && p!.shippingCost > 0 ? p.shippingCost.toString() : '');
 
     _selectedCategoryId = p?.categoryId.isNotEmpty == true ? p?.categoryId : null;
@@ -143,10 +145,12 @@ class _InfoProductPageState extends State<InfoProductPage> {
       variants: widget.product?.variants ?? [],
       discounts: widget.product?.discounts ?? [],
       offers: widget.product?.offers ?? [],
-      isActive: widget.product?.isActive ?? true,
+      isActive: widget.product?.isActive ?? false,
       isFeatured: widget.product?.isFeatured ?? false,
       isTopSelling: widget.product?.isTopSelling ?? false,
+      isFreeProduct: widget.product?.isFreeProduct ?? false,
       isFreeShipping: _isFreeShipping,
+      isActiveRatings: _isActiveRatings,
       shippingCost: _isFreeShipping ? 0.0 : (double.tryParse(_shippingCostController.text) ?? 0.0),
       ratings: widget.product?.ratings ?? [],
       createdAt: widget.product?.createdAt ?? DateTime.now(),
@@ -424,6 +428,23 @@ class _InfoProductPageState extends State<InfoProductPage> {
                           },
                         ),
                       ],
+                      const SizedBox(height: 24),
+                      const Text(
+                        'خيارات التفاعل والتقييمات',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        title: const Text('تفعيل قسم التقييمات للمنتج'),
+                        subtitle: const Text('السماح للعملاء برؤية وكتابة التقييمات لهذا المنتج'),
+                        value: _isActiveRatings,
+                        onChanged: (val) {
+                          setState(() {
+                            _isActiveRatings = val;
+                          });
+                        },
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ],
                   ),
                 ),

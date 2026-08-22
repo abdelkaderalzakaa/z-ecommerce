@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/product/brand_model.dart';
 import 'package:z_ecommerce/data/models/product/category_model.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/models/shared/follower_model.dart';
+import 'package:z_ecommerce/data/models/shared/like_model.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/brand_provider.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
 import 'package:z_ecommerce/data/providers/follower_provider.dart';
+import 'package:z_ecommerce/data/providers/like_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/locale_provider.dart';
@@ -88,18 +92,33 @@ class _BusinessEntryState extends State<BusinessEntry> {
     final businessProvider = context.watch<BusinessProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
     final productProvider = context.watch<ProductProvider>();
+    final brandProvider = context.watch<BrandProvider>();
 
     final activeBusinesses = businessProvider.activeBusinesses;
+    final recommendedBusinesses = activeBusinesses
+        .where((b) => b.isRecommended)
+        .toList();
     final categories = categoryProvider.categories;
+    final recommendedCategories = categories
+        .where((c) => c.isRecommended)
+        .toList();
+    final brands = brandProvider.brands;
+    final recommendedBrands = brands
+        .where((b) => b.isRecommended)
+        .toList();
     final allProducts = productProvider.allProducts;
+    final recommendedProducts = allProducts
+        .where((p) => p.isRecommended)
+        .toList();
+    final freeProducts = allProducts.where((p) => p.isFreeProduct).toList();
 
     final filteredStores = activeBusinesses.where((b) {
       final nameAr = b.localization.name.ar.toLowerCase();
       final nameEn = b.localization.name.en.toLowerCase();
       final q = _searchQuery.toLowerCase();
       final matchesSearch = nameAr.contains(q) || nameEn.contains(q);
-      final matchesCategory = _selectedCategory == null ||
-          b.businessType.name == _selectedCategory;
+      final matchesCategory =
+          _selectedCategory == null || b.businessType.name == _selectedCategory;
       return matchesSearch && matchesCategory;
     }).toList();
 
@@ -145,27 +164,40 @@ class _BusinessEntryState extends State<BusinessEntry> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const BusinessPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const BusinessPage()),
                 );
               },
             ),
             SectionTopBusiness(
               screenWidth: width * 0.75,
-              businesses: activeBusinesses,
+              businesses: recommendedBusinesses,
             ),
 
-            /// Section 4: Top Products Section
-            TopSection(
-              title: TranslationKeys.topProducts.tr(context),
-              buttonLabel: TranslationKeys.viewAllProducts.tr(context),
-              onTap: () {},
-            ),
-            SectionTopProducts(
-              screenWidth: width * 0.75,
-              products: allProducts,
-            ),
+            /// Section 4: Recommended Products Section
+            if (recommendedProducts.isNotEmpty) ...[
+              TopSection(
+                title: TranslationKeys.recommendedProducts.tr(context),
+                buttonLabel: TranslationKeys.viewAllProducts.tr(context),
+                onTap: () {},
+              ),
+              SectionTopProducts(
+                screenWidth: width * 0.75,
+                products: recommendedProducts,
+              ),
+            ],
+
+            /// Section 4.5: Free Products Section
+            if (freeProducts.isNotEmpty) ...[
+              TopSection(
+                title: TranslationKeys.freeProducts.tr(context),
+                buttonLabel: TranslationKeys.viewAllProducts.tr(context),
+                onTap: () {},
+              ),
+              SectionTopProducts(
+                screenWidth: width * 0.75,
+                products: freeProducts,
+              ),
+            ],
 
             /// Section 5: Top Categories Section
             TopSection(
@@ -180,7 +212,20 @@ class _BusinessEntryState extends State<BusinessEntry> {
                 );
               },
             ),
-            SectionCategory(categories: categories),
+            SectionCategory(categories: recommendedCategories),
+
+            /// Section 5.5: Top Brands Section
+            if (recommendedBrands.isNotEmpty) ...[
+              TopSection(
+                title: TranslationKeys.topBrands.tr(context),
+                buttonLabel: TranslationKeys.viewAllProducts.tr(context), // placeholder link
+                onTap: () {},
+              ),
+              SectionBrands(
+                screenWidth: width * 0.75,
+                brands: recommendedBrands,
+              ),
+            ],
 
             /// Section 6: Statistics / KPI Section
             TopSection(title: TranslationKeys.whyOurPlatform.tr(context)),
@@ -212,10 +257,7 @@ class _BusinessEntryState extends State<BusinessEntry> {
 class SectionHero extends StatelessWidget {
   final int activeStoresCount;
 
-  const SectionHero({
-    super.key,
-    this.activeStoresCount = 0,
-  });
+  const SectionHero({super.key, this.activeStoresCount = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +319,11 @@ class SectionHero extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.stars, color: AppColors.star, size: 18),
+                          const Icon(
+                            Icons.stars,
+                            color: AppColors.star,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             TranslationKeys.businessPlatformBadge.tr(context),
@@ -417,18 +463,26 @@ class SectionHero extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        TranslationKeys.verifiedStoresTitle.tr(context),
+                                        TranslationKeys.verifiedStoresTitle.tr(
+                                          context,
+                                        ),
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
-                                          color: theme.textTheme.bodyLarge?.color,
+                                          color:
+                                              theme.textTheme.bodyLarge?.color,
                                         ),
                                       ),
                                       Text(
                                         "$activeStoresCount ${TranslationKeys.activeStoresNow.tr(context)}",
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
+                                          color:
+                                              theme
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.color ??
+                                              AppColors.textSecondary,
                                         ),
                                       ),
                                     ],
@@ -500,7 +554,9 @@ class SectionSearchAndCategory extends StatelessWidget {
             // Search Field
             Container(
               decoration: BoxDecoration(
-                color: isDark ? theme.colorScheme.surface : Colors.grey.shade100,
+                color: isDark
+                    ? theme.colorScheme.surface
+                    : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.cardBorder),
               ),
@@ -514,7 +570,10 @@ class SectionSearchAndCategory extends StatelessWidget {
                     color: AppColors.textMuted,
                     fontSize: 14,
                   ),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.textSecondary,
+                  ),
                   suffixIcon: searchQuery.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear, size: 18),
@@ -570,10 +629,14 @@ class SectionSearchAndCategory extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: isSelected
                                           ? theme.primaryColor
-                                          : (isDark ? theme.colorScheme.surface : Colors.grey.shade200),
+                                          : (isDark
+                                                ? theme.colorScheme.surface
+                                                : Colors.grey.shade200),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: isSelected ? theme.primaryColor : AppColors.cardBorder,
+                                        color: isSelected
+                                            ? theme.primaryColor
+                                            : AppColors.cardBorder,
                                       ),
                                     ),
                                     child: Icon(
@@ -604,11 +667,14 @@ class SectionSearchAndCategory extends StatelessWidget {
                           final type = BusinessType.values[index - 1];
                           final isSelected = selectedCategory == type.name;
                           final color = theme.primaryColor;
-                          final isAr = Localizations.localeOf(context).languageCode == 'ar';
+                          final isAr =
+                              Localizations.localeOf(context).languageCode ==
+                              'ar';
 
                           return GestureDetector(
-                            onTap: () =>
-                                onCategorySelected(isSelected ? null : type.name),
+                            onTap: () => onCategorySelected(
+                              isSelected ? null : type.name,
+                            ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -642,7 +708,9 @@ class SectionSearchAndCategory extends StatelessWidget {
                                     fontWeight: isSelected
                                         ? FontWeight.bold
                                         : FontWeight.normal,
-                                    color: isSelected ? color : theme.textTheme.bodyLarge?.color,
+                                    color: isSelected
+                                        ? color
+                                        : theme.textTheme.bodyLarge?.color,
                                   ),
                                 ),
                               ],
@@ -781,10 +849,7 @@ class SectionTopProducts extends StatelessWidget {
 class SectionCategory extends StatelessWidget {
   final List<CategoryModel> categories;
 
-  const SectionCategory({
-    super.key,
-    this.categories = const [],
-  });
+  const SectionCategory({super.key, this.categories = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -996,7 +1061,11 @@ class SectionJoin extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           colors: isDark
-              ? [theme.primaryColor.withOpacity(0.3), theme.cardColor, theme.cardColor]
+              ? [
+                  theme.primaryColor.withOpacity(0.3),
+                  theme.cardColor,
+                  theme.cardColor,
+                ]
               : [theme.primaryColor, theme.cardColor, theme.cardColor],
         ),
         border: Border.all(color: AppColors.cardBorder),
@@ -1057,7 +1126,9 @@ class SectionJoin extends StatelessWidget {
                       color: AppColors.green,
                     ),
                     ChipApp(
-                      lable: TranslationKeys.technicalSupportShipping.tr(context),
+                      lable: TranslationKeys.technicalSupportShipping.tr(
+                        context,
+                      ),
                       icon: Icons.done,
                       color: AppColors.green,
                     ),
@@ -1082,9 +1153,16 @@ class SectionJoin extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: theme.primaryColor.withOpacity(0.25)),
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.cardBorder, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.shadowColor.withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1107,7 +1185,9 @@ class SectionJoin extends StatelessWidget {
                       TranslationKeys.activeStoresNow.tr(context),
                       style: TextStyle(
                         fontSize: 13,
-                        color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
+                        color:
+                            theme.textTheme.bodyMedium?.color ??
+                            AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -1221,11 +1301,7 @@ class CardBusiness extends StatelessWidget {
   final BusinessModel business;
   final int index;
 
-  const CardBusiness({
-    super.key,
-    required this.business,
-    this.index = 0,
-  });
+  const CardBusiness({super.key, required this.business, this.index = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -1233,19 +1309,21 @@ class CardBusiness extends StatelessWidget {
     final isAr = context.read<LocaleProvider>().locale.languageCode == 'ar';
     final title = isAr
         ? (business.localization.name.ar.isNotEmpty
-            ? business.localization.name.ar
-            : business.localization.name.en)
+              ? business.localization.name.ar
+              : business.localization.name.en)
         : (business.localization.name.en.isNotEmpty
-            ? business.localization.name.en
-            : business.localization.name.ar);
+              ? business.localization.name.en
+              : business.localization.name.ar);
 
     final coverUrl = business.theme.coverBannerUrl;
     final hasRatings = business.ratings.isNotEmpty;
     final double avgRating = hasRatings
         ? (business.ratings.map((r) => r.rating).reduce((a, b) => a + b) /
-            business.ratings.length)
+              business.ratings.length)
         : 0.0;
-    final String ratingDisplay = hasRatings ? avgRating.toStringAsFixed(1) : (isAr ? 'جديد' : 'New');
+    final String ratingDisplay = hasRatings
+        ? avgRating.toStringAsFixed(1)
+        : (isAr ? 'جديد' : 'New');
 
     void openStore() {
       context.read<BusinessProvider>().selectBusiness(business.id);
@@ -1286,8 +1364,9 @@ class CardBusiness extends StatelessWidget {
                           theme.primaryColor,
                         ],
                       ),
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
                       image: (coverUrl != null && coverUrl.isNotEmpty)
                           ? DecorationImage(
                               image: NetworkImage(coverUrl),
@@ -1310,7 +1389,9 @@ class CardBusiness extends StatelessWidget {
                     right: isAr ? 6 : null,
                     left: isAr ? null : 6,
                     child: ChipApp(
-                      icon: hasRatings ? Icons.star : Icons.new_releases_outlined,
+                      icon: hasRatings
+                          ? Icons.star
+                          : Icons.new_releases_outlined,
                       lable: ratingDisplay,
                       color: hasRatings ? AppColors.star : theme.primaryColor,
                     ),
@@ -1347,12 +1428,18 @@ class CardBusiness extends StatelessWidget {
                   const SizedBox(width: 4),
                   Consumer2<AuthProvider, FollowerProvider>(
                     builder: (context, authProvider, followerProvider, child) {
-                      final isFollowing = followerProvider.isFollowing(business.id);
+                      final isFollowing = followerProvider.isFollowing(
+                        business.id,
+                      );
                       return ButtonApp(
                         format: FormatButtonApp.icon,
                         label: "",
-                        icon: isFollowing ? Icons.favorite : Icons.favorite_border,
-                        color: isFollowing ? Colors.red : theme.textTheme.bodyMedium?.color,
+                        icon: isFollowing
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: isFollowing
+                            ? Colors.red
+                            : theme.textTheme.bodyMedium?.color,
                         onPressed: () async {
                           if (authProvider.isAuthenticated) {
                             final follower = FollowerModel(
@@ -1368,7 +1455,9 @@ class CardBusiness extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  TranslationKeys.pleaseLoginToSaveItems.tr(context),
+                                  TranslationKeys.pleaseLoginToSaveItems.tr(
+                                    context,
+                                  ),
                                 ),
                               ),
                             );
@@ -1391,17 +1480,23 @@ class CardProduct extends StatelessWidget {
   final ProductModel product;
   final int index;
 
-  const CardProduct({
-    super.key,
-    required this.product,
-    this.index = 0,
-  });
+  const CardProduct({super.key, required this.product, this.index = 0});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final title = product.name;
-    final priceStr = "\$${product.originalPrice.toStringAsFixed(2)}";
+
+    final bool isFree = product.isFreeProduct || product.basePrice == 0;
+    final priceStr = isFree
+        ? TranslationKeys.free.tr(context)
+        : "\$${product.basePrice.toStringAsFixed(2)}";
+
+    final ratingCount = product.ratings.length;
+    final double avgRating = ratingCount > 0
+        ? product.ratings.fold(0.0, (sum, r) => sum + r.rating) / ratingCount
+        : 0.0;
+
     final imageUrl = product.displayImage;
 
     return Container(
@@ -1433,8 +1528,9 @@ class CardProduct extends StatelessWidget {
                         theme.primaryColor,
                       ],
                     ),
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
                     image: imageUrl.isNotEmpty
                         ? DecorationImage(
                             image: NetworkImage(imageUrl),
@@ -1455,9 +1551,9 @@ class CardProduct extends StatelessWidget {
                 Positioned(
                   top: 6,
                   right: 6,
-                  child: const ChipApp(
+                  child: ChipApp(
                     icon: Icons.star,
-                    lable: "5.0",
+                    lable: avgRating.toStringAsFixed(1),
                     color: AppColors.star,
                   ),
                 ),
@@ -1485,20 +1581,46 @@ class CardProduct extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         priceStr,
-                        style: AppTextStyles.priceStyle(context).copyWith(
-                          fontSize: 13,
-                          color: theme.primaryColor,
-                        ),
+                        style: AppTextStyles.priceStyle(
+                          context,
+                        ).copyWith(fontSize: 13, color: theme.primaryColor),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 4),
-                ButtonApp(
-                  format: FormatButtonApp.icon,
-                  label: "",
-                  icon: Icons.favorite_border,
-                  onPressed: () {},
+                Consumer2<AuthProvider, LikeProvider>(
+                  builder: (context, auth, likeProvider, _) {
+                    final isFavorite = likeProvider.hasLiked(product.id);
+                    return ButtonApp(
+                      format: FormatButtonApp.icon,
+                      label: "",
+                      icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+                      onPressed: () async {
+                        if (auth.isAuthenticated) {
+                          final like = LikeModel(
+                            id: '',
+                            userId: auth.currentUser!.id,
+                            targetId: product.id,
+                            targetType: 'product',
+                            createdAt: DateTime.now(),
+                          );
+                          await likeProvider.toggleLike(like);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                TranslationKeys.pleaseLoginToSaveItems.tr(
+                                  context,
+                                ),
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
                 ),
               ],
             ),
@@ -1525,17 +1647,24 @@ class CardCategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    // Ensure the color is visible on the current theme
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final iconColor = isDarkMode ? Colors.white70 : Colors.black54;
+
     return Container(
       margin: const EdgeInsets.all(4),
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: category.bgColor.withOpacity(0.12),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: category.bgColor.withOpacity(0.35)),
+        border: Border.all(color: category.bgColor.withOpacity(0.4)),
         boxShadow: [
           BoxShadow(
-            color: category.bgColor.withOpacity(0.06),
+            color: theme.shadowColor.withOpacity(0.05),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -1574,14 +1703,130 @@ class CardCategory extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: category.bgColor,
+                      color: textColor,
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: category.bgColor,
+                Icon(Icons.arrow_forward_ios, size: 16, color: iconColor),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SectionBrands extends StatelessWidget {
+  final double screenWidth;
+  final List<BrandModel> brands;
+
+  const SectionBrands({
+    super.key,
+    required this.screenWidth,
+    this.brands = const [],
+  });
+
+  double _getCardWidth(double width) {
+    if (width > 1200) return width * 0.15;
+    if (width > 800) return width * 0.20;
+    if (width > 500) return width * 0.25;
+    return width * 0.30;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final cardWidth = _getCardWidth(width);
+
+    return SizedBox(
+      height: 120,
+      width: double.infinity,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: brands.length,
+        itemBuilder: (context, index) {
+          final b = brands[index];
+          return SizedBox(
+            width: cardWidth,
+            child: CardBrand(brand: b),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class CardBrand extends StatelessWidget {
+  final BrandModel brand;
+
+  const CardBrand({super.key, required this.brand});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return Container(
+      margin: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // Can be routed to a brand page later
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+                      shape: BoxShape.circle,
+                      image: (brand.logoUrl != null && brand.logoUrl!.isNotEmpty)
+                          ? DecorationImage(
+                              image: NetworkImage(brand.logoUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: (brand.logoUrl == null || brand.logoUrl!.isEmpty)
+                        ? Icon(
+                            Icons.branding_watermark_rounded,
+                            size: 32,
+                            color: theme.primaryColor.withOpacity(0.5),
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  brand.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -1648,9 +1893,7 @@ class CardKpi extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   description,
-                  style: AppTextStyles.bodyText(context).copyWith(
-                    fontSize: 13,
-                  ),
+                  style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
                 ),
               ],
             ),

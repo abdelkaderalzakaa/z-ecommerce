@@ -7,6 +7,8 @@ class CategoryModel {
   final Color bgColor;
   final IconData? icon;
   final bool isGlobal; // هل الفئة عامة ومضافة من الإدارة؟
+  final bool isRecommended; // هل التصنيف موصى به من قبل السوبر أدمن؟
+
   String? get businessId => businessIds.isNotEmpty ? businessIds.first : null;
 
   const CategoryModel({
@@ -16,6 +18,7 @@ class CategoryModel {
     required this.bgColor,
     this.icon,
     this.isGlobal = false,
+    this.isRecommended = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -26,6 +29,7 @@ class CategoryModel {
       'bgColor': bgColor.value,
       'iconCodePoint': icon?.codePoint,
       'isGlobal': isGlobal,
+      'isRecommended': isRecommended,
     };
   }
 
@@ -45,6 +49,7 @@ class CategoryModel {
           ? IconData(json['iconCodePoint'], fontFamily: 'MaterialIcons')
           : null,
       isGlobal: json['isGlobal'] ?? false,
+      isRecommended: json['isRecommended'] ?? false,
     );
   }
 
@@ -55,6 +60,7 @@ class CategoryModel {
     Color? bgColor,
     IconData? icon,
     bool? isGlobal,
+    bool? isRecommended,
   }) {
     return CategoryModel(
       id: id ?? this.id,
@@ -63,6 +69,7 @@ class CategoryModel {
       bgColor: bgColor ?? this.bgColor,
       icon: icon ?? this.icon,
       isGlobal: isGlobal ?? this.isGlobal,
+      isRecommended: isRecommended ?? this.isRecommended,
     );
   }
 

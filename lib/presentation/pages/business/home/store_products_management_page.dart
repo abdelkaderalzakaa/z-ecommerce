@@ -127,7 +127,9 @@ class _StoreProductsManagementPageState
                         title: TranslationKeys.statusActive.tr(context),
                         flex: 1,
                         cellBuilder: (p) => TableStatusBadge.fromStatus(
-                          TranslationKeys.statusActive.tr(context),
+                          p.isActive
+                              ? TranslationKeys.statusActive.tr(context)
+                              : TranslationKeys.statusInactive.tr(context),
                         ),
                       ),
                       AppTableColumn<ProductModel>(

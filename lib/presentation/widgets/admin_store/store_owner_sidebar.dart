@@ -20,47 +20,11 @@ class StoreOwnerSidebar extends StatelessWidget {
   final bool isCollapsed;
   final VoidCallback? onToggleCollapse;
 
-  static final List<StoreOwnerSidebarItem> items = [
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeOverview,
-      icon: Icons.dashboard_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeProductsTab,
-      icon: Icons.inventory_2_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeOffersTab,
-      icon: Icons.local_offer_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeOrdersTab,
-      icon: Icons.shopping_cart_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeCategoriesTab,
-      icon: Icons.category_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeBrandsTab,
-      icon: Icons.branding_watermark_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeFollowersTab,
-      icon: Icons.people_alt_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeReviewsAndLikesTab,
-      icon: Icons.star_rounded,
-    ),
-    const StoreOwnerSidebarItem(
-      titleKey: TranslationKeys.storeSettingsTab,
-      icon: Icons.settings_rounded,
-    ),
-  ];
+  final List<StoreOwnerSidebarItem> items;
 
   const StoreOwnerSidebar({
     super.key,
+    required this.items,
     required this.selectedIndex,
     required this.onItemSelected,
     this.isCollapsed = false,

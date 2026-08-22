@@ -361,15 +361,17 @@ class _ProductInfoState extends State<ProductInfo> {
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
     final currency = selectedBusiness.currency.symbol;
     final businessId = selectedBusiness.id;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
-    final hasVariants =
-        product.variants.isNotEmpty && product.variants.length > 1;
     final selectedVariant = product.variants.isNotEmpty
         ? product.variants[_selectedVariantIndex.clamp(
             0,
             product.variants.length - 1,
           )]
         : product.defaultVariant;
+
+    final selectorsList = _buildVariantSelectors(context, product, selectedVariant);
+    final showVariantsSection = selectorsList.isNotEmpty;
 
     final cartItemIndex = cartProvider
         .items(businessId)
@@ -557,19 +559,21 @@ class _ProductInfoState extends State<ProductInfo> {
         Row(
           children: [
             Icon(
-              selectedVariant.stock > 0
+              (selectedVariant.stock > 0 || selectedVariant.stock == -1)
                   ? Icons.check_circle_outline
                   : Icons.remove_circle_outline,
-              color: selectedVariant.stock > 0 ? Colors.green : Colors.red,
+              color: (selectedVariant.stock > 0 || selectedVariant.stock == -1) ? Colors.green : Colors.red,
               size: 16,
             ),
             const SizedBox(width: 6),
             Text(
-              selectedVariant.stock > 0
-                  ? 'الكمية المتوفرة: ${selectedVariant.stock}'
-                  : 'غير متوفر في المخزون',
+              selectedVariant.stock == -1
+                  ? (isAr ? 'متوفر في المخزون' : 'In Stock')
+                  : (selectedVariant.stock > 0
+                      ? 'الكمية المتوفرة: ${selectedVariant.stock}'
+                      : (isAr ? 'غير متوفر في المخزون' : 'Out of Stock')),
               style: TextStyle(
-                color: selectedVariant.stock > 0 ? Colors.green : Colors.red,
+                color: (selectedVariant.stock > 0 || selectedVariant.stock == -1) ? Colors.green : Colors.red,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -623,12 +627,12 @@ class _ProductInfoState extends State<ProductInfo> {
             );
           },
         ),
-        if (hasVariants) ...[
+        if (showVariantsSection) ...[
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Divider(color: Theme.of(context).dividerColor, height: 1),
           ),
-          ..._buildVariantSelectors(context, product, selectedVariant),
+          ...selectorsList,
         ],
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),

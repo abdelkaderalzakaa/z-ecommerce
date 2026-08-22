@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product/product_model.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
@@ -72,15 +73,6 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Active/Inactive Switch
-              Switch(
-                value: product.isActive,
-                onChanged: (val) async {
-                  final updated = product.copyWith(isActive: val);
-                  await provider.updateProduct(updated);
-                },
-              ),
-              const SizedBox(width: 8),
               // Customer preview button (Eye icon)
               ButtonApp(
                 format: FormatButtonApp.icon,
@@ -95,19 +87,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               ),
             ],
           ),
-          tabs: const [
+          tabs: [
             Tab(text: 'نظرة عامة'),
             Tab(text: 'التسعير'),
             Tab(text: 'الخصومات'),
-            Tab(text: 'العروض والاوفرات'),
-            Tab(text: 'التقييمات والمراجعات'),
+            if (context.watch<BusinessProvider>().selectedBusiness.allowOffers)
+              Tab(text: 'العروض والاوفرات'),
+            if (context.watch<BusinessProvider>().selectedBusiness.allowReviews)
+              Tab(text: 'التقييمات والمراجعات'),
           ],
           tabViews: [
             ProductOverviewTab(product: product),
             ProductPricingTab(product: product),
             ProductDiscountsTab(product: product),
-            ProductOffersTab(product: product),
-            ProductReviewsTab(product: product),
+            if (context.watch<BusinessProvider>().selectedBusiness.allowOffers)
+              ProductOffersTab(product: product),
+            if (context.watch<BusinessProvider>().selectedBusiness.allowReviews)
+              ProductReviewsTab(product: product),
           ],
         );
       },

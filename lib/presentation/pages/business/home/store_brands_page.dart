@@ -22,6 +22,14 @@ class StoreBrandsPage extends StatefulWidget {
 
 class _StoreBrandsPageState extends State<StoreBrandsPage> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BrandProvider>().listenToAllBrands();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
@@ -62,7 +70,7 @@ class _StoreBrandsPageState extends State<StoreBrandsPage> {
                     if (widget.isSuperAdmin) {
                       return true;
                     } else {
-                      return b.businessIds.contains(currentStoreId);
+                      return b.isGlobal || b.businessIds.contains(currentStoreId);
                     }
                   }).toList();
 
@@ -126,6 +134,20 @@ class _StoreBrandsPageState extends State<StoreBrandsPage> {
                             title: b.isGlobal
                                 ? '${b.businessIds.length} متاجر'
                                 : 'متجر مالك',
+                          ),
+                        ),
+                        AppTableColumn<BrandModel>(
+                          title: 'موصى به',
+                          flex: 1,
+                          alignment: Alignment.center,
+                          sortable: true,
+                          sortKey: (b) => b.isRecommended ? 1 : 0,
+                          cellBuilder: (b) => Switch(
+                            value: b.isRecommended,
+                            onChanged: (val) async {
+                              final updated = b.copyWith(isRecommended: val);
+                              await brandProvider.updateBrand(updated);
+                            },
                           ),
                         ),
                       ],

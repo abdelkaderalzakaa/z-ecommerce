@@ -17,38 +17,11 @@ class TopReviewsSection extends StatelessWidget {
     final businessProvider = context.watch<BusinessProvider>();
     final storeRatings = businessProvider.selectedBusiness.ratings;
 
-    // Fallback sample top reviews if business has no user ratings yet
-    final List<RatedUser> reviewsToShow = storeRatings.isNotEmpty
-        ? storeRatings
-        : [
-            RatedUser(
-              id: 'r1',
-              userId: 'u1',
-              userName: 'سارة الأحمد',
-              rating: 5.0,
-              comment:
-                  'منتجات رائعة وجودة ممتازة جداً! التوصيل كان سريع والتغليف أنيق ومحترف. سأكرر التجربة حتماً.',
-              createdAt: DateTime.now().subtract(const Duration(days: 2)),
-            ),
-            RatedUser(
-              id: 'r2',
-              userId: 'u2',
-              userName: 'أحمد محمود',
-              rating: 5.0,
-              comment:
-                  'من أفضل المتاجر التي تعاملت معها، خدمة العملاء سريعة في الرد والمنتج يطابق الوصف تماماً.',
-              createdAt: DateTime.now().subtract(const Duration(days: 5)),
-            ),
-            RatedUser(
-              id: 'r3',
-              userId: 'u3',
-              userName: 'ريم الخالد',
-              rating: 5.0,
-              comment:
-                  'أسعار مناسبة وعروض حقيقية. تجربة التسوق سلسة جداً من إضافة السلة حتى استلام الطلب.',
-              createdAt: DateTime.now().subtract(const Duration(days: 9)),
-            ),
-          ];
+    final List<RatedUser> reviewsToShow = storeRatings;
+
+    if (reviewsToShow.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: hPad),

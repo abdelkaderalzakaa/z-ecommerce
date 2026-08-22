@@ -143,6 +143,21 @@ class _StoreCategoriesPageState extends State<StoreCategoriesPage> {
                             ],
                           ),
                         ),
+                        if (widget.isSuperAdmin)
+                          AppTableColumn<CategoryModel>(
+                            title: 'موصى به',
+                            flex: 1,
+                            alignment: Alignment.center,
+                            sortable: true,
+                            sortKey: (c) => c.isRecommended ? 1 : 0,
+                            cellBuilder: (c) => Switch(
+                              value: c.isRecommended,
+                              onChanged: (val) async {
+                                final updated = c.copyWith(isRecommended: val);
+                                await catProvider.updateCategory(updated);
+                              },
+                            ),
+                          ),
                         AppTableColumn<CategoryModel>(
                           title: TranslationKeys.actions.tr(context),
                           width: widget.isSuperAdmin ? 70 : 140,

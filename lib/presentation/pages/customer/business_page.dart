@@ -471,7 +471,7 @@ class _SectionBusinessGrid extends StatelessWidget {
               Text(
                 searchQuery.isNotEmpty
                     ? "${TranslationKeys.searchResultsFor.tr(context)} '$searchQuery'"
-                    : TranslationKeys.topBusinesses.tr(context),
+                    : TranslationKeys.viewAllBusinesses.tr(context),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
