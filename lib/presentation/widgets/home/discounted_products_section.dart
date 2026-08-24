@@ -11,6 +11,8 @@ import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import '../../../data/models/product/product_model.dart';
 
+import 'package:z_ecommerce/data/providers/product_filter_provider.dart';
+
 class DiscountedProductsSection extends StatelessWidget {
   const DiscountedProductsSection({super.key});
 
@@ -19,9 +21,20 @@ class DiscountedProductsSection extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    return Consumer<ProductProvider>(
-      builder: (context, provider, child) {
-        final products = provider.allProducts.take(4).toList();
+    return Consumer2<ProductProvider, BusinessProvider>(
+      builder: (context, productProvider, businessProvider, child) {
+        final businessId = businessProvider.selectedBusiness.id;
+        final storeProducts = productProvider.allProducts
+            .where((p) => p.businessId == businessId)
+            .toList();
+            
+        final discountedProducts = storeProducts.where((p) {
+          return p.activeDiscount != null ||
+              p.offers.isNotEmpty ||
+              (p.discountPercent != null && p.discountPercent! > 0);
+        }).toList();
+
+        final products = discountedProducts.take(4).toList();
         if (products.isEmpty) return const SizedBox.shrink();
 
         return Padding(
@@ -42,12 +55,17 @@ class DiscountedProductsSection extends StatelessWidget {
               isMobile
                   ? _MobileProductGrid(products: products)
                   : _DesktopProductGrid(products: products),
-              const SizedBox(height: 36),
-              ViewAllButton(
-                onTap: () {
-                  changeScreen(context, const CategoriesPage());
-                },
-              ),
+              if (discountedProducts.length > 4)
+                Column(
+                  children: [
+                    const SizedBox(height: 36),
+                    ViewAllButton(
+                      onTap: () {
+                        changeScreen(context, const CategoriesPage(initialQuickFilter: QuickFilter.onSale));
+                      },
+                    ),
+                  ],
+                ),
             ],
           ),
         );

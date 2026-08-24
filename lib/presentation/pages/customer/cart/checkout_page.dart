@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../../../data/providers/cart_provider.dart';
-import '../../../../data/providers/invoice_provider.dart';
 import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/providers/business_provider.dart';
 import '../../../../data/models/common/address_model.dart';
@@ -21,6 +20,8 @@ import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/customer/cart/confirm_order_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
+import 'package:z_ecommerce/data/services/order_service.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
@@ -58,11 +59,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
     });
   }
 
-  void _submitOrder() {
+  Future<void> _submitOrder() async {
     final cartProvider = context.read<CartProvider>();
     final authProvider = context.read<AuthProvider>();
 
-    if (!authProvider.isAuthenticated) {
+    if (!authProvider.isAuthenticated || authProvider.currentUser == null || authProvider.currentCustomer == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -97,29 +98,42 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
 
-    final invoiceProvider = context.read<InvoiceProvider>();
-
-    final subtotal = cartProvider.subTotal(businessId);
-    final discount = subtotal * 0.20;
-    final shipping = subtotal > 0 ? 15.0 : 0.0;
-
+    final OrderService orderService = OrderService();
     List<String> generatedids = [];
+    
+    PaymentMethod pm = PaymentMethod.cashOnDelivery;
+    if (_selectedPaymentMethod == PaymentMethodType.creditCard) {
+      pm = PaymentMethod.creditCard;
+    } else if (_selectedPaymentMethod != PaymentMethodType.cashOnDelivery) {
+      pm = PaymentMethod.digitalWallet;
+    }
 
     for (var address in _selectedAddresses) {
-      invoiceProvider.generateInvoice(
-        storeId: businessId,
-        items: cartProvider.items(businessId),
-        discount: discount,
-        tax: 0,
-        shippingCost: shipping,
-        shippingAddress: address,
-      );
-      generatedids.add(invoiceProvider.invoices.last.id);
+      try {
+        final order = await orderService.checkoutAndCreateOrder(
+          customerId: authProvider.currentCustomer!.id,
+          cartByStore: { businessId: cartProvider.items(businessId) },
+          paymentMethod: pm,
+          shippingAddressSnapshot: address,
+        );
+        if (order != null) {
+          generatedids.add(order.id);
+        }
+      } catch (e) {
+        if (context.mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(content: Text('Failed to place order: $e'), backgroundColor: Colors.red),
+           );
+        }
+        return;
+      }
     }
 
     cartProvider.clearCart(businessId);
 
-    changeScreen(context, ConfirmOrderPage(ids: generatedids));
+    if (context.mounted) {
+      changeScreen(context, ConfirmOrderPage(ids: generatedids));
+    }
   }
 
   @override
@@ -131,20 +145,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: HeaderDetails(
         title: TranslationKeys.checkoutTitle.tr(context),
-        fallbackRoute: 'cart',
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.yourCart.tr(context),
-          TranslationKeys.checkout.tr(context),
-        ],
+         
         isCartActive: false,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TopTitle(
+              title: TranslationKeys.checkoutTitle.tr(context),
+              fallbackRoute: 'cart',
+              paths: [
+                TranslationKeys.home.tr(context),
+                TranslationKeys.yourCart.tr(context),
+                TranslationKeys.checkout.tr(context),
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: hPad),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: isMobile
                   ? Column(
                       children: [
@@ -272,12 +290,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Theme.of(context).scaffoldBackgroundColor,
-                  image: DecorationImage(
-                    image: NetworkImage(user.avatarUrl),
-                    fit: BoxFit.cover,
-                  ),
+                  image: user.avatarUrl.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(user.avatarUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: null,
+                child: user.avatarUrl.isEmpty
+                    ? Icon(
+                        Icons.person,
+                        size: 30,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      )
+                    : null,
               ),
               const SizedBox(width: 16),
               Column(
@@ -514,7 +540,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             children: methods.map((method) {
               final isSelected = _selectedPaymentMethod == method;
               final methodData = PaymentMethodModel.availableMethods.firstWhere(
-                (m) => m.id == method.name,
+                (m) => m.type == method,
                 orElse: () => PaymentMethodModel.availableMethods.first,
               );
               final String title = methodData.title.get(context);
@@ -546,11 +572,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: Row(
                       children: [
                         Icon(
-                          method.name == 'cod'
+                          method.id == 'cod'
                               ? Icons.money
-                              : method.name == 'creditCard'
+                              : method.id == 'credit_card'
                               ? Icons.credit_card
-                              : method.name == 'paypal'
+                              : method.id == 'paypal'
                               ? Icons.paypal
                               : Icons.account_balance_wallet,
                           size: 28,

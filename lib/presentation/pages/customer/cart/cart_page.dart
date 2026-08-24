@@ -35,7 +35,10 @@ class _CartPageState extends State<CartPage> {
       if (mounted) {
         final offerProvider = context.read<OfferProvider>();
         // Assuming storeOffers contains the offers for the current store context
-        final allOffers = [...offerProvider.activeOffers, ...offerProvider.storeOffers];
+        final allOffers = [
+          ...offerProvider.activeOffers,
+          ...offerProvider.storeOffers,
+        ];
         context.read<CartProvider>().runOffersEngine(allOffers);
       }
     });
@@ -50,19 +53,22 @@ class _CartPageState extends State<CartPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: HeaderDetails(
         title: TranslationKeys.yourCart.tr(context),
-        fallbackRoute: 'shop',
-        paths: [
-          TranslationKeys.home.tr(context),
-          '${TranslationKeys.checkout.tr(context).split(' ').first}:${context.watch<CartProvider>().cartCount(context.read<BusinessProvider>().selectedBusiness.id)} ${TranslationKeys.items.tr(context)}',
-        ],
         isCartActive: false,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TopTitle(
+              title: TranslationKeys.yourCart.tr(context),
+              fallbackRoute: 'shop',
+              paths: [
+                TranslationKeys.home.tr(context),
+                '${TranslationKeys.checkout.tr(context).split(' ').first}:${context.watch<CartProvider>().cartCount(context.read<BusinessProvider>().selectedBusiness.id)} ${TranslationKeys.items.tr(context)}',
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: hPad),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: isMobile
                   ? const Column(
                       children: [
@@ -82,7 +88,9 @@ class _CartPageState extends State<CartPage> {
             ),
 
             const SizedBox(height: 80),
-            FooterBuisness(idBuisness: context.read<BusinessProvider>().selectedBusiness.id),
+            FooterBuisness(
+              idBuisness: context.read<BusinessProvider>().selectedBusiness.id,
+            ),
           ],
         ),
       ),

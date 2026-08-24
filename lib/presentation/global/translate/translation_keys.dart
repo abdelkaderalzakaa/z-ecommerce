@@ -251,6 +251,7 @@ class TranslationKeys {
   static const String usersManagement = 'users_management';
   static const String offersManagement = 'offers_management';
   static const String categoriesManagement = 'categories_management';
+  static const String deliveryManagement = 'delivery_management';
   static const String reportedReviews = 'reported_reviews';
   static const String superAdminControlPanel = 'super_admin_control_panel';
   static const String totalStores = 'total_stores';
@@ -362,6 +363,7 @@ class TranslationKeys {
   static const String storeBrandsTab = 'store_brands_tab';
   static const String storeFollowersTab = 'store_followers_tab';
   static const String storeReviewsAndLikesTab = 'store_reviews_and_likes_tab';
+  static const String storeDeliveryTab = 'store_delivery_tab';
   static const String storeSettingsTab = 'store_settings_tab';
   static const String ordersSubtitle = 'orders_subtitle';
 

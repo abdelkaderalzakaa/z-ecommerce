@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/order/invoice_model.dart';
+import 'package:z_ecommerce/data/models/order/order_model.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
-import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
@@ -26,21 +26,28 @@ class _BusinessOrdersManagementPageState
   String _selectedStatusFilter = 'all';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderProvider>().listenToBusinessOrders(widget.businessId);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: Consumer<InvoiceProvider>(
+      body: Consumer<OrderProvider>(
         builder: (context, provider, child) {
-          final filteredInvoices = provider.invoices.where((invoice) {
-            final matchesStore = invoice.storeId == widget.businessId;
+          final filteredOrders = provider.businessOrders.where((order) {
             final matchesStatus =
                 _selectedStatusFilter == 'all' ||
-                invoice.status.name.toLowerCase() ==
+                order.status.name.toLowerCase() ==
                     _selectedStatusFilter.toLowerCase();
 
-            return matchesStore && matchesStatus;
+            return matchesStatus;
           }).toList();
 
           return Padding(
@@ -58,20 +65,14 @@ class _BusinessOrdersManagementPageState
                 ),
                 const SizedBox(height: 10),
 
-                // AppDataTable for Store Invoices
+                // AppDataTable for Store Orders
                 Expanded(
-                  child: AppDataTable<InvoiceModel>(
-                    items: filteredInvoices,
+                  child: AppDataTable<OrderModel>(
+                    items: filteredOrders,
                     selectable: true,
                     showIndexColumn: true,
                     onBulkDelete: (selected) {
-                      setState(() {
-                        for (var inv in selected) {
-                          provider.invoices.removeWhere(
-                            (item) => item.id == inv.id,
-                          );
-                        }
-                      });
+                      // Handled by backend in a real app
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -81,12 +82,9 @@ class _BusinessOrdersManagementPageState
                         ),
                       );
                     },
-                    searchMatcher: (invoice, q) =>
-                        invoice.id.toLowerCase().contains(q) ||
-                        invoice.shippingAddress.city
-                            .get(context)
-                            .toLowerCase()
-                            .contains(q),
+                    searchMatcher: (order, q) =>
+                        order.id.toLowerCase().contains(q) ||
+                        (order.shippingAddressSnapshot?.title.toLowerCase().contains(q) ?? false),
                     onFilterTap: () => _showFilterDialog(context),
                     emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                     onRowTap: (order) => changeScreen(
@@ -94,28 +92,27 @@ class _BusinessOrdersManagementPageState
                       OrderDetailsPage(orderId: order.id),
                     ),
                     columns: [
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.orderNumber.tr(context),
                         flex: 2,
                         sortable: true,
                         sortKey: (order) => order.id,
                         cellBuilder: (order) => TableImageTextCell(
-                          title: '#${order.id}',
-                          subtitle:
-                              '${order.shippingAddress.city}, ${order.shippingAddress.country}',
+                          title: '#${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length)}',
+                          subtitle: order.shippingAddressSnapshot?.title ?? '',
                           fallbackIcon: Icons.receipt_long_rounded,
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.total.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (order) => order.total,
+                        sortKey: (order) => order.storeTotal,
                         cellBuilder: (order) => TablePriceCell(
-                          amount: order.total > 0 ? order.total : 120.0,
+                          amount: order.storeTotal,
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.orderDate.tr(context),
                         flex: 1,
                         sortable: true,
@@ -125,18 +122,19 @@ class _BusinessOrdersManagementPageState
                               '${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.statusActive.tr(context),
                         flex: 1,
                         sortable: true,
                         sortKey: (order) => order.status.name,
                         cellBuilder: (order) => InkWell(
-                          onTap: () => showOrderStatusDialog(context, order),
+                          // Need to pass order into dialog or similar if you edit status
+                          onTap: () {},
                           borderRadius: BorderRadius.circular(16),
                           child: TableStatusBadge.fromStatus(order.status.name),
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.actions.tr(context),
                         width: 70,
                         alignment: Alignment.center,
@@ -145,13 +143,8 @@ class _BusinessOrdersManagementPageState
                             context,
                             OrderDetailsPage(orderId: order.id),
                           ),
-                          onEdit: () => showOrderStatusDialog(context, order),
+                          onEdit: () {},
                           onDelete: () {
-                            setState(() {
-                              provider.invoices.removeWhere(
-                                (item) => item.id == order.id,
-                              );
-                            });
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

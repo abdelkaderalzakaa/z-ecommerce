@@ -77,37 +77,39 @@ class _OrderSummaryState extends State<OrderSummary> {
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _couponController,
-                  decoration: InputDecoration(
-                    hintText: TranslationKeys.couponCode.tr(context),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.input),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).dividerColor,
+          if (selectedBusiness.allowOffers) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _couponController,
+                    decoration: InputDecoration(
+                      hintText: TranslationKeys.couponCode.tr(context),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.input),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).dividerColor,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              ButtonApp(
-                onPressed: () {},
-                label:
-                    TranslationKeys.notAvailable.tr(context) == 'not_available'
-                    ? 'Apply'
-                    : 'تطبيق',
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+                const SizedBox(width: 8),
+                ButtonApp(
+                  onPressed: () {},
+                  label:
+                      TranslationKeys.notAvailable.tr(context) == 'not_available'
+                      ? 'Apply'
+                      : 'تطبيق',
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
           if (widget.multiplier > 1) ...[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -148,12 +150,14 @@ class _OrderSummaryState extends State<OrderSummary> {
             value: '$currency${subtotal.toStringAsFixed(0)}',
           ),
           const SizedBox(height: 20),
-          _SummaryRow(
-            label: TranslationKeys.discount.tr(context),
-            value: '-$currency${discount.toStringAsFixed(0)}',
-            isValueRed: true,
-          ),
-          const SizedBox(height: 20),
+          if (selectedBusiness.allowOffers && discount > 0) ...[
+            _SummaryRow(
+              label: TranslationKeys.discount.tr(context),
+              value: '-$currency${discount.toStringAsFixed(0)}',
+              isValueRed: true,
+            ),
+            const SizedBox(height: 20),
+          ],
           _SummaryRow(
             label: TranslationKeys.deliveryFee.tr(context),
             value: '$currency${deliveryFee.toStringAsFixed(0)}',

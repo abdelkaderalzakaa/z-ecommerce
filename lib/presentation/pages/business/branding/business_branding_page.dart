@@ -7,6 +7,8 @@ import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
+
 class StoreBrandingPage extends StatefulWidget {
   const StoreBrandingPage({super.key});
 
@@ -504,7 +506,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
       children: [
         ClipRRect(
           borderRadius: t.inputBorderRadius,
-          child: Image.network(
+          child: CustomNetworkImage(imageUrl: 
             imageUrl,
             width: 45,
             height: 45,
@@ -604,7 +606,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
               children: [
                 ClipRRect(
                   borderRadius: t.cardBorderRadius,
-                  child: Image.network(
+                  child: CustomNetworkImage(imageUrl: 
                     imageUrl,
                     height: 160,
                     width: double.infinity,
@@ -1141,10 +1143,11 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: primaryColor.withOpacity(0.15),
-                      backgroundImage: NetworkImage(t.logoUrl ?? _logoUrl),
+                    CustomNetworkImage(
+                      imageUrl: t.logoUrl ?? _logoUrl,
+                      width: 32,
+                      height: 32,
+                      shape: BoxShape.circle,
                     ),
                     const SizedBox(width: 10),
                     Text(
@@ -1828,7 +1831,7 @@ class _StoreBrandingPageState extends State<StoreBrandingPage> {
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(t.cardRadius),
                   ),
-                  child: Image.network(
+                  child: CustomNetworkImage(imageUrl: 
                     imageUrl,
                     height: 90,
                     width: double.infinity,

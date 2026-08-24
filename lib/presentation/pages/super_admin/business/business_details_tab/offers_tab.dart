@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -67,7 +68,7 @@ class _OffersTabState extends State<OffersTab> {
                     margin: const EdgeInsets.only(bottom: 8.0),
                     child: ListTile(
                       leading: offer.imageUrl != null
-                          ? Image.network(
+                          ? CustomNetworkImage(imageUrl: 
                               offer.imageUrl!,
                               width: 50,
                               height: 50,

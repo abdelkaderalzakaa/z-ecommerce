@@ -19,8 +19,9 @@ class Breadcrumb extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 5),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        reverse: true,
+        reverse: false,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             for (int i = 0; i < paths.length; i++) ...[

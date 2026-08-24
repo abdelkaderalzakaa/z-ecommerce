@@ -9,6 +9,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   final bool useAdminTheme;
@@ -23,15 +24,20 @@ class PrivacyPolicyPage extends StatelessWidget {
     final business = businessProvider.selectedBusiness;
     final isGlobal = business.id.isEmpty;
     final superAdminProvider = context.watch<SuperAdminProvider>();
-    final superAdmin = superAdminProvider.currentSuperAdmin;
 
     String privacyText = '';
     if (isGlobal) {
-      final saPrivacy = superAdmin?.platformSettings.privacyContent.get(context);
-      final saAdminPrivacy = superAdmin?.localizationAdmin.privacyPolicy.get(context);
-      privacyText = (saPrivacy != null && saPrivacy.trim().isNotEmpty)
+      final saPrivacy = superAdminProvider.platformSettings.privacyContent.get(
+        context,
+      );
+      final saAdminPrivacy = superAdminProvider.platformLocalization.privacyPolicy.get(
+        context,
+      );
+      privacyText = (saPrivacy.trim().isNotEmpty)
           ? saPrivacy
-          : ((saAdminPrivacy != null && saAdminPrivacy.trim().isNotEmpty) ? saAdminPrivacy : '');
+          : ((saAdminPrivacy.trim().isNotEmpty)
+                ? saAdminPrivacy
+                : '');
     } else {
       privacyText = business.localization.privacyPolicy.get(context);
     }
@@ -71,18 +77,19 @@ class PrivacyPolicyPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: HeaderDetails(
-        title: TranslationKeys.privacyPolicy.tr(context),
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.privacyPolicy.tr(context),
-        ],
-      ),
+      appBar: HeaderDetails(title: TranslationKeys.privacyPolicy.tr(context)),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            TopTitle(
+              title: TranslationKeys.privacyPolicy.tr(context),
+              paths: [
+                TranslationKeys.home.tr(context),
+                TranslationKeys.privacyPolicy.tr(context),
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 36),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Column(
@@ -109,7 +116,11 @@ class PrivacyPolicyPage extends StatelessWidget {
                           CircleAvatar(
                             backgroundColor: AppColors.green.withOpacity(0.15),
                             radius: 26,
-                            child: const Icon(Icons.security, color: AppColors.green, size: 28),
+                            child: const Icon(
+                              Icons.security,
+                              color: AppColors.green,
+                              size: 28,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -127,7 +138,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   TranslationKeys.privacySubtitle.tr(context),
-                                  style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+                                  style: AppTextStyles.bodyText(
+                                    context,
+                                  ).copyWith(fontSize: 13),
                                 ),
                               ],
                             ),
@@ -149,7 +162,11 @@ class PrivacyPolicyPage extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            Icon(Icons.privacy_tip_outlined, size: 48, color: theme.primaryColor.withOpacity(0.5)),
+                            Icon(
+                              Icons.privacy_tip_outlined,
+                              size: 48,
+                              color: theme.primaryColor.withOpacity(0.5),
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               "لم يتم إضافة سياسة خصوصية خاصة بهذا المتجر بعد",
@@ -182,7 +199,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                           ),
                           child: Text(
                             privacyText,
-                            style: AppTextStyles.bodyText(context).copyWith(fontSize: 14, height: 1.6),
+                            style: AppTextStyles.bodyText(
+                              context,
+                            ).copyWith(fontSize: 14, height: 1.6),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -199,7 +218,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: theme.cardColor,
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: color.withOpacity(0.35)),
+                                border: Border.all(
+                                  color: color.withOpacity(0.35),
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: color.withOpacity(0.04),
@@ -226,7 +247,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           sec['title'] as String,
@@ -239,10 +261,9 @@ class PrivacyPolicyPage extends StatelessWidget {
                                         const SizedBox(height: 8),
                                         Text(
                                           sec['content'] as String,
-                                          style: AppTextStyles.bodyText(context).copyWith(
-                                            fontSize: 13,
-                                            height: 1.6,
-                                          ),
+                                          style: AppTextStyles.bodyText(
+                                            context,
+                                          ).copyWith(fontSize: 13, height: 1.6),
                                         ),
                                       ],
                                     ),

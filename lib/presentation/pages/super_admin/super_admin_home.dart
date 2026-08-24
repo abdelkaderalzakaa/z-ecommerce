@@ -9,6 +9,7 @@ import 'business/businessess_management_page.dart';
 import 'orders/orders_management_page.dart';
 import 'users/users_management_page.dart';
 import 'offers/offers_management_page.dart';
+import 'delivery/deliveries_management_page.dart';
  
 import 'platform_settings_page.dart';
 
@@ -31,6 +32,7 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
     UsersManagementPage(),
     OffersManagementPage(),
     StoreCategoriesPage(isSuperAdmin: true),
+    DeliveriesManagementPage(),
     PlatformSettingsPage(),
   ];
 

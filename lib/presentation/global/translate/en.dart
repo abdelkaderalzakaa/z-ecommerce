@@ -251,6 +251,7 @@ const Map<String, String> en = {
   TranslationKeys.usersManagement: 'Users & Roles',
   TranslationKeys.offersManagement: 'Offers & Discounts',
   TranslationKeys.categoriesManagement: 'Categories Management',
+  TranslationKeys.deliveryManagement: 'Delivery Management',
   TranslationKeys.reportedReviews: 'Reported Reviews',
   TranslationKeys.superAdminControlPanel: 'Super Admin Control Panel',
   TranslationKeys.totalStores: 'Total Stores',
@@ -361,6 +362,7 @@ const Map<String, String> en = {
   TranslationKeys.storeBrandsTab: 'Brands',
   TranslationKeys.storeFollowersTab: 'Followers',
   TranslationKeys.storeReviewsAndLikesTab: 'Reviews & Likes',
+  TranslationKeys.storeDeliveryTab: 'Delivery & Drivers',
   TranslationKeys.storeSettingsTab: 'Settings',
 
   // Business Entry Keys

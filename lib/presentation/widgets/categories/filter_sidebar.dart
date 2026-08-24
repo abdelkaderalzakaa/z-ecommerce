@@ -1,3 +1,5 @@
+import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/models/product/brand_model.dart';
@@ -7,6 +9,7 @@ import '../../../data/providers/brand_provider.dart';
 import '../../../data/providers/category_provider.dart';
 import '../../../data/providers/product_filter_provider.dart';
 import '../../../data/providers/product_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/core/constants/app_constants.dart';
 import '../../global/core/constants/product_enums.dart';
 import '../../global/translate/app_localizations.dart';
@@ -32,8 +35,24 @@ class FilterSidebar extends StatelessWidget {
     final productProvider = context.watch<ProductProvider>();
     final brandProvider = context.watch<BrandProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
+    final businessProvider = context.watch<BusinessProvider>();
 
-    final allProducts = productProvider.allProducts;
+    final selectedBusinessId = businessProvider.selectedBusiness.id;
+    
+    // فلترة المنتجات بحسب البزنس المحدد (إن وجد)
+    final allProducts = selectedBusinessId.isNotEmpty
+        ? productProvider.customerAllProducts.where((p) => p.businessId == selectedBusinessId).toList()
+        : productProvider.customerAllProducts;
+
+    // فلترة الماركات والأقسام بحيث تظهر فقط تلك التي تمتلك منتجات فعلية
+    final availableBrands = brandProvider.brands.where((b) {
+      return allProducts.any((p) => p.brandId == b.id || p.brand == b.name);
+    }).toList();
+
+    final availableCategories = categoryProvider.categories.where((c) {
+      return allProducts.any((p) => p.categoryId == c.id || p.category == c.label);
+    }).toList();
+
     final activeCount = filterProvider.activeFiltersCount;
 
     return Container(
@@ -51,7 +70,7 @@ class FilterSidebar extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,11 +80,7 @@ class FilterSidebar extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.tune_rounded,
-                    color: theme.primaryColor,
-                    size: 22,
-                  ),
+                  Icon(Icons.tune_rounded, color: theme.primaryColor, size: 22),
                   const SizedBox(width: 8),
                   Text(
                     TranslationKeys.filters.tr(context),
@@ -77,10 +92,7 @@ class FilterSidebar extends StatelessWidget {
                   if (activeCount > 0) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
+                      padding: const EdgeInsets.all(1),
                       decoration: BoxDecoration(
                         color: theme.primaryColor,
                         borderRadius: BorderRadius.circular(12),
@@ -89,7 +101,7 @@ class FilterSidebar extends StatelessWidget {
                         '$activeCount',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -98,24 +110,18 @@ class FilterSidebar extends StatelessWidget {
                 ],
               ),
               if (filterProvider.hasActiveFilters)
-                TextButton.icon(
+                ButtonApp(
+                  format: FormatButtonApp.text,
                   onPressed: () => filterProvider.clearAllFilters(),
-                  icon: const Icon(Icons.refresh_rounded, size: 16),
-                  label: Text(
-                    TranslationKeys.clearFilters.tr(context),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red.shade400,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
+                  icon: Icons.refresh_rounded,
+                  label: TranslationKeys.clearFilters.tr(context),
                 ),
             ],
           ),
 
-          const SizedBox(height: 16),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
+          const SizedBox(height: 5),
+          Divider(color: theme.secondaryHeaderColor),
+          const SizedBox(height: 5),
 
           // 1. Quick Filters & Highlights
           _SectionTitle(
@@ -125,41 +131,36 @@ class FilterSidebar extends StatelessWidget {
           const SizedBox(height: 10),
           _QuickFiltersSection(filterProvider: filterProvider),
 
-          const SizedBox(height: 20),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 5),
+          Divider(color: theme.secondaryHeaderColor),
+          const SizedBox(height: 5),
           // 2. Brands List
           _BrandsSection(
-            brands: brandProvider.brands,
+            brands: availableBrands,
             allProducts: allProducts,
             filterProvider: filterProvider,
           ),
 
-          const SizedBox(height: 20),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 5),
+          Divider(color: theme.secondaryHeaderColor),
+          const SizedBox(height: 5),
           // 3. Categories List
           _CategoriesSection(
-            categories: categoryProvider.categories,
+            categories: availableCategories,
             allProducts: allProducts,
             filterProvider: filterProvider,
           ),
 
-          const SizedBox(height: 20),
-          const Divider(height: 1),
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 5),
+          Divider(color: theme.secondaryHeaderColor),
+          const SizedBox(height: 5),
           // 4. Product Details (Sizes, Colors, Material, Type)
           _SectionTitle(
             title: TranslationKeys.productDetailsFilter.tr(context),
             icon: Icons.dashboard_customize_outlined,
           ),
           const SizedBox(height: 12),
-          _ProductAttributesSection(
-            filterProvider: filterProvider,
-          ),
+          _ProductAttributesSection(filterProvider: filterProvider),
 
           if (onApply != null) ...[
             const SizedBox(height: 24),
@@ -345,32 +346,48 @@ class _BrandsSection extends StatelessWidget {
 
     if (brands.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionTitle(
-          title: TranslationKeys.brands.tr(context),
-          icon: Icons.branding_watermark_outlined,
+    return Theme(
+      data: theme.copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        initiallyExpanded: true,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: EdgeInsets.zero,
+        leading: Icon(
+          Icons.branding_watermark_outlined,
+          size: 18,
+          color: theme.primaryColor,
         ),
-        const SizedBox(height: 10),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 220),
-          child: ListView.builder(
+        title: Text(
+          TranslationKeys.brands.tr(context),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        children: [
+          ListView.builder(
             shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: brands.length,
             itemBuilder: (context, index) {
               final brand = brands[index];
-              final isSelected = filterProvider.selectedBrandIds.contains(brand.id) ||
+              final isSelected =
+                  filterProvider.selectedBrandIds.contains(brand.id) ||
                   filterProvider.selectedBrandIds.contains(brand.name);
               final count = allProducts
                   .where((p) => p.brandId == brand.id || p.brand == brand.name)
                   .length;
 
               return InkWell(
-                onTap: () => filterProvider.toggleBrand(brand.id.isNotEmpty ? brand.id : brand.name),
+                onTap: () => filterProvider.toggleBrand(
+                  brand.id.isNotEmpty ? brand.id : brand.name,
+                ),
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 4,
+                  ),
                   child: Row(
                     children: [
                       SizedBox(
@@ -388,11 +405,26 @@ class _BrandsSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      if (brand.logoUrl != null && brand.logoUrl!.isNotEmpty) ...[
-                        CircleAvatar(
-                          radius: 11,
-                          backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                          backgroundImage: NetworkImage(brand.logoUrl!),
+                      if (brand.logoUrl != null &&
+                          brand.logoUrl!.isNotEmpty) ...[
+                        ClipOval(
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            color: isDark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade200,
+                            child: CustomNetworkImage(
+                              imageUrl: brand.logoUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.image_not_supported_outlined,
+                                    size: 14,
+                                    color: Colors.grey,
+                                  ),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
                       ],
@@ -401,7 +433,9 @@ class _BrandsSection extends StatelessWidget {
                           brand.name,
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                             color: isSelected
                                 ? theme.primaryColor
                                 : theme.textTheme.bodyMedium?.color,
@@ -409,16 +443,23 @@ class _BrandsSection extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                          color: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           '$count',
                           style: TextStyle(
                             fontSize: 11,
-                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade700,
                           ),
                         ),
                       ),
@@ -428,8 +469,8 @@ class _BrandsSection extends StatelessWidget {
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -452,32 +493,50 @@ class _CategoriesSection extends StatelessWidget {
 
     if (categories.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionTitle(
-          title: TranslationKeys.categories.tr(context),
-          icon: Icons.category_outlined,
+    return Theme(
+      data: theme.copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        initiallyExpanded: true,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: EdgeInsets.zero,
+        leading: Icon(
+          Icons.category_outlined,
+          size: 18,
+          color: theme.primaryColor,
         ),
-        const SizedBox(height: 10),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 220),
-          child: ListView.builder(
+        title: Text(
+          TranslationKeys.categories.tr(context),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        children: [
+          ListView.builder(
             shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: categories.length,
             itemBuilder: (context, index) {
               final cat = categories[index];
-              final isSelected = filterProvider.selectedCategoryIds.contains(cat.id) ||
+              final isSelected =
+                  filterProvider.selectedCategoryIds.contains(cat.id) ||
                   filterProvider.selectedCategoryIds.contains(cat.label);
               final count = allProducts
-                  .where((p) => p.categoryId == cat.id || p.category == cat.label)
+                  .where(
+                    (p) => p.categoryId == cat.id || p.category == cat.label,
+                  )
                   .length;
 
               return InkWell(
-                onTap: () => filterProvider.toggleCategory(cat.id.isNotEmpty ? cat.id : cat.label),
+                onTap: () => filterProvider.toggleCategory(
+                  cat.id.isNotEmpty ? cat.id : cat.label,
+                ),
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 4,
+                  ),
                   child: Row(
                     children: [
                       SizedBox(
@@ -509,7 +568,9 @@ class _CategoriesSection extends StatelessWidget {
                           cat.label,
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                             color: isSelected
                                 ? theme.primaryColor
                                 : theme.textTheme.bodyMedium?.color,
@@ -517,16 +578,23 @@ class _CategoriesSection extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                          color: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           '$count',
                           style: TextStyle(
                             fontSize: 11,
-                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade700,
                           ),
                         ),
                       ),
@@ -536,8 +604,8 @@ class _CategoriesSection extends StatelessWidget {
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -573,7 +641,10 @@ class _ProductAttributesSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? theme.primaryColor
@@ -582,15 +653,21 @@ class _ProductAttributesSection extends StatelessWidget {
                   border: Border.all(
                     color: isSelected
                         ? theme.primaryColor
-                        : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
+                        : (isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade300),
                   ),
                 ),
                 child: Text(
                   label,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isSelected
+                        ? Colors.white
+                        : theme.textTheme.bodyMedium?.color,
                   ),
                 ),
               ),
@@ -645,7 +722,9 @@ class _ProductAttributesSection extends StatelessWidget {
                       ? Icon(
                           Icons.check,
                           size: 16,
-                          color: (pColor == ProductColor.white || pColor == ProductColor.yellow)
+                          color:
+                              (pColor == ProductColor.white ||
+                                  pColor == ProductColor.yellow)
                               ? Colors.black
                               : Colors.white,
                         )
@@ -677,7 +756,9 @@ class _ProductAttributesSection extends StatelessWidget {
               onSelected: (_) => filterProvider.toggleMaterial(mat),
               selectedColor: theme.primaryColor.withValues(alpha: 0.15),
               checkmarkColor: theme.primaryColor,
-              backgroundColor: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+              backgroundColor: isDark
+                  ? Colors.grey.shade900
+                  : Colors.grey.shade100,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
@@ -711,7 +792,9 @@ class _ProductAttributesSection extends StatelessWidget {
               onSelected: (_) => filterProvider.toggleType(type),
               selectedColor: theme.primaryColor.withValues(alpha: 0.15),
               checkmarkColor: theme.primaryColor,
-              backgroundColor: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+              backgroundColor: isDark
+                  ? Colors.grey.shade900
+                  : Colors.grey.shade100,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(

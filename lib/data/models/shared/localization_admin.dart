@@ -43,6 +43,26 @@ class LocalizationAdmin {
     };
   }
 
+  LocalizationAdmin copyWith({
+    LocalizedString? name,
+    LocalizedString? slogan,
+    LocalizedString? description,
+    LocalizedString? footerDescription,
+    LocalizedString? aboutUs,
+    LocalizedString? termsAndConditions,
+    LocalizedString? privacyPolicy,
+  }) {
+    return LocalizationAdmin(
+      name: name ?? this.name,
+      slogan: slogan ?? this.slogan,
+      description: description ?? this.description,
+      footerDescription: footerDescription ?? this.footerDescription,
+      aboutUs: aboutUs ?? this.aboutUs,
+      termsAndConditions: termsAndConditions ?? this.termsAndConditions,
+      privacyPolicy: privacyPolicy ?? this.privacyPolicy,
+    );
+  }
+
   /// إنشاء كائن LocalizationAdmin فارغ بقيم افتراضية
   factory LocalizationAdmin.empty() {
     return LocalizationAdmin(

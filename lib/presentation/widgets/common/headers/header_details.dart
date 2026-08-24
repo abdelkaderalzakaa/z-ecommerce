@@ -14,22 +14,19 @@ import '../../../../data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 
 class HeaderDetails extends StatefulWidget implements PreferredSizeWidget {
-  final List<String> paths;
+
   final bool isCartActive;
+  final bool showBackButton;
   final String title;
-  final String? fallbackRoute;
-  final VoidCallback? onBack;
   const HeaderDetails({
     super.key,
-    required this.paths,
     this.isCartActive = true,
+    this.showBackButton = false,
     required this.title,
-    this.fallbackRoute,
-    this.onBack,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(150);
+  Size get preferredSize => const Size.fromHeight(81);
 
   @override
   State<HeaderDetails> createState() => _HeaderDetailsState();
@@ -50,6 +47,10 @@ class _HeaderDetailsState extends State<HeaderDetails> {
             padding: EdgeInsets.symmetric(horizontal: hPad),
             child: Row(
               children: [
+                if (widget.showBackButton) ...[
+                  const BackButton(),
+                  const SizedBox(width: 8),
+                ],
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: InkWell(
@@ -68,12 +69,6 @@ class _HeaderDetailsState extends State<HeaderDetails> {
             ),
           ),
           Container(height: 1, color: Theme.of(context).dividerColor),
-          TopTitle(
-            title: widget.title,
-            paths: widget.paths,
-            fallbackRoute: widget.fallbackRoute,
-            onBack: widget.onBack,
-          ),
         ],
       ),
     );

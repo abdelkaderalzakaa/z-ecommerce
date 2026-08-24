@@ -11,6 +11,7 @@ import '../../../global/translate/localized_string.dart';
 import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/offers/offer_card.dart';
 import 'package:z_ecommerce/presentation/pages/customer/offer/offers_page.dart';
+import '../../../widgets/common/headers/widgets/top_title.dart';
 
 class OffersPage extends StatelessWidget {
   final String? offerType;
@@ -25,15 +26,27 @@ class OffersPage extends StatelessWidget {
         title: offerType != null
             ? TranslationKeys.offers.tr(context)
             : TranslationKeys.offers.tr(context),
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.offers.tr(context),
-        ],
+         
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: hPad),
         child: CustomScrollView(
           slivers: [
+            // Top Title
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: TopTitle(
+                  title: offerType != null
+                      ? TranslationKeys.offers.tr(context)
+                      : TranslationKeys.offers.tr(context),
+                  paths: [
+                    TranslationKeys.home.tr(context),
+                    TranslationKeys.offers.tr(context),
+                  ],
+                ),
+              ),
+            ),
             // Hero Header for Specific Offer Type
             if (offerType != null) _buildHeroHeader(context, offerType!),
 

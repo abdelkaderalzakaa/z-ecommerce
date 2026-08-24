@@ -27,7 +27,7 @@ class FollowerService {
         final newFollower = follower.copyWith(id: docRef.id);
         await docRef.set(newFollower.toMap());
         
-        // TODO: Trigger Push Notification here for the store owner or when the store adds a product
+        // 
         
         return true;
       }

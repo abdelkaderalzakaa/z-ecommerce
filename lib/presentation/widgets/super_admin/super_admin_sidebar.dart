@@ -45,6 +45,10 @@ class SuperAdminSidebar extends StatelessWidget {
       titleKey: TranslationKeys.categoriesManagement,
       icon: Icons.category_rounded,
     ),
+    SuperAdminSidebarItem(
+      titleKey: TranslationKeys.deliveryManagement,
+      icon: Icons.local_shipping_rounded,
+    ),
 
     SuperAdminSidebarItem(
       titleKey: TranslationKeys.settingsTab,

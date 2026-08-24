@@ -195,12 +195,11 @@ class _MobileFooter extends StatelessWidget {
 class _BrandColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
-    final platformName =
-        superAdmin?.localizationAdmin.name.get(context) ?? 'z-matajer';
-    final platformDescription =
-        superAdmin?.localizationAdmin.footerDescription.get(context) ??
-        'منصة متقدمة للتجارة الإلكترونية.';
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+    final saName = superAdminProvider.platformLocalization.name.get(context);
+    final platformName = saName.isNotEmpty ? saName : 'z-matajer';
+    final saDesc = superAdminProvider.platformLocalization.footerDescription.get(context);
+    final platformDescription = saDesc.isNotEmpty ? saDesc : 'منصة متقدمة للتجارة الإلكترونية.';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

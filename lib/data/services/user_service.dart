@@ -6,6 +6,7 @@ import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/models/store/currency_store.dart';
 import 'package:z_ecommerce/data/models/super_admin/super_admin_model.dart';
+import 'package:z_ecommerce/data/models/super_admin/platform_config_model.dart';
 import 'package:z_ecommerce/data/models/customer/customer_model.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/models/common/social_media.dart';
@@ -28,6 +29,7 @@ class UserService {
   final String _usersCollection = 'users';
   final String _businessesCollection = 'businesses';
   final String _superAdminsCollection = 'super_admins';
+  final String _platformConfigCollection = 'platform_settings';
   final String _customersCollection = 'customers';
 
   // ==========================================
@@ -163,12 +165,7 @@ class UserService {
       return;
     }
     try {
-      // 1. حفظ UserModel أولاً في users إن وجد
-      if (business.owner != null) {
-        await saveUser(business.owner!);
-      }
-
-      // 2. حفظ BusinessModel في businesses
+      // حفظ BusinessModel في businesses
       await _firestore
           .collection(_businessesCollection)
           .doc(business.id)
@@ -228,7 +225,7 @@ class UserService {
       final snapshot = await _firestore.collection(_businessesCollection).get();
       return snapshot.docs
           .map((doc) => BusinessModel.fromMap(doc.data(), doc.id))
-          .where((b) => b.owner == null)
+          .where((b) => b.ownerId == null || b.ownerId!.isEmpty)
           .toList();
     } catch (e) {
       debugPrint('Error fetching unassigned businesses: $e');
@@ -272,10 +269,6 @@ class UserService {
   /// حفظ بيانات السوبر أدمن في مجموعة super_admins
   Future<void> saveSuperAdmin(SuperAdminModel superAdmin) async {
     try {
-      // 1. حفظ UserModel الأساسي
-      await saveUser(superAdmin.user);
-
-      // 2. حفظ بيانات السوبر أدمن
       await _firestore
           .collection(_superAdminsCollection)
           .doc(superAdmin.id)
@@ -317,48 +310,98 @@ class UserService {
         });
   }
 
-  /// تحديث إعدادات المنصة لمدير النظام
-  Future<void> updateSuperAdminPlatformSettings({
-    required String adminId,
-    required dynamic platformSettings,
-  }) async {
+  // ==========================================
+  // 🌐 3.1 PlatformConfig (إعدادات وهوية المنصة العامة)
+  // ==========================================
+
+  /// جلب إعدادات المنصة العامة
+  Future<PlatformConfigModel?> getPlatformConfig() async {
     try {
-      await _firestore.collection(_superAdminsCollection).doc(adminId).update({
-        'platformSettings': platformSettings,
+      final doc = await _firestore
+          .collection(_platformConfigCollection)
+          .doc('global_config')
+          .get();
+      if (doc.exists && doc.data() != null) {
+        return PlatformConfigModel.fromMap(doc.data()!, doc.id);
+      }
+    } catch (e) {
+      debugPrint('Error fetching PlatformConfig: $e');
+    }
+    return null;
+  }
+
+  /// حفظ أو تحديث إعدادات المنصة بالكامل
+  Future<void> savePlatformConfig(PlatformConfigModel config) async {
+    try {
+      await _firestore
+          .collection(_platformConfigCollection)
+          .doc(config.id.isNotEmpty ? config.id : 'global_config')
+          .set(config.toMap(), SetOptions(merge: true));
+      debugPrint('PlatformConfig saved successfully');
+    } catch (e) {
+      debugPrint('Error saving PlatformConfig: $e');
+    }
+  }
+
+  /// البث المباشر لإعدادات المنصة
+  Stream<PlatformConfigModel?> streamPlatformConfig() {
+    return _firestore
+        .collection(_platformConfigCollection)
+        .doc('global_config')
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.exists && snapshot.data() != null) {
+            return PlatformConfigModel.fromMap(snapshot.data()!, snapshot.id);
+          }
+          return null;
+        });
+  }
+
+  /// تحديث نصوص وترجمات المنصة
+  Future<void> updatePlatformLocalization(Map<String, dynamic> localization) async {
+    try {
+      await _firestore.collection(_platformConfigCollection).doc('global_config').set({
+        'localization': localization,
         'updatedAt': DateTime.now().toIso8601String(),
-      });
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Error updating platform localization: $e');
+    }
+  }
+
+  /// تحديث هوية وألوان وثيم المنصة
+  Future<void> updatePlatformTheme(Map<String, dynamic> theme) async {
+    try {
+      await _firestore.collection(_platformConfigCollection).doc('global_config').set({
+        'theme': theme,
+        'updatedAt': DateTime.now().toIso8601String(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Error updating platform theme: $e');
+    }
+  }
+
+  /// تحديث وسائل تواصل المنصة العامة
+  Future<void> updatePlatformSocials(List<Map<String, dynamic>> socials) async {
+    try {
+      await _firestore.collection(_platformConfigCollection).doc('global_config').set({
+        'socials': socials,
+        'updatedAt': DateTime.now().toIso8601String(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Error updating platform socials: $e');
+    }
+  }
+
+  /// تحديث إعدادات وتشغيل المنصة
+  Future<void> updatePlatformSettings(Map<String, dynamic> settings) async {
+    try {
+      await _firestore.collection(_platformConfigCollection).doc('global_config').set({
+        'settings': settings,
+        'updatedAt': DateTime.now().toIso8601String(),
+      }, SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error updating platform settings: $e');
-    }
-  }
-
-  /// تحديث الثيم (ThemeAdmin) لمدير النظام
-  Future<void> updateSuperAdminTheme({
-    required String adminId,
-    required Map<String, dynamic> theme,
-  }) async {
-    try {
-      await _firestore.collection(_superAdminsCollection).doc(adminId).update({
-        'themeAdmin': theme,
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
-    } catch (e) {
-      debugPrint('Error updating super admin theme: $e');
-    }
-  }
-
-  /// تحديث بيانات الترجمة والنصوص (LocalizationAdmin) لمدير النظام
-  Future<void> updateSuperAdminLocalization({
-    required String adminId,
-    required Map<String, dynamic> localization,
-  }) async {
-    try {
-      await _firestore.collection(_superAdminsCollection).doc(adminId).update({
-        'localizationAdmin': localization,
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
-    } catch (e) {
-      debugPrint('Error updating super admin localization: $e');
     }
   }
 
@@ -375,10 +418,6 @@ class UserService {
       return;
     }
     try {
-      // 1. حفظ UserModel الأساسي
-      await saveUser(customer.user);
-
-      // 2. حفظ بيانات العميل
       await _firestore
           .collection(_customersCollection)
           .doc(customer.id)

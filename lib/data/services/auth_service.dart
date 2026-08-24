@@ -6,9 +6,8 @@ import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId: kIsWeb ? 'YOUR_CLIENT_ID.apps.googleusercontent.com' : null,
-  );
+  GoogleSignIn? _mobileGoogleSignIn;
+  GoogleSignIn get _googleSignIn => _mobileGoogleSignIn ??= GoogleSignIn();
 
   /// الحصول على المستخدم الحالي في Firebase Auth
   User? get currentFirebaseUser => _auth.currentUser;
@@ -50,21 +49,29 @@ class AuthService {
   /// 3. تسجيل الدخول بواسطة حساب Google (Google Sign-In)
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      // 1. فتح نافذة اختيار حساب Google
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null; // قام المستخدم بإلغاء التسجيل
+      if (kIsWeb) {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+        googleProvider.setCustomParameters({'prompt': 'select_account'});
+        return await _auth.signInWithPopup(googleProvider);
+      } else {
+        // 1. فتح نافذة اختيار حساب Google للأجهزة الذكية
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) return null; // قام المستخدم بإلغاء التسجيل
 
-      // 2. الحصول على تفاصيل المصادقة من Google
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        // 2. الحصول على تفاصيل المصادقة من Google
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      // 3. إنشاء اعتمادات Firebase من خلال توكنات Google
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+        // 3. إنشاء اعتمادات Firebase من خلال توكنات Google
+        final OAuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
 
-      // 4. تسجيل الدخول في Firebase Auth
-      return await _auth.signInWithCredential(credential);
+        // 4. تسجيل الدخول في Firebase Auth
+        return await _auth.signInWithCredential(credential);
+      }
     } catch (e) {
       debugPrint('Error signing in with Google: $e');
       rethrow;
@@ -110,7 +117,9 @@ class AuthService {
   /// 8. تسجيل الخروج من Firebase و Google
   Future<void> signOut() async {
     try {
-      await _googleSignIn.signOut();
+      if (!kIsWeb) {
+        await _googleSignIn.signOut();
+      }
       await _auth.signOut();
     } catch (e) {
       debugPrint('Error signing out: $e');

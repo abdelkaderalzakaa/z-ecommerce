@@ -93,7 +93,7 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                             store.localization.name.get(context),
                         cellBuilder: (store) => TableImageTextCell(
                           title: store.localization.name.get(context),
-                          subtitle: store.owner?.email ?? '',
+                          subtitle: store.ownerEmail ?? '',
                           imageUrl: store.theme.logoUrl,
                           fallbackIcon: Icons.storefront_rounded,
                         ),
@@ -120,7 +120,7 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                         title: TranslationKeys.contact.tr(context),
                         flex: 1,
                         cellBuilder: (store) =>
-                            TableTextCell(title: store.owner?.email ?? ''),
+                            TableTextCell(title: store.ownerEmail ?? ''),
                       ),
                       AppTableColumn<BusinessModel>(
                         title: TranslationKeys.statusActive.tr(context),

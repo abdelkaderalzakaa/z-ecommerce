@@ -5,9 +5,9 @@ import '../../../../data/models/auth/user_model.dart';
 
 class StoreHeaderCard extends StatelessWidget {
   final BusinessModel store;
-  final UserModel owner;
+  final UserModel? owner;
 
-  const StoreHeaderCard({super.key, required this.store, required this.owner});
+  const StoreHeaderCard({super.key, required this.store, this.owner});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +87,7 @@ class StoreHeaderCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            owner.name,
+                            owner?.name ?? store.ownerName ?? 'غير محدد',
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ],

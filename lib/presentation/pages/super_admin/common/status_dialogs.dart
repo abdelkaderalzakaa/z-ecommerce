@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:z_ecommerce/data/models/order/invoice_model.dart';
+import 'package:z_ecommerce/data/models/order/order_model.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
-import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
@@ -12,8 +12,8 @@ import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart'
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 /// Interactive Order Status Update Dialog
-void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
-  OrderStatus selectedStatus = invoice.status;
+void showOrderStatusDialog(BuildContext context, OrderModel order) {
+  OrderStatus selectedStatus = order.status;
 
   showDialog(
     context: context,
@@ -29,7 +29,7 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
             children: [
               Icon(Icons.sync_alt_rounded, color: theme.primaryColor),
               const SizedBox(width: 10),
-              Text('تغيير حالة الطلب #${invoice.id}'),
+              Text('تغيير حالة الطلب #${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length)}'),
             ],
           ),
           content: Column(
@@ -73,10 +73,9 @@ void showOrderStatusDialog(BuildContext context, InvoiceModel invoice) {
             ),
             ButtonApp(
               onPressed: () {
-                invoice.updateStatus(
+                context.read<OrderProvider>().updateOrderStatus(
+                  order.id,
                   selectedStatus,
-                  "super_admin",
-                  UserRole.superAdmin,
                 );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(

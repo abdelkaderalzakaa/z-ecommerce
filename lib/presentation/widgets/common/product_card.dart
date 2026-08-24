@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:z_ecommerce/presentation/pages/customer/cart/cart_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart';
 import 'package:flutter/material.dart';
@@ -107,7 +108,7 @@ class _ProductImagePlaceholder extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.card - 1),
               child: (imageUrl != null && imageUrl.isNotEmpty)
-                  ? Image.network(
+                  ? CustomNetworkImage(imageUrl: 
                       imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Center(

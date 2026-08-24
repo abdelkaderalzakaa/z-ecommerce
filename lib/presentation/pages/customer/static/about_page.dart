@@ -9,6 +9,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 
 class AboutPage extends StatelessWidget {
   final bool useAdminTheme;
@@ -26,7 +27,6 @@ class AboutPage extends StatelessWidget {
     final isGlobal = business.id.isEmpty;
 
     final superAdminProvider = context.watch<SuperAdminProvider>();
-    final superAdmin = superAdminProvider.currentSuperAdmin;
 
     // Data Resolution:
     // Global context -> Super Admin data
@@ -36,15 +36,19 @@ class AboutPage extends StatelessWidget {
     String headerSubtitle = '';
 
     if (isGlobal) {
-      final saAbout = superAdmin?.platformSettings.aboutUsContent.get(context);
-      final saDesc = superAdmin?.localizationAdmin.description.get(context);
-      aboutText = (saAbout != null && saAbout.trim().isNotEmpty)
+      final saAbout = superAdminProvider.platformSettings.aboutUsContent.get(context);
+      final saDesc = superAdminProvider.platformLocalization.description.get(context);
+      aboutText = (saAbout.trim().isNotEmpty)
           ? saAbout
-          : ((saDesc != null && saDesc.trim().isNotEmpty)
-              ? saDesc
-              : 'z-matajer هي المنصة الأولى لدعم المتاجر والعمل الحر في منطقتك. نوفر تجربة تسوق إلكترونية متكاملة تربط التجار والعملاء بمرونة، أمان، وسرعة فائقة.');
-      headerTitle = superAdmin?.localizationAdmin.name.get(context) ?? 'منصة z-matajer';
-      headerSubtitle = 'المنصة التجارية الشاملة للمتاجر والتسوق الإلكتروني الموثوق';
+          : ((saDesc.trim().isNotEmpty)
+                ? saDesc
+                : 'z-matajer هي المنصة الأولى لدعم المتاجر والعمل الحر في منطقتك. نوفر تجربة تسوق إلكترونية متكاملة تربط التجار والعملاء بمرونة، أمان، وسرعة فائقة.');
+      headerTitle = superAdminProvider.platformLocalization.name.get(context);
+      if (headerTitle.isEmpty) headerTitle = 'منصة z-matajer';
+      headerSubtitle = superAdminProvider.platformLocalization.slogan.get(context);
+      if (headerSubtitle.isEmpty) {
+        headerSubtitle = 'المنصة التجارية الشاملة للمتاجر والتسوق الإلكتروني الموثوق';
+      }
     } else {
       aboutText = business.localization.aboutUs.get(context);
       headerTitle = business.localization.name.get(context);
@@ -55,18 +59,19 @@ class AboutPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: HeaderDetails(
-        title: TranslationKeys.about.tr(context),
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.about.tr(context),
-        ],
-      ),
+      appBar: HeaderDetails(title: TranslationKeys.about.tr(context)),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            TopTitle(
+              title: TranslationKeys.about.tr(context),
+              paths: [
+                TranslationKeys.home.tr(context),
+                TranslationKeys.about.tr(context),
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 36),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Column(
@@ -84,7 +89,11 @@ class AboutPage extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            Icon(Icons.info_outline_rounded, size: 48, color: theme.primaryColor.withOpacity(0.5)),
+                            Icon(
+                              Icons.info_outline_rounded,
+                              size: 48,
+                              color: theme.primaryColor.withOpacity(0.5),
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               "لم يتم إضافة معلومات من قبل هذا المتجر بعد",
@@ -105,8 +114,16 @@ class AboutPage extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: isDark
-                                ? [theme.primaryColor.withOpacity(0.3), theme.cardColor, theme.cardColor]
-                                : [theme.primaryColor, theme.cardColor, theme.cardColor],
+                                ? [
+                                    theme.primaryColor.withOpacity(0.3),
+                                    theme.cardColor,
+                                    theme.cardColor,
+                                  ]
+                                : [
+                                    theme.primaryColor,
+                                    theme.cardColor,
+                                    theme.cardColor,
+                                  ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: AppColors.cardBorder),
@@ -128,7 +145,11 @@ class AboutPage extends StatelessWidget {
                                 children: [
                                   Row(
                                     children: [
-                                      const Icon(Icons.stars_rounded, color: Colors.amber, size: 24),
+                                      const Icon(
+                                        Icons.stars_rounded,
+                                        color: Colors.amber,
+                                        size: 24,
+                                      ),
                                       const SizedBox(width: 8),
                                       Text(
                                         headerTitle,
@@ -146,18 +167,27 @@ class AboutPage extends StatelessWidget {
                                       headerSubtitle,
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: isDark ? AppColors.textMuted : theme.primaryColor.withOpacity(0.8),
+                                        color: isDark
+                                            ? AppColors.textMuted
+                                            : theme.primaryColor.withOpacity(
+                                                0.8,
+                                              ),
                                       ),
                                     ),
                                   ],
                                   const SizedBox(height: 14),
                                   Text(
                                     aboutText,
-                                    style: AppTextStyles.bodyText(context).copyWith(
-                                      fontSize: isMobile ? 14 : 16,
-                                      height: 1.6,
-                                      color: isDark ? theme.textTheme.bodyLarge?.color : theme.primaryColor.withOpacity(0.95),
-                                    ),
+                                    style: AppTextStyles.bodyText(context)
+                                        .copyWith(
+                                          fontSize: isMobile ? 14 : 16,
+                                          height: 1.6,
+                                          color: isDark
+                                              ? theme.textTheme.bodyLarge?.color
+                                              : theme.primaryColor.withOpacity(
+                                                  0.95,
+                                                ),
+                                        ),
                                   ),
                                 ],
                               ),
@@ -166,13 +196,19 @@ class AboutPage extends StatelessWidget {
                             Expanded(
                               flex: isMobile ? 0 : 4,
                               child: Padding(
-                                padding: EdgeInsets.only(top: isMobile ? 20 : 0),
+                                padding: EdgeInsets.only(
+                                  top: isMobile ? 20 : 0,
+                                ),
                                 child: Container(
                                   height: 160,
                                   decoration: BoxDecoration(
                                     color: theme.primaryColor.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: theme.primaryColor.withOpacity(0.25)),
+                                    border: Border.all(
+                                      color: theme.primaryColor.withOpacity(
+                                        0.25,
+                                      ),
+                                    ),
                                   ),
                                   child: Center(
                                     child: Icon(
@@ -208,7 +244,8 @@ class AboutPage extends StatelessWidget {
                               child: const _ValueCard(
                                 icon: Icons.shield_outlined,
                                 title: "أمان وثقة عالية",
-                                subtitle: "حماية كاملة للبيانات والتحاملات المالية الموثوقة.",
+                                subtitle:
+                                    "حماية كاملة للبيانات والتحاملات المالية الموثوقة.",
                                 color: Colors.blue,
                               ),
                             ),
@@ -218,7 +255,8 @@ class AboutPage extends StatelessWidget {
                               child: const _ValueCard(
                                 icon: Icons.bolt_outlined,
                                 title: "سرعة الأداء",
-                                subtitle: "تصفح فورياً للشراء والتسليم السريع للطلبات.",
+                                subtitle:
+                                    "تصفح فورياً للشراء والتسليم السريع للطلبات.",
                                 color: AppColors.green,
                               ),
                             ),
@@ -228,7 +266,8 @@ class AboutPage extends StatelessWidget {
                               child: const _ValueCard(
                                 icon: Icons.workspace_premium_outlined,
                                 title: "جودة المنتجات",
-                                subtitle: "منتجات مفحوصة ومتاجر معتمدة مرخصة بالكامل.",
+                                subtitle:
+                                    "منتجات مفحوصة ومتاجر معتمدة مرخصة بالكامل.",
                                 color: Colors.amber,
                               ),
                             ),
@@ -392,7 +431,8 @@ class _StatCard extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 13,
-              color: theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
+              color:
+                  theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary,
             ),
           ),
         ],

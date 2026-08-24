@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:z_ecommerce/presentation/pages/customer/offer/offer_details_page.dart';
 import 'dart:async';
 import 'dart:ui';
@@ -145,7 +146,7 @@ class _OfferCardState extends State<OfferCard>
                 children: [
                   // Background Image
                   if (offer.imageUrl != null)
-                    Image.network(
+                    CustomNetworkImage(imageUrl: 
                       offer.imageUrl!,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>

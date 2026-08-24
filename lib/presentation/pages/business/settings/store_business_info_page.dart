@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
-import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/add_edit_template.dart';
 
@@ -18,47 +18,96 @@ class _StoreBusinessInfoPageState extends State<StoreBusinessInfoPage> {
 
   late TextEditingController _nameArController;
   late TextEditingController _nameEnController;
-  late TextEditingController _sloganController;
-  late TextEditingController _descriptionController;
+  late TextEditingController _sloganArController;
+  late TextEditingController _sloganEnController;
+  late TextEditingController _descriptionArController;
+  late TextEditingController _descriptionEnController;
 
   bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    // In a real scenario, fetch these from BusinessModel via Provider
-    _nameArController = TextEditingController(text: 'متجري التجاري');
-    _nameEnController = TextEditingController(text: 'My Commercial Store');
-    _sloganController = TextEditingController(text: 'أفخم التشكيلات المودرن');
-    _descriptionController = TextEditingController(
-      text: 'متجر متخصص بتقديم أحدث المنتجات بجودة عالية وأسعار منافسة',
-    );
+    final business = context.read<BusinessProvider>().selectedBusiness;
+    _nameArController = TextEditingController(text: business.localization.name.ar);
+    _nameEnController = TextEditingController(text: business.localization.name.en);
+    _sloganArController = TextEditingController(text: business.localization.slogan.ar);
+    _sloganEnController = TextEditingController(text: business.localization.slogan.en);
+    _descriptionArController = TextEditingController(text: business.localization.description.ar);
+    _descriptionEnController = TextEditingController(text: business.localization.description.en);
   }
 
   @override
   void dispose() {
     _nameArController.dispose();
     _nameEnController.dispose();
-    _sloganController.dispose();
-    _descriptionController.dispose();
+    _sloganArController.dispose();
+    _sloganEnController.dispose();
+    _descriptionArController.dispose();
+    _descriptionEnController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    setState(() => _isSubmitting = false);
-
-    if (mounted) {
+    final business = context.read<BusinessProvider>().selectedBusiness;
+    if (business.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('تم حفظ وتحديث بيانات المتجر بنجاح!'),
-          backgroundColor: Colors.green,
+          content: Text('خطأ: لم يتم تحديد المتجر'),
+          backgroundColor: Colors.red,
         ),
       );
-      Navigator.pop(context);
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final updatedLocalization = business.localization.copyWith(
+        name: LocalizedString(
+          ar: _nameArController.text.trim(),
+          en: _nameEnController.text.trim().isNotEmpty
+              ? _nameEnController.text.trim()
+              : _nameArController.text.trim(),
+        ),
+        slogan: LocalizedString(
+          ar: _sloganArController.text.trim(),
+          en: _sloganEnController.text.trim(),
+        ),
+        description: LocalizedString(
+          ar: _descriptionArController.text.trim(),
+          en: _descriptionEnController.text.trim(),
+        ),
+      );
+
+      await context.read<BusinessProvider>().updateLocalization(
+            business.id,
+            updatedLocalization,
+          );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تم حفظ وتحديث بيانات المتجر بنجاح!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('حدث خطأ أثناء الحفظ: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -102,26 +151,52 @@ class _StoreBusinessInfoPageState extends State<StoreBusinessInfoPage> {
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language, size: 20),
                     ),
-                    validator: (v) => v!.isEmpty ? TranslationKeys.required.tr(context) : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _sloganArController,
+                    decoration: InputDecoration(
+                      labelText: '${TranslationKeys.storeSlogan.tr(context)} (عربي)',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.format_quote_rounded, size: 20),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    controller: _sloganEnController,
+                    decoration: InputDecoration(
+                      labelText: '${TranslationKeys.storeSlogan.tr(context)} (English)',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.format_quote_rounded, size: 20),
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _sloganController,
+              controller: _descriptionArController,
+              maxLines: 3,
               decoration: InputDecoration(
-                labelText: TranslationKeys.storeSlogan.tr(context),
+                labelText: '${TranslationKeys.storeDescription.tr(context)} (عربي)',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.format_quote_rounded, size: 20),
+                alignLabelWithHint: true,
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _descriptionController,
-              maxLines: 4,
+              controller: _descriptionEnController,
+              maxLines: 3,
               decoration: InputDecoration(
-                labelText: TranslationKeys.storeDescription.tr(context),
+                labelText: '${TranslationKeys.storeDescription.tr(context)} (English)',
                 border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),

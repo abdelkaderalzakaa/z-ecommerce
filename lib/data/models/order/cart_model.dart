@@ -19,8 +19,9 @@ class CartItemModel {
   final String? offerId;
   final String? offerName;
   
-  // Pricing (For display purposes. Will be revalidated on checkout)
+  // Pricing (For display purposes initially, then frozen at checkout)
   final double displayPrice; 
+  final double discountAmount;
   
   int quantity;
 
@@ -35,6 +36,7 @@ class CartItemModel {
     this.offerId,
     this.offerName,
     required this.displayPrice,
+    this.discountAmount = 0.0,
     this.quantity = 1,
   }) : assert(
          productId != null || offerId != null,
@@ -42,7 +44,7 @@ class CartItemModel {
        );
 
   double get unitPrice => displayPrice;
-  double get totalPrice => unitPrice * quantity;
+  double get totalPrice => (unitPrice * quantity) - discountAmount;
   bool get hasVariant => selectedVariant != null;
 
   String? get variantDisplayName {
@@ -64,6 +66,7 @@ class CartItemModel {
       'offerId': offerId,
       'offerName': offerName,
       'displayPrice': displayPrice,
+      'discountAmount': discountAmount,
       'quantity': quantity,
     };
   }
@@ -87,6 +90,7 @@ class CartItemModel {
       offerId: map['offerId'],
       offerName: map['offerName'],
       displayPrice: (map['displayPrice'] as num? ?? 0.0).toDouble(),
+      discountAmount: (map['discountAmount'] as num? ?? 0.0).toDouble(),
       quantity: map['quantity'] ?? 1,
     );
   }

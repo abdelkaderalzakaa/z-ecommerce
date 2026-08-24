@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/shared/follower_model.dart';
@@ -575,8 +576,17 @@ class _BusinessCardItem extends StatelessWidget {
 
   void _navigateToBusiness(BuildContext context) async {
     final businessProvider = context.read<BusinessProvider>();
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    
     await businessProvider.selectBusiness(business.id);
+    
     if (context.mounted) {
+      Navigator.of(context).pop(); // Close loading dialog
       changeScreen(context, const HomePage());
     }
   }
@@ -772,7 +782,7 @@ class _BusinessCardItem extends StatelessWidget {
                             backgroundColor: theme.primaryColor.withOpacity(0.12),
                             child: (logoUrl != null && logoUrl.isNotEmpty)
                                 ? ClipOval(
-                                    child: Image.network(
+                                    child: CustomNetworkImage(imageUrl: 
                                       logoUrl,
                                       width: 52,
                                       height: 52,

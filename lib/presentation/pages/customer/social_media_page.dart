@@ -10,6 +10,7 @@ import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layou
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 
 class SocialMediaPage extends StatelessWidget {
   const SocialMediaPage({super.key});
@@ -62,27 +63,36 @@ class SocialMediaPage extends StatelessWidget {
     final hasSelectedBusiness = !selectedBusiness.isEmpty;
 
     final superAdminProvider = context.watch<SuperAdminProvider>();
-    final superAdmin = superAdminProvider.currentSuperAdmin;
 
     final String pageTitle = hasSelectedBusiness
         ? selectedBusiness.localization.name.get(context)
-        : (superAdmin?.localizationAdmin.name.get(context) ?? 'z-matajer');
+        : (superAdminProvider.platformLocalization.name.get(context).isNotEmpty
+            ? superAdminProvider.platformLocalization.name.get(context)
+            : 'z-matajer');
 
     final String phone = hasSelectedBusiness
-        ? (selectedBusiness.owner?.phoneNumber ?? '')
-        : (superAdmin?.user.phoneNumber ?? '');
+        ? (selectedBusiness.ownerPhone ?? '')
+        : ((superAdminProvider.platformSettings.phone != null &&
+                superAdminProvider.platformSettings.phone!.isNotEmpty)
+            ? superAdminProvider.platformSettings.phone!
+            : '+966 50 123 4567');
     final String email = hasSelectedBusiness
-        ? (selectedBusiness.owner?.email ?? '')
-        : (superAdmin?.user.email ?? '');
+        ? (selectedBusiness.ownerEmail ?? '')
+        : ((superAdminProvider.platformSettings.email != null &&
+                superAdminProvider.platformSettings.email!.isNotEmpty)
+            ? superAdminProvider.platformSettings.email!
+            : 'support@z-matajer.com');
 
     final List<SocialModel> entitySocials = hasSelectedBusiness
         ? selectedBusiness.socials
-        : (superAdmin?.socials ?? []);
+        : superAdminProvider.platformSocials;
 
     final List<_SocialChannelItem> channels = [];
 
     // Map SocialModel list to display channels
-    for (final s in entitySocials.where((s) => s.isVisible && s.url.isNotEmpty)) {
+    for (final s in entitySocials.where(
+      (s) => s.isVisible && s.url.isNotEmpty,
+    )) {
       channels.add(
         _SocialChannelItem(
           name: s.title.get(context),
@@ -132,18 +142,22 @@ class SocialMediaPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: HeaderDetails(
-        title: isAr ? 'وسائل التواصل والاتصال' : 'Social Media & Contact Channels',
-        paths: [isAr ? 'وسائل التواصل' : 'Social Media'],
+        title: isAr
+            ? 'وسائل التواصل والاتصال'
+            : 'Social Media & Contact Channels',
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TopTitle(
+              title: isAr
+                  ? 'وسائل التواصل والاتصال'
+                  : 'Social Media & Contact Channels',
+              paths: [isAr ? 'وسائل التواصل' : 'Social Media'],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: hPad,
-                vertical: isMobile ? 20 : 32,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -156,7 +170,11 @@ class SocialMediaPage extends StatelessWidget {
                           color: theme.primaryColor.withOpacity(0.12),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.share, color: theme.primaryColor, size: 28),
+                        child: Icon(
+                          Icons.share,
+                          color: theme.primaryColor,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -164,7 +182,9 @@ class SocialMediaPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isAr ? 'قنوات التواصل الرسمي' : 'Official Communication Channels',
+                              isAr
+                                  ? 'قنوات التواصل الرسمي'
+                                  : 'Official Communication Channels',
                               style: TextStyle(
                                 fontSize: isMobile ? 22 : 28,
                                 fontWeight: FontWeight.bold,
@@ -176,7 +196,10 @@ class SocialMediaPage extends StatelessWidget {
                               isAr
                                   ? 'تواصل معنا مباشرة عبر المنصات الاجتماعية الرسمية لـ ($pageTitle)'
                                   : 'Connect with ($pageTitle) via official social media channels',
-                              style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13),
+                              style: TextStyle(
+                                color: theme.textTheme.bodyMedium?.color,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -189,7 +212,10 @@ class SocialMediaPage extends StatelessWidget {
                   if (channels.isEmpty)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 60,
+                        horizontal: 24,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(16),
@@ -204,7 +230,9 @@ class SocialMediaPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            isAr ? 'لم يتم إضافة وسائل تواصل بعد' : 'No Social Channels Available',
+                            isAr
+                                ? 'لم يتم إضافة وسائل تواصل بعد'
+                                : 'No Social Channels Available',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -249,29 +277,40 @@ class SocialMediaPage extends StatelessWidget {
                                 padding: const EdgeInsets.all(18),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
-                                            color: channel.color.withOpacity(0.12),
+                                            color: channel.color.withOpacity(
+                                              0.12,
+                                            ),
                                             shape: BoxShape.circle,
                                           ),
-                                          child: Icon(channel.icon, color: channel.color, size: 24),
+                                          child: Icon(
+                                            channel.icon,
+                                            color: channel.color,
+                                            size: 24,
+                                          ),
                                         ),
                                         const SizedBox(width: 14),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 channel.name,
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
-                                                  color: theme.textTheme.bodyLarge?.color,
+                                                  color: theme
+                                                      .textTheme
+                                                      .bodyLarge
+                                                      ?.color,
                                                 ),
                                               ),
                                               const SizedBox(height: 2),
@@ -291,18 +330,30 @@ class SocialMediaPage extends StatelessWidget {
                                     ),
                                     const Divider(height: 20),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         ButtonApp(
-                                          label: isAr ? 'انتقال / زيارة' : 'Visit Now',
+                                          label: isAr
+                                              ? 'انتقال / زيارة'
+                                              : 'Visit Now',
                                           icon: Icons.open_in_new,
                                           fontSize: 12,
-                                          onPressed: () => _launchUrl(context, channel.url),
+                                          onPressed: () =>
+                                              _launchUrl(context, channel.url),
                                         ),
                                         IconButton(
-                                          tooltip: isAr ? 'نسخ الرابط' : 'Copy Link',
-                                          icon: const Icon(Icons.copy, size: 18),
-                                          onPressed: () => _copyToClipboard(context, channel.url),
+                                          tooltip: isAr
+                                              ? 'نسخ الرابط'
+                                              : 'Copy Link',
+                                          icon: const Icon(
+                                            Icons.copy,
+                                            size: 18,
+                                          ),
+                                          onPressed: () => _copyToClipboard(
+                                            context,
+                                            channel.url,
+                                          ),
                                         ),
                                       ],
                                     ),

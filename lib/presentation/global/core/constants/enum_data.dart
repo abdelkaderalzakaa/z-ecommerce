@@ -45,7 +45,13 @@ enum UserRole {
   superAdmin,
   businessOwner,
   customer,
+  delivery,
 }
+
+enum DeliveryEntityType { company, individual }
+
+enum DeliveryHandlingType { own, platform }
+
 enum SocialPlatform {
   instagram,
   facebook,

@@ -7,6 +7,7 @@ import '../../../data/models/product/brand_model.dart';
 import '../../../data/providers/product_provider.dart';
 import '../../../data/providers/product_filter_provider.dart';
 import '../../../data/providers/like_provider.dart';
+import '../../../data/providers/business_provider.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
@@ -31,10 +32,16 @@ class ProductGrid extends StatelessWidget {
     // Grid column count based on breakpoint
     int crossAxisCount = isMobile ? 2 : (isTablet ? 2 : 3);
 
-    return Consumer3<ProductProvider, ProductFilterProvider, LikeProvider>(
-      builder: (context, productProvider, filterProvider, likeProvider, child) {
+    return Consumer4<ProductProvider, ProductFilterProvider, LikeProvider, BusinessProvider>(
+      builder: (context, productProvider, filterProvider, likeProvider, businessProvider, child) {
+        final selectedBusinessId = businessProvider.selectedBusiness.id;
+        
+        final baseProducts = selectedBusinessId.isNotEmpty
+            ? productProvider.customerAllProducts.where((p) => p.businessId == selectedBusinessId).toList()
+            : productProvider.customerAllProducts;
+
         final products = filterProvider.getFilteredProducts(
-          productProvider.allProducts,
+          baseProducts,
           likeProvider: likeProvider,
         );
 

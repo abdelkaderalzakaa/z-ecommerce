@@ -45,10 +45,10 @@ class _FollowersTabState extends State<FollowersTab> {
                 margin: const EdgeInsets.only(bottom: 8.0),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: follower.userAvatar != null
+                    backgroundImage: follower.userAvatar != null && follower.userAvatar!.isNotEmpty
                         ? NetworkImage(follower.userAvatar!)
                         : null,
-                    child: follower.userAvatar == null
+                    child: follower.userAvatar == null || follower.userAvatar!.isEmpty
                         ? const Icon(Icons.person)
                         : null,
                   ),

@@ -87,6 +87,44 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    final authProvider = context.read<AuthProvider>();
+
+    final success = await authProvider.signInWithGoogle();
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      if (success) {
+        final role = authProvider.currentUser?.role;
+        if (role == UserRole.superAdmin) {
+          changeScreenUntill(context, const SuperAdminHome());
+        } else if (role == UserRole.businessOwner) {
+          if (authProvider.currentUser?.businessId != null) {
+            await context
+                .read<BusinessProvider>()
+                .selectBusiness(authProvider.currentUser!.businessId!);
+          }
+          changeScreenUntill(context, const AdminStore());
+        } else {
+          final destination = widget.redirectTo ?? '/';
+          if (destination == '/') {
+            changeScreenUntill(context, const BusinessEntry());
+          } else {
+            Navigator.pushReplacementNamed(context, destination);
+          }
+        }
+      } else if (authProvider.errorMessage != null) {
+        setState(() {
+          _errorMessage = authProvider.errorMessage;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -238,7 +276,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // Social Login
               SocialLoginButtons(
-                onGooglePressed: () {},
+                onGooglePressed: _handleGoogleSignIn,
               ),
               const SizedBox(height: 24),
 

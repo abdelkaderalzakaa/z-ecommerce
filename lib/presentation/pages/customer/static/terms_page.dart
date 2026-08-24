@@ -9,6 +9,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 
 class TermsPage extends StatelessWidget {
   final bool useAdminTheme;
@@ -23,15 +24,18 @@ class TermsPage extends StatelessWidget {
     final business = businessProvider.selectedBusiness;
     final isGlobal = business.id.isEmpty;
     final superAdminProvider = context.watch<SuperAdminProvider>();
-    final superAdmin = superAdminProvider.currentSuperAdmin;
 
     String termsText = '';
     if (isGlobal) {
-      final saTerms = superAdmin?.platformSettings.termsContent.get(context);
-      final saAdminTerms = superAdmin?.localizationAdmin.termsAndConditions.get(context);
-      termsText = (saTerms != null && saTerms.trim().isNotEmpty)
+      final saTerms = superAdminProvider.platformSettings.termsContent.get(context);
+      final saAdminTerms = superAdminProvider.platformLocalization.termsAndConditions.get(
+        context,
+      );
+      termsText = (saTerms.trim().isNotEmpty)
           ? saTerms
-          : ((saAdminTerms != null && saAdminTerms.trim().isNotEmpty) ? saAdminTerms : '');
+          : ((saAdminTerms.trim().isNotEmpty)
+                ? saAdminTerms
+                : '');
     } else {
       termsText = business.localization.termsAndConditions.get(context);
     }
@@ -71,18 +75,19 @@ class TermsPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: HeaderDetails(
-        title: TranslationKeys.termsConditions.tr(context),
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.termsConditions.tr(context),
-        ],
-      ),
+      appBar: HeaderDetails(title: TranslationKeys.termsConditions.tr(context)),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            TopTitle(
+              title: TranslationKeys.termsConditions.tr(context),
+              paths: [
+                TranslationKeys.home.tr(context),
+                TranslationKeys.termsConditions.tr(context),
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 36),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 1200),
                 child: Column(
@@ -107,9 +112,15 @@ class TermsPage extends StatelessWidget {
                       child: Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: theme.primaryColor.withOpacity(0.12),
+                            backgroundColor: theme.primaryColor.withOpacity(
+                              0.12,
+                            ),
                             radius: 26,
-                            child: Icon(Icons.rule_folder_outlined, color: theme.primaryColor, size: 28),
+                            child: Icon(
+                              Icons.rule_folder_outlined,
+                              color: theme.primaryColor,
+                              size: 28,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -127,7 +138,9 @@ class TermsPage extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   TranslationKeys.termsSubtitle.tr(context),
-                                  style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+                                  style: AppTextStyles.bodyText(
+                                    context,
+                                  ).copyWith(fontSize: 13),
                                 ),
                               ],
                             ),
@@ -149,7 +162,11 @@ class TermsPage extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            Icon(Icons.gavel_outlined, size: 48, color: theme.primaryColor.withOpacity(0.5)),
+                            Icon(
+                              Icons.gavel_outlined,
+                              size: 48,
+                              color: theme.primaryColor.withOpacity(0.5),
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               "لم يتم إضافة شروط وأحكام خاصة بهذا المتجر بعد",
@@ -182,7 +199,9 @@ class TermsPage extends StatelessWidget {
                           ),
                           child: Text(
                             termsText,
-                            style: AppTextStyles.bodyText(context).copyWith(fontSize: 14, height: 1.6),
+                            style: AppTextStyles.bodyText(
+                              context,
+                            ).copyWith(fontSize: 14, height: 1.6),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -213,7 +232,9 @@ class TermsPage extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: theme.primaryColor.withOpacity(0.12),
+                                      color: theme.primaryColor.withOpacity(
+                                        0.12,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Icon(
@@ -225,7 +246,8 @@ class TermsPage extends StatelessWidget {
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -244,7 +266,10 @@ class TermsPage extends StatelessWidget {
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
-                                                  color: theme.textTheme.bodyLarge?.color,
+                                                  color: theme
+                                                      .textTheme
+                                                      .bodyLarge
+                                                      ?.color,
                                                 ),
                                               ),
                                             ),
@@ -253,10 +278,9 @@ class TermsPage extends StatelessWidget {
                                         const SizedBox(height: 8),
                                         Text(
                                           sec['content'] as String,
-                                          style: AppTextStyles.bodyText(context).copyWith(
-                                            fontSize: 13,
-                                            height: 1.6,
-                                          ),
+                                          style: AppTextStyles.bodyText(
+                                            context,
+                                          ).copyWith(fontSize: 13, height: 1.6),
                                         ),
                                       ],
                                     ),

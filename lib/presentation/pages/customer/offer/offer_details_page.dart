@@ -15,6 +15,7 @@ import '../../../widgets/common/product_card.dart';
 import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/common/headers/header_details.dart';
 import '../../../../data/providers/business_provider.dart';
+import '../../../widgets/common/headers/widgets/top_title.dart';
 
 class OfferDetailsPage extends StatefulWidget {
   final String offerId;
@@ -97,19 +98,25 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
 
     final hPad = ResponsiveLayout.horizontalPadding(context);
     return Scaffold(
-      appBar: HeaderDetails(
-        title: offer.name.get(context),
-        fallbackRoute: 'offers',
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.specialOffers.tr(context),
-          offer.name.get(context),
-        ],
-      ),
+      appBar: HeaderDetails(title: offer.name.get(context)),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: hPad),
         child: CustomScrollView(
           slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: TopTitle(
+                  title: offer.name.get(context),
+                  fallbackRoute: 'offers',
+                  paths: [
+                    TranslationKeys.home.tr(context),
+                    TranslationKeys.specialOffers.tr(context),
+                    offer.name.get(context),
+                  ],
+                ),
+              ),
+            ),
             _buildHeroHeader(context, offer),
             SliverToBoxAdapter(
               child: Padding(
@@ -282,10 +289,8 @@ class _OfferDetailsPageState extends State<OfferDetailsPage> {
                             ),
                           );
                         },
-                        icon: 
-                          Icons.copy, 
-                        label:  
-                          'Copy: ${offer.couponCode}', 
+                        icon: Icons.copy,
+                        label: 'Copy: ${offer.couponCode}',
                       ),
                   ],
                 ),

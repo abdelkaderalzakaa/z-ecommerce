@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/order/invoice_model.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
-import 'package:z_ecommerce/data/providers/invoice_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -23,8 +21,8 @@ class StoreDashboardOverviewPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: Consumer2<ProductProvider, InvoiceProvider>(
-        builder: (context, productProvider, invoiceProvider, child) {
+      body: Consumer<ProductProvider>(
+        builder: (context, productProvider, child) {
           final currentStoreId =
               context.read<BusinessProvider>().selectedBusiness.id;
           final myStoreProducts = productProvider.allProducts

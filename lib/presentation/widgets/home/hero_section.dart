@@ -1,17 +1,22 @@
+import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_html/html.dart' as html;
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/follower_provider.dart';
 import 'package:z_ecommerce/data/providers/review_provider.dart';
 import 'package:z_ecommerce/data/providers/like_provider.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
+import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
 import 'package:z_ecommerce/data/models/shared/follower_model.dart';
 import 'package:z_ecommerce/data/models/shared/like_model.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
-import 'package:z_ecommerce/presentation/global/theme/app_colors.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -28,15 +33,35 @@ class _HeroSectionState extends State<HeroSection> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final selectedBusiness = context.read<BusinessProvider>().selectedBusiness;
+      final selectedBusiness = context
+          .read<BusinessProvider>()
+          .selectedBusiness;
       if (selectedBusiness.id.isNotEmpty) {
-        context.read<FollowerProvider>().listenToStoreFollowers(selectedBusiness.id);
-        context.read<ReviewProvider>().listenToBusinessReviews(selectedBusiness.id);
-        context.read<LikeProvider>().listenToTargetLikesCount(selectedBusiness.id);
+        context.read<FollowerProvider>().listenToStoreFollowers(
+          selectedBusiness.id,
+        );
+        context.read<ReviewProvider>().listenToBusinessReviews(
+          selectedBusiness.id,
+        );
+        context.read<LikeProvider>().listenToTargetLikesCount(
+          selectedBusiness.id,
+        );
+        context.read<OrderProvider>().listenToBusinessOrders(
+          selectedBusiness.id,
+        );
         final auth = context.read<AuthProvider>();
         if (auth.isAuthenticated) {
           context.read<LikeProvider>().listenToUserLikes(auth.currentUser!.id);
         }
+
+        // Record a visit
+        final visit = BusinessVisitModel(
+          id: '',
+          businessId: selectedBusiness.id,
+          userId: auth.currentUser?.id,
+          visitDate: DateTime.now(),
+        );
+        context.read<BusinessProvider>().addVisit(selectedBusiness.id, visit);
       }
     });
   }
@@ -44,7 +69,6 @@ class _HeroSectionState extends State<HeroSection> {
   @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
-    final hPad = ResponsiveLayout.horizontalPadding(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -56,201 +80,178 @@ class _HeroSectionState extends State<HeroSection> {
     final logoUrl = selectedBusiness.theme.logoUrl;
     final primaryColor = Theme.of(context).primaryColor;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 24),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.1) : theme.dividerColor,
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.06),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
+    final langCode = Localizations.localeOf(context).languageCode;
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.1) : theme.dividerColor,
+          width: 1,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            /// 1. Top Cover / Hero Header Banner
-            Container(
-              height: isMobile ? 140 : 200,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.xl),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          /// 1. Top Cover / Hero Header Banner
+          Container(
+            height: isMobile ? 50 : 90,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  primaryColor.withOpacity(0.25),
+                  primaryColor.withOpacity(0.85),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
                 ),
-                gradient: LinearGradient(
-                  colors: [
-                    primaryColor.withOpacity(0.85),
-                    primaryColor.withOpacity(0.4),
+                Spacer(),
+                ChipApp(
+                  icon: selectedBusiness.businessType.icon,
+                  lable: selectedBusiness.businessType.ar,
+                  color: primaryColor,
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                margin: EdgeInsets.all(10),
+                width: isMobile ? 35 : 75,
+                height: isMobile ? 35 : 75,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.scaffoldBackgroundColor,
+                  border: Border.all(color: theme.cardColor, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                ),
+                child: ClipOval(
+                  child: logoUrl != null && logoUrl.isNotEmpty
+                      ? CustomNetworkImage(
+                          imageUrl: logoUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (ctx, err, stack) =>
+                              _buildFallbackLogo(context, primaryColor),
+                        )
+                      : _buildFallbackLogo(context, primaryColor),
                 ),
               ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: -40,
-                    top: -40,
-                    child: CircleAvatar(
-                      radius: 120,
-                      backgroundColor: Colors.white.withOpacity(0.08),
-                    ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    top: 20,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(20),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      storeName.isNotEmpty ? storeName : 'اسم البزنس غير محدد',
+                      style: TextStyle(
+                        fontSize: isMobile ? 18 : 21,
+                        fontWeight: FontWeight.bold,
+                        color: theme.textTheme.displayLarge?.color,
                       ),
-                      child: Row(
+                    ),
+
+                    /// الفروع والعناوين
+                    if (selectedBusiness.addAddress.isNotEmpty)
+                      Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(selectedBusiness.businessType.icon, color: Colors.white, size: 16),
+                          Icon(
+                            Icons.location_on_rounded,
+                            color: theme.primaryColor,
+                            size: 18,
+                          ),
                           const SizedBox(width: 6),
-                          Text(
-                            selectedBusiness.businessType.ar,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            /// 2. Main Profile Content Section
-            Transform.translate(
-              offset: const Offset(0, -50),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 36),
-                child: Column(
-                  crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-                  children: [
-                    /// Logo Avatar & Action Row
-                    Flex(
-                      direction: isMobile ? Axis.vertical : Axis.horizontal,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.end,
-                      children: [
-                        /// Store Logo with Glowing Border
-                        Container(
-                          width: isMobile ? 100 : 120,
-                          height: isMobile ? 100 : 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.scaffoldBackgroundColor,
-                            border: Border.all(color: theme.cardColor, width: 4),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primaryColor.withOpacity(0.25),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
+                          Flexible(
+                            child: Text(
+                              selectedBusiness.addAddress.first
+                                  .getFormattedAddress(langCode: langCode),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: theme.textTheme.bodyMedium?.color,
                               ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: logoUrl != null && logoUrl.isNotEmpty
-                                ? Image.network(
-                                    logoUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, stack) => _buildFallbackLogo(context, primaryColor),
-                                  )
-                                : _buildFallbackLogo(context, primaryColor),
-                          ),
-                        ),
-                        if (isMobile) const SizedBox(height: 16),
-
-                        /// Follow & Contact Actions
-                        _HeroActions(business: selectedBusiness),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// Store Title & Verified Badge
-                    Row(
-                      mainAxisSize: isMobile ? MainAxisSize.min : MainAxisSize.max,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            storeName.isNotEmpty ? storeName : 'اسم البزنس غير محدد',
-                            style: TextStyle(
-                              fontSize: isMobile ? 24 : 32,
-                              fontWeight: FontWeight.bold,
-                              color: theme.textTheme.displayLarge?.color,
                             ),
                           ),
-                        ),
-                        if (selectedBusiness.isVerified) ...[
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.verified_rounded,
-                            color: Colors.blueAccent,
-                            size: 26,
-                          ),
                         ],
-                      ],
-                    ),
-
-                    if (storeSlogan.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        storeSlogan,
-                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                        style: TextStyle(
-                          fontSize: isMobile ? 15 : 18,
-                          fontWeight: FontWeight.w600,
-                          color: primaryColor,
-                        ),
                       ),
-                    ],
-
-                    if (storeDesc.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        storeDesc,
-                        textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.6,
-                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
-                        ),
-                      ),
-                    ],
-
-                    const SizedBox(height: 24),
-
-                    /// 3. Rich KPIs & Metrics Bar (المتابعين، الزيارات، الطلبات، التقييم، الإعجابات)
-                    _HeroMetricsBar(business: selectedBusiness),
-
-                    /// 4. Addresses & Contact Badges Section
-                    if (selectedBusiness.addAddress.isNotEmpty || selectedBusiness.socials.isNotEmpty) ...[
-                      const SizedBox(height: 20),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      _HeroDetailsFooter(business: selectedBusiness),
-                    ],
                   ],
                 ),
               ),
+              if (selectedBusiness.isVerified) ...[
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.verified_rounded,
+                  color: Colors.blueAccent,
+                  size: 24,
+                ),
+              ],
+            ],
+          ),
+          if (storeSlogan.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              storeSlogan,
+              textAlign: isMobile ? TextAlign.center : TextAlign.start,
+              style: TextStyle(
+                fontSize: isMobile ? 14 : 16,
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+              ),
             ),
           ],
-        ),
+
+          if (storeDesc.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              storeDesc,
+              textAlign: isMobile ? TextAlign.center : TextAlign.start,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+              ),
+            ),
+          ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(child: _HeroMetricsBar(business: selectedBusiness)),
+                const SizedBox(width: 16),
+                _HeroActions(business: selectedBusiness),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -259,11 +260,94 @@ class _HeroSectionState extends State<HeroSection> {
     return Container(
       color: primaryColor.withOpacity(0.12),
       child: Center(
-        child: Icon(
-          Icons.storefront_rounded,
-          size: 50,
-          color: primaryColor,
+        child: Icon(Icons.storefront_rounded, size: 50, color: primaryColor),
+      ),
+    );
+  }
+}
+
+class CardActionHero extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String countText;
+  final String buttonLabel;
+  final IconData buttonIcon;
+  final FormatButtonApp format;
+  final Color buttonColor;
+  final VoidCallback onPressed;
+
+  const CardActionHero({
+    super.key,
+    required this.icon,
+    required this.iconColor,
+    required this.countText,
+    required this.buttonLabel,
+    required this.buttonIcon,
+    this.format = FormatButtonApp.elevated,
+    required this.buttonColor,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.all(4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        color: isDark ? theme.colorScheme.surface : theme.cardColor,
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.1) : AppColors.cardBorder,
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                margin: const EdgeInsets.all(2.5),
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: iconColor.withOpacity(0.12),
+                ),
+                child: Icon(icon, size: 14, color: iconColor),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                countText,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textTheme.bodyLarge?.color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ButtonApp(
+            format: format,
+            color: buttonColor,
+            icon: buttonIcon,
+            label: buttonLabel,
+            onPressed: onPressed,
+          ),
+        ],
       ),
     );
   }
@@ -287,76 +371,105 @@ class _HeroActions extends StatelessWidget {
     final isFollowing = followerProvider.isFollowing(business.id);
     final isLiked = likeProvider.hasLiked(business.id);
 
+    final realLikes = likeProvider.getLikesCount(business.id);
+    final likesCount = realLikes > 0 ? realLikes : business.likes;
+
+    final followersCount = followerProvider.storeFollowers.isNotEmpty
+        ? followerProvider.storeFollowers.length
+        : business.followersUsers.length;
+
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+
     return Wrap(
-      spacing: 12,
-      runSpacing: 12,
+      spacing: 8,
+      runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        /// 1. Like Button (إذا كان مسموحاً)
-        if (business.allowLikes)
-          ButtonApp(
-            format: isLiked ? FormatButtonApp.outline : FormatButtonApp.elevated,
-            color: isLiked ? Colors.redAccent : Colors.redAccent,
-            icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-            label: isLiked ? 'معجب' : 'إعجاب',
-            onPressed: () async {
-              if (authProvider.isAuthenticated) {
-                final likeModel = LikeModel(
-                  id: '',
-                  userId: authProvider.currentUser!.id,
-                  targetId: business.id,
-                  targetType: 'store',
-                  createdAt: DateTime.now(),
-                );
-                await likeProvider.toggleLike(likeModel);
-              } else {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(TranslationKeys.pleaseLoginToSaveItems.tr(context)),
-                    backgroundColor: Colors.red,
+        /// 1. بطاقة الإعجاب (Like Card)
+        CardActionHero(
+          icon: Icons.favorite,
+          iconColor: Colors.redAccent,
+          countText: isAr ? '$likesCount إعجاب' : '$likesCount Likes',
+          buttonLabel: isLiked
+              ? (isAr ? 'معجب' : 'Liked')
+              : (isAr ? 'إعجاب' : 'Like'),
+          buttonIcon: isLiked
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
+          format: isLiked ? FormatButtonApp.outline : FormatButtonApp.elevated,
+          buttonColor: Colors.redAccent,
+          onPressed: () async {
+            if (authProvider.isAuthenticated) {
+              final likeModel = LikeModel(
+                id: '',
+                userId: authProvider.currentUser!.id,
+                targetId: business.id,
+                targetType: 'store',
+                createdAt: DateTime.now(),
+              );
+              await likeProvider.toggleLike(likeModel);
+            } else {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    TranslationKeys.pleaseLoginToSaveItems.tr(context),
                   ),
-                );
-              }
-            },
-          ),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+        ),
 
-        /// 2. Follow Button (إذا كان مسموحاً)
-        if (business.allowFollow)
-          ButtonApp(
-            format: isFollowing ? FormatButtonApp.outline : FormatButtonApp.elevated,
-            color: isFollowing ? Colors.grey : primaryColor,
-            icon: isFollowing ? Icons.check_circle_outline_rounded : Icons.person_add_alt_1_rounded,
-            label: isFollowing ? 'متابع' : 'متابعة البزنس',
-            onPressed: () async {
-              if (authProvider.isAuthenticated) {
-                final follower = FollowerModel(
-                  id: '',
-                  userId: authProvider.currentUser!.id,
-                  userName: authProvider.currentUser!.name,
-                  userAvatar: authProvider.currentUser!.avatarUrl,
-                  businessId: business.id,
-                  followedAt: DateTime.now(),
-                );
-                await followerProvider.toggleFollow(follower);
-              } else {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(TranslationKeys.pleaseLoginToSaveItems.tr(context)),
-                    backgroundColor: Colors.red,
+        /// 2. بطاقة المتابعة (Follow Card)
+        CardActionHero(
+          icon: Icons.people_alt_rounded,
+          iconColor: primaryColor,
+          countText: isAr
+              ? '$followersCount متابع'
+              : '$followersCount Followers',
+          buttonLabel: isFollowing
+              ? (isAr ? 'متابع' : 'Following')
+              : (isAr ? 'متابعة البزنس' : 'Follow'),
+          buttonIcon: isFollowing
+              ? Icons.check_circle_outline_rounded
+              : Icons.person_add_alt_1_rounded,
+          format: isFollowing
+              ? FormatButtonApp.outline
+              : FormatButtonApp.elevated,
+          buttonColor: isFollowing ? Colors.grey : primaryColor,
+          onPressed: () async {
+            if (authProvider.isAuthenticated) {
+              final follower = FollowerModel(
+                id: '',
+                userId: authProvider.currentUser!.id,
+                userName: authProvider.currentUser!.name,
+                userAvatar: authProvider.currentUser!.avatarUrl,
+                businessId: business.id,
+                followedAt: DateTime.now(),
+              );
+              await followerProvider.toggleFollow(follower);
+            } else {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    TranslationKeys.pleaseLoginToSaveItems.tr(context),
                   ),
-                );
-              }
-            },
-          ),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+        ),
       ],
     );
   }
 }
 
 /// ============================================================================
-/// 📊 Hero Metrics Bar (المتابعين، الزيارات، الطلبات، التقييم، الإعجابات)
+/// 📊 Hero Metrics Bar (الزيارات، الطلبات، التقييم)
 /// ============================================================================
 class _HeroMetricsBar extends StatelessWidget {
   final BusinessModel business;
@@ -365,32 +478,38 @@ class _HeroMetricsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final followerProvider = context.watch<FollowerProvider>();
     final reviewProvider = context.watch<ReviewProvider>();
-    final likeProvider = context.watch<LikeProvider>();
+    final orderProvider = context.watch<OrderProvider>();
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final followersCount = followerProvider.storeFollowers.length;
     final reviews = reviewProvider.businessReviews;
-
     double avgRating = 0;
+    int reviewsCount = 0;
     if (reviews.isNotEmpty) {
-      avgRating = reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
+      reviewsCount = reviews.length;
+      avgRating =
+          reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
     } else if (business.ratings.isNotEmpty) {
-      avgRating = business.ratings.map((r) => r.rating).reduce((a, b) => a + b) / business.ratings.length;
+      reviewsCount = business.ratings.length;
+      avgRating =
+          business.ratings.map((r) => r.rating).reduce((a, b) => a + b) /
+          business.ratings.length;
     }
 
-    final visitsCount = business.visits.length;
-    final ordersCount = business.orders;
+    final visitsCount = business.visits.isNotEmpty ? business.visits.length : 1;
+    final ordersCount = orderProvider.businessOrders.isNotEmpty
+        ? orderProvider.businessOrders.length
+        : business.orders;
 
-    final realLikes = likeProvider.getLikesCount(business.id);
-    final likesCount = realLikes > 0 ? realLikes : business.likes;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: isDark ? theme.scaffoldBackgroundColor : theme.scaffoldBackgroundColor.withOpacity(0.7),
+        color: isDark
+            ? theme.scaffoldBackgroundColor
+            : theme.scaffoldBackgroundColor.withOpacity(0.7),
         borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: theme.dividerColor, width: 1),
       ),
@@ -399,48 +518,33 @@ class _HeroMetricsBar extends StatelessWidget {
         runSpacing: 16,
         spacing: 24,
         children: [
-          /// 1. المتابعين (إذا كان مسموحاً)
-          if (business.allowFollow)
-            _MetricTile(
-              icon: Icons.people_alt_rounded,
-              color: Colors.blue,
-              label: 'المتابعين',
-              value: '$followersCount',
-            ),
-
-          /// 2. الزيارات (دائماً متاحة)
+          /// 1. الزيارات
           _MetricTile(
             icon: Icons.visibility_rounded,
             color: Colors.purple,
-            label: 'الزيارات',
+            label: isAr ? 'الزيارات' : 'Visits',
             value: '$visitsCount',
           ),
 
-          /// 3. الطلبات (دائماً متاحة)
+          /// 2. الطلبات
           _MetricTile(
             icon: Icons.shopping_bag_rounded,
             color: Colors.orange,
-            label: 'إجمالي الطلبات',
+            label: isAr ? 'إجمالي الطلبات' : 'Total Orders',
             value: '$ordersCount',
           ),
 
-          /// 4. التقييم (إذا كان مسموحاً)
-          if (business.allowReviews)
-            _MetricTile(
-              icon: Icons.star_rounded,
-              color: Colors.amber,
-              label: 'التقييم العام',
-              value: avgRating > 0 ? avgRating.toStringAsFixed(1) : '5.0',
-            ),
-
-          /// 5. الإعجابات (إذا كان مسموحاً)
-          if (business.allowLikes)
-            _MetricTile(
-              icon: Icons.favorite_rounded,
-              color: Colors.redAccent,
-              label: 'الإعجابات',
-              value: '$likesCount',
-            ),
+          /// 3. التقييم
+          _MetricTile(
+            icon: Icons.star_rounded,
+            color: Colors.amber,
+            label: isAr
+                ? (reviewsCount > 0
+                      ? 'التقييمات ($reviewsCount)'
+                      : 'التقييم العام')
+                : (reviewsCount > 0 ? 'Reviews ($reviewsCount)' : 'Rating'),
+            value: avgRating > 0 ? avgRating.toStringAsFixed(1) : '5.0',
+          ),
         ],
       ),
     );
@@ -480,16 +584,15 @@ class _MetricTile extends StatelessWidget {
           children: [
             Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
               ),
             ),
           ],
@@ -499,77 +602,3 @@ class _MetricTile extends StatelessWidget {
   }
 }
 
-/// ============================================================================
-/// 📍 Hero Details Footer (العناوين ووسائل التواصل)
-/// ============================================================================
-class _HeroDetailsFooter extends StatelessWidget {
-  final BusinessModel business;
-
-  const _HeroDetailsFooter({required this.business});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final langCode = Localizations.localeOf(context).languageCode;
-
-    return Wrap(
-      spacing: 16,
-      runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        /// الفروع والعناوين
-        if (business.addAddress.isNotEmpty)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.location_on_rounded, color: theme.primaryColor, size: 18),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  business.addAddress.first.getFormattedAddress(langCode: langCode),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: theme.textTheme.bodyMedium?.color,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-        /// وسائل التواصل
-        if (business.socials.isNotEmpty)
-          Wrap(
-            spacing: 8,
-            children: business.socials
-                .where((s) => s.isVisible)
-                .map(
-                  (social) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.primaryColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.link_rounded, color: theme.primaryColor, size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          social.platform.name,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: theme.primaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-      ],
-    );
-  }
-}

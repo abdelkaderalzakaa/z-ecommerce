@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import '../../data/models/order/order_model.dart';
-import '../../data/models/order/order_item_model.dart';
 import '../../data/providers/order_provider.dart';
 import '../global/core/constants/app_constants.dart';
 import '../global/core/responsive/responsive_layout.dart';
@@ -14,6 +13,9 @@ import '../../data/providers/business_provider.dart';
 import '../global/translate/app_localizations.dart';
 import '../global/translate/translation_keys.dart';
 import '../../presentation/global/core/constants/enum_data.dart';
+import '../../data/providers/auth_provider.dart';
+import '../../data/models/common/address_model.dart';
+import '../widgets/order/order_tracker_widget.dart';
 
 class OrderDetailsPage extends StatelessWidget {
   final OrderModel order;
@@ -31,11 +33,7 @@ class OrderDetailsPage extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: HeaderDetails(
         title: TranslationKeys.orderDetails.tr(context),
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.profile.tr(context),
-          TranslationKeys.orderDetails.tr(context),
-        ],
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -113,6 +111,13 @@ class OrderDetailsPage extends StatelessWidget {
   Widget _buildMobileContent(BuildContext context, String currency) {
     return Column(
       children: [
+        OrderTrackerWidget(
+          currentStatus: order.status,
+          isMobile: true,
+        ),
+        const SizedBox(height: 24),
+        _buildAddressCard(context),
+        const SizedBox(height: 24),
         _buildItemsCard(context, currency),
         const SizedBox(height: 24),
         _buildSummaryCard(context, currency),
@@ -133,8 +138,114 @@ class OrderDetailsPage extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 40),
-        Expanded(flex: 1, child: _buildSummaryCard(context, currency)),
+        Expanded(
+          flex: 1, 
+          child: Column(
+            children: [
+              OrderTrackerWidget(
+                currentStatus: order.status,
+                isMobile: false,
+              ),
+              const SizedBox(height: 24),
+              _buildAddressCard(context),
+              const SizedBox(height: 24),
+              _buildSummaryCard(context, currency),
+            ],
+          )
+        ),
       ],
+    );
+  }
+
+  Widget _buildAddressCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                TranslationKeys.shippingAddress.tr(context),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              if (order.status == OrderStatus.pending)
+                TextButton(
+                  onPressed: () => _showAddressSelectionDialog(context),
+                  child: Text(TranslationKeys.editAddress.tr(context)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (order.shippingAddressSnapshot != null)
+            Text(
+              order.shippingAddressSnapshot!.getFormattedAddress(),
+              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            )
+          else
+            Text(
+              TranslationKeys.notAvailable.tr(context),
+              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddressSelectionDialog(BuildContext context) {
+    final addresses = context.read<AuthProvider>().currentCustomer?.addresses ?? [];
+    if (addresses.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(TranslationKeys.noSavedAddresses.tr(context))),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                TranslationKeys.selectShippingAddress.tr(context),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...addresses.map((address) => ListTile(
+                    title: Text(address.title),
+                    subtitle: Text(address.getFormattedAddress()),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      final success = await context.read<OrderProvider>().updateOrderAddress(order.id, address);
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('تم التحديث بنجاح')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('حدث خطأ أثناء التحديث')),
+                        );
+                      }
+                    },
+                  )),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -154,41 +265,29 @@ class OrderDetailsPage extends StatelessWidget {
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
-          FutureBuilder<List<OrderItemModel>>(
-            future: context.read<OrderProvider>().getOrderItems(order.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return const Center(child: Text('An error occurred.'));
-              }
-              final items = snapshot.data ?? [];
-              if (items.isEmpty) {
-                return Center(child: Text(TranslationKeys.notAvailable.tr(context)));
-              }
-              return ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: items.length,
-                separatorBuilder: (context, index) =>
-                    const Divider(height: 32, color: AppColors.divider),
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return CartItemWidget(
-                    title: item.productName,
-                    size: item.variantName ?? TranslationKeys.notAvailable.tr(context),
-                    color: TranslationKeys.notAvailable.tr(context),
-                    price: item.unitPrice,
-                    quantity: item.quantity,
-                    isReadOnly: true,
-                    isGift: item.unitPrice == 0.0,
-                    isBundle: false,
-                  );
-                },
-              );
-            }
-          ),
+          if (order.items.isEmpty)
+            Center(child: Text(TranslationKeys.notAvailable.tr(context)))
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: order.items.length,
+              separatorBuilder: (context, index) =>
+                  const Divider(height: 32, color: AppColors.divider),
+              itemBuilder: (context, index) {
+                final item = order.items[index];
+                return CartItemWidget(
+                  title: item.productName ?? '',
+                  size: item.variantDisplayName ?? TranslationKeys.notAvailable.tr(context),
+                  color: TranslationKeys.notAvailable.tr(context),
+                  price: item.unitPrice,
+                  quantity: item.quantity,
+                  isReadOnly: true,
+                  isGift: item.unitPrice == 0.0,
+                  isBundle: false,
+                );
+              },
+            ),
         ],
       ),
     );
@@ -248,9 +347,53 @@ class OrderDetailsPage extends StatelessWidget {
               ),
             ],
           ),
+            const SizedBox(height: 24),
+          if (order.status == OrderStatus.pending)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => _cancelOrder(context),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.accent,
+                  side: const BorderSide(color: AppColors.accent),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('Cancel Order'),
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  void _cancelOrder(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel Order'),
+        content: const Text('Are you sure you want to cancel this order?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(TranslationKeys.cancel.tr(context)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.accent),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final success = await context.read<OrderProvider>().updateOrderStatus(order.id, OrderStatus.cancelled);
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم الإلغاء بنجاح')),
+        );
+      }
+    }
   }
 }
 

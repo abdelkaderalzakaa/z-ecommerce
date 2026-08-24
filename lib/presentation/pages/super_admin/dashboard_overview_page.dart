@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/category_provider.dart';
-import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
 import 'package:z_ecommerce/data/providers/offer_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
@@ -29,7 +29,7 @@ class DashboardOverviewPage extends StatelessWidget {
     return Consumer5<
       BusinessProvider,
       ProductProvider,
-      InvoiceProvider,
+      OrderProvider,
       OfferProvider,
       CategoryProvider
     >(
@@ -38,7 +38,7 @@ class DashboardOverviewPage extends StatelessWidget {
             context,
             storesProvider,
             productProvider,
-            invoiceProvider,
+            orderProvider,
             offerProvider,
             categoryProvider,
             child,
@@ -59,12 +59,12 @@ class DashboardOverviewPage extends StatelessWidget {
             final totalProducts = productProvider.allProducts.length;
             final topSellingProductsCount = productProvider.allProducts.length;
 
-            final totalOrders = invoiceProvider.invoices.length;
-            final completedOrders = invoiceProvider.invoices
-                .where((i) => i.status == 'Completed' || i.status == 'Paid')
+            final totalOrders = orderProvider.allOrders.length;
+            final completedOrders = orderProvider.allOrders
+                .where((i) => i.status.name == 'Completed' || i.status.name == 'Paid')
                 .length;
-            final pendingOrders = invoiceProvider.invoices
-                .where((i) => i.status == 'Pending')
+            final pendingOrders = orderProvider.allOrders
+                .where((i) => i.status.name == 'Pending')
                 .length;
 
             final ownersCount = storesProvider.businesses.length;
@@ -196,7 +196,7 @@ class DashboardOverviewPage extends StatelessWidget {
                                 flex: 3,
                                 child: _buildOrdersFlowChart(
                                   context,
-                                  invoiceProvider,
+                                  orderProvider,
                                 ),
                               ),
                               const SizedBox(width: 20),
@@ -213,7 +213,7 @@ class DashboardOverviewPage extends StatelessWidget {
                         }
                         return Column(
                           children: [
-                            _buildOrdersFlowChart(context, invoiceProvider),
+                            _buildOrdersFlowChart(context, orderProvider),
                             const SizedBox(height: 20),
                             _buildCategoriesDistribution(
                               context,
@@ -399,7 +399,7 @@ class DashboardOverviewPage extends StatelessWidget {
   // Widget: Orders Visual Flow Chart
   Widget _buildOrdersFlowChart(
     BuildContext context,
-    InvoiceProvider invoiceProvider,
+    OrderProvider orderProvider,
   ) {
     final theme = Theme.of(context);
     final days = [

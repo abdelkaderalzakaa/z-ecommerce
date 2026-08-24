@@ -12,6 +12,7 @@ enum QuickFilter {
   newArrivals,
   mostLiked,
   onSale,
+  featured,
 }
 
 class ProductFilterProvider extends ChangeNotifier {
@@ -70,6 +71,7 @@ class ProductFilterProvider extends ChangeNotifier {
     String? brandId,
     String? brandName,
     bool onSale = false,
+    QuickFilter? initialQuickFilter,
   }) {
     bool changed = false;
     if (categoryId != null && categoryId.isNotEmpty && !_selectedCategoryIds.contains(categoryId)) {
@@ -90,6 +92,11 @@ class ProductFilterProvider extends ChangeNotifier {
 
     if (onSale && _quickFilter != QuickFilter.onSale) {
       _quickFilter = QuickFilter.onSale;
+      changed = true;
+    }
+    
+    if (initialQuickFilter != null && _quickFilter != initialQuickFilter) {
+      _quickFilter = initialQuickFilter;
       changed = true;
     }
 
@@ -213,6 +220,9 @@ class ProductFilterProvider extends ChangeNotifier {
     LikeProvider? likeProvider,
   }) {
     List<ProductModel> list = allProducts.where((p) {
+      // 0. Base Customer Visibility Rule
+      if (!p.isValidForCustomer) return false;
+
       // 1. Search Query
       if (_searchQuery.trim().isNotEmpty) {
         final q = _searchQuery.trim().toLowerCase();
@@ -230,6 +240,9 @@ class ProductFilterProvider extends ChangeNotifier {
         return false;
       }
       if (_quickFilter == QuickFilter.bestSellers && !p.isTopSelling) {
+        return false;
+      }
+      if (_quickFilter == QuickFilter.featured && !p.isFeatured) {
         return false;
       }
       if (_quickFilter == QuickFilter.onSale) {

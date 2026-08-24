@@ -19,6 +19,11 @@ class ProductProvider extends ChangeNotifier {
   // Getters
   List<ProductModel> get allProducts => _allProducts;
   List<ProductModel> get storeProducts => _storeProducts;
+  
+  /// المنتجات المسموح للزبون برؤيتها (نشطة ولها سعر أو مجانية)
+  List<ProductModel> get customerAllProducts => _allProducts.where((p) => p.isValidForCustomer).toList();
+  List<ProductModel> get customerStoreProducts => _storeProducts.where((p) => p.isValidForCustomer).toList();
+
   ProductModel get selectedProduct => _selectedProduct;
   bool get selectedProductIsEmpty => _selectedProduct.isEmpty;
   bool get isLoading => _isLoading;
@@ -127,19 +132,19 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  /// التصفية بحسب التصنيف `categoryId`
+  /// التصفية بحسب التصنيف `categoryId` للزبون
   List<ProductModel> getProductsByCategory(String categoryId) {
-    return _allProducts.where((p) => p.categoryId == categoryId).toList();
+    return _allProducts.where((p) => p.categoryId == categoryId && p.isValidForCustomer).toList();
   }
 
-  /// المنتجات المميزة `isFeatured`
+  /// المنتجات المميزة `isFeatured` للزبون
   List<ProductModel> get featuredProducts {
-    return _allProducts.where((p) => p.isFeatured).toList();
+    return _allProducts.where((p) => p.isFeatured && p.isValidForCustomer).toList();
   }
 
-  /// المنتجات الأكثر مبيعاً `isTopSelling`
+  /// المنتجات الأكثر مبيعاً `isTopSelling` للزبون
   List<ProductModel> get topSellingProducts {
-    return _allProducts.where((p) => p.isTopSelling).toList();
+    return _allProducts.where((p) => p.isTopSelling && p.isValidForCustomer).toList();
   }
 
   // ==========================================

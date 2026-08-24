@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
@@ -31,6 +32,14 @@ class BusinessProvider with ChangeNotifier {
   bool get businessSettingsIsEmpty => _businessSettings.isEmpty;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  BusinessModel? getBusinessById(String id) {
+    try {
+      return _businesses.firstWhere((b) => b.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
 
   BusinessProvider() {
     _initStream();
@@ -161,6 +170,14 @@ class BusinessProvider with ChangeNotifier {
       businessId: businessId,
       socials: socials.cast(),
     );
+    final castedSocials = socials.cast<SocialModel>();
+    if (_businessSettings.id == businessId) {
+      _businessSettings = _businessSettings.copyWith(socials: castedSocials);
+    }
+    final index = _businesses.indexWhere((b) => b.id == businessId);
+    if (index != -1) {
+      _businesses[index] = _businesses[index].copyWith(socials: castedSocials);
+    }
     notifyListeners();
   }
 
@@ -170,6 +187,17 @@ class BusinessProvider with ChangeNotifier {
       businessId: businessId,
       visit: visit,
     );
+    if (_businessSettings.id == businessId) {
+      _businessSettings = _businessSettings.copyWith(
+        visits: [..._businessSettings.visits, visit],
+      );
+    }
+    final index = _businesses.indexWhere((b) => b.id == businessId);
+    if (index != -1) {
+      _businesses[index] = _businesses[index].copyWith(
+        visits: [..._businesses[index].visits, visit],
+      );
+    }
     notifyListeners();
   }
 
@@ -179,6 +207,13 @@ class BusinessProvider with ChangeNotifier {
       businessId: businessId,
       localization: localization,
     );
+    if (_businessSettings.id == businessId) {
+      _businessSettings = _businessSettings.copyWith(localization: localization);
+    }
+    final index = _businesses.indexWhere((b) => b.id == businessId);
+    if (index != -1) {
+      _businesses[index] = _businesses[index].copyWith(localization: localization);
+    }
     notifyListeners();
   }
 
@@ -188,6 +223,13 @@ class BusinessProvider with ChangeNotifier {
       businessId: businessId,
       currency: currency,
     );
+    if (_businessSettings.id == businessId) {
+      _businessSettings = _businessSettings.copyWith(currency: currency);
+    }
+    final index = _businesses.indexWhere((b) => b.id == businessId);
+    if (index != -1) {
+      _businesses[index] = _businesses[index].copyWith(currency: currency);
+    }
     notifyListeners();
   }
 
@@ -197,6 +239,13 @@ class BusinessProvider with ChangeNotifier {
       businessId: businessId,
       theme: theme,
     );
+    if (_businessSettings.id == businessId) {
+      _businessSettings = _businessSettings.copyWith(theme: theme);
+    }
+    final index = _businesses.indexWhere((b) => b.id == businessId);
+    if (index != -1) {
+      _businesses[index] = _businesses[index].copyWith(theme: theme);
+    }
     notifyListeners();
   }
 

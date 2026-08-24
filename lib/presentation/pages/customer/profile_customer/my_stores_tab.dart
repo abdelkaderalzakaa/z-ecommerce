@@ -27,7 +27,7 @@ class MyStoresTab extends StatelessWidget {
 
     // Fetch stores owned by or assigned to current user
     final myBusinesses = businessProvider.businesses.where((b) {
-      return b.owner?.id == currentUserId && currentUserId.isNotEmpty;
+      return b.ownerId == currentUserId && currentUserId.isNotEmpty;
     }).toList();
 
     return Column(

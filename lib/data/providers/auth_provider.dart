@@ -22,6 +22,7 @@ class AuthProvider with ChangeNotifier {
   CustomerModel? _currentCustomer;
 
   bool _isLoading = false;
+  bool _isInitialized = false;
   String? _errorMessage;
 
   // Getters
@@ -31,6 +32,7 @@ class AuthProvider with ChangeNotifier {
   CustomerModel? get currentCustomer => _currentCustomer;
 
   bool get isLoading => _isLoading;
+  bool get isInitialized => _isInitialized;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _currentUser != null;
 
@@ -41,20 +43,29 @@ class AuthProvider with ChangeNotifier {
   /// الاستماع لمظلة حالة المصادقة من Firebase (Auto Sync)
   void _initAuthStateListener() {
     FirebaseAuth.instance.authStateChanges().listen((User? firebaseUser) async {
-      if (firebaseUser != null) {
-        final existingUser = await _userService.getUserById(firebaseUser.uid);
-        if (existingUser != null) {
-          await setCurrentUser(existingUser);
+      _isLoading = true;
+
+      try {
+        if (firebaseUser != null) {
+          final existingUser = await _userService.getUserById(firebaseUser.uid);
+          if (existingUser != null) {
+            await setCurrentUser(existingUser);
+          } else {
+            final newUser = _authService.mapFirebaseUserToUserModel(firebaseUser);
+            await _userService.saveUser(newUser);
+            await setCurrentUser(newUser);
+          }
         } else {
-          final newUser = _authService.mapFirebaseUserToUserModel(firebaseUser);
-          await _userService.saveUser(newUser);
-          await setCurrentUser(newUser);
+          _currentUser = null;
+          _currentBusiness = null;
+          _currentSuperAdmin = null;
+          _currentCustomer = null;
         }
-      } else {
-        _currentUser = null;
-        _currentBusiness = null;
-        _currentSuperAdmin = null;
-        _currentCustomer = null;
+      } catch (e) {
+        debugPrint('Error in authStateListener: $e');
+      } finally {
+        _isInitialized = true;
+        _isLoading = false;
         notifyListeners();
       }
     });
@@ -122,9 +133,13 @@ class AuthProvider with ChangeNotifier {
           role: UserRole.customer,
           createdAt: now,
         );
+        await _userService.saveUser(user);
 
         final customer = CustomerModel(
-          user: user,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
           addresses: [],
           businessActivities: [],
           createdAt: now,
@@ -175,10 +190,14 @@ class AuthProvider with ChangeNotifier {
           businessId: credential.user!.uid,
           createdAt: now,
         );
+        await _userService.saveUser(ownerUser);
 
         final business = BusinessModel(
           id: credential.user!.uid,
-          owner: ownerUser,
+          ownerId: ownerUser.id,
+          ownerName: ownerUser.name,
+          ownerEmail: ownerUser.email,
+          ownerPhone: ownerUser.phoneNumber,
           businessType: businessType,
           addAddress: addresses,
           theme: ThemeAdmin.empty(),
@@ -217,8 +236,13 @@ class AuthProvider with ChangeNotifier {
 
         if (user == null) {
           user = _authService.mapFirebaseUserToUserModel(firebaseUser);
+          await _userService.saveUser(user);
           final customer = CustomerModel(
-            user: user,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            avatarUrl: user.avatarUrl,
             addresses: [],
             businessActivities: [],
             createdAt: DateTime.now(),
@@ -258,7 +282,6 @@ class AuthProvider with ChangeNotifier {
   Future<void> setCurrentUser(UserModel user) async {
     _currentUser = user;
     _isLoading = true;
-    notifyListeners();
 
     try {
       if (user.role == UserRole.businessOwner && user.businessId != null) {
@@ -276,17 +299,25 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// إضافة عنوان جديد للعميل الحالي
+  /// إضافة أو تحديث عنوان للعميل الحالي
   Future<void> addAddress(AddressModel address) async {
     if (_currentCustomer == null && _currentUser != null) {
       _currentCustomer = CustomerModel(
-        user: _currentUser!,
+        id: _currentUser!.id,
+        name: _currentUser!.name,
+        email: _currentUser!.email,
+        phoneNumber: _currentUser!.phoneNumber,
+        avatarUrl: _currentUser!.avatarUrl,
         addresses: [address],
       );
     } else if (_currentCustomer != null) {
-      final updatedAddresses = List<AddressModel>.from(
-        _currentCustomer!.addresses,
-      )..add(address);
+      final updatedAddresses = List<AddressModel>.from(_currentCustomer!.addresses);
+      final index = updatedAddresses.indexWhere((a) => a.id == address.id);
+      if (index >= 0) {
+        updatedAddresses[index] = address;
+      } else {
+        updatedAddresses.add(address);
+      }
       _currentCustomer = _currentCustomer!.copyWith(
         addresses: updatedAddresses,
       );
@@ -351,7 +382,11 @@ class AuthProvider with ChangeNotifier {
       _currentUser = updatedUser;
 
       if (_currentCustomer != null) {
-        _currentCustomer = _currentCustomer!.copyWith(user: updatedUser);
+        _currentCustomer = _currentCustomer!.copyWith(
+          name: updatedUser.name,
+          phoneNumber: updatedUser.phoneNumber,
+          avatarUrl: updatedUser.avatarUrl,
+        );
         await _userService.saveCustomer(_currentCustomer!);
       }
 

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/models/order/invoice_model.dart';
+import 'package:z_ecommerce/data/models/order/order_model.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
 class OrderOverviewTab extends StatelessWidget {
-  final InvoiceModel invoice;
+  final OrderModel order;
 
-  const OrderOverviewTab({super.key, required this.invoice});
+  const OrderOverviewTab({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -40,19 +40,13 @@ class OrderOverviewTab extends StatelessWidget {
                   _buildPriceRow(
                     context,
                     TranslationKeys.subtotal.tr(context),
-                    invoice.subtotal,
-                  ),
-                  const Divider(),
-                  _buildPriceRow(
-                    context,
-                    TranslationKeys.discount.tr(context),
-                    -invoice.discount,
+                    order.subTotal,
                   ),
                   const Divider(),
                   _buildPriceRow(
                     context,
                     TranslationKeys.deliveryFee.tr(context),
-                    invoice.shippingCost,
+                    order.shippingCost,
                   ),
                   const Divider(),
                   const SizedBox(height: 4),
@@ -67,7 +61,7 @@ class OrderOverviewTab extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '\$${invoice.total.toStringAsFixed(2)}',
+                        '\$${order.storeTotal.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -102,25 +96,25 @@ class OrderOverviewTab extends StatelessWidget {
                   _buildMetaRow(
                     context,
                     TranslationKeys.orderNumber.tr(context),
-                    invoice.id,
+                    order.id,
                   ),
                   const Divider(),
                   _buildMetaRow(
                     context,
                     TranslationKeys.associatedStore.tr(context),
-                    'متجر ${invoice.storeId}',
+                    'متجر ${order.businessId}',
                   ),
                   const Divider(),
                   _buildMetaRow(
                     context,
                     TranslationKeys.placedOn.tr(context),
-                    '${invoice.createdAt.year}-${invoice.createdAt.month.toString().padLeft(2, '0')}-${invoice.createdAt.day.toString().padLeft(2, '0')}',
+                    '${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
                   ),
                   const Divider(),
                   _buildMetaRow(
                     context,
                     TranslationKeys.statusActive.tr(context),
-                    invoice.status.name,
+                    order.status.name,
                   ),
                 ],
               ),

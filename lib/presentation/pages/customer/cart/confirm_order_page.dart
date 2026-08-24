@@ -11,6 +11,7 @@ import '../../../widgets/common/footers/footer_section.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
+import '../../../widgets/common/headers/widgets/top_title.dart';
 
 class ConfirmOrderPage extends StatelessWidget {
   final List<String>? ids;
@@ -25,19 +26,19 @@ class ConfirmOrderPage extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: HeaderDetails(
         title: TranslationKeys.orderPlacedSuccessfully.tr(context),
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.orderPlacedSuccessfully.tr(context),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            TopTitle(
+              title: TranslationKeys.orderPlacedSuccessfully.tr(context),
+              paths: [
+                TranslationKeys.home.tr(context),
+                TranslationKeys.orderPlacedSuccessfully.tr(context),
+              ],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: hPad,
-                vertical: ResponsiveLayout.isMobile(context) ? 40 : 80,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: Center(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 600),
@@ -112,8 +113,7 @@ class ConfirmOrderPage extends StatelessWidget {
             ),
             const SizedBox(height: 80),
             FooterBuisness(
-              idBuisness:
-                  context.read<BusinessProvider>().selectedBusiness.id,
+              idBuisness: context.read<BusinessProvider>().selectedBusiness.id,
             ),
           ],
         ),

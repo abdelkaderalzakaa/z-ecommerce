@@ -14,6 +14,8 @@ import 'package:z_ecommerce/presentation/pages/business/store_manage_addresses_p
 import 'package:z_ecommerce/presentation/pages/business/store_manage_payment_methods_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/branding/business_branding_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/branding/restaurant_menu_branding_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/settings/store_manage_delivery_page.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/excel_import_page.dart';
 
 class StoreOwnerSettingsPage extends StatelessWidget {
   const StoreOwnerSettingsPage({super.key});
@@ -66,6 +68,20 @@ class StoreOwnerSettingsPage extends StatelessWidget {
                       ),
                       _buildSettingsCard(
                         context: context,
+                        title: 'استيراد / تصدير Excel',
+                        subtitle: 'رفع المنتجات والفئات والعلامات من ملف Excel مع تقرير قبل الحفظ',
+                        icon: Icons.table_chart_rounded,
+                        color: Colors.indigo,
+                        onTap: () => changeScreen(
+                          context,
+                          ExcelImportPage(
+                            businessId: business.id,
+                            businessName: business.localization.name.get(context),
+                          ),
+                        ),
+                      ),
+                      _buildSettingsCard(
+                        context: context,
                         title: 'صلاحيات البزنس',
                         subtitle: 'الصلاحيات المحددة من الإدارة العامة',
                         icon: Icons.admin_panel_settings_rounded,
@@ -95,6 +111,14 @@ class StoreOwnerSettingsPage extends StatelessWidget {
                         icon: Icons.payments_rounded,
                         color: Colors.green,
                         onTap: () => changeScreen(context, StoreManagePaymentMethodsPage(store: business)),
+                      ),
+                      _buildSettingsCard(
+                        context: context,
+                        title: 'إعدادات التوصيل',
+                        subtitle: 'إدارة نموذج التوصيل ومناديب المتجر',
+                        icon: Icons.local_shipping_rounded,
+                        color: Colors.indigo,
+                        onTap: () => changeScreen(context, StoreManageDeliveryPage(store: business)),
                       ),
                       _buildSettingsCard(
                         context: context,

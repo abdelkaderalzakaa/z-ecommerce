@@ -39,135 +39,138 @@ class _ProductsTabState extends State<ProductsTab> {
 
         final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
-        return Expanded(
-                child: AppDataTable<ProductModel>(
-                  items: storeProducts,
-                  selectable: true,
-                  showIndexColumn: true,
-                  onBulkDelete: (selected) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
-                        ),
-                        backgroundColor: Colors.red,
+        return Column(
+          children: [
+            Expanded(
+              child: AppDataTable<ProductModel>(
+                items: storeProducts,
+                selectable: true,
+                showIndexColumn: true,
+                onBulkDelete: (selected) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${TranslationKeys.deleteSelected.tr(context)} (${selected.length})',
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                },
+                primaryActionButton: ButtonApp(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            InfoProductPage(businessId: widget.store.id),
                       ),
                     );
                   },
-                  primaryActionButton: ButtonApp(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              InfoProductPage(businessId: widget.store.id),
-                        ),
-                      );
-                    },
-                    icon: Icons.add,
-                    label: isAr ? 'إضافة منتج' : 'Add Product',
+                  icon: Icons.add,
+                  label: isAr ? 'إضافة منتج' : 'Add Product',
+                ),
+                searchMatcher: (p, q) =>
+                    p.name.toLowerCase().contains(q.toLowerCase()) ||
+                    p.id.toLowerCase().contains(q.toLowerCase()),
+                emptyMessage: TranslationKeys.noDataAvailable.tr(context),
+                columns: [
+                  AppTableColumn<ProductModel>(
+                    title: TranslationKeys.product.tr(context),
+                    flex: 2,
+                    sortable: true,
+                    sortKey: (p) => p.name,
+                    cellBuilder: (p) => TableTextCell(
+                      title: p.name,
+                      subtitle: p.id,
+                    ),
                   ),
-                  searchMatcher: (p, q) =>
-                      p.name.toLowerCase().contains(q.toLowerCase()) ||
-                      p.id.toLowerCase().contains(q.toLowerCase()),
-                  emptyMessage: TranslationKeys.noDataAvailable.tr(context),
-                  columns: [
-                    AppTableColumn<ProductModel>(
-                      title: TranslationKeys.product.tr(context),
-                      flex: 2,
-                      sortable: true,
-                      sortKey: (p) => p.name,
-                      cellBuilder: (p) => TableTextCell(
-                        title: p.name,
-                        subtitle: p.id,
-                      ),
+                  AppTableColumn<ProductModel>(
+                    title: TranslationKeys.category.tr(context),
+                    flex: 1,
+                    sortable: true,
+                    sortKey: (p) => p.categoryId,
+                    cellBuilder: (p) => TableTextCell(
+                      title: p.categoryId,
                     ),
-                    AppTableColumn<ProductModel>(
-                      title: TranslationKeys.category.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (p) => p.categoryId,
-                      cellBuilder: (p) => TableTextCell(
-                        title: p.categoryId,
-                      ),
+                  ),
+                  AppTableColumn<ProductModel>(
+                    title: TranslationKeys.price.tr(context),
+                    flex: 1,
+                    sortable: true,
+                    sortKey: (p) => p.basePrice,
+                    cellBuilder: (p) => TablePriceCell(amount: p.basePrice),
+                  ),
+                  AppTableColumn<ProductModel>(
+                    title: TranslationKeys.rating.tr(context),
+                    flex: 1,
+                    sortable: true,
+                    sortKey: (p) => p.rating,
+                    cellBuilder: (p) => TableTextCell(
+                      title: '⭐ ${p.rating.toStringAsFixed(1)}',
+                      subtitle: '${p.reviewsCount}',
                     ),
-                    AppTableColumn<ProductModel>(
-                      title: TranslationKeys.price.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (p) => p.basePrice,
-                      cellBuilder: (p) => TablePriceCell(amount: p.basePrice),
-                    ),
-                    AppTableColumn<ProductModel>(
-                      title: TranslationKeys.rating.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (p) => p.rating,
-                      cellBuilder: (p) => TableTextCell(
-                        title: '⭐ ${p.rating.toStringAsFixed(1)}',
-                        subtitle: '${p.reviewsCount}',
-                      ),
-                    ),
-                    AppTableColumn<ProductModel>(
-                      title: TranslationKeys.recommendedProducts.tr(context),
-                      flex: 1,
-                      sortable: true,
-                      sortKey: (p) => p.isRecommended ? 1 : 0,
-                      cellBuilder: (p) => Switch(
-                        value: p.isRecommended,
-                        onChanged: (val) {
-                          if (val && p.basePrice == 0) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('لا يمكن تعيين منتج سعره صفر كمنتج موصى به'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                            return;
-                          }
-                          final updated = p.copyWith(isRecommended: val);
-                          Provider.of<ProductProvider>(
-                            context,
-                            listen: false,
-                          ).updateProduct(updated);
-                        },
-                      ),
-                    ),
-                    AppTableColumn<ProductModel>(
-                      title: TranslationKeys.actions.tr(context),
-                      width: 70,
-                      alignment: Alignment.center,
-                      cellBuilder: (p) => TablePopupMenuActions(
-                        onView: () {},
-                        onEdit: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => InfoProductPage(
-                                product: p,
-                                businessId: widget.store.id,
-                              ),
-                            ),
-                          );
-                        },
-                        onDelete: () {
-                          Provider.of<ProductProvider>(
-                            context,
-                            listen: false,
-                          ).deleteProduct(p.id);
+                  ),
+                  AppTableColumn<ProductModel>(
+                    title: TranslationKeys.recommendedProducts.tr(context),
+                    flex: 1,
+                    sortable: true,
+                    sortKey: (p) => p.isRecommended ? 1 : 0,
+                    cellBuilder: (p) => Switch(
+                      value: p.isRecommended,
+                      onChanged: (val) {
+                        if (val && p.basePrice == 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('تم حذف المنتج بنجاح'),
-                              backgroundColor: Colors.green,
+                              content: Text('لا يمكن تعيين منتج سعره صفر كمنتج موصى به'),
+                              backgroundColor: Colors.red,
                             ),
                           );
-                        },
-                      ),
+                          return;
+                        }
+                        final updated = p.copyWith(isRecommended: val);
+                        Provider.of<ProductProvider>(
+                          context,
+                          listen: false,
+                        ).updateProduct(updated);
+                      },
                     ),
-                  ],
-                ),
-              )
-           ;
+                  ),
+                  AppTableColumn<ProductModel>(
+                    title: TranslationKeys.actions.tr(context),
+                    width: 70,
+                    alignment: Alignment.center,
+                    cellBuilder: (p) => TablePopupMenuActions(
+                      onView: () {},
+                      onEdit: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => InfoProductPage(
+                              product: p,
+                              businessId: widget.store.id,
+                            ),
+                          ),
+                        );
+                      },
+                      onDelete: () {
+                        Provider.of<ProductProvider>(
+                          context,
+                          listen: false,
+                        ).deleteProduct(p.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('تم حذف المنتج بنجاح'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
       },
     );
   }

@@ -45,6 +45,9 @@ class UserDetailsPage extends StatelessWidget {
       case UserRole.customer:
         roleText = TranslationKeys.customerRole.tr(context);
         break;
+      case UserRole.delivery:
+        roleText = 'مندوب / شركة توصيل';
+        break;
     }
 
     // Role-based Dynamic Tabs & Tab Views Setup

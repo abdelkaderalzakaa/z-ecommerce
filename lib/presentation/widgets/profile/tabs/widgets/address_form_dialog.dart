@@ -87,23 +87,9 @@ class _AddressFormDialogState extends State<AddressFormDialog> {
         postalCode: postalStr,
       );
 
-      final customer = context.read<AuthProvider>().currentCustomer;
-      if (customer != null) {
-        final currentAddresses = List<AddressModel>.from(customer.addresses);
-        if (widget.initialAddress == null) {
-          currentAddresses.add(newAddress);
-        } else {
-          final idx = currentAddresses.indexWhere((a) => a.id == newAddress.id);
-          if (idx >= 0) {
-            currentAddresses[idx] = newAddress;
-          } else {
-            currentAddresses.add(newAddress);
-          }
-        }
-        context.read<CustomerProvider>().updateAddresses(
-          customer.id,
-          currentAddresses,
-        );
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.currentCustomer != null) {
+        authProvider.addAddress(newAddress);
       }
 
       Navigator.pop(context);

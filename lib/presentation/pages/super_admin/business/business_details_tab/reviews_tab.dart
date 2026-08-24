@@ -68,10 +68,10 @@ class _ReviewsTabState extends State<ReviewsTab> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: theme.primaryColor.withOpacity(0.1),
-                      backgroundImage: item.userAvatar != null
+                      backgroundImage: item.userAvatar != null && item.userAvatar!.isNotEmpty
                           ? NetworkImage(item.userAvatar!)
                           : null,
-                      child: item.userAvatar == null
+                      child: item.userAvatar == null || item.userAvatar!.isEmpty
                           ? const Icon(Icons.person)
                           : null,
                     ),

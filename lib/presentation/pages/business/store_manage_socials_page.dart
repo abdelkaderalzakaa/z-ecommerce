@@ -46,8 +46,8 @@ class _StoreManageSocialsPageState extends State<StoreManageSocialsPage> {
     _facebookCtrl = TextEditingController(text: getUrl(SocialPlatform.facebook));
     _tiktokCtrl = TextEditingController(text: getUrl(SocialPlatform.tiktok));
     _twitterCtrl = TextEditingController(text: getUrl(SocialPlatform.twitter));
-    _phoneCtrl = TextEditingController(text: getUrl(SocialPlatform.contactPhoneFirst).isNotEmpty ? getUrl(SocialPlatform.contactPhoneFirst) : (widget.store.owner?.phoneNumber ?? ''));
-    _emailCtrl = TextEditingController(text: getUrl(SocialPlatform.contactEmail).isNotEmpty ? getUrl(SocialPlatform.contactEmail) : (widget.store.owner?.email ?? ''));
+    _phoneCtrl = TextEditingController(text: getUrl(SocialPlatform.contactPhoneFirst).isNotEmpty ? getUrl(SocialPlatform.contactPhoneFirst) : (widget.store.ownerPhone ?? ''));
+    _emailCtrl = TextEditingController(text: getUrl(SocialPlatform.contactEmail).isNotEmpty ? getUrl(SocialPlatform.contactEmail) : (widget.store.ownerEmail ?? ''));
     _websiteCtrl = TextEditingController(text: getUrl(SocialPlatform.website));
   }
 

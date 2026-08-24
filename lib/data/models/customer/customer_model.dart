@@ -1,10 +1,13 @@
 import 'package:z_ecommerce/data/models/customer/activity_customer_inbusiness.dart';
 import '../common/address_model.dart';
-import '../auth/user_model.dart';
 
 class CustomerModel {
-  // 1. البيانات الأساسية
-  final UserModel user;
+  // 1. البيانات الأساسية الخفيفة
+  final String id;
+  final String name;
+  final String? email;
+  final String? phoneNumber;
+  final String? avatarUrl;
   final List<AddressModel> addresses;
 
   // 2. المفضلة والأنشطة
@@ -16,7 +19,11 @@ class CustomerModel {
   final DateTime? updatedAt;
 
   CustomerModel({
-    required this.user,
+    required this.id,
+    this.name = '',
+    this.email,
+    this.phoneNumber,
+    this.avatarUrl,
     this.addresses = const [],
     this.wishlist = const [],
     this.businessActivities = const [],
@@ -28,8 +35,6 @@ class CustomerModel {
   // 🧮 Dynamic Getters & Helpers
   // ==========================================
 
-  /// معرف العميل المباشر من UserModel
-  String get id => user.id;
   bool get isEmpty => id.isEmpty;
 
   /// الحصول على العنوان الافتراضي
@@ -69,7 +74,11 @@ class CustomerModel {
 
   factory CustomerModel.fromMap(Map<String, dynamic> map, {String? docId}) {
     return CustomerModel(
-      user: UserModel.fromMap(map['user'] ?? {}),
+      id: docId ?? map['id'] ?? (map['user']?['id'] ?? ''),
+      name: map['name'] ?? (map['user']?['name'] ?? ''),
+      email: map['email'] ?? map['user']?['email'],
+      phoneNumber: map['phoneNumber'] ?? map['user']?['phoneNumber'],
+      avatarUrl: map['avatarUrl'] ?? map['user']?['avatarUrl'],
       addresses: (map['addresses'] as List<dynamic>?)
               ?.map((e) => AddressModel.fromMap(e))
               .toList() ??
@@ -94,7 +103,10 @@ class CustomerModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'user': user.toMap(),
+      'name': name,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'avatarUrl': avatarUrl,
       'addresses': addresses.map((e) => e.toMap()).toList(),
       'wishlist': wishlist,
       'businessActivities': businessActivities.map((e) => e.toMap()).toList(),
@@ -104,7 +116,11 @@ class CustomerModel {
   }
 
   CustomerModel copyWith({
-    UserModel? user,
+    String? id,
+    String? name,
+    String? email,
+    String? phoneNumber,
+    String? avatarUrl,
     List<AddressModel>? addresses,
     List<String>? wishlist,
     List<ActivityCustomerInBusiness>? businessActivities,
@@ -112,7 +128,11 @@ class CustomerModel {
     DateTime? updatedAt,
   }) {
     return CustomerModel(
-      user: user ?? this.user,
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
       addresses: addresses ?? this.addresses,
       wishlist: wishlist ?? this.wishlist,
       businessActivities: businessActivities ?? this.businessActivities,
@@ -124,7 +144,8 @@ class CustomerModel {
   /// إنشاء كائن CustomerModel فارغ بقيم افتراضية
   factory CustomerModel.empty() {
     return CustomerModel(
-      user: UserModel.empty(),
+      id: '',
+      name: '',
       addresses: const [],
       wishlist: const [],
       businessActivities: const [],

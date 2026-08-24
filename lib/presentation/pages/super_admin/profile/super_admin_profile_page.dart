@@ -5,6 +5,7 @@ import '../../../../data/providers/auth_provider.dart';
 import '../../../../data/providers/super_admin_provider.dart';
 import '../../../../data/models/common/social_media.dart';
 import '../../../../presentation/global/core/constants/enum_data.dart';
+import '../../../../presentation/global/translate/localized_string.dart';
 
 class SuperAdminProfilePage extends StatefulWidget {
   const SuperAdminProfilePage({super.key});
@@ -34,7 +35,7 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       final user = context.watch<AuthProvider>().currentUser;
-      final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
+      final platformSocials = context.watch<SuperAdminProvider>().platformSocials;
 
       if (user != null) {
         _adminNameController.text = user.name.isNotEmpty
@@ -48,9 +49,8 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
             ? user.id
             : 'SA-ROOT-9901-PROD';
 
-        final socials = superAdmin?.socials ?? [];
         String getUrl(SocialPlatform plat) {
-          final found = socials.where((e) => e.platform == plat);
+          final found = platformSocials.where((e) => e.platform == plat);
           return found.isNotEmpty ? found.first.url : '';
         }
 
@@ -102,7 +102,50 @@ class _SuperAdminProfilePageState extends State<SuperAdminProfilePage> {
     setState(() => _isSaving = true);
     final authProvider = context.read<AuthProvider>();
 
-    // Remove unused socialLinks variable
+    final updatedSocials = [
+      SocialModel(
+        title: const LocalizedString(ar: 'واتساب', en: 'WhatsApp'),
+        icon: 'whatsapp',
+        color: const Color(0xFF25D366),
+        platform: SocialPlatform.whatsapp,
+        url: _whatsappController.text.trim(),
+        isVisible: _whatsappController.text.trim().isNotEmpty,
+      ),
+      SocialModel(
+        title: const LocalizedString(ar: 'إنستغرام', en: 'Instagram'),
+        icon: 'instagram',
+        color: const Color(0xFFE4405F),
+        platform: SocialPlatform.instagram,
+        url: _instagramController.text.trim(),
+        isVisible: _instagramController.text.trim().isNotEmpty,
+      ),
+      SocialModel(
+        title: const LocalizedString(ar: 'لينكد إن', en: 'LinkedIn'),
+        icon: 'linkedin',
+        color: const Color(0xFF0A66C2),
+        platform: SocialPlatform.linkedin,
+        url: _linkedinController.text.trim(),
+        isVisible: _linkedinController.text.trim().isNotEmpty,
+      ),
+      SocialModel(
+        title: const LocalizedString(ar: 'فيسبوك', en: 'Facebook'),
+        icon: 'facebook',
+        color: const Color(0xFF1877F2),
+        platform: SocialPlatform.facebook,
+        url: _facebookController.text.trim(),
+        isVisible: _facebookController.text.trim().isNotEmpty,
+      ),
+      SocialModel(
+        title: const LocalizedString(ar: 'الموقع الإلكتروني', en: 'Website'),
+        icon: 'website',
+        color: Colors.indigo,
+        platform: SocialPlatform.website,
+        url: _websiteController.text.trim(),
+        isVisible: _websiteController.text.trim().isNotEmpty,
+      ),
+    ];
+
+    await context.read<SuperAdminProvider>().updatePlatformSocials(updatedSocials);
 
     await authProvider.updateProfile(
       name: _adminNameController.text.trim(),

@@ -30,7 +30,7 @@ class PermissionsTab extends StatelessWidget {
 
     // Calculate launch readiness
     int readinessScore = 0;
-    final hasOwner = currentStore.owner != null;
+    final hasOwner = currentStore.hasOwner;
     final hasAddress = currentStore.addAddress.isNotEmpty;
     final hasArabicName = currentStore.localization.name.ar.isNotEmpty;
     final hasSocials = currentStore.socials.isNotEmpty;

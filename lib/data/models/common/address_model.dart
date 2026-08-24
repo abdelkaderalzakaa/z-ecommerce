@@ -38,17 +38,24 @@ class AddressModel {
 
   /// إرجاع النص الكامل للعنوان ملخصاً بلغة محددة (مفيد للعرض السريع في الـ UI)
   String getFormattedAddress({String langCode = 'ar'}) {
-    final countryStr = country.getByLanguage(langCode);
-    final cityStr = city.getByLanguage(langCode);
-    final regionStr = region.getByLanguage(langCode);
+    final countryStr = country.getByLanguage(langCode).trim();
+    final cityStr = city.getByLanguage(langCode).trim();
+    final regionStr = region.getByLanguage(langCode).trim();
+    final streetStr = street.trim();
+    final buildingStr = (building ?? '').trim();
 
-    final parts = [
-      if (countryStr.isNotEmpty) countryStr,
-      if (cityStr.isNotEmpty) cityStr,
-      if (regionStr.isNotEmpty) regionStr,
-      if (street.isNotEmpty) street,
-      if (building != null && building!.isNotEmpty) building,
-    ];
+    final List<String> parts = [];
+    void addUnique(String val) {
+      if (val.isNotEmpty && !parts.contains(val)) {
+        parts.add(val);
+      }
+    }
+
+    addUnique(countryStr);
+    addUnique(cityStr);
+    addUnique(regionStr);
+    addUnique(streetStr);
+    addUnique(buildingStr);
 
     return parts.join(' - ');
   }

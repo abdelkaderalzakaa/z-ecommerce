@@ -61,6 +61,8 @@ class _StoreOffersManagementPageState extends State<StoreOffersManagementPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().listenToAllProducts();
+      context.read<OfferProvider>().listenToActiveOffers();
+      context.read<OfferProvider>().listenToStoreOffers(widget.businessId);
     });
   }
 

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/admin_business_home.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
- import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
 import 'data/providers/product_provider.dart';
 import 'data/providers/category_provider.dart';
 import 'data/providers/cart_provider.dart';
-import 'data/providers/invoice_provider.dart';
 import 'data/providers/order_provider.dart';
 import 'data/providers/auth_provider.dart';
 import 'presentation/global/settings_provider.dart';
@@ -17,7 +19,7 @@ import 'presentation/global/locale_provider.dart';
 import 'data/providers/offer_provider.dart';
 import 'data/providers/brand_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
-
+import 'data/providers/delivery_provider.dart';
 import 'data/providers/review_provider.dart';
 import 'data/providers/like_provider.dart';
 import 'data/providers/follower_provider.dart';
@@ -25,11 +27,8 @@ import 'data/providers/customer_provider.dart';
 import 'data/providers/product_filter_provider.dart';
 import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_theme.dart';
-import 'presentation/pages/customer/business_page.dart'; 
-import 'data/models/auth/user_model.dart';
 import 'presentation/pages/auth/banned_page.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'presentation/pages/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +55,6 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => BusinessProvider()),
@@ -68,10 +66,15 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FollowerProvider()),
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => ProductFilterProvider()),
+        ChangeNotifierProvider(create: (_) => DeliveryProvider()),
       ],
-      child: Consumer3<SettingsProvider, LocaleProvider, BusinessProvider>(
-        builder: (context, settings, localeProvider, businessProvider, child) {
-          final themeInfo = businessProvider.selectedBusiness.theme;
+      child: Consumer4<SettingsProvider, LocaleProvider, BusinessProvider, SuperAdminProvider>(
+        builder: (context, settings, localeProvider, businessProvider, superAdminProvider, child) {
+          final isStoreSelected = !businessProvider.selectedBusiness.isEmpty;
+          final themeInfo = isStoreSelected
+              ? businessProvider.selectedBusiness.theme
+              : superAdminProvider.platformTheme;
+
           final primaryColor = themeInfo.primaryColorValue;
           final secondaryColor = themeInfo.secondaryColorValue;
           final backgroundColor = themeInfo.backgroundColorValue;
@@ -79,17 +82,11 @@ class ZEcommerceApp extends StatelessWidget {
 
           return MaterialApp(
             onGenerateTitle: (context) {
-              final superAdmin = context
-                  .watch<SuperAdminProvider>()
-                  .currentSuperAdmin;
-              final saName = superAdmin?.localizationAdmin.name.get(context);
-              final platformName = (saName != null && saName.isNotEmpty)
-                  ? saName
-                  : 'z-matajer';
+              final platformName = superAdminProvider.platformLocalization.name.get(context);
+              final fallbackName = platformName.isNotEmpty ? platformName : 'z-matajer';
 
-              final bName = businessProvider.selectedBusiness.localization.name
-                  .get(context);
-              return (bName.isNotEmpty) ? bName : platformName;
+              final bName = businessProvider.selectedBusiness.localization.name.get(context);
+              return (bName.isNotEmpty) ? bName : fallbackName;
             },
             debugShowCheckedModeBanner: false,
             themeMode: settings.themeMode,
@@ -133,24 +130,12 @@ class AppRootRouter extends StatefulWidget {
 class _AppRootRouterState extends State<AppRootRouter> {
   String? _lastUserId;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   Future.microtask(() {
-  //     if (mounted) {
-  //       context.read<SuperAdminProvider>().saveSuperAdminOnce();
-  //     }
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
-        if (authProvider.isLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+        if (!authProvider.isInitialized || authProvider.isLoading) {
+          return const SplashScreen();
         }
 
         final user = authProvider.currentUser;
@@ -179,19 +164,26 @@ class _AppRootRouterState extends State<AppRootRouter> {
           case UserRole.superAdmin:
             return const SuperAdminHome();
           case UserRole.businessOwner:
-            if (user.businessId != null) {
-              Future.microtask(() {
-                if (context.read<BusinessProvider>().selectedBusiness.id !=
-                    user.businessId) {
-                  context.read<BusinessProvider>().selectBusiness(
-                    user.businessId!,
-                  );
+            final businessProvider = context.watch<BusinessProvider>();
+            if (user.businessId != null && user.businessId!.isNotEmpty) {
+              if (businessProvider.selectedBusiness.id != user.businessId) {
+                if (!businessProvider.isLoading) {
+                  Future.microtask(() {
+                    context.read<BusinessProvider>().selectBusiness(user.businessId!);
+                  });
                 }
-              });
+                return const SplashScreen();
+              }
             }
             return const AdminStore();
           case UserRole.customer:
             return const BusinessEntry();
+          case UserRole.delivery:
+            return const Scaffold(
+              body: Center(
+                child: Text('واجهة المندوب / شركة التوصيل (قيد التطوير)'),
+              ),
+            );
         }
       },
     );

@@ -7,7 +7,6 @@ import 'package:z_ecommerce/data/models/store/followers_store.dart';
 import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_constant.dart';
-import '../auth/user_model.dart';
 import 'currency_store.dart';
 import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
 
@@ -46,7 +45,12 @@ extension ReadinessStatusExtension on ReadinessStatus {
 
 class BusinessModel {
   final String id;
-  final UserModel? owner;
+  // بيانات المالك الخفيفة (مفصولة عن كوليكشن users)
+  final String? ownerId;
+  final String? ownerName;
+  final String? ownerEmail;
+  final String? ownerPhone;
+
   final BusinessType businessType;
   final List<AddressModel> addAddress;
   final int likes;
@@ -58,6 +62,8 @@ class BusinessModel {
   // 3. وسائل التواصل وطرق الدفع
   final List<SocialModel> socials;
   final List<PaymentMethodType> paymentMethods;
+  final DeliveryHandlingType deliveryHandling;
+  final List<String> assignedDeliveryIds;
 
   // 4. الإحصائيات والتفاعل
   final int orders;
@@ -85,7 +91,10 @@ class BusinessModel {
 
   BusinessModel({
     required this.id,
-    this.owner,
+    this.ownerId,
+    this.ownerName,
+    this.ownerEmail,
+    this.ownerPhone,
     this.addAddress = const [],
     this.businessType = BusinessType.retailStore,
     this.likes = 0,
@@ -94,6 +103,8 @@ class BusinessModel {
     required this.currency,
     this.socials = const [],
     this.paymentMethods = const [],
+    this.deliveryHandling = DeliveryHandlingType.own,
+    this.assignedDeliveryIds = const [],
     this.orders = 0,
     this.followersUsers = const [],
     this.ratings = const [],
@@ -110,7 +121,10 @@ class BusinessModel {
 
   BusinessModel copyWith({
     String? id,
-    UserModel? owner,
+    String? ownerId,
+    String? ownerName,
+    String? ownerEmail,
+    String? ownerPhone,
     BusinessType? businessType,
     List<AddressModel>? addAddress,
     int? likes,
@@ -119,6 +133,8 @@ class BusinessModel {
     CurrencyStore? currency,
     List<SocialModel>? socials,
     List<PaymentMethodType>? paymentMethods,
+    DeliveryHandlingType? deliveryHandling,
+    List<String>? assignedDeliveryIds,
     int? orders,
     List<FollowersStore>? followersUsers,
     List<RatedUser>? ratings,
@@ -134,7 +150,10 @@ class BusinessModel {
   }) {
     return BusinessModel(
       id: id ?? this.id,
-      owner: owner ?? this.owner,
+      ownerId: ownerId ?? this.ownerId,
+      ownerName: ownerName ?? this.ownerName,
+      ownerEmail: ownerEmail ?? this.ownerEmail,
+      ownerPhone: ownerPhone ?? this.ownerPhone,
       businessType: businessType ?? this.businessType,
       addAddress: addAddress ?? this.addAddress,
       likes: likes ?? this.likes,
@@ -143,6 +162,8 @@ class BusinessModel {
       currency: currency ?? this.currency,
       socials: socials ?? this.socials,
       paymentMethods: paymentMethods ?? this.paymentMethods,
+      deliveryHandling: deliveryHandling ?? this.deliveryHandling,
+      assignedDeliveryIds: assignedDeliveryIds ?? this.assignedDeliveryIds,
       orders: orders ?? this.orders,
       followersUsers: followersUsers ?? this.followersUsers,
       ratings: ratings ?? this.ratings,
@@ -176,7 +197,7 @@ class BusinessModel {
   }
 
   // --- الخصائص المستقلة لكل عنصر (Getters) ---
-  bool get hasOwner => owner != null;
+  bool get hasOwner => ownerId != null && ownerId!.isNotEmpty;
   bool get hasName => _isValidLocalizedText(localization.name);
   bool get hasSlogan => _isValidLocalizedText(localization.slogan);
   bool get hasDescription => _isValidLocalizedText(localization.description);
@@ -254,7 +275,6 @@ class BusinessModel {
   int get followersCount => followersUsers.length;
 
   /// حساب التقييم النهائي الموزون للنشاط (Weighted Score)
-  /// يعتمد على متوسط مراجعات التقييم مع أوزان تفاعلية للزيارات والمتابعين
   double get rating {
     if (ratings.isEmpty) return 0.0;
 
@@ -263,14 +283,12 @@ class BusinessModel {
         ratings.map((e) => e.rating).reduce((a, b) => a + b) / ratings.length;
 
     // 2. عامل مؤشر التفاعل (Engagement Score) بناءً على المتابعين والزيارات
-    // يضيف نسبة دعم بسيطة تصل لـ 0.5 كحد أقصى للأنشطة الأكثر تفاعلاً
     double engagementBonus = 0.0;
     if (visitorsCount > 0) {
-      double followerRatio = followersCount / visitorsCount; // نسبة التحويل
+      double followerRatio = followersCount / visitorsCount;
       engagementBonus = (followerRatio * 0.5).clamp(0.0, 0.5);
     }
 
-    // النتيجة النهائية محصورة بين 0 و 5
     return (averageRating + engagementBonus).clamp(0.0, 5.0);
   }
 
@@ -281,7 +299,10 @@ class BusinessModel {
   factory BusinessModel.fromMap(Map<String, dynamic> map, String docId) {
     return BusinessModel(
       id: docId,
-      owner: map['owner'] != null ? UserModel.fromMap(map['owner']) : null,
+      ownerId: map['ownerId'] ?? map['owner']?['id'],
+      ownerName: map['ownerName'] ?? map['owner']?['name'],
+      ownerEmail: map['ownerEmail'] ?? map['owner']?['email'],
+      ownerPhone: map['ownerPhone'] ?? (map['owner']?['phoneNumber']),
       addAddress:
           (map['addAddress'] as List<dynamic>?)
               ?.map((e) => AddressModel.fromMap(e))
@@ -297,12 +318,19 @@ class BusinessModel {
               ?.map((e) => SocialModel.fromMap(e))
               .toList() ??
           [],
-      paymentMethods:
-          (map['paymentMethods'] as List<dynamic>?)
-              ?.map((e) => PaymentMethodType.fromString(e.toString()))
+      paymentMethods: (map['paymentMethods'] as List<dynamic>?)
+              ?.map((e) => PaymentMethodType.values.firstWhere(
+                    (v) => v.name == e,
+                    orElse: () => PaymentMethodType.cashOnDelivery,
+                  ))
               .toList() ??
           [],
-      orders: map['orders'] ?? 0,
+      deliveryHandling: DeliveryHandlingType.values.firstWhere(
+        (e) => e.name == map['deliveryHandling'],
+        orElse: () => DeliveryHandlingType.own,
+      ),
+      assignedDeliveryIds: List<String>.from(map['assignedDeliveryIds'] ?? []),
+      orders: map['orders']?.toInt() ?? 0,
       followersUsers:
           (map['followersUsers'] as List<dynamic>?)
               ?.map((e) => FollowersStore.fromMap(e))
@@ -336,7 +364,10 @@ class BusinessModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      if (owner != null) 'owner': owner!.toMap(),
+      'ownerId': ownerId,
+      'ownerName': ownerName,
+      'ownerEmail': ownerEmail,
+      'ownerPhone': ownerPhone,
       'addAddress': addAddress.map((e) => e.toMap()).toList(),
       'businessType': businessType.name,
       'likes': likes,
@@ -345,6 +376,8 @@ class BusinessModel {
       'currency': currency.toMap(),
       'socials': socials.map((e) => e.toMap()).toList(),
       'paymentMethods': paymentMethods.map((e) => e.name).toList(),
+      'deliveryHandling': deliveryHandling.name,
+      'assignedDeliveryIds': assignedDeliveryIds,
       'orders': orders,
       'followersUsers': followersUsers.map((e) => e.toMap()).toList(),
       'ratings': ratings.map((e) => e.toMap()).toList(),
@@ -364,7 +397,6 @@ class BusinessModel {
   factory BusinessModel.empty() {
     return BusinessModel(
       id: 'empty_business',
-      owner: null,
       theme: ThemeAdmin.empty(),
       localization: LocalizationAdmin.empty(),
       currency: CurrencyStore.empty(),

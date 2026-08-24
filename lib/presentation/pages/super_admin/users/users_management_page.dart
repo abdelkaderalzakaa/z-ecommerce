@@ -138,6 +138,11 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                           bg = const Color(0xFFE6F4EA);
                           fg = const Color(0xFF137333);
                           break;
+                        case UserRole.delivery:
+                          roleLabel = 'توصيل';
+                          bg = const Color(0xFFE0F2FE);
+                          fg = const Color(0xFF0284C7);
+                          break;
                       }
 
                       return TableStatusBadge(

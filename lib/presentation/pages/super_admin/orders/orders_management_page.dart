@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
-import 'package:z_ecommerce/data/models/order/invoice_model.dart';
-import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/data/models/order/order_model.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
@@ -24,10 +24,18 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
   String _selectedStatusFilter = 'all';
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderProvider>().listenToAllOrders();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer<InvoiceProvider>(
+    return Consumer<OrderProvider>(
       builder: (context, provider, child) {
-        final allOrders = provider.invoices;
+        final allOrders = provider.allOrders;
 
         final filteredOrders = allOrders.where((order) {
           final matchesStatus =
@@ -44,9 +52,9 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Full Height Expanded AppDataTable for InvoiceModel
+                // Full Height Expanded AppDataTable for OrderModel
                 Expanded(
-                  child: AppDataTable<InvoiceModel>(
+                  child: AppDataTable<OrderModel>(
                     items: filteredOrders,
                     selectable: true,
                     showIndexColumn: true,
@@ -62,7 +70,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                     },
                     searchMatcher: (order, q) =>
                         order.id.toLowerCase().contains(q) ||
-                        order.storeId.toLowerCase().contains(q),
+                        order.businessId.toLowerCase().contains(q),
                     onFilterTap: () => _showFilterDialog(context),
                     emptyMessage: TranslationKeys.noDataAvailable.tr(context),
                     onRowTap: (order) => changeScreen(
@@ -70,35 +78,35 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                       OrderDetailsPage(orderId: order.id),
                     ),
                     columns: [
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.orderId.tr(context),
                         flex: 1,
                         sortable: true,
                         sortKey: (order) => order.id,
                         cellBuilder: (order) =>
-                            TableTextCell(title: '#${order.id}', isBold: true),
+                            TableTextCell(title: '#${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length)}', isBold: true),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.store.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (order) => order.storeId,
+                        sortKey: (order) => order.businessId,
                         cellBuilder: (order) => TableImageTextCell(
                           title:
-                              '${TranslationKeys.store.tr(context)} ${order.storeId}',
+                              '${TranslationKeys.store.tr(context)} ${order.businessId}',
                           fallbackIcon: Icons.storefront_rounded,
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.total.tr(context),
                         flex: 1,
                         sortable: true,
-                        sortKey: (order) => order.total,
+                        sortKey: (order) => order.storeTotal,
                         cellBuilder: (order) => TablePriceCell(
-                          amount: order.total > 0 ? order.total : 120.0,
+                          amount: order.storeTotal,
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.orderDate.tr(context),
                         flex: 1,
                         sortable: true,
@@ -108,13 +116,13 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                               '${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.statusActive.tr(context),
                         flex: 1,
                         sortable: true,
                         sortKey: (order) => order.status.index,
                         cellBuilder: (order) => InkWell(
-                          onTap: () => showOrderStatusDialog(context, order),
+                          onTap: () {}, // Handled differently if needed
                           borderRadius: BorderRadius.circular(16),
                           child: TableStatusBadge.fromStatus(
                             order.status == OrderStatus.pending
@@ -127,7 +135,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                           ),
                         ),
                       ),
-                      AppTableColumn<InvoiceModel>(
+                      AppTableColumn<OrderModel>(
                         title: TranslationKeys.actions.tr(context),
                         width: 70,
                         alignment: Alignment.center,
@@ -136,7 +144,7 @@ class _OrdersManagementPageState extends State<OrdersManagementPage> {
                             context,
                             OrderDetailsPage(orderId: order.id),
                           ),
-                          onEdit: () => showOrderStatusDialog(context, order),
+                          onEdit: () {},
                           onDelete: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

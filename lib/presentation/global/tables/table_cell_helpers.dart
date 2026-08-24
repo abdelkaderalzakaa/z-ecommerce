@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import '../translate/app_localizations.dart';
 
@@ -93,7 +94,7 @@ class TableImageTextCell extends StatelessWidget {
           child: (imageUrl != null && imageUrl!.startsWith('http'))
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
+                  child: CustomNetworkImage(imageUrl: 
                     imageUrl!,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/common/address_model.dart';
-import 'package:z_ecommerce/data/models/order/invoice_model.dart';
-import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/data/models/order/order_model.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -19,24 +18,28 @@ class OrderDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<InvoiceProvider>(
+    return Consumer<OrderProvider>(
       builder: (context, provider, child) {
-        final allInvoices = provider.invoices.isNotEmpty
-            ? provider.invoices
-            : null;
+        final allOrders = provider.allOrders.isNotEmpty
+            ? provider.allOrders
+            : (provider.businessOrders.isNotEmpty ? provider.businessOrders : provider.customerOrders);
 
-        final invoice = allInvoices!.firstWhere(
-          (inv) => inv.id == orderId,
-          orElse: () => allInvoices.first,
+        if (allOrders.isEmpty) {
+          return const Scaffold(body: Center(child: Text("No data found")));
+        }
+
+        final order = allOrders.firstWhere(
+          (o) => o.id == orderId,
+          orElse: () => allOrders.first,
         );
 
         return DetailsTemplate(
           title: TranslationKeys.orderDetails.tr(context),
-          name: '${TranslationKeys.orderId.tr(context)}: ${invoice.id}',
+          name: '${TranslationKeys.orderId.tr(context)}: #${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length)}',
           subtitle:
-              '${TranslationKeys.associatedStore.tr(context)}: متجر ${invoice.storeId} • ${invoice.createdAt.year}-${invoice.createdAt.month.toString().padLeft(2, '0')}-${invoice.createdAt.day.toString().padLeft(2, '0')}',
+              '${TranslationKeys.associatedStore.tr(context)}: متجر ${order.businessId} • ${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
           fallbackIcon: Icons.receipt_long_rounded,
-          statusBadge: TableStatusBadge.fromStatus(invoice.status.name),
+          statusBadge: TableStatusBadge.fromStatus(order.status.name),
           headerMetrics: [
             Chip(
               avatar: const Icon(
@@ -44,19 +47,7 @@ class OrderDetailsPage extends StatelessWidget {
                 size: 16,
                 color: Colors.green,
               ),
-              label: Text('\$${invoice.total.toStringAsFixed(2)}'),
-              padding: EdgeInsets.zero,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            Chip(
-              avatar: const Icon(
-                Icons.shopping_bag_outlined,
-                size: 16,
-                color: Colors.blue,
-              ),
-              label: Text(
-                '${invoice.items.length} ${TranslationKeys.items.tr(context)}',
-              ),
+              label: Text('\$${order.storeTotal.toStringAsFixed(2)}'),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
@@ -70,7 +61,7 @@ class OrderDetailsPage extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '${TranslationKeys.editAddress.tr(context)} "${invoice.id}"',
+                  '${TranslationKeys.editAddress.tr(context)} "${order.id}"',
                 ),
               ),
             );
@@ -79,7 +70,7 @@ class OrderDetailsPage extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '${TranslationKeys.deleteSelected.tr(context)} "${invoice.id}"',
+                  '${TranslationKeys.deleteSelected.tr(context)} "${order.id}"',
                 ),
                 backgroundColor: Colors.red,
               ),
@@ -91,9 +82,9 @@ class OrderDetailsPage extends StatelessWidget {
             Tab(text: TranslationKeys.shippingAddress.tr(context)),
           ],
           tabViews: [
-            OrderOverviewTab(invoice: invoice),
-            OrderItemsTab(invoice: invoice),
-            OrderShippingTab(invoice: invoice),
+            OrderOverviewTab(order: order),
+            OrderItemsTab(items: order.items),
+            OrderShippingTab(order: order),
           ],
         );
       },

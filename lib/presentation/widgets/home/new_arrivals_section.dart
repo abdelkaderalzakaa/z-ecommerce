@@ -9,6 +9,7 @@ import '../common/product_card.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import '../../../data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/providers/product_filter_provider.dart';
 import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 
 class NewArrivalsSection extends StatelessWidget {
@@ -25,7 +26,16 @@ class NewArrivalsSection extends StatelessWidget {
         final storeProducts = productProvider.allProducts
             .where((p) => p.businessId == businessId)
             .toList();
-        final products = storeProducts.take(4).toList();
+        
+        // Sort by date created
+        final sortedProducts = List<ProductModel>.from(storeProducts);
+        sortedProducts.sort((a, b) {
+          final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return bDate.compareTo(aDate);
+        });
+
+        final products = sortedProducts.take(4).toList();
         if (products.isEmpty) return const SizedBox.shrink();
 
         return Padding(
@@ -40,10 +50,15 @@ class NewArrivalsSection extends StatelessWidget {
               isMobile
                   ? _MobileProductGrid(products: products)
                   : _DesktopProductGrid(products: products),
-              const SizedBox(height: 36),
-              ViewAllButton(onTap: () {
-                changeScreen(context, const CategoriesPage());
-              }),
+              if (storeProducts.length > 4)
+                Column(
+                  children: [
+                    const SizedBox(height: 36),
+                    ViewAllButton(onTap: () {
+                      changeScreen(context, const CategoriesPage(initialQuickFilter: QuickFilter.newArrivals));
+                    }),
+                  ],
+                ),
             ],
           ),
         );

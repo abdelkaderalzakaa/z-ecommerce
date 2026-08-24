@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/data/models/order/invoice_model.dart';
+import 'package:z_ecommerce/data/models/order/order_model.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
-import 'package:z_ecommerce/data/providers/invoice_provider.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_data_table.dart';
 import 'package:z_ecommerce/presentation/global/tables/app_table_column.dart';
 import 'package:z_ecommerce/presentation/global/tables/table_cell_helpers.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/orders/order_details_page.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 
 class UserOrdersTab extends StatefulWidget {
   final UserModel user;
@@ -20,15 +22,23 @@ class UserOrdersTab extends StatefulWidget {
 
 class _UserOrdersTabState extends State<UserOrdersTab> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderProvider>().listenToCustomerOrders(widget.user.id);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer<InvoiceProvider>(
+    return Consumer<OrderProvider>(
       builder: (context, provider, child) {
-        final userInvoices = provider.invoices;
+        final userOrders = provider.customerOrders;
 
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: AppDataTable<InvoiceModel>(
-            items: userInvoices,
+          child: AppDataTable<OrderModel>(
+            items: userOrders,
             selectable: true,
             showIndexColumn: true,
             onBulkDelete: (selected) {
@@ -41,42 +51,45 @@ class _UserOrdersTabState extends State<UserOrdersTab> {
                 ),
               );
             },
-            searchMatcher: (inv, q) =>
-                inv.id.toLowerCase().contains(q.toLowerCase()),
+            searchMatcher: (order, q) =>
+                order.id.toLowerCase().contains(q.toLowerCase()),
             emptyMessage: TranslationKeys.noDataAvailable.tr(context),
             columns: [
-              AppTableColumn<InvoiceModel>(
+              AppTableColumn<OrderModel>(
                 title: TranslationKeys.orderId.tr(context),
                 flex: 2,
                 sortable: true,
-                sortKey: (inv) => inv.id,
-                cellBuilder: (inv) => TableTextCell(
-                  title: inv.id,
+                sortKey: (order) => order.id,
+                cellBuilder: (order) => TableTextCell(
+                  title: '#${order.id.substring(0, order.id.length > 8 ? 8 : order.id.length)}',
                   subtitle:
-                      '${inv.createdAt.year}-${inv.createdAt.month.toString().padLeft(2, '0')}-${inv.createdAt.day.toString().padLeft(2, '0')}',
+                      '${order.createdAt.year}-${order.createdAt.month.toString().padLeft(2, '0')}-${order.createdAt.day.toString().padLeft(2, '0')}',
                   isBold: true,
                 ),
               ),
-              AppTableColumn<InvoiceModel>(
+              AppTableColumn<OrderModel>(
                 title: TranslationKeys.total.tr(context),
                 flex: 1,
                 sortable: true,
-                sortKey: (inv) => inv.total,
-                cellBuilder: (inv) => TablePriceCell(amount: inv.total),
+                sortKey: (order) => order.storeTotal,
+                cellBuilder: (order) => TablePriceCell(amount: order.storeTotal),
               ),
-              AppTableColumn<InvoiceModel>(
+              AppTableColumn<OrderModel>(
                 title: TranslationKeys.statusActive.tr(context),
                 flex: 1,
                 sortable: true,
-                sortKey: (inv) => inv.status.name,
-                cellBuilder: (inv) => TableStatusBadge.fromStatus(inv.status.name),
+                sortKey: (order) => order.status.name,
+                cellBuilder: (order) => TableStatusBadge.fromStatus(order.status.name),
               ),
-              AppTableColumn<InvoiceModel>(
+              AppTableColumn<OrderModel>(
                 title: TranslationKeys.actions.tr(context),
                 width: 70,
                 alignment: Alignment.center,
-                cellBuilder: (inv) => TablePopupMenuActions(
-                  onView: () {},
+                cellBuilder: (order) => TablePopupMenuActions(
+                  onView: () => changeScreen(
+                    context,
+                    OrderDetailsPage(orderId: order.id),
+                  ),
                   onEdit: () {},
                   onDelete: () {},
                 ),

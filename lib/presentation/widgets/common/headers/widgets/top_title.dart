@@ -22,56 +22,102 @@ class TopTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hPad = ResponsiveLayout.horizontalPadding(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: hPad),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap:
-                onBack ??
-                () {
-                  if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  } else {
-                    changeScreen(context, const HomePage());
-                  }
-                },
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Icon(
-                Icons.arrow_back_ios_outlined,
-                size: 26,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
+    final isMobile = ResponsiveLayout.isMobile(context);
+    if (!isMobile) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            InkWell(
+              onTap:
+                  onBack ??
+                  () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      changeScreen(context, const HomePage());
+                    }
+                  },
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Icon(
+                  Icons.arrow_back_ios_outlined,
+                  size: 26,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Flexible(
-            flex: 1,
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-                letterSpacing: -0.5,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  letterSpacing: 1,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 2,
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Breadcrumb(paths: paths),
+            const SizedBox(width: 10),
+            Breadcrumb(paths: paths),
+          ],
+        ),
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            InkWell(
+              onTap:
+                  onBack ??
+                  () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    } else {
+                      changeScreen(context, const HomePage());
+                    }
+                  },
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Icon(
+                  Icons.arrow_back_ios_outlined,
+                  size: 26,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      letterSpacing: 1,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  Breadcrumb(paths: paths),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }

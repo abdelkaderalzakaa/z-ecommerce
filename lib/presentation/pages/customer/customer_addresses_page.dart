@@ -10,6 +10,7 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 import 'package:z_ecommerce/presentation/widgets/profile/tabs/widgets/address_form_dialog.dart';
 
 class CustomerAddressesPage extends StatefulWidget {
@@ -37,13 +38,19 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
       if (_selectedFilterTag == 'all') return true;
       final titleLower = address.title.toLowerCase();
       if (_selectedFilterTag == 'home') {
-        return titleLower.contains('home') || titleLower.contains('بيت') || titleLower.contains('منزل');
+        return titleLower.contains('home') ||
+            titleLower.contains('بيت') ||
+            titleLower.contains('منزل');
       }
       if (_selectedFilterTag == 'work') {
-        return titleLower.contains('work') || titleLower.contains('عمل') || titleLower.contains('مكتب');
+        return titleLower.contains('work') ||
+            titleLower.contains('عمل') ||
+            titleLower.contains('مكتب');
       }
       if (_selectedFilterTag == 'other') {
-        return titleLower.contains('other') || titleLower.contains('أخرى') || titleLower.contains('اخرى');
+        return titleLower.contains('other') ||
+            titleLower.contains('أخرى') ||
+            titleLower.contains('اخرى');
       }
       return true;
     }).toList();
@@ -51,18 +58,22 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: HeaderDetails(
-        title: isAr ? 'عناوين التوصيل والمواقع' : 'Delivery Addresses & Locations',
-        paths: [TranslationKeys.addresses.tr(context)],
+        title: isAr
+            ? 'عناوين التوصيل والمواقع'
+            : 'Delivery Addresses & Locations',
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TopTitle(
+              title: isAr
+                  ? 'عناوين التوصيل والمواقع'
+                  : 'Delivery Addresses & Locations',
+              paths: [TranslationKeys.addresses.tr(context)],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: hPad,
-                vertical: isMobile ? 20 : 32,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -86,7 +97,9 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
                             isAr
                                 ? 'إدارة وتخصيص عناوين الاستلام والتوصيل الخاصة بك (البيت، العمل، أخرى)'
                                 : 'Manage and customize your delivery addresses (Home, Work, Other)',
-                            style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+                            style: AppTextStyles.bodyText(
+                              context,
+                            ).copyWith(fontSize: 13),
                           ),
                         ],
                       ),
@@ -107,14 +120,21 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
                   // Filter Chips Bar
                   Row(
                     children: [
-                      _buildTagFilterChip('all', isAr ? 'جميع العناوين' : 'All Addresses', allAddresses.length, theme),
+                      _buildTagFilterChip(
+                        'all',
+                        isAr ? 'جميع العناوين' : 'All Addresses',
+                        allAddresses.length,
+                        theme,
+                      ),
                       const SizedBox(width: 8),
                       _buildTagFilterChip(
                         'home',
                         isAr ? 'البيت' : 'Home',
                         allAddresses.where((a) {
                           final t = a.title.toLowerCase();
-                          return t.contains('home') || t.contains('بيت') || t.contains('منزل');
+                          return t.contains('home') ||
+                              t.contains('بيت') ||
+                              t.contains('منزل');
                         }).length,
                         theme,
                       ),
@@ -124,7 +144,9 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
                         isAr ? 'العمل' : 'Work',
                         allAddresses.where((a) {
                           final t = a.title.toLowerCase();
-                          return t.contains('work') || t.contains('عمل') || t.contains('مكتب');
+                          return t.contains('work') ||
+                              t.contains('عمل') ||
+                              t.contains('مكتب');
                         }).length,
                         theme,
                       ),
@@ -134,7 +156,9 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
                         isAr ? 'أخرى' : 'Other',
                         allAddresses.where((a) {
                           final t = a.title.toLowerCase();
-                          return t.contains('other') || t.contains('أخرى') || t.contains('اخرى');
+                          return t.contains('other') ||
+                              t.contains('أخرى') ||
+                              t.contains('اخرى');
                         }).length,
                         theme,
                       ),
@@ -146,7 +170,10 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
                   if (filteredAddresses.isEmpty)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 60,
+                        horizontal: 24,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(16),
@@ -161,7 +188,9 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            isAr ? 'لا توجد عناوين أضيفت بعد' : 'No Addresses Found',
+                            isAr
+                                ? 'لا توجد عناوين أضيفت بعد'
+                                : 'No Addresses Found',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -173,11 +202,15 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
                             isAr
                                 ? 'قم بإضافة عنوان منزل أو عمل لتسريع استلام طلباتك.'
                                 : 'Add your home or office address to receive orders faster.',
-                            style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+                            style: AppTextStyles.bodyText(
+                              context,
+                            ).copyWith(fontSize: 13),
                           ),
                           const SizedBox(height: 20),
                           ButtonApp(
-                            label: isAr ? 'إضافة عنوان الآن' : 'Add Address Now',
+                            label: isAr
+                                ? 'إضافة عنوان الآن'
+                                : 'Add Address Now',
                             icon: Icons.add,
                             onPressed: () {
                               showDialog(
@@ -218,7 +251,12 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
     );
   }
 
-  Widget _buildTagFilterChip(String filterKey, String label, int count, ThemeData theme) {
+  Widget _buildTagFilterChip(
+    String filterKey,
+    String label,
+    int count,
+    ThemeData theme,
+  ) {
     final isSelected = _selectedFilterTag == filterKey;
 
     return ChoiceChip(
@@ -231,7 +269,9 @@ class _CustomerAddressesPageState extends State<CustomerAddressesPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withOpacity(0.25) : theme.primaryColor.withOpacity(0.12),
+                color: isSelected
+                    ? Colors.white.withOpacity(0.25)
+                    : theme.primaryColor.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -273,10 +313,7 @@ class _AddressPageCard extends StatelessWidget {
   final AddressModel address;
   final String langCode;
 
-  const _AddressPageCard({
-    required this.address,
-    required this.langCode,
-  });
+  const _AddressPageCard({required this.address, required this.langCode});
 
   @override
   Widget build(BuildContext context) {
@@ -287,10 +324,14 @@ class _AddressPageCard extends StatelessWidget {
     String addressTagLabel = isAr ? 'البيت' : 'Home';
 
     final titleLower = address.title.toLowerCase();
-    if (titleLower.contains('work') || titleLower.contains('عمل') || titleLower.contains('مكتب')) {
+    if (titleLower.contains('work') ||
+        titleLower.contains('عمل') ||
+        titleLower.contains('مكتب')) {
       addressIcon = Icons.work_outline;
       addressTagLabel = isAr ? 'العمل' : 'Work';
-    } else if (titleLower.contains('other') || titleLower.contains('أخرى') || titleLower.contains('اخرى')) {
+    } else if (titleLower.contains('other') ||
+        titleLower.contains('أخرى') ||
+        titleLower.contains('اخرى')) {
       addressIcon = Icons.location_city_outlined;
       addressTagLabel = isAr ? 'أخرى' : 'Other';
     }
@@ -330,14 +371,20 @@ class _AddressPageCard extends StatelessWidget {
                       color: theme.primaryColor.withOpacity(0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(addressIcon, color: theme.primaryColor, size: 22),
+                    child: Icon(
+                      addressIcon,
+                      color: theme.primaryColor,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        address.title.isNotEmpty ? address.title : addressTagLabel,
+                        address.title.isNotEmpty
+                            ? address.title
+                            : addressTagLabel,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -347,7 +394,10 @@ class _AddressPageCard extends StatelessWidget {
                       if (address.isDefault) ...[
                         const SizedBox(height: 2),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.green.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(10),
@@ -408,11 +458,17 @@ class _AddressPageCard extends StatelessWidget {
                           isDefault: a.id == address.id,
                         );
                       }).toList();
-                      await customerProvider.updateAddresses(currentCustomer.id, updatedList);
+                      await customerProvider.updateAddresses(
+                        currentCustomer.id,
+                        updatedList,
+                      );
                     }
                   },
                   icon: const Icon(Icons.check_circle_outline, size: 16),
-                  label: Text(isAr ? 'جعله افتراضي' : 'Set Default', style: const TextStyle(fontSize: 12)),
+                  label: Text(
+                    isAr ? 'جعله افتراضي' : 'Set Default',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 )
               else
                 const SizedBox.shrink(),
@@ -425,20 +481,30 @@ class _AddressPageCard extends StatelessWidget {
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => AddressFormDialog(initialAddress: address),
+                        builder: (context) =>
+                            AddressFormDialog(initialAddress: address),
                       );
                     },
                   ),
                   IconButton(
                     tooltip: isAr ? 'حذف' : 'Delete',
-                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.red,
+                      size: 18,
+                    ),
                     onPressed: () async {
                       final customerProvider = context.read<CustomerProvider>();
                       final authProvider = context.read<AuthProvider>();
                       final currentCustomer = authProvider.currentCustomer;
                       if (currentCustomer != null) {
-                        final updatedList = currentCustomer.addresses.where((a) => a.id != address.id).toList();
-                        await customerProvider.updateAddresses(currentCustomer.id, updatedList);
+                        final updatedList = currentCustomer.addresses
+                            .where((a) => a.id != address.id)
+                            .toList();
+                        await customerProvider.updateAddresses(
+                          currentCustomer.id,
+                          updatedList,
+                        );
                       }
                     },
                   ),

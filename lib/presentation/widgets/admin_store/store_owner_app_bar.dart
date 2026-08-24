@@ -10,6 +10,8 @@ import '../../global/navigation.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
+
 class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isMobile;
   final VoidCallback? onMenuPressed;
@@ -60,19 +62,17 @@ class StoreOwnerAppBar extends StatelessWidget implements PreferredSizeWidget {
             height: 38,
             decoration: BoxDecoration(
               color: primaryColor.withOpacity(0.12),
-              borderRadius:
-                  storeTheme.cardBorderRadius,
+              borderRadius: storeTheme.cardBorderRadius,
               border: Border.all(color: primaryColor.withOpacity(0.2)),
-              image: logoUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(logoUrl),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
             ),
             child: logoUrl == null
                 ? Icon(Icons.storefront_rounded, color: primaryColor, size: 20)
-                : null,
+                : CustomNetworkImage(
+                    imageUrl: logoUrl,
+                    width: 38,
+                    height: 38,
+                    borderRadius: storeTheme.cardBorderRadius,
+                  ),
           ),
           const SizedBox(width: 12),
           Column(

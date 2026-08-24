@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
@@ -171,7 +172,7 @@ class _BrandTabState extends State<BrandTab> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
                                   child: brand.logoUrl != null && brand.logoUrl!.isNotEmpty
-                                      ? Image.network(
+                                      ? CustomNetworkImage(imageUrl: 
                                           brand.logoUrl!,
                                           fit: BoxFit.cover,
                                           errorBuilder: (ctx, err, stack) => Icon(

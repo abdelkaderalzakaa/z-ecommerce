@@ -1,23 +1,124 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
-import 'package:z_ecommerce/data/models/auth/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
+import 'package:z_ecommerce/data/models/auth/user_model.dart';
+import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
+import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
+import 'package:z_ecommerce/data/models/super_admin/platform_config_model.dart';
+import 'package:z_ecommerce/data/models/super_admin/platform_settings.dart';
 import 'package:z_ecommerce/data/models/super_admin/super_admin_model.dart';
 import 'package:z_ecommerce/data/services/user_service.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
 
 class SuperAdminProvider with ChangeNotifier {
   final UserService _userService = UserService();
 
   SuperAdminModel? _currentSuperAdmin;
+  PlatformConfigModel _platformConfig = PlatformConfigModel.defaultConfig();
+
   bool _isLoading = false;
   String? _errorMessage;
 
   SuperAdminModel? get currentSuperAdmin => _currentSuperAdmin;
+  PlatformConfigModel get platformConfig => _platformConfig;
+  LocalizationAdmin get platformLocalization => _platformConfig.localization;
+  ThemeAdmin get platformTheme => _platformConfig.theme;
+  List<SocialModel> get platformSocials => _platformConfig.socials;
+  PlatformSettings get platformSettings => _platformConfig.settings;
+
+  // Compatibility getters for existing UI
+  LocalizationAdmin get localizationAdmin => _platformConfig.localization;
+  ThemeAdmin get themeAdmin => _platformConfig.theme;
+  List<SocialModel> get socials => _platformConfig.socials;
+
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  SuperAdminProvider() {
+    _initPlatformConfig();
+  }
+
+  /// الاستماع اللحظي لإعدادات المنصة العامة
+  void _initPlatformConfig() {
+    _userService.streamPlatformConfig().listen((config) {
+      if (config != null) {
+        _platformConfig = config;
+        notifyListeners();
+      }
+    });
+  }
+
+  /// جلب إعدادات المنصة العامة لمرة واحدة
+  Future<PlatformConfigModel> fetchPlatformConfig() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final config = await _userService.getPlatformConfig();
+      if (config != null) {
+        _platformConfig = config;
+      }
+      return _platformConfig;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return _platformConfig;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// حفظ أو تحديث إعدادات المنصة بالكامل
+  Future<void> savePlatformConfig(PlatformConfigModel config) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _userService.savePlatformConfig(config);
+      _platformConfig = config;
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// 📱 تحديث وسائل التواصل الاجتماعي للمنصة
+  Future<void> updatePlatformSocials(List<SocialModel> socials) async {
+    _platformConfig = _platformConfig.copyWith(socials: socials);
+    notifyListeners();
+    await _userService.updatePlatformSocials(
+      socials.map((e) => e.toMap()).toList(),
+    );
+  }
+
+  /// 🌐 تحديث إعدادات الترجمات واللغة للمنصة
+  Future<void> updatePlatformLocalization(LocalizationAdmin localization) async {
+    _platformConfig = _platformConfig.copyWith(localization: localization);
+    notifyListeners();
+    await _userService.updatePlatformLocalization(localization.toMap());
+  }
+
+  /// 🎨 تحديث هوية وألوان وثيم المنصة
+  Future<void> updatePlatformTheme(ThemeAdmin theme) async {
+    _platformConfig = _platformConfig.copyWith(theme: theme);
+    notifyListeners();
+    await _userService.updatePlatformTheme(theme.toMap());
+  }
+
+  /// ⚙️ تحديث إعدادات النظام والتشغيل للمنصة
+  Future<void> updatePlatformSettings(PlatformSettings settings) async {
+    _platformConfig = _platformConfig.copyWith(settings: settings);
+    notifyListeners();
+    await _userService.updatePlatformSettings(settings.toMap());
+  }
+
+  // ==========================================
+  // 👤 SuperAdmin User Management
+  // ==========================================
 
   /// جلب بيانات السوبر أدمن بالمعرف
   Future<SuperAdminModel?> fetchSuperAdmin(String adminId) async {
@@ -53,29 +154,7 @@ class SuperAdminProvider with ChangeNotifier {
     }
   }
 
-  // ==========================================
-  // 🧩 Sub-Models Operations for SuperAdmin
-  // ==========================================
-
-  /// 📱 تحديث وسائل التواصل الاجتماعي لمدير النظام
-  Future<void> updateSocials(String adminId, List<dynamic> socials) async {
-    await _userService.updateSuperAdminSocials(
-      adminId: adminId,
-      socials: socials.cast(),
-    );
-    notifyListeners();
-  }
-
-  /// 🌐 تحديث إعدادات الترجمات واللغة لمدير النظام
-  Future<void> updateLocalization(String adminId, dynamic localization) async {
-    await _userService.updateSuperAdminLocalization(
-      adminId: adminId,
-      localization: localization,
-    );
-    notifyListeners();
-  }
-
-  /// حفظ أو تحديث بيانات السوبر أدمن مع إضافته للمصادقة (Firebase Auth)
+  /// حفظ أو تحديث بيانات السوبر أدمن مع إضافته للمصادقة (Firebase Auth) وتهيئة إعدادات المنصة
   Future<void> saveSuperAdminOnce() async {
     _isLoading = true;
     notifyListeners();
@@ -83,7 +162,7 @@ class SuperAdminProvider with ChangeNotifier {
     try {
       final FirebaseAuth auth = FirebaseAuth.instance;
       UserCredential userCredential;
-      
+
       try {
         // محاولة تسجيل الدخول إذا كان الحساب موجوداً مسبقاً
         userCredential = await auth.signInWithEmailAndPassword(
@@ -100,53 +179,39 @@ class SuperAdminProvider with ChangeNotifier {
 
       final String superAdminId = userCredential.user!.uid;
 
-      SuperAdminModel superAdmin = SuperAdminModel(
-        user: UserModel(
-          id: superAdminId,
-          name: "test super admin",
-          email: "testsuperadmin@gmail.com",
-          phoneNumber: "81728282",
-          role: UserRole.superAdmin,
-          createdAt: DateTime.now(),
-        ),
-        socials: [],
-        themeAdmin: ThemeAdmin.empty(),
-        localizationAdmin: LocalizationAdmin(
-          name: const LocalizedString(
-            ar: 'متاجر زد', 
-            en: 'Z-Matajer'
-          ),
-          slogan: const LocalizedString(
-            ar: 'وجهتك الأولى للتسوق الإلكتروني', 
-            en: 'Your first destination for e-commerce'
-          ),
-          description: const LocalizedString(
-            ar: 'منصة متكاملة تتيح لك التسوق بكل سهولة وأمان وتوفر لك كل ما تحتاجه في مكان واحد.',
-            en: 'An integrated platform that allows you to shop with ease and security, providing everything you need in one place.'
-          ),
-          footerDescription: const LocalizedString(
-            ar: 'نحن هنا لخدمتك على مدار الساعة، تسوق بأمان واطمئنان.',
-            en: 'We are here to serve you 24/7. Shop safely and with peace of mind.'
-          ),
-          aboutUs: const LocalizedString(
-            ar: 'منصة متاجر زد هي الرائدة في تقديم حلول التجارة الإلكترونية لتجربة تسوق لا مثيل لها.',
-            en: 'Z-Matajer is the leading platform in providing e-commerce solutions for an unparalleled shopping experience.'
-          ),
-          termsAndConditions: const LocalizedString(
-            ar: 'يرجى مراجعة صفحة الشروط والأحكام لمعرفة التفاصيل الخاصة باستخدام المنصة.',
-            en: 'Please review the Terms and Conditions page for details on using the platform.'
-          ),
-          privacyPolicy: const LocalizedString(
-            ar: 'نحن نلتزم بحماية بياناتك الشخصية وضمان سرية معلوماتك تماماً.',
-            en: 'We are committed to protecting your personal data and ensuring the complete confidentiality of your information.'
-          ),
-        ),
+      final user = UserModel(
+        id: superAdminId,
+        name: "test super admin",
+        email: "testsuperadmin@gmail.com",
+        phoneNumber: "81728282",
+        role: UserRole.superAdmin,
+        createdAt: DateTime.now(),
+      );
+      await _userService.saveUser(user);
+
+      final superAdmin = SuperAdminModel(
+        id: superAdminId,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
       await _userService.saveSuperAdmin(superAdmin);
       _currentSuperAdmin = superAdmin;
-      
-      debugPrint("Super admin created/signed in successfully with UID: $superAdminId");
+
+      // تهيئة إعدادات المنصة الافتراضية إذا لم تكن موجودة
+      final existingPlatform = await _userService.getPlatformConfig();
+      if (existingPlatform == null) {
+        final defaultPlatform = PlatformConfigModel.defaultConfig();
+        await _userService.savePlatformConfig(defaultPlatform);
+        _platformConfig = defaultPlatform;
+      } else {
+        _platformConfig = existingPlatform;
+      }
+
+      debugPrint("Super admin and Platform config initialized successfully: $superAdminId");
     } catch (e) {
       _errorMessage = e.toString();
       debugPrint("Error in saveSuperAdminOnce: $e");

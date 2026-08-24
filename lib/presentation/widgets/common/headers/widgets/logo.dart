@@ -15,11 +15,9 @@ class Logo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
-    final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
-    final saName = superAdmin?.localizationAdmin.name.get(context);
-    final platformName = (saName != null && saName.isNotEmpty)
-        ? saName
-        : 'z-matajer';
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+    final saName = superAdminProvider.platformLocalization.name.get(context);
+    final platformName = saName.isNotEmpty ? saName : 'z-matajer';
 
     final bName = isPlatform
         ? null
@@ -50,11 +48,9 @@ class Copyright extends StatelessWidget {
   Widget build(BuildContext context) {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
-    final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
-    final saName = superAdmin?.localizationAdmin.name.get(context);
-    final platformName = (saName != null && saName.isNotEmpty)
-        ? saName
-        : 'z-matajer';
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+    final saName = superAdminProvider.platformLocalization.name.get(context);
+    final platformName = saName.isNotEmpty ? saName : 'z-matajer';
 
     final bName = isPlatform
         ? null

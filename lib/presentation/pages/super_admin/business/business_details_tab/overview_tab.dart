@@ -30,9 +30,9 @@ class OverviewTab extends StatelessWidget {
         : 0.0;
     final String ratingDisplay = hasRatings ? avgRating.toStringAsFixed(1) : (isAr ? 'جديد' : 'New');
 
-    final ownerName = store.owner?.name.isNotEmpty == true ? store.owner!.name : (isAr ? 'غير محدد' : 'Not set');
-    final ownerEmail = store.owner?.email.isNotEmpty == true ? store.owner!.email : (isAr ? 'غير محدد' : 'Not set');
-    final ownerPhone = store.owner?.phoneNumber.isNotEmpty == true ? store.owner!.phoneNumber : (isAr ? 'غير محدد' : 'Not set');
+    final ownerName = store.ownerName?.isNotEmpty == true ? store.ownerName! : (isAr ? 'غير محدد' : 'Not set');
+    final ownerEmail = store.ownerEmail?.isNotEmpty == true ? store.ownerEmail! : (isAr ? 'غير محدد' : 'Not set');
+    final ownerPhone = store.ownerPhone?.isNotEmpty == true ? store.ownerPhone! : (isAr ? 'غير محدد' : 'Not set');
     final regDate = store.createdAt != null
         ? store.createdAt!.toLocal().toString().split(' ')[0]
         : (isAr ? 'غير محدد' : 'Not set');

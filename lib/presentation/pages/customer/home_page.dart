@@ -16,6 +16,9 @@ import '../../widgets/home/browse_brands_section.dart';
 import '../../widgets/home/discounted_products_section.dart';
 import '../../widgets/home/offers_section.dart';
 import '../../widgets/home/top_reviews_section.dart';
+import '../../widgets/home/recommended_section.dart';
+import '../../widgets/home/featured_section.dart';
+import '../../widgets/home/most_liked_section.dart';
 import '../../widgets/common/footers/footer_section.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,6 +38,11 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey _offersKey = GlobalKey();
   final GlobalKey _browseBrandsKey = GlobalKey();
   final GlobalKey _reviewsKey = GlobalKey();
+  
+  final GlobalKey _recommendedKey = GlobalKey();
+  final GlobalKey _featuredKey = GlobalKey();
+  final GlobalKey _discountedKey = GlobalKey();
+  final GlobalKey _mostLikedKey = GlobalKey();
 
   @override
   void initState() {
@@ -63,6 +71,10 @@ class _HomePageState extends State<HomePage> {
       'offers' => _offersKey,
       'browseBrands' => _browseBrandsKey,
       'reviews' => _reviewsKey,
+      'recommended' => _recommendedKey,
+      'featured' => _featuredKey,
+      'discounted' => _discountedKey,
+      'mostLiked' => _mostLikedKey,
       _ => null,
     };
 
@@ -116,6 +128,12 @@ class _HomePageState extends State<HomePage> {
                   HeroSection(key: _heroKey),
                   const BrandsSection(),
                   const SizedBox(height: 72),
+                  RecommendedSection(key: _recommendedKey),
+                  const SizedBox(height: 72),
+                  FeaturedSection(key: _featuredKey),
+                  const SizedBox(height: 72),
+                  DiscountedProductsSection(key: _discountedKey),
+                  const SizedBox(height: 72),
                   NewArrivalsSection(key: _newArrivalsKey),
                   const SizedBox(height: 72),
                   BrowseCategoriesSection(key: _browseCategoriesKey),
@@ -123,6 +141,8 @@ class _HomePageState extends State<HomePage> {
                   TopSellingSection(key: _topSellingKey),
                   const SizedBox(height: 72),
                   OffersSection(key: _offersKey),
+                  const SizedBox(height: 72),
+                  MostLikedSection(key: _mostLikedKey),
                   const SizedBox(height: 72),
                   BrowseBrandsSection(key: _browseBrandsKey),
                   const SizedBox(height: 72),

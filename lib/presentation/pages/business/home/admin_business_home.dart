@@ -11,6 +11,7 @@ import 'package:z_ecommerce/presentation/pages/business/home/store_offers_manage
 import 'package:z_ecommerce/presentation/pages/business/settings/store_owner_settings_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_products_management_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_reviews_management_page.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/store_delivery_management_page.dart';
 import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_app_bar.dart';
 import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_sidebar.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
@@ -49,6 +50,7 @@ class _AdminStoreState extends State<AdminStore> {
       const StoreBrandsPage(),
       if (store.allowFollow) const StoreFollowersPage(),
       if (store.allowReviews || store.allowLikes) const StoreReviewsManagementPage(),
+      StoreDeliveryManagementPage(businessId: store.id),
       const StoreOwnerSettingsPage(),
     ];
   }
@@ -91,6 +93,10 @@ class _AdminStoreState extends State<AdminStore> {
           icon: Icons.star_rounded,
         ),
       const StoreOwnerSidebarItem(
+        titleKey: TranslationKeys.storeDeliveryTab,
+        icon: Icons.local_shipping_rounded,
+      ),
+      const StoreOwnerSidebarItem(
         titleKey: TranslationKeys.storeSettingsTab,
         icon: Icons.settings_rounded,
       ),
@@ -113,44 +119,50 @@ class _AdminStoreState extends State<AdminStore> {
     if (store.isInactive) {
       return Scaffold(
         body: Center(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.block, size: 90, color: Colors.red),
-                const SizedBox(height: 24),
-                const Text(
-                  'عذراً، هذا المتجر غير مفعل حالياً',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'لا يمكنك الوصول إلى لوحة تحكم المتجر لأن حالته غير نشطة.\nالرجاء التواصل مع الإدارة للتفعيل.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Colors.grey, height: 1.5),
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(Icons.block, size: 90, color: Colors.red),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'عذراً، هذا المتجر غير مفعل حالياً',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'لا يمكنك الوصول إلى لوحة تحكم المتجر لأن حالته غير نشطة. الرجاء التواصل مع الإدارة للتفعيل.',
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    style: TextStyle(fontSize: 15, color: Colors.grey, height: 1.5),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+                    icon: const Icon(Icons.logout_rounded),
+                    label: const Text(
+                      'تسجيل الخروج',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () async {
+                      await context.read<AuthProvider>().signOut();
+                    },
                   ),
-                  icon: const Icon(Icons.logout_rounded),
-                  label: const Text(
-                    'تسجيل الخروج',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () async {
-                    await context.read<AuthProvider>().signOut();
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

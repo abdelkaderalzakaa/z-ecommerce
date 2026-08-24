@@ -26,6 +26,7 @@ import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.d
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
 import 'package:z_ecommerce/presentation/widgets/profile/profile_sidebar.dart';
 import 'package:z_ecommerce/presentation/widgets/profile/profile_tabs_mobile.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 
 class ProfilePage extends StatefulWidget {
   final String? tabId;
@@ -82,12 +83,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final businessProvider = context.watch<BusinessProvider>();
     final myStoresCount = userId.isNotEmpty
-        ? businessProvider.businesses.where((b) => b.owner?.id == userId).length
+        ? businessProvider.businesses.where((b) => b.ownerId == userId).length
         : 0;
 
     final customer = authProvider.currentCustomer;
     final followingCount = userId.isNotEmpty
-        ? businessProvider.businesses.where((b) => b.followersUsers.any((f) => f.userId == userId)).length
+        ? businessProvider.businesses
+              .where((b) => b.followersUsers.any((f) => f.userId == userId))
+              .length
         : 0;
     final wishlistCount = customer?.wishlist.length ?? 0;
     final addressesCount = customer?.addresses.length ?? 0;
@@ -95,7 +98,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return [
       TranslationKeys.myAccount.tr(context),
       '${TranslationKeys.myStores.tr(context)} ($myStoresCount)',
-      isAr ? 'المتاجر التي أتابعها ($followingCount)' : 'Following ($followingCount)',
+      isAr
+          ? 'المتاجر التي أتابعها ($followingCount)'
+          : 'Following ($followingCount)',
       TranslationKeys.orders.tr(context),
       '${TranslationKeys.wishlist.tr(context)} ($wishlistCount)',
       '${TranslationKeys.addresses.tr(context)} ($addressesCount)',
@@ -145,30 +150,29 @@ class _ProfilePageState extends State<ProfilePage> {
     final currentUser = authProvider.currentUser;
 
     // Strict Role Check: Customer Profile Page is strictly for UserRole.customer
-    final isCustomer = isAuthenticated && currentUser?.role == UserRole.customer;
+    final isCustomer =
+        isAuthenticated && currentUser?.role == UserRole.customer;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: HeaderDetails(
-        title: TranslationKeys.profile.tr(context),
-        paths: [TranslationKeys.profile.tr(context)],
-      ),
+      appBar: HeaderDetails(title: TranslationKeys.profile.tr(context)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TopTitle(
+              title: TranslationKeys.profile.tr(context),
+              paths: [TranslationKeys.profile.tr(context)],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: hPad,
-                vertical: isMobile ? 16 : 20, // Compact reduced padding
-              ),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: !isAuthenticated
                   ? _buildNotAuthenticatedCard(context, theme, isAr)
                   : !isCustomer
-                      ? _buildAccessDeniedCard(context, currentUser, theme, isAr)
-                      : (isMobile
-                          ? _buildMobileLayout(context)
-                          : _buildDesktopLayout(context)),
+                  ? _buildAccessDeniedCard(context, currentUser, theme, isAr)
+                  : (isMobile
+                        ? _buildMobileLayout(context)
+                        : _buildDesktopLayout(context)),
             ),
             const SizedBox(height: 20),
             const FooterSection(),
@@ -179,7 +183,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // 1. Access Restriction Card for Unauthenticated Visitors
-  Widget _buildNotAuthenticatedCard(BuildContext context, ThemeData theme, bool isAr) {
+  Widget _buildNotAuthenticatedCard(
+    BuildContext context,
+    ThemeData theme,
+    bool isAr,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
@@ -206,7 +214,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 ? 'يجب تسجيل الدخول بحساب زبون للوصول إلى تفاصيل وإعدادات الملف الشخصي.'
                 : 'You must log in with a customer account to access profile settings.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13),
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 24),
           ButtonApp(
@@ -220,7 +231,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // 2. Access Restriction Card for Non-Customer Roles (BusinessAdmin / SuperAdmin)
-  Widget _buildAccessDeniedCard(BuildContext context, UserModel? user, ThemeData theme, bool isAr) {
+  Widget _buildAccessDeniedCard(
+    BuildContext context,
+    UserModel? user,
+    ThemeData theme,
+    bool isAr,
+  ) {
     String roleName = isAr ? 'إداري' : 'Admin';
     Widget navigateBtn = ButtonApp(
       label: isAr ? 'العودة للمدخل الرئيسي' : 'Back to Entry',
@@ -231,14 +247,19 @@ class _ProfilePageState extends State<ProfilePage> {
     if (user?.role == UserRole.superAdmin) {
       roleName = isAr ? 'سوبر أدمن المنصة' : 'Platform Super Admin';
       navigateBtn = ButtonApp(
-        label: isAr ? 'الانتقال إلى لوحة السوبر أدمن' : 'Go to Super Admin Dashboard',
+        label: isAr
+            ? 'الانتقال إلى لوحة السوبر أدمن'
+            : 'Go to Super Admin Dashboard',
         icon: Icons.dashboard_outlined,
-        onPressed: () => changeScreenReplacement(context, const SuperAdminHome()),
+        onPressed: () =>
+            changeScreenReplacement(context, const SuperAdminHome()),
       );
     } else if (user?.role == UserRole.businessOwner) {
       roleName = isAr ? 'أدمن نشاط تجاري' : 'Business Owner';
       navigateBtn = ButtonApp(
-        label: isAr ? 'الانتقال إلى لوحة التحكم التجارية' : 'Go to Business Dashboard',
+        label: isAr
+            ? 'الانتقال إلى لوحة التحكم التجارية'
+            : 'Go to Business Dashboard',
         icon: Icons.storefront_outlined,
         onPressed: () => changeScreenReplacement(context, const AdminStore()),
       );
@@ -254,10 +275,16 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Column(
         children: [
-          Icon(Icons.admin_panel_settings_outlined, size: 64, color: Colors.amber.shade800),
+          Icon(
+            Icons.admin_panel_settings_outlined,
+            size: 64,
+            color: Colors.amber.shade800,
+          ),
           const SizedBox(height: 16),
           Text(
-            isAr ? 'عذراً! الواجهة خاصة بالزبائن فقط' : 'Access Restricted to Customers',
+            isAr
+                ? 'عذراً! الواجهة خاصة بالزبائن فقط'
+                : 'Access Restricted to Customers',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -270,7 +297,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 ? 'حسابك الحالي لديه صلاحية ($roleName).\nواجهة البروفايل مخصصة حصرياً لحسابات الزبائن لمتابعة طلباتهم ومفضلاتهم.'
                 : 'Your account is registered as ($roleName).\nCustomer profile is reserved for customer accounts.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 13),
+            style: TextStyle(
+              color: theme.textTheme.bodyMedium?.color,
+              fontSize: 13,
+            ),
           ),
           const SizedBox(height: 24),
           navigateBtn,

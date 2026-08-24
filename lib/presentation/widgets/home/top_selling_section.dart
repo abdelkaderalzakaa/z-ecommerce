@@ -10,6 +10,7 @@ import '../../../data/models/product/product_model.dart';
 import '../../global/translate/app_localizations.dart';
 import '../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
+import 'package:z_ecommerce/data/providers/product_filter_provider.dart';
 
 class TopSellingSection extends StatelessWidget {
   const TopSellingSection({super.key});
@@ -44,10 +45,15 @@ class TopSellingSection extends StatelessWidget {
               isMobile
                   ? _MobileProductGrid(products: products)
                   : _DesktopProductGrid(products: products),
-              const SizedBox(height: 36),
-              ViewAllButton(onTap: () {
-                changeScreen(context, const CategoriesPage());
-              }),
+              if (topSellingProducts.length > 4)
+                Column(
+                  children: [
+                    const SizedBox(height: 36),
+                    ViewAllButton(onTap: () {
+                      changeScreen(context, const CategoriesPage(initialQuickFilter: QuickFilter.bestSellers));
+                    }),
+                  ],
+                ),
             ],
           ),
         );

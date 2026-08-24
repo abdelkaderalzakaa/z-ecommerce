@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
@@ -141,7 +142,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
               const SizedBox(height: 10),
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.network(
+                child: CustomNetworkImage(imageUrl: 
                   dish.imageUrl,
                   height: 160,
                   width: double.infinity,
@@ -260,10 +261,10 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
             CircleAvatar(
               radius: 16,
               backgroundColor: primaryColor.withOpacity(0.12),
-              backgroundImage: themeInfo.logoUrl != null
+              backgroundImage: themeInfo.logoUrl != null && themeInfo.logoUrl!.isNotEmpty
                   ? NetworkImage(themeInfo.logoUrl!)
                   : null,
-              child: themeInfo.logoUrl == null
+              child: themeInfo.logoUrl == null || themeInfo.logoUrl!.isEmpty
                   ? Icon(
                       Icons.restaurant_menu_rounded,
                       color: primaryColor,
@@ -432,8 +433,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
           ),
         ),
 
-        // Banner Cover
-        if (themeInfo?.coverBannerUrl != null)
+        if (themeInfo?.coverBannerUrl != null && themeInfo!.coverBannerUrl!.isNotEmpty)
           Container(
             height: 110,
             width: double.infinity,
@@ -552,7 +552,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
+                                child: CustomNetworkImage(imageUrl: 
                                   dish.imageUrl,
                                   height: 120,
                                   width: double.infinity,
@@ -644,7 +644,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                                         themeInfo?.cardRadius ?? 18,
                                       ),
                                     ),
-                                    child: Image.network(
+                                    child: CustomNetworkImage(imageUrl: 
                                       dish.imageUrl,
                                       height: 140,
                                       width: double.infinity,
@@ -793,7 +793,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
+                                child: CustomNetworkImage(imageUrl: 
                                   dish.imageUrl,
                                   height: 85,
                                   width: 85,
@@ -1015,7 +1015,7 @@ class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
                   themeInfo?.cardBorderRadius ?? BorderRadius.circular(20),
               child: Stack(
                 children: [
-                  Image.network(
+                  CustomNetworkImage(imageUrl: 
                     themeInfo?.coverBannerUrl ??
                         'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
                     height: 220,

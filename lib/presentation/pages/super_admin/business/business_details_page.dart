@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:z_ecommerce/core/services/excel_export_service.dart';
-import 'package:z_ecommerce/core/services/excel_import_service.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/excel_import_page.dart';
+
 import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/brand_provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
@@ -21,6 +21,7 @@ import 'package:z_ecommerce/presentation/pages/super_admin/business/business_det
 import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/permissions_tab.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/products_tab.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/reviews_tab.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/business/business_details_tab/delivery_tab.dart';
 import 'package:z_ecommerce/presentation/widgets/templates/details_template.dart';
 
 import 'create_business_page.dart';
@@ -51,7 +52,7 @@ class BusinessDetailsPage extends StatelessWidget {
 
         // Calculate readiness based on filled fields
         int readinessScore = 0;
-        if (store.owner != null) readinessScore += 20;
+        if (store.hasOwner) readinessScore += 20;
         if (store.addAddress.isNotEmpty) readinessScore += 20;
         if (store.localization.name.ar.isNotEmpty) readinessScore += 20;
         if (store.socials.isNotEmpty) readinessScore += 20;
@@ -75,45 +76,20 @@ class BusinessDetailsPage extends StatelessWidget {
           fallbackIcon: Icons.storefront_rounded,
           statusBadge: TableStatusBadge.fromStatus(store.status ?? 'Active'),
           headerMetrics: [
-            // Import Button
+            // Import / Export Button
             ButtonApp(
-              onPressed: () async {
-                await ExcelImportService.importData(context, store.id);
-              },
-              icon: Icons.upload_rounded,
-              label: isAr ? 'استيراد بيانات' : 'Import Data',
-              color: Colors.green,
-            ),
-            const SizedBox(width: 8),
-            // Export Button
-            ButtonApp(
-              onPressed: () async {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(isAr ? 'جاري تجهيز الملف للتصدير...' : 'Preparing export file...')),
+              onPressed: () {
+                changeScreen(
+                  context,
+                  ExcelImportPage(
+                    businessId: store.id,
+                    businessName: store.localization.name.get(context),
+                  ),
                 );
-                try {
-                  await ExcelExportService.exportBusinessData(
-                    context,
-                    store.id,
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(isAr ? 'تم تصدير البيانات بنجاح!' : 'Data exported successfully!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(isAr ? 'حدث خطأ أثناء التصدير: $e' : 'Export failed: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
               },
-              icon: Icons.download_rounded,
-              color: Colors.amber,
-              label: isAr ? 'تصدير بيانات المتجر' : 'Export Store Data',
+              icon: Icons.table_chart_rounded,
+              label: isAr ? 'استيراد / تصدير' : 'Import / Export',
+              color: Colors.indigo,
             ),
             const SizedBox(width: 8),
           ],
@@ -129,6 +105,7 @@ class BusinessDetailsPage extends StatelessWidget {
             Tab(text: isAr ? 'العلامات التجارية ($brandsCount)' : 'Brands ($brandsCount)'),
             Tab(text: isAr ? 'المتابعات ($followersCount)' : 'Followers ($followersCount)'),
             Tab(text: isAr ? 'التقييمات والآراء ($reviewsCount)' : 'Reviews ($reviewsCount)'),
+            Tab(text: isAr ? 'التوصيل' : 'Delivery'),
           ],
           tabViews: [
             OverviewTab(store: store),
@@ -139,6 +116,7 @@ class BusinessDetailsPage extends StatelessWidget {
             BrandTab(store: store),
             FollowersTab(store: store),
             ReviewsTab(store: store),
+            DeliveryTab(store: store),
           ],
         );
       },

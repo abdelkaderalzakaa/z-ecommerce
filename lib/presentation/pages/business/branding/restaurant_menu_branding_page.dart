@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
@@ -839,7 +840,7 @@ class _RestaurantMenuBrandingPageState
               borderRadius: t.cardBorderRadius,
               child: Stack(
                 children: [
-                  Image.network(
+                  CustomNetworkImage(imageUrl: 
                     t.coverBannerUrl ??
                         'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
                     height: 180,
@@ -1220,7 +1221,7 @@ class _RestaurantMenuBrandingPageState
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.network(
+                              child: CustomNetworkImage(imageUrl: 
                                 meal['image']!,
                                 height: 110,
                                 width: double.infinity,
@@ -1326,7 +1327,7 @@ class _RestaurantMenuBrandingPageState
                                 borderRadius: BorderRadius.vertical(
                                   top: Radius.circular(t.cardRadius),
                                 ),
-                                child: Image.network(
+                                child: CustomNetworkImage(imageUrl: 
                                   meal['image']!,
                                   height: 120,
                                   width: double.infinity,
@@ -1464,7 +1465,7 @@ class _RestaurantMenuBrandingPageState
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
+                            child: CustomNetworkImage(imageUrl: 
                               meal['image']!,
                               height: 70,
                               width: 70,

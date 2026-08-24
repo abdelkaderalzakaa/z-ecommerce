@@ -49,10 +49,10 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
       final b = widget.businessToEdit!;
       _storeNameEnController.text = b.localization.name.en;
       _storeNameArController.text = b.localization.name.ar;
-      _contactEmailController.text = b.owner?.email ?? '';
-      _contactPhoneController.text = b.owner?.phoneNumber ?? '';
-      _ownerNameController.text = b.owner?.name ?? '';
-      _ownerEmailController.text = b.owner?.email ?? '';
+      _contactEmailController.text = b.ownerEmail ?? '';
+      _contactPhoneController.text = b.ownerPhone ?? '';
+      _ownerNameController.text = b.ownerName ?? '';
+      _ownerEmailController.text = b.ownerEmail ?? '';
       _selectedBusinessType = b.businessType;
     }
   }
@@ -68,18 +68,16 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
     try {
       if (widget.businessToEdit != null) {
         final existing = widget.businessToEdit!;
-        final updatedOwner = existing.owner?.copyWith(
-          name: _ownerNameController.text.trim(),
-          email: _ownerEmailController.text.trim(),
-          phoneNumber: _contactPhoneController.text.trim(),
-        ) ?? UserModel(
-          id: existing.id,
-          name: _ownerNameController.text.trim(),
-          email: _ownerEmailController.text.trim(),
-          role: UserRole.businessOwner,
-          phoneNumber: _contactPhoneController.text.trim(),
-          createdAt: DateTime.now(),
-        );
+        if (existing.ownerId != null && existing.ownerId!.isNotEmpty) {
+          final user = await userService.getUserById(existing.ownerId!);
+          if (user != null) {
+            await userService.saveUser(user.copyWith(
+              name: _ownerNameController.text.trim(),
+              email: _ownerEmailController.text.trim(),
+              phoneNumber: _contactPhoneController.text.trim(),
+            ));
+          }
+        }
 
         final updatedLocalization = LocalizationAdmin(
           name: LocalizedString(
@@ -95,7 +93,10 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
         );
 
         final updatedStore = existing.copyWith(
-          owner: updatedOwner,
+          ownerId: existing.ownerId,
+          ownerName: _ownerNameController.text.trim(),
+          ownerEmail: _ownerEmailController.text.trim(),
+          ownerPhone: _contactPhoneController.text.trim(),
           businessType: _selectedBusinessType,
           localization: updatedLocalization,
           updatedAt: DateTime.now(),
@@ -130,7 +131,7 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
         throw Exception(TranslationKeys.errorCreatingStore.tr(context));
       }
 
-      // بناء UserModel للمالك باستخدام الـ UID الصحيح
+      // بناء وحفظ UserModel للمالك في كوليكشن users
       final newOwner = UserModel(
         id: ownerId,
         name: _ownerNameController.text.trim(),
@@ -140,6 +141,7 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
         phoneNumber: _contactPhoneController.text.trim(),
         createdAt: DateTime.now(),
       );
+      await userService.saveUser(newOwner);
 
       // بناء LocalizationAdmin للمتجر
       final localization = LocalizationAdmin(
@@ -167,7 +169,10 @@ class _CreateBusinessPageState extends State<CreateBusinessPage> {
 
       final newStore = BusinessModel(
         id: storeId,
-        owner: newOwner,
+        ownerId: ownerId,
+        ownerName: newOwner.name,
+        ownerEmail: newOwner.email,
+        ownerPhone: newOwner.phoneNumber,
         businessType: _selectedBusinessType,
         theme: const ThemeAdmin(
           primaryColor: '#000000',

@@ -20,6 +20,14 @@ class OffersManagementPage extends StatefulWidget {
 
 class _OffersManagementPageState extends State<OffersManagementPage> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OfferProvider>().listenToActiveOffers();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<OfferProvider>(
       builder: (context, provider, child) {

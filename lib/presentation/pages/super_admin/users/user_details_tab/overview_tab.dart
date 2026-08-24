@@ -24,6 +24,9 @@ class UserOverviewTab extends StatelessWidget {
       case UserRole.customer:
         roleText = TranslationKeys.customerRole.tr(context);
         break;
+      case UserRole.delivery:
+        roleText = 'مندوب / شركة توصيل';
+        break;
     }
 
     return SingleChildScrollView(

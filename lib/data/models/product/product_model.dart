@@ -181,6 +181,15 @@ class ProductModel {
   /// هل يوجد خصم فعلي على المنتج؟
   bool get hasDiscount => discountPercent != null && discountPercent! > 0;
 
+  /// هل المنتج صالح للعرض في واجهات الزبون؟
+  /// (يجب أن يكون نشطاً، وأن يكون له سعر أكبر من 0 أو أن يكون مجانياً بالكامل)
+  bool get isValidForCustomer {
+    if (!isActive) return false;
+    if (isFreeProduct) return true;
+    if (basePrice > 0) return true;
+    return false;
+  }
+
   /// هل المنتج وصل حديثاً؟ (إذا تم إنشاؤه خلال آخر 30 يوماً)
   bool get isNewArrival {
     if (createdAt == null) return false;

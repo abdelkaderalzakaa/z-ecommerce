@@ -70,7 +70,8 @@ class ExcelImportService {
               children: [
                 const Text('تم العثور على البيانات التالية في الملف:'),
                 const SizedBox(height: 12),
-                Text('• معلومات المتجر: ${data.business != null ? "موجودة" : "غير موجودة"}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                if (data.business != null)
+                  const Text('• معلومات المتجر: موجودة', style: TextStyle(fontWeight: FontWeight.bold)),
                 Text('• عدد الفئات: ${data.categories.length}'),
                 Text('• عدد العلامات التجارية: ${data.brands.length}'),
                 Text('• عدد المنتجات: ${data.products.length}'),
@@ -154,10 +155,13 @@ class ExcelImportService {
 
   static Future<ImportDataResult> _processExcelData(Excel excel, String currentBusinessId) async {
     debugPrint('ExcelImportService: Starting _processExcelData...');
-    // 0. Process Store Info (معلومات المتجر)
-    debugPrint('ExcelImportService: Processing Store Info sheet...');
-    final storeSheet = excel['معلومات المتجر'];
-    final business = await _parseBusinessInfo(storeSheet, currentBusinessId);
+    // 0. Optional Store Info (معلومات المتجر)
+    BusinessModel? business;
+    if (excel.tables.containsKey('معلومات المتجر')) {
+      debugPrint('ExcelImportService: Processing Store Info sheet...');
+      final storeSheet = excel['معلومات المتجر'];
+      business = await _parseBusinessInfo(storeSheet, currentBusinessId);
+    }
   
     // 1. Process Categories (الفئات)
     debugPrint('ExcelImportService: Processing Categories sheet...');

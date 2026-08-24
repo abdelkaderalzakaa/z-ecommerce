@@ -30,27 +30,25 @@ class ProductDetailsPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: HeaderDetails(
-        title: TranslationKeys.productDetails.tr(context),
-
-        fallbackRoute: 'shop',
-        paths: [
-          TranslationKeys.home.tr(context),
-          TranslationKeys.shop.tr(context),
-          product.category,
-          product.name,
-        ],
-      ),
+      appBar: HeaderDetails(title: TranslationKeys.productDetails.tr(context)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Top Title
+            TopTitle(
+              title: TranslationKeys.productDetails.tr(context),
+              fallbackRoute: 'shop',
+              paths: [
+                TranslationKeys.home.tr(context),
+                TranslationKeys.shop.tr(context),
+                product.category,
+                product.name,
+              ],
+            ),
             // Product Gallery and Info
             Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: isMobile ? 20 : 24,
-                horizontal: hPad,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: isMobile
                   ? Column(
                       children: [
@@ -83,7 +81,10 @@ class ProductDetailsPage extends StatelessWidget {
             if (context.watch<BusinessProvider>().selectedBusiness.allowOffers)
               ProductOffersSection(product: product),
 
-            if (context.watch<BusinessProvider>().selectedBusiness.allowReviews) ...[
+            if (context
+                .watch<BusinessProvider>()
+                .selectedBusiness
+                .allowReviews) ...[
               const SizedBox(height: 24),
               ProductReviewsSection(product: product),
             ],

@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
@@ -114,10 +115,10 @@ class AuthSplitLayout extends StatelessWidget {
     ThemeData theme,
     Color primaryColor,
   ) {
-    final superAdmin = context.watch<SuperAdminProvider>().currentSuperAdmin;
-    final logoUrl = superAdmin?.themeAdmin.logoUrl ?? '';
-    final brandName =
-        superAdmin?.localizationAdmin.name.get(context) ?? 'Z-MATAJER';
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+    final logoUrl = superAdminProvider.platformTheme.logoUrl ?? '';
+    final saName = superAdminProvider.platformLocalization.name.get(context);
+    final brandName = saName.isNotEmpty ? saName : 'Z-MATAJER';
 
     return Container(
       padding: const EdgeInsets.all(40),
@@ -153,7 +154,7 @@ class AuthSplitLayout extends StatelessWidget {
                   ],
                 ),
                 child: logoUrl.isNotEmpty
-                    ? Image.network(
+                    ? CustomNetworkImage(imageUrl: 
                         logoUrl,
                         width: 32,
                         height: 32,
@@ -226,8 +227,9 @@ class AuthSplitLayout extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  superAdmin?.localizationAdmin.description.get(context) ??
-                      'انضم اليوم لتجربة تسوق سريعة وموثوقة واستكشف آلاف المنتجات والمتاجر الممتازة.',
+                  superAdminProvider.platformLocalization.description.get(context).isNotEmpty
+                      ? superAdminProvider.platformLocalization.description.get(context)
+                      : 'انضم اليوم لتجربة تسوق سريعة وموثوقة واستكشف آلاف المنتجات والمتاجر الممتازة.',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,

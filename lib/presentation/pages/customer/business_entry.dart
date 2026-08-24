@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/product/brand_model.dart';
@@ -13,6 +14,7 @@ import 'package:z_ecommerce/data/providers/category_provider.dart';
 import 'package:z_ecommerce/data/providers/follower_provider.dart';
 import 'package:z_ecommerce/data/providers/like_provider.dart';
 import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/locale_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
@@ -106,7 +108,9 @@ class _BusinessEntryState extends State<BusinessEntry> {
     final recommendedBrands = brands
         .where((b) => b.isRecommended)
         .toList();
-    final allProducts = productProvider.allProducts;
+
+    // استخدام المنتجات المسموحة للزبون فقط
+    final allProducts = productProvider.customerAllProducts;
     final recommendedProducts = allProducts
         .where((p) => p.isRecommended)
         .toList();
@@ -338,7 +342,9 @@ class SectionHero extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      TranslationKeys.businessHeroTitle.tr(context),
+                      context.watch<SuperAdminProvider>().platformLocalization.slogan.get(context).isNotEmpty
+                          ? context.watch<SuperAdminProvider>().platformLocalization.slogan.get(context)
+                          : TranslationKeys.businessHeroTitle.tr(context),
                       textAlign: isMobile ? TextAlign.center : TextAlign.start,
                       style: TextStyle(
                         fontSize: isMobile ? 24 : 36,
@@ -348,7 +354,9 @@ class SectionHero extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      TranslationKeys.businessHeroSubtitle.tr(context),
+                      context.watch<SuperAdminProvider>().platformLocalization.description.get(context).isNotEmpty
+                          ? context.watch<SuperAdminProvider>().platformLocalization.description.get(context)
+                          : TranslationKeys.businessHeroSubtitle.tr(context),
                       textAlign: isMobile ? TextAlign.center : TextAlign.start,
                       style: AppTextStyles.bodyText(context).copyWith(
                         color: isDark
@@ -1325,12 +1333,21 @@ class CardBusiness extends StatelessWidget {
         ? avgRating.toStringAsFixed(1)
         : (isAr ? 'جديد' : 'New');
 
-    void openStore() {
-      context.read<BusinessProvider>().selectBusiness(business.id);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+    void openStore() async {
+      final businessProvider = context.read<BusinessProvider>();
+      
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
+      
+      await businessProvider.selectBusiness(business.id);
+      
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        changeScreen(context, const HomePage());
+      }
     }
 
     return GestureDetector(
@@ -1800,12 +1817,6 @@ class CardBrand extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
                       shape: BoxShape.circle,
-                      image: (brand.logoUrl != null && brand.logoUrl!.isNotEmpty)
-                          ? DecorationImage(
-                              image: NetworkImage(brand.logoUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
                     ),
                     child: (brand.logoUrl == null || brand.logoUrl!.isEmpty)
                         ? Icon(
@@ -1813,7 +1824,17 @@ class CardBrand extends StatelessWidget {
                             size: 32,
                             color: theme.primaryColor.withOpacity(0.5),
                           )
-                        : null,
+                        : ClipOval(
+                            child: CustomNetworkImage(imageUrl: 
+                              brand.logoUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 32,
+                                color: theme.primaryColor.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 8),

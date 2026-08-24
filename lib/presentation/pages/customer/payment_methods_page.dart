@@ -3,6 +3,7 @@ import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dar
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
 
 class PaymentMethodsPage extends StatelessWidget {
   const PaymentMethodsPage({super.key});
@@ -16,7 +17,9 @@ class PaymentMethodsPage extends StatelessWidget {
 
     final List<_PaymentOption> paymentMethods = [
       _PaymentOption(
-        title: isAr ? 'الدفع عند الاستلام (Cash on Delivery)' : 'Cash on Delivery (COD)',
+        title: isAr
+            ? 'الدفع عند الاستلام (Cash on Delivery)'
+            : 'Cash on Delivery (COD)',
         description: isAr
             ? 'ادفع نقداً بكل سهولة وأمان عند وصول الطلبية إلى باب منزلك أو مقر عملك دون أي رسوم مسبقة.'
             : 'Pay in cash effortlessly when your order arrives at your doorstep.',
@@ -42,7 +45,9 @@ class PaymentMethodsPage extends StatelessWidget {
         ],
       ),
       _PaymentOption(
-        title: isAr ? 'المحافظ الإلكترونية (Digital Wallets)' : 'Digital Wallets',
+        title: isAr
+            ? 'المحافظ الإلكترونية (Digital Wallets)'
+            : 'Digital Wallets',
         description: isAr
             ? 'ادفع مباشرة عبر المحافظ الإلكترونية المعتمدة مثل (Whish Money, OMT Card, ZainCash, Apple Pay).'
             : 'Pay seamlessly using Whish Money, OMT Card, Apple Pay, and local e-wallets.',
@@ -55,7 +60,9 @@ class PaymentMethodsPage extends StatelessWidget {
         ],
       ),
       _PaymentOption(
-        title: isAr ? 'التحويل البنكي المباشر (Bank Transfer)' : 'Bank Wire Transfer',
+        title: isAr
+            ? 'التحويل البنكي المباشر (Bank Transfer)'
+            : 'Bank Wire Transfer',
         description: isAr
             ? 'إمكانية التحويل البنكي المباشر إلى الحساب المصرفي الرسمي مع إرفاق وصل التحويل لتأكيد الطلبية.'
             : 'Direct bank transfer to official IBAN with receipt attachment.',
@@ -73,17 +80,17 @@ class PaymentMethodsPage extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: HeaderDetails(
         title: isAr ? 'طرق الدفع المتاحة' : 'Payment Methods',
-        paths: [isAr ? 'طرق الدفع' : 'Payment Methods'],
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TopTitle(
+              title: isAr ? 'طرق الدفع المتاحة' : 'Payment Methods',
+              paths: [isAr ? 'طرق الدفع' : 'Payment Methods'],
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: hPad,
-                vertical: isMobile ? 20 : 32,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: hPad),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -96,7 +103,11 @@ class PaymentMethodsPage extends StatelessWidget {
                           color: theme.primaryColor.withOpacity(0.12),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.payment, color: theme.primaryColor, size: 28),
+                        child: Icon(
+                          Icons.payment,
+                          color: theme.primaryColor,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -104,7 +115,9 @@ class PaymentMethodsPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isAr ? 'وسائل وطرق الدفع المعتمدة' : 'Accepted Payment Options',
+                              isAr
+                                  ? 'وسائل وطرق الدفع المعتمدة'
+                                  : 'Accepted Payment Options',
                               style: TextStyle(
                                 fontSize: isMobile ? 22 : 28,
                                 fontWeight: FontWeight.bold,
@@ -116,7 +129,9 @@ class PaymentMethodsPage extends StatelessWidget {
                               isAr
                                   ? 'اختر طريقة الدفع الأكثر ملاءمة لك مع ضمان حماية الدفع المالي 100%'
                                   : 'Select your preferred payment method with 100% security guarantee',
-                              style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+                              style: AppTextStyles.bodyText(
+                                context,
+                              ).copyWith(fontSize: 13),
                             ),
                           ],
                         ),
@@ -132,18 +147,26 @@ class PaymentMethodsPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.green.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.green.withOpacity(0.3)),
+                      border: Border.all(
+                        color: AppColors.green.withOpacity(0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.verified_user, color: AppColors.green, size: 32),
+                        const Icon(
+                          Icons.verified_user,
+                          color: AppColors.green,
+                          size: 32,
+                        ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isAr ? 'ضمان أمان وحماية الدفع 100%' : '100% Payment Protection Guarantee',
+                                isAr
+                                    ? 'ضمان أمان وحماية الدفع 100%'
+                                    : '100% Payment Protection Guarantee',
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -155,7 +178,10 @@ class PaymentMethodsPage extends StatelessWidget {
                                 isAr
                                     ? 'جميع المعاملات المالية مشفرة وآمنة وفق أعلى معايير الحماية المصرفية العالمية.'
                                     : 'All transactions are encrypted and secured under banking standards.',
-                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -204,7 +230,11 @@ class PaymentMethodsPage extends StatelessWidget {
                                     color: option.color.withOpacity(0.12),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(option.icon, color: option.color, size: 24),
+                                  child: Icon(
+                                    option.icon,
+                                    color: option.color,
+                                    size: 24,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -218,7 +248,10 @@ class PaymentMethodsPage extends StatelessWidget {
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: option.color.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(8),
@@ -237,7 +270,9 @@ class PaymentMethodsPage extends StatelessWidget {
                             const Divider(height: 20),
                             Text(
                               option.description,
-                              style: AppTextStyles.bodyText(context).copyWith(fontSize: 12.5),
+                              style: AppTextStyles.bodyText(
+                                context,
+                              ).copyWith(fontSize: 12.5),
                             ),
                             const SizedBox(height: 8),
                             Column(
@@ -246,13 +281,18 @@ class PaymentMethodsPage extends StatelessWidget {
                                   padding: const EdgeInsets.only(bottom: 4),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.check_circle, size: 14, color: option.color),
+                                      Icon(
+                                        Icons.check_circle,
+                                        size: 14,
+                                        color: option.color,
+                                      ),
                                       const SizedBox(width: 6),
                                       Text(
                                         feat,
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: theme.textTheme.bodyMedium?.color,
+                                          color:
+                                              theme.textTheme.bodyMedium?.color,
                                         ),
                                       ),
                                     ],
