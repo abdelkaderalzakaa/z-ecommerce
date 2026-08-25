@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/product_provider.dart';
-import '../../../data/providers/business_provider.dart';
-import '../../global/core/constants/app_constants.dart';
-import '../../global/core/responsive/responsive_layout.dart';
-import '../common/product_card.dart';
-import '../../../data/models/product/product_model.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/product_filter_provider.dart';
+import 'package:z_ecommerce/data/providers/product_provider.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
+import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
+import '../common/product_card.dart';
 
 class RecommendedSection extends StatelessWidget {
   const RecommendedSection({super.key});
@@ -22,14 +22,17 @@ class RecommendedSection extends StatelessWidget {
 
     return Consumer2<ProductProvider, BusinessProvider>(
       builder: (context, productProvider, businessProvider, child) {
-        final businessId = businessProvider.selectedBusiness.id;
+        final business = businessProvider.selectedBusiness;
+        if (!business.isRecommended) return const SizedBox.shrink();
+
+        final businessId = business.id;
         final storeProducts = productProvider.allProducts
             .where((p) => p.businessId == businessId)
             .toList();
         final recommendedProducts = storeProducts
             .where((p) => p.isRecommended)
             .toList();
-        final products = (recommendedProducts.isNotEmpty ? recommendedProducts : storeProducts).take(4).toList();
+        final products = recommendedProducts.take(4).toList();
         if (products.isEmpty) return const SizedBox.shrink();
 
         return Container(
@@ -64,48 +67,54 @@ class RecommendedSection extends StatelessWidget {
 
 class _DesktopProductGrid extends StatelessWidget {
   final List<ProductModel> products;
+
   const _DesktopProductGrid({required this.products});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: products
-          .map(
-            (p) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: ProductCard(
-                  product: p,
-                ),
-              ),
-            ),
-          )
-          .toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        int crossAxisCount = 4;
+        if (constraints.maxWidth < 1100) crossAxisCount = 3;
+        if (constraints.maxWidth < 750) crossAxisCount = 2;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.72,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: products.length,
+          itemBuilder: (context, index) => ProductCard(product: products[index]),
+        );
+      },
     );
   }
 }
 
 class _MobileProductGrid extends StatelessWidget {
   final List<ProductModel> products;
+
   const _MobileProductGrid({required this.products});
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.65,
-      ),
-      itemCount: products.length,
-      itemBuilder: (_, i) => ProductCard(
-        product: products[i],
+    return SizedBox(
+      height: 280,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: products.length,
+        separatorBuilder: (ctx, index) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          return SizedBox(
+            width: 170,
+            child: ProductCard(product: products[index]),
+          );
+        },
       ),
     );
   }
 }
-
-

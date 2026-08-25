@@ -12,6 +12,11 @@ import '../../../../global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/pages/customer/profile_customer/profile_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 
+import 'package:z_ecommerce/presentation/pages/delivery/delivery_home.dart';
+import 'package:z_ecommerce/presentation/pages/business/home/admin_business_home.dart';
+import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
+
 class AccountHeaderIcon extends StatelessWidget {
   const AccountHeaderIcon({super.key});
 
@@ -26,7 +31,15 @@ class AccountHeaderIcon extends StatelessWidget {
 
         void handlePress() {
           if (isAuthenticated) {
-            changeScreen(context, const ProfilePage());
+            if (user?.role == UserRole.delivery) {
+              changeScreen(context, const DeliveryPortalHome());
+            } else if (user?.role == UserRole.businessOwner) {
+              changeScreen(context, const AdminStore());
+            } else if (user?.role == UserRole.superAdmin) {
+              changeScreen(context, const SuperAdminHome());
+            } else {
+              changeScreen(context, const ProfilePage());
+            }
           } else {
             changeScreen(context, const LoginPage());
           }

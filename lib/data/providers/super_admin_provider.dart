@@ -18,6 +18,8 @@ class SuperAdminProvider with ChangeNotifier {
   PlatformConfigModel _platformConfig = PlatformConfigModel.defaultConfig();
 
   bool _isLoading = false;
+  bool _isCheckingPlatform = true;
+  bool _isPlatformInitialized = true;
   String? _errorMessage;
 
   SuperAdminModel? get currentSuperAdmin => _currentSuperAdmin;
@@ -33,10 +35,13 @@ class SuperAdminProvider with ChangeNotifier {
   List<SocialModel> get socials => _platformConfig.socials;
 
   bool get isLoading => _isLoading;
+  bool get isCheckingPlatform => _isCheckingPlatform;
+  bool get isPlatformInitialized => _isPlatformInitialized;
   String? get errorMessage => _errorMessage;
 
   SuperAdminProvider() {
     _initPlatformConfig();
+    checkPlatformInitialization();
   }
 
   /// الاستماع اللحظي لإعدادات المنصة العامة
@@ -44,9 +49,34 @@ class SuperAdminProvider with ChangeNotifier {
     _userService.streamPlatformConfig().listen((config) {
       if (config != null) {
         _platformConfig = config;
+        _isPlatformInitialized = true;
         notifyListeners();
       }
     });
+  }
+
+  /// فحص حالة تهيئة المنصة
+  Future<bool> checkPlatformInitialization() async {
+    _isCheckingPlatform = true;
+    notifyListeners();
+
+    try {
+      final initialized = await _userService.isPlatformInitialized();
+      _isPlatformInitialized = initialized;
+      if (initialized) {
+        final config = await _userService.getPlatformConfig();
+        if (config != null) {
+          _platformConfig = config;
+        }
+      }
+      return initialized;
+    } catch (e) {
+      debugPrint('Error checking platform initialization: $e');
+      return true;
+    } finally {
+      _isCheckingPlatform = false;
+      notifyListeners();
+    }
   }
 
   /// جلب إعدادات المنصة العامة لمرة واحدة
@@ -59,6 +89,7 @@ class SuperAdminProvider with ChangeNotifier {
       final config = await _userService.getPlatformConfig();
       if (config != null) {
         _platformConfig = config;
+        _isPlatformInitialized = true;
       }
       return _platformConfig;
     } catch (e) {
@@ -78,6 +109,7 @@ class SuperAdminProvider with ChangeNotifier {
     try {
       await _userService.savePlatformConfig(config);
       _platformConfig = config;
+      _isPlatformInitialized = true;
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -154,6 +186,89 @@ class SuperAdminProvider with ChangeNotifier {
     }
   }
 
+  /// تأسيس وتهيئة المنصة والسوبر أدمن عبر واجهة التأسيس (Setup Wizard)
+  Future<bool> initializePlatformFromWizard({
+    required String adminName,
+    required String adminEmail,
+    required String adminPassword,
+    required String adminPhone,
+    required LocalizationAdmin localization,
+    required ThemeAdmin theme,
+    required List<SocialModel> socials,
+    required PlatformSettings settings,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final FirebaseAuth auth = FirebaseAuth.instance;
+      UserCredential userCredential;
+
+      try {
+        userCredential = await auth.createUserWithEmailAndPassword(
+          email: adminEmail.trim(),
+          password: adminPassword,
+        );
+      } catch (e) {
+        userCredential = await auth.signInWithEmailAndPassword(
+          email: adminEmail.trim(),
+          password: adminPassword,
+        );
+      }
+
+      final String superAdminId = userCredential.user!.uid;
+      final now = DateTime.now();
+
+      // 1. User
+      final user = UserModel(
+        id: superAdminId,
+        name: adminName.trim(),
+        email: adminEmail.trim(),
+        phoneNumber: adminPhone.trim(),
+        role: UserRole.superAdmin,
+        createdAt: now,
+      );
+      await _userService.saveUser(user);
+
+      // 2. SuperAdmin
+      final superAdmin = SuperAdminModel(
+        id: superAdminId,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await _userService.saveSuperAdmin(superAdmin);
+      _currentSuperAdmin = superAdmin;
+
+      // 3. Platform Config
+      final platformConfig = PlatformConfigModel(
+        id: 'global_config',
+        localization: localization,
+        theme: theme,
+        socials: socials,
+        settings: settings,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await _userService.savePlatformConfig(platformConfig);
+      _platformConfig = platformConfig;
+      _isPlatformInitialized = true;
+
+      debugPrint("Platform & SuperAdmin initialized successfully via Wizard: $superAdminId");
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      debugPrint("Error in initializePlatformFromWizard: $e");
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// حفظ أو تحديث بيانات السوبر أدمن مع إضافته للمصادقة (Firebase Auth) وتهيئة إعدادات المنصة
   Future<void> saveSuperAdminOnce() async {
     _isLoading = true;
@@ -164,13 +279,11 @@ class SuperAdminProvider with ChangeNotifier {
       UserCredential userCredential;
 
       try {
-        // محاولة تسجيل الدخول إذا كان الحساب موجوداً مسبقاً
         userCredential = await auth.signInWithEmailAndPassword(
           email: "testsuperadmin@gmail.com",
           password: "testsuperadmin",
         );
       } catch (e) {
-        // إذا لم يكن موجوداً، نقوم بإنشائه
         userCredential = await auth.createUserWithEmailAndPassword(
           email: "testsuperadmin@gmail.com",
           password: "testsuperadmin",
@@ -178,6 +291,7 @@ class SuperAdminProvider with ChangeNotifier {
       }
 
       final String superAdminId = userCredential.user!.uid;
+      final now = DateTime.now();
 
       final user = UserModel(
         id: superAdminId,
@@ -185,7 +299,7 @@ class SuperAdminProvider with ChangeNotifier {
         email: "testsuperadmin@gmail.com",
         phoneNumber: "81728282",
         role: UserRole.superAdmin,
-        createdAt: DateTime.now(),
+        createdAt: now,
       );
       await _userService.saveUser(user);
 
@@ -194,14 +308,13 @@ class SuperAdminProvider with ChangeNotifier {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: now,
+        updatedAt: now,
       );
 
       await _userService.saveSuperAdmin(superAdmin);
       _currentSuperAdmin = superAdmin;
 
-      // تهيئة إعدادات المنصة الافتراضية إذا لم تكن موجودة
       final existingPlatform = await _userService.getPlatformConfig();
       if (existingPlatform == null) {
         final defaultPlatform = PlatformConfigModel.defaultConfig();
@@ -210,6 +323,7 @@ class SuperAdminProvider with ChangeNotifier {
       } else {
         _platformConfig = existingPlatform;
       }
+      _isPlatformInitialized = true;
 
       debugPrint("Super admin and Platform config initialized successfully: $superAdminId");
     } catch (e) {

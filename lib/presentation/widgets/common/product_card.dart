@@ -1,19 +1,20 @@
-import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/order/cart_model.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/models/shared/like_model.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/cart_provider.dart';
+import 'package:z_ecommerce/data/providers/like_provider.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
+import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/customer/cart/cart_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart';
-import 'package:flutter/material.dart';
-import '../../global/core/constants/app_constants.dart';
-import '../../global/core/responsive/responsive_layout.dart';
-import '../../../data/models/product/product_model.dart';
-import 'package:provider/provider.dart';
-import '../../../data/providers/cart_provider.dart';
-import '../../../data/providers/auth_provider.dart';
-import '../../../data/providers/business_provider.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/global/navigation.dart';
-import 'package:z_ecommerce/data/providers/like_provider.dart';
-import 'package:z_ecommerce/data/models/shared/like_model.dart';
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 
 class ProductCard extends StatefulWidget {
   final ProductModel product;
@@ -74,18 +75,162 @@ class _ProductImagePlaceholder extends StatelessWidget {
     this.discountPercent,
   });
 
+  void _showQuickVariantPicker(
+    BuildContext context,
+    ProductModel product,
+    String businessId,
+    CartProvider cartProvider,
+  ) {
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      isAr ? 'اختر الخيار المناسب للسلة' : 'Select Option',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  product.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: product.variants.length,
+                    separatorBuilder: (ctx, i) => const SizedBox(height: 8),
+                    itemBuilder: (ctx, index) {
+                      final variant = product.variants[index];
+                      final variantPrice = product.getPriceForVariant(variant);
+
+                      return InkWell(
+                        onTap: () {
+                          cartProvider.addProductToCart(
+                            businessId: businessId,
+                            product: product,
+                            selectedVariant: variant,
+                          );
+                          Navigator.of(ctx).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isAr
+                                    ? 'تمت إضافة المنتج إلى السلة'
+                                    : 'Item added to cart',
+                              ),
+                              duration: const Duration(seconds: 2),
+                              action: SnackBarAction(
+                                label: isAr ? 'عرض السلة' : 'View Cart',
+                                onPressed: () =>
+                                    changeScreen(context, const CartPage()),
+                              ),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.add_shopping_cart,
+                                size: 18,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  variant.name.isNotEmpty
+                                      ? variant.name
+                                      : (variant.variantKey.isNotEmpty
+                                          ? variant.variantKey
+                                              .replaceAll('|', ' - ')
+                                              .replaceAll(':', ': ')
+                                          : (isAr ? 'خيار متاح' : 'Option')),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '\$${variantPrice.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final String? imageUrl = (product.thumbnail != null && product.thumbnail!.isNotEmpty)
         ? product.thumbnail
         : (product.images.isNotEmpty ? product.images.first : null);
 
+    final business = context.watch<BusinessProvider>().selectedBusiness;
+    final dynamicCardRadius = business.theme.cardRadius > 0 ? business.theme.cardRadius : AppRadius.card;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       height: 260,
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(AppRadius.card),
+        borderRadius: BorderRadius.circular(dynamicCardRadius),
         border: Border.all(
           color: hovered
               ? Theme.of(context).primaryColor
@@ -106,10 +251,10 @@ class _ProductImagePlaceholder extends StatelessWidget {
         children: [
           Positioned.fill(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.card - 1),
+              borderRadius: BorderRadius.circular(dynamicCardRadius - 1),
               child: (imageUrl != null && imageUrl.isNotEmpty)
-                  ? CustomNetworkImage(imageUrl: 
-                      imageUrl,
+                  ? CustomNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: Icon(
@@ -175,52 +320,52 @@ class _ProductImagePlaceholder extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.star, size: 12, color: Colors.white),
+                    const Icon(Icons.star, color: Colors.white, size: 12),
                     const SizedBox(width: 4),
                     Text(
                       TranslationKeys.recommended.tr(context),
                       style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          if (context.watch<BusinessProvider>().selectedBusiness.allowLikes)
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Consumer2<AuthProvider, LikeProvider>(
-              builder: (context, authProvider, likeProvider, child) {
-                final isFavorite = likeProvider.hasLiked(product.id);
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Consumer3<LikeProvider, AuthProvider, BusinessProvider>(
+              builder: (context, likeProvider, authProvider, businessProvider, child) {
+                if (!businessProvider.selectedBusiness.allowLikes) {
+                  return const SizedBox.shrink();
+                }
+                final userId = authProvider.currentUser?.id;
+                final isLiked = userId != null && likeProvider.hasLiked(product.id);
 
                 return InkWell(
-                  onTap: () async {
-                    if (authProvider.isAuthenticated) {
-                      final like = LikeModel(
+                  onTap: () {
+                    if (userId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('يرجى تسجيل الدخول أولاً للإعجاب بالمنتج'),
+                        ),
+                      );
+                      return;
+                    }
+                    likeProvider.toggleLike(
+                      LikeModel(
                         id: '',
-                        userId: authProvider.currentUser!.id,
+                        userId: userId,
                         targetId: product.id,
                         targetType: 'product',
                         createdAt: DateTime.now(),
-                      );
-                      await likeProvider.toggleLike(like);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            TranslationKeys.pleaseLoginToSaveItems.tr(context),
-                          ),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
+                      ),
+                    );
                   },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
+                  child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
@@ -234,9 +379,11 @@ class _ProductImagePlaceholder extends StatelessWidget {
                       ],
                     ),
                     child: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      size: 20,
-                      color: isFavorite ? Colors.red : Colors.grey,
+                      isLiked ? Icons.favorite : Icons.favorite_border,
+                      size: 18,
+                      color: isLiked
+                          ? Colors.red
+                          : Theme.of(context).iconTheme.color,
                     ),
                   ),
                 );
@@ -256,24 +403,32 @@ class _ProductImagePlaceholder extends StatelessWidget {
                   onTap: () {
                     if (isInCart) {
                       changeScreen(context, const CartPage());
+                    } else if (product.variants.length > 1) {
+                      _showQuickVariantPicker(context, product, businessId, cartProvider);
                     } else {
                       cartProvider.addProductToCart(
-                      businessId: businessId,
-                      product: product,
-                    );
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Item added to cart'),
-                        duration: const Duration(seconds: 2),
-                        action: SnackBarAction(
-                          label: 'View Cart',
-                          onPressed: () =>
-                              changeScreen(context, const CartPage()),
+                        businessId: businessId,
+                        product: product,
+                        selectedVariant: product.variants.isNotEmpty ? product.defaultVariant : null,
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'تمت إضافة المنتج إلى السلة'
+                                : 'Item added to cart',
+                          ),
+                          duration: const Duration(seconds: 2),
+                          action: SnackBarAction(
+                            label: Localizations.localeOf(context).languageCode == 'ar'
+                                ? 'عرض السلة'
+                                : 'View Cart',
+                            onPressed: () =>
+                                changeScreen(context, const CartPage()),
+                          ),
                         ),
-                      ),
-                    );
-                  
+                      );
+                    }
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),

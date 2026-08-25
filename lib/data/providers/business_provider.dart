@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
@@ -8,16 +9,26 @@ import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
 import 'package:z_ecommerce/data/models/store/currency_store.dart';
 import 'package:z_ecommerce/data/models/store/followers_store.dart';
 import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
+import 'package:z_ecommerce/data/services/geo_proximity_service.dart';
 import 'package:z_ecommerce/data/services/user_service.dart';
 
 class BusinessProvider with ChangeNotifier {
   final UserService _userService = UserService();
+  final AddressService _addressService = AddressService();
+  final GeoProximityService _geoService = GeoProximityService();
 
   List<BusinessModel> _businesses = [];
+  Map<String, List<AddressModel>> _businessAddressesMap = {};
+  AddressModel? _activeCustomerLocation;
+  GeoProximityTier? _selectedProximityFilter;
+  bool _onlyDeliverableFilter = false;
+
   BusinessModel _businessSettings = BusinessModel.empty();
   bool _isLoading = false;
   String? _errorMessage;
   StreamSubscription<List<BusinessModel>>? _businessSubscription;
+  StreamSubscription<List<AddressModel>>? _businessAddressesSubscription;
 
   List<BusinessModel> get businesses => List.unmodifiable(_businesses);
   
@@ -33,6 +44,12 @@ class BusinessProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  // موقع الزبون النشط المعتمد للتحليل الجغرافي والتوصيل
+  AddressModel? get activeCustomerLocation => _activeCustomerLocation;
+  GeoProximityTier? get selectedProximityFilter => _selectedProximityFilter;
+  bool get onlyDeliverableFilter => _onlyDeliverableFilter;
+  Map<String, List<AddressModel>> get businessAddressesMap => _businessAddressesMap;
+
   BusinessModel? getBusinessById(String id) {
     try {
       return _businesses.firstWhere((b) => b.id == id);
@@ -43,6 +60,7 @@ class BusinessProvider with ChangeNotifier {
 
   BusinessProvider() {
     _initStream();
+    _initBusinessAddressesStream();
   }
 
   /// الاستماع التلقائي المباشر لكافة المتاجر من UserService
@@ -50,7 +68,7 @@ class BusinessProvider with ChangeNotifier {
     _businessSubscription = _userService.streamBusinesses().listen(
       (list) {
         _businesses = list;
-        if (!_businessSettings.isEmpty) {
+        if (_businessSettings.isNotEmpty) {
           final updated = list.firstWhere(
             (b) => b.id == _businessSettings.id,
             orElse: () => _businessSettings,
@@ -65,6 +83,137 @@ class BusinessProvider with ChangeNotifier {
       },
     );
   }
+
+  /// الاستماع التلقائي المباشر لكافة عناوين وفروع المتاجر لحساب القرب الجغرافي
+  void _initBusinessAddressesStream() {
+    _businessAddressesSubscription = _addressService.streamAllBusinessAddresses().listen(
+      (addresses) {
+        final Map<String, List<AddressModel>> map = {};
+        for (final addr in addresses) {
+          if (addr.userId.isNotEmpty) {
+            map.putIfAbsent(addr.userId, () => []).add(addr);
+          }
+        }
+        _businessAddressesMap = map;
+        notifyListeners();
+      },
+      onError: (e) {
+        debugPrint('Error streaming business addresses: $e');
+      },
+    );
+  }
+
+  // =========================================================================
+  // 🗺️ إدارة التحليل والتسهيلات الجغرافية والتوصيل (Geo Discovery Engine)
+  // =========================================================================
+
+  /// تعيين الموقع الجغرافي للزبون يدوياً أو تلقائياً من العنوان الافتراضي
+  void setActiveCustomerLocation(AddressModel? location) {
+    _activeCustomerLocation = location;
+    notifyListeners();
+  }
+
+  /// تعيين فلتر القرب الجغرافي (في بلدتك / في قضائك / في محافظتك / الكل)
+  void setProximityFilter(GeoProximityTier? tier) {
+    _selectedProximityFilter = tier;
+    notifyListeners();
+  }
+
+  /// تبديل فلتر المتاجر التي توصل فقط
+  void toggleDeliverableFilter(bool? value) {
+    _onlyDeliverableFilter = value ?? !_onlyDeliverableFilter;
+    notifyListeners();
+  }
+
+  /// تحليل مدى قرب متجر معين من موقع الزبون الحالي
+  BusinessGeoAnalysis analyzeBusiness(BusinessModel business, {bool isAr = true}) {
+    final addresses = _businessAddressesMap[business.id] ?? [];
+    return _geoService.analyzeBusinessProximity(
+      business: business,
+      businessAddresses: addresses,
+      customerAddress: _activeCustomerLocation,
+      isAr: isAr,
+    );
+  }
+
+  /// الحصول على قائمة المتاجر مرتبة ومفلترة جغرافياً مع كافة المعايير
+  List<BusinessGeoAnalysis> getGeoSortedBusinesses({
+    String? categoryId,
+    String? searchQuery,
+    GeoProximityTier? filterTier,
+    bool? onlyDeliverable,
+    bool isAr = true,
+  }) {
+    final tier = filterTier ?? _selectedProximityFilter;
+    final deliverOnly = onlyDeliverable ?? _onlyDeliverableFilter;
+
+    // 1. فلترة المتاجر النشطة
+    var filtered = activeBusinesses;
+
+    // 2. فلترة البحث النصي
+    if (searchQuery != null && searchQuery.trim().isNotEmpty) {
+      final q = searchQuery.trim().toLowerCase();
+      filtered = filtered.where((b) {
+        final nameAr = b.localization.name.ar.toLowerCase();
+        final nameEn = b.localization.name.en.toLowerCase();
+        final sloganAr = b.localization.slogan.ar.toLowerCase();
+        final sloganEn = b.localization.slogan.en.toLowerCase();
+        return nameAr.contains(q) || nameEn.contains(q) || sloganAr.contains(q) || sloganEn.contains(q);
+      }).toList();
+    }
+
+    // 3. الترتيب والتحليل الجغرافي المرجح
+    var analyzedList = _geoService.sortBusinessesByCustomerLocation(
+      businesses: filtered,
+      businessAddressesMap: _businessAddressesMap,
+      customerAddress: _activeCustomerLocation,
+      isAr: isAr,
+    );
+
+    // 4. تطبيق فلتر رتبة القرب الجغرافي إن وجد
+    if (tier != null) {
+      analyzedList = analyzedList.where((item) => item.proximityTier == tier).toList();
+    }
+
+    // 5. تطبيق فلتر التوصيل المتاح إن وجد
+    if (deliverOnly) {
+      analyzedList = analyzedList.where((item) => item.canDeliver).toList();
+    }
+
+    return analyzedList;
+  }
+
+  /// إحصاء عدد المتاجر في رتبة جغرافية معينة
+  int countBusinessesInTier(GeoProximityTier tier, {bool isAr = true}) {
+    return activeBusinesses.where((b) {
+      final addresses = _businessAddressesMap[b.id] ?? [];
+      final analysis = _geoService.analyzeBusinessProximity(
+        business: b,
+        businessAddresses: addresses,
+        customerAddress: _activeCustomerLocation,
+        isAr: isAr,
+      );
+      return analysis.proximityTier == tier;
+    }).length;
+  }
+
+  /// إحصاء عدد المتاجر التي توفر التوصيل
+  int countDeliverableBusinesses({bool isAr = true}) {
+    return activeBusinesses.where((b) {
+      final addresses = _businessAddressesMap[b.id] ?? [];
+      final analysis = _geoService.analyzeBusinessProximity(
+        business: b,
+        businessAddresses: addresses,
+        customerAddress: _activeCustomerLocation,
+        isAr: isAr,
+      );
+      return analysis.canDeliver;
+    }).length;
+  }
+
+  // =========================================================================
+  // 🏬 عمليات المتاجر الأساسية
+  // =========================================================================
 
   /// جلب كافة المتاجر من السيرفس
   Future<void> fetchBusinesses() async {
@@ -100,105 +249,15 @@ class BusinessProvider with ChangeNotifier {
     }
   }
 
-  /// حفظ أو تحديث نشاط تجاري عبر السيرفس
-  Future<void> saveBusiness(BusinessModel business) async {
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      await _userService.saveBusiness(business);
-      final index = _businesses.indexWhere((b) => b.id == business.id);
-      if (index >= 0) {
-        _businesses[index] = business;
-      } else {
-        _businesses.add(business);
-      }
-      if (_businessSettings.id == business.id) {
-        _businessSettings = business;
-      }
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  /// 🔄 تحديث حالة المتجر (نشط/غير نشط)
-  Future<void> updateStoreStatus(String businessId, String newStatus) async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      await _userService.updateBusinessStatus(businessId, newStatus);
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  /// ⚙️ تحديث صلاحيات وإعدادات البزنس (السماح بالمتابعة، الإعجابات، التقييمات، والتوصية)
-  Future<void> updatePermissions(
-    String businessId, {
-    bool? allowFollow,
-    bool? allowLikes,
-    bool? allowReviews,
-    bool? allowOffers,
-    bool? isRecommended,
-  }) async {
-    final index = _businesses.indexWhere((b) => b.id == businessId);
-    if (index >= 0) {
-      final updated = _businesses[index].copyWith(
-        allowFollow: allowFollow,
-        allowLikes: allowLikes,
-        allowReviews: allowReviews,
-        allowOffers: allowOffers,
-        isRecommended: isRecommended,
-      );
-      await saveBusiness(updated);
-    }
-  }
-
-  // ==========================================
-  // 🧩 Sub-Models Operations for Business
-  // ==========================================
-
-  /// 📱 تحديث وسائل التواصل للمتجر
-  Future<void> updateSocials(String businessId, List<dynamic> socials) async {
-    await _userService.updateBusinessSocials(
-      businessId: businessId,
-      socials: socials.cast(),
-    );
-    final castedSocials = socials.cast<SocialModel>();
-    if (_businessSettings.id == businessId) {
-      _businessSettings = _businessSettings.copyWith(socials: castedSocials);
-    }
-    final index = _businesses.indexWhere((b) => b.id == businessId);
-    if (index != -1) {
-      _businesses[index] = _businesses[index].copyWith(socials: castedSocials);
-    }
+  /// مسح المتجر المختار حالياً
+  void clearSelectedBusiness() {
+    _businessSettings = BusinessModel.empty();
     notifyListeners();
   }
 
-  /// 👁️ إضافة زيارة جديدة للمتجر
-  Future<void> addVisit(String businessId, BusinessVisitModel visit) async {
-    await _userService.addBusinessVisit(
-      businessId: businessId,
-      visit: visit,
-    );
-    if (_businessSettings.id == businessId) {
-      _businessSettings = _businessSettings.copyWith(
-        visits: [..._businessSettings.visits, visit],
-      );
-    }
-    final index = _businesses.indexWhere((b) => b.id == businessId);
-    if (index != -1) {
-      _businesses[index] = _businesses[index].copyWith(
-        visits: [..._businesses[index].visits, visit],
-      );
-    }
-    notifyListeners();
+  /// تسجيل زيارة جديدة لمتجر
+  Future<void> recordVisit(String businessId, BusinessVisitModel visit) async {
+    await addVisit(businessId, visit);
   }
 
   /// 🌐 تحديث إعدادات اللغة والترجمة للمتجر
@@ -295,9 +354,71 @@ class BusinessProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 💾 حفظ أو تحديث بيانات متجر كاملة
+  Future<void> saveBusiness(BusinessModel business) async {
+    await _userService.saveBusiness(business);
+    if (_businessSettings.id == business.id) {
+      _businessSettings = business;
+    }
+    final index = _businesses.indexWhere((b) => b.id == business.id);
+    if (index != -1) {
+      _businesses[index] = business;
+    } else {
+      _businesses.add(business);
+    }
+    notifyListeners();
+  }
+
+  /// 🔄 تحديث حالة المتجر
+  Future<void> updateStoreStatus(String businessId, String newStatus) async {
+    await _userService.updateBusinessStatus(businessId, newStatus);
+    if (_businessSettings.id == businessId) {
+      _businessSettings = _businessSettings.copyWith(status: newStatus);
+    }
+    final index = _businesses.indexWhere((b) => b.id == businessId);
+    if (index != -1) {
+      _businesses[index] = _businesses[index].copyWith(status: newStatus);
+    }
+    notifyListeners();
+  }
+
+  /// 🔒 تحديث صلاحيات وخصائص المتجر
+  Future<void> updatePermissions(
+    String businessId, {
+    bool? allowFollow,
+    bool? allowLikes,
+    bool? allowReviews,
+    bool? allowOffers,
+    bool? isRecommended,
+  }) async {
+    final business = getBusinessById(businessId);
+    if (business == null) return;
+
+    final updated = business.copyWith(
+      allowFollow: allowFollow,
+      allowLikes: allowLikes,
+      allowReviews: allowReviews,
+      allowOffers: allowOffers,
+      isRecommended: isRecommended,
+    );
+
+    await saveBusiness(updated);
+  }
+
+  /// 👁️ تسجيل زيارة لمتجر
+  Future<void> addVisit(String businessId, BusinessVisitModel visit) async {
+    final business = getBusinessById(businessId);
+    if (business == null) return;
+    final updated = business.copyWith(
+      visits: [...business.visits, visit],
+    );
+    await saveBusiness(updated);
+  }
+
   @override
   void dispose() {
     _businessSubscription?.cancel();
+    _businessAddressesSubscription?.cancel();
     super.dispose();
   }
 }

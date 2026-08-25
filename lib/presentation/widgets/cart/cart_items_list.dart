@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/cart_provider.dart';
+import 'package:z_ecommerce/data/providers/product_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
-import '../../../../data/providers/cart_provider.dart';
-import '../../global/core/constants/app_constants.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'cart_item.dart';
-import '../../../data/providers/business_provider.dart';
 
 class CartItemsList extends StatelessWidget {
   const CartItemsList({super.key});
 
-  
   @override
   Widget build(BuildContext context) {
     final businessId = context.read<BusinessProvider>().selectedBusiness.id;
     final cartProvider = context.watch<CartProvider>();
+    final productProvider = context.watch<ProductProvider>();
     final items = cartProvider.items(businessId);
 
     if (items.isEmpty) {
@@ -59,15 +60,16 @@ class CartItemsList extends StatelessWidget {
         child: Column(
           children: List.generate(items.length, (index) {
             final item = items[index];
+            final matchingProduct = productProvider.allProducts.firstWhere(
+              (p) => p.id == item.productId,
+              orElse: () => ProductModel.empty(),
+            );
+
             return Column(
               children: [
                 CartItemWidget(
-                  title:
-                      item.productName ?? item.offerName ?? '',
-                  size: item.selectedVariant?.size?.name ?? TranslationKeys.notAvailable.tr(context),
-                  color: item.selectedVariant?.color?.name ?? '',
-                  price: item.totalPrice,
-                  quantity: item.quantity,
+                  item: item,
+                  product: matchingProduct.isEmpty ? null : matchingProduct,
                   isGift: item.type == CartItemType.gift,
                   isBundle: false,
                   onQuantityChanged: (newQuantity) {
@@ -76,13 +78,13 @@ class CartItemsList extends StatelessWidget {
                       itemId: item.id,
                       newQuantity: newQuantity,
                     );
-                                    },
+                  },
                   onRemove: () {
                     cartProvider.removeItem(
                       businessId: businessId,
                       itemId: item.id,
                     );
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
                           TranslationKeys.itemRemovedFromCart.tr(context),

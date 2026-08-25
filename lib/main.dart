@@ -20,6 +20,7 @@ import 'data/providers/offer_provider.dart';
 import 'data/providers/brand_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'data/providers/delivery_provider.dart';
+import 'data/providers/address_provider.dart';
 import 'data/providers/review_provider.dart';
 import 'data/providers/like_provider.dart';
 import 'data/providers/follower_provider.dart';
@@ -29,6 +30,8 @@ import 'presentation/global/translate/app_localizations.dart';
 import 'presentation/global/theme/app_theme.dart';
 import 'presentation/pages/auth/banned_page.dart';
 import 'presentation/pages/splash_screen.dart';
+import 'presentation/pages/super_admin/setup/platform_setup_page.dart';
+import 'package:z_ecommerce/presentation/pages/delivery/delivery_home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,55 +70,60 @@ class ZEcommerceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => ProductFilterProvider()),
         ChangeNotifierProvider(create: (_) => DeliveryProvider()),
+        ChangeNotifierProvider(create: (_) => AddressProvider()),
       ],
-      child: Consumer4<SettingsProvider, LocaleProvider, BusinessProvider, SuperAdminProvider>(
-        builder: (context, settings, localeProvider, businessProvider, superAdminProvider, child) {
-          final isStoreSelected = !businessProvider.selectedBusiness.isEmpty;
-          final themeInfo = isStoreSelected
-              ? businessProvider.selectedBusiness.theme
-              : superAdminProvider.platformTheme;
+      child:
+          Consumer4<
+            SettingsProvider,
+            LocaleProvider,
+            BusinessProvider,
+            SuperAdminProvider
+          >(
+            builder:
+                (
+                  context,
+                  settings,
+                  localeProvider,
+                  businessProvider,
+                  superAdminProvider,
+                  child,
+                ) {
+                  return MaterialApp(
+                    onGenerateTitle: (context) {
+                      final platformName = superAdminProvider
+                          .platformLocalization
+                          .name
+                          .get(context);
+                      final fallbackName = platformName.isNotEmpty
+                          ? platformName
+                          : 'z-matajer';
 
-          final primaryColor = themeInfo.primaryColorValue;
-          final secondaryColor = themeInfo.secondaryColorValue;
-          final backgroundColor = themeInfo.backgroundColorValue;
-          final surfaceColor = themeInfo.surfaceColorValue;
-
-          return MaterialApp(
-            onGenerateTitle: (context) {
-              final platformName = superAdminProvider.platformLocalization.name.get(context);
-              final fallbackName = platformName.isNotEmpty ? platformName : 'z-matajer';
-
-              final bName = businessProvider.selectedBusiness.localization.name.get(context);
-              return (bName.isNotEmpty) ? bName : fallbackName;
-            },
-            debugShowCheckedModeBanner: false,
-            themeMode: settings.themeMode,
-            locale: localeProvider.locale,
-            supportedLocales: const [Locale('en', ''), Locale('ar', '')],
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            theme: AppTheme.getLightTheme(
-              primaryColor: primaryColor,
-              secondaryColor: secondaryColor,
-              backgroundColor: backgroundColor,
-              surfaceColor: surfaceColor,
-              fontFamily: themeInfo.fontFamily,
-              buttonRadius: themeInfo.buttonRadius,
-              cardRadius: themeInfo.cardRadius,
-              inputRadius: themeInfo.inputRadius,
-            ),
-            darkTheme: AppTheme.getDarkTheme(
-              primaryColor: primaryColor,
-              secondaryColor: secondaryColor,
-            ),
-            home: const AppRootRouter(),
-          );
-        },
-      ),
+                      final bName = businessProvider
+                          .selectedBusiness
+                          .localization
+                          .name
+                          .get(context);
+                      return (bName.isNotEmpty) ? bName : fallbackName;
+                    },
+                    debugShowCheckedModeBanner: false,
+                    themeMode: settings.themeMode,
+                    locale: localeProvider.locale,
+                    supportedLocales: const [
+                      Locale('en', ''),
+                      Locale('ar', ''),
+                    ],
+                    localizationsDelegates: const [
+                      AppLocalizations.delegate,
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    theme: AppTheme.getThemeFromAdmin(superAdminProvider.platformTheme, false),
+                    darkTheme: AppTheme.getThemeFromAdmin(superAdminProvider.platformTheme, true),
+                    home: const AppRootRouter(),
+                  );
+                },
+          ),
     );
   }
 }
@@ -132,8 +140,17 @@ class _AppRootRouterState extends State<AppRootRouter> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
+    return Consumer2<AuthProvider, SuperAdminProvider>(
+      builder: (context, authProvider, superAdminProvider, _) {
+        if (superAdminProvider.isCheckingPlatform) {
+          return const SplashScreen();
+        }
+
+        // إذا لم تكن المنصة مهيأة بعد، عرض معالج التأسيس لمرة واحدة
+        if (!superAdminProvider.isPlatformInitialized) {
+          return const PlatformSetupPage();
+        }
+
         if (!authProvider.isInitialized || authProvider.isLoading) {
           return const SplashScreen();
         }
@@ -169,7 +186,9 @@ class _AppRootRouterState extends State<AppRootRouter> {
               if (businessProvider.selectedBusiness.id != user.businessId) {
                 if (!businessProvider.isLoading) {
                   Future.microtask(() {
-                    context.read<BusinessProvider>().selectBusiness(user.businessId!);
+                    context.read<BusinessProvider>().selectBusiness(
+                      user.businessId!,
+                    );
                   });
                 }
                 return const SplashScreen();
@@ -179,11 +198,7 @@ class _AppRootRouterState extends State<AppRootRouter> {
           case UserRole.customer:
             return const BusinessEntry();
           case UserRole.delivery:
-            return const Scaffold(
-              body: Center(
-                child: Text('واجهة المندوب / شركة التوصيل (قيد التطوير)'),
-              ),
-            );
+            return const DeliveryPortalHome();
         }
       },
     );

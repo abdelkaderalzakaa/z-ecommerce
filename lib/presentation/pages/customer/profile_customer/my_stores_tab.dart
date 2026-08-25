@@ -151,10 +151,7 @@ class _MyStoreCard extends StatelessWidget {
     final likesCount = business.likes;
 
     final hasRatings = business.ratings.isNotEmpty;
-    final double avgRating = hasRatings
-        ? (business.ratings.map((r) => r.rating).reduce((a, b) => a + b) /
-            business.ratings.length)
-        : 0.0;
+    final double avgRating = business.averageRating;
     final String ratingDisplay = hasRatings ? avgRating.toStringAsFixed(1) : (isAr ? 'جديد' : 'New');
 
     return Container(

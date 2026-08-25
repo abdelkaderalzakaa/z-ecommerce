@@ -22,6 +22,7 @@ import 'package:z_ecommerce/presentation/pages/customer/profile_customer/orders_
 import 'package:z_ecommerce/presentation/pages/customer/profile_customer/settings_tab.dart';
 import 'package:z_ecommerce/presentation/pages/customer/profile_customer/wishlist_tab.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
+import 'package:z_ecommerce/presentation/pages/delivery/delivery_home.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
 import 'package:z_ecommerce/presentation/widgets/profile/profile_sidebar.dart';
@@ -93,7 +94,6 @@ class _ProfilePageState extends State<ProfilePage> {
               .length
         : 0;
     final wishlistCount = customer?.wishlist.length ?? 0;
-    final addressesCount = customer?.addresses.length ?? 0;
 
     return [
       TranslationKeys.myAccount.tr(context),
@@ -103,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
           : 'Following ($followingCount)',
       TranslationKeys.orders.tr(context),
       '${TranslationKeys.wishlist.tr(context)} ($wishlistCount)',
-      '${TranslationKeys.addresses.tr(context)} ($addressesCount)',
+      TranslationKeys.addresses.tr(context),
       TranslationKeys.settings.tr(context),
     ];
   }
@@ -262,6 +262,15 @@ class _ProfilePageState extends State<ProfilePage> {
             : 'Go to Business Dashboard',
         icon: Icons.storefront_outlined,
         onPressed: () => changeScreenReplacement(context, const AdminStore()),
+      );
+    } else if (user?.role == UserRole.delivery) {
+      roleName = isAr ? 'مندوب توصيل / شركة شحن' : 'Delivery Partner';
+      navigateBtn = ButtonApp(
+        label: isAr
+            ? 'الانتقال إلى بوابة التوصيل والطلبات'
+            : 'Go to Delivery Portal',
+        icon: Icons.two_wheeler_outlined,
+        onPressed: () => changeScreenReplacement(context, const DeliveryPortalHome()),
       );
     }
 

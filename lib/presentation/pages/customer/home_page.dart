@@ -19,7 +19,6 @@ import '../../widgets/home/top_reviews_section.dart';
 import '../../widgets/home/recommended_section.dart';
 import '../../widgets/home/featured_section.dart';
 import '../../widgets/home/most_liked_section.dart';
-import '../../widgets/common/footers/footer_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -38,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey _offersKey = GlobalKey();
   final GlobalKey _browseBrandsKey = GlobalKey();
   final GlobalKey _reviewsKey = GlobalKey();
-  
+
   final GlobalKey _recommendedKey = GlobalKey();
   final GlobalKey _featuredKey = GlobalKey();
   final GlobalKey _discountedKey = GlobalKey();
@@ -47,7 +46,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // بدء البث المباشر الموحد لبيانات الصفحة الرئيسية
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductProvider>().listenToAllProducts();
       context.read<CategoryProvider>().listenToAllCategories();
@@ -95,22 +93,69 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final businessProvider = Provider.of<BusinessProvider>(context);
-    final storeTheme = businessProvider.selectedBusiness.theme;
+    final selectedBusiness = businessProvider.selectedBusiness;
+    final storeTheme = selectedBusiness.theme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final primaryColor = storeTheme.primaryColorValue;
-    final secondaryColor = storeTheme.secondaryColorValue;
-    final bgColor = storeTheme.backgroundColorValue;
+    final primaryColor = isDark && storeTheme.darkPrimaryColor.isNotEmpty
+        ? storeTheme.darkPrimaryColorValue
+        : storeTheme.primaryColorValue;
+    final secondaryColor = isDark && storeTheme.darkSecondaryColor.isNotEmpty
+        ? storeTheme.darkSecondaryColorValue
+        : storeTheme.secondaryColorValue;
+    final bgColor = isDark
+        ? storeTheme.darkBackgroundColorValue
+        : storeTheme.backgroundColorValue;
+    final surfaceColor = isDark
+        ? storeTheme.darkSurfaceColorValue
+        : storeTheme.surfaceColorValue;
     final fontFamily = storeTheme.fontFamily.isNotEmpty
         ? storeTheme.fontFamily
         : 'Cairo';
 
+    final btnRadius = storeTheme.buttonRadius > 0 ? storeTheme.buttonRadius : 12.0;
+    final cardRadius = storeTheme.cardRadius > 0 ? storeTheme.cardRadius : 16.0;
+    final inputRadius = storeTheme.inputRadius > 0 ? storeTheme.inputRadius : 10.0;
+    final fontScale = storeTheme.fontScale > 0 ? storeTheme.fontScale : 1.0;
+
     final dynamicTheme = Theme.of(context).copyWith(
       primaryColor: primaryColor,
-      colorScheme: Theme.of(
-        context,
-      ).colorScheme.copyWith(primary: primaryColor, secondary: secondaryColor),
+      cardColor: surfaceColor,
+      colorScheme: Theme.of(context).colorScheme.copyWith(
+        primary: primaryColor,
+        secondary: secondaryColor,
+        surface: surfaceColor,
+      ),
       scaffoldBackgroundColor: bgColor,
-      textTheme: Theme.of(context).textTheme.apply(fontFamily: fontFamily),
+      textTheme: Theme.of(context).textTheme.apply(
+        fontFamily: fontFamily,
+        fontSizeFactor: fontScale,
+      ),
+      cardTheme: CardThemeData(
+        color: surfaceColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cardRadius),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(btnRadius),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(btnRadius),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(inputRadius),
+        ),
+      ),
     );
 
     return Theme(
@@ -128,8 +173,10 @@ class _HomePageState extends State<HomePage> {
                   HeroSection(key: _heroKey),
                   const BrandsSection(),
                   const SizedBox(height: 72),
-                  RecommendedSection(key: _recommendedKey),
-                  const SizedBox(height: 72),
+                  if (selectedBusiness.isRecommended) ...[
+                    RecommendedSection(key: _recommendedKey),
+                    const SizedBox(height: 72),
+                  ],
                   FeaturedSection(key: _featuredKey),
                   const SizedBox(height: 72),
                   DiscountedProductsSection(key: _discountedKey),
@@ -140,21 +187,22 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 72),
                   TopSellingSection(key: _topSellingKey),
                   const SizedBox(height: 72),
-                  OffersSection(key: _offersKey),
-                  const SizedBox(height: 72),
-                  MostLikedSection(key: _mostLikedKey),
-                  const SizedBox(height: 72),
+                  if (selectedBusiness.allowOffers) ...[
+                    OffersSection(key: _offersKey),
+                    const SizedBox(height: 72),
+                  ],
+                  if (selectedBusiness.allowLikes) ...[
+                    MostLikedSection(key: _mostLikedKey),
+                    const SizedBox(height: 72),
+                  ],
                   BrowseBrandsSection(key: _browseBrandsKey),
                   const SizedBox(height: 72),
-                  if (businessProvider.selectedBusiness.allowReviews) ...[
+                  if (selectedBusiness.allowReviews) ...[
                     TopReviewsSection(key: _reviewsKey),
                     const SizedBox(height: 72),
                   ],
                   FooterBuisness(
-                    idBuisness: context
-                        .read<BusinessProvider>()
-                        .selectedBusiness
-                        .id,
+                    idBuisness: selectedBusiness.id,
                   ),
                 ],
               ),

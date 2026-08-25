@@ -20,10 +20,11 @@ class OffersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OfferProvider>(
       builder: (context, provider, child) {
-        final businessId = context
+        final business = context
             .watch<BusinessProvider>()
-            .selectedBusiness
-            .id;
+            .selectedBusiness;
+        if (!business.allowOffers) return const SizedBox.shrink();
+        final businessId = business.id;
         var activeOffers = provider.activeOffers;
         activeOffers = activeOffers
             .where((o) => o.businessId == businessId)

@@ -14,9 +14,12 @@ class TopReviewsSection extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
-    final businessProvider = context.watch<BusinessProvider>();
-    final storeRatings = businessProvider.selectedBusiness.ratings;
+    final business = context.watch<BusinessProvider>().selectedBusiness;
+    if (!business.allowReviews) {
+      return const SizedBox.shrink();
+    }
 
+    final storeRatings = business.ratings;
     final List<RatedUser> reviewsToShow = storeRatings;
 
     if (reviewsToShow.isEmpty) {

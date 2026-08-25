@@ -9,6 +9,7 @@ import 'package:z_ecommerce/data/models/super_admin/super_admin_model.dart';
 import 'package:z_ecommerce/data/models/super_admin/platform_config_model.dart';
 import 'package:z_ecommerce/data/models/customer/customer_model.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
 import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/customer/activity_customer_inbusiness.dart';
 import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
@@ -313,6 +314,20 @@ class UserService {
   // ==========================================
   // 🌐 3.1 PlatformConfig (إعدادات وهوية المنصة العامة)
   // ==========================================
+
+  /// فحص هل المنصة مهيأة مسبقاً في Firestore
+  Future<bool> isPlatformInitialized() async {
+    try {
+      final doc = await _firestore
+          .collection(_platformConfigCollection)
+          .doc('global_config')
+          .get();
+      return doc.exists && doc.data() != null;
+    } catch (e) {
+      debugPrint('Error checking platform initialization: $e');
+      return false;
+    }
+  }
 
   /// جلب إعدادات المنصة العامة
   Future<PlatformConfigModel?> getPlatformConfig() async {
@@ -638,16 +653,16 @@ class UserService {
     }
   }
 
-  // --- 📍 AddressModel (إدارة العناوين) ---
+  // --- 📍 AddressModel (إدارة العناوين عبر كولكشن addresses المستقل) ---
   Future<void> updateCustomerAddresses({
     required String customerId,
     required List<AddressModel> addresses,
   }) async {
     try {
-      await _firestore.collection(_customersCollection).doc(customerId).update({
-        'addresses': addresses.map((e) => e.toMap()).toList(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+      final addrService = AddressService();
+      for (final addr in addresses) {
+        await addrService.saveAddress(addr.copyWith(userId: customerId, userType: 'customer'));
+      }
     } catch (e) {
       debugPrint('Error updating customer addresses: $e');
     }
@@ -658,13 +673,10 @@ class UserService {
     required List<AddressModel> addresses,
   }) async {
     try {
-      await _firestore
-          .collection(_businessesCollection)
-          .doc(businessId)
-          .update({
-            'addAddress': addresses.map((e) => e.toMap()).toList(),
-            'updatedAt': DateTime.now().toIso8601String(),
-          });
+      final addrService = AddressService();
+      for (final addr in addresses) {
+        await addrService.saveAddress(addr.copyWith(userId: businessId, userType: 'business'));
+      }
     } catch (e) {
       debugPrint('Error updating business addresses: $e');
     }

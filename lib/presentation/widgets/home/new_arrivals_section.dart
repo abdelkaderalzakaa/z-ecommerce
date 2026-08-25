@@ -23,12 +23,10 @@ class NewArrivalsSection extends StatelessWidget {
     return Consumer2<ProductProvider, BusinessProvider>(
       builder: (context, productProvider, businessProvider, child) {
         final businessId = businessProvider.selectedBusiness.id;
-        final storeProducts = productProvider.allProducts
-            .where((p) => p.businessId == businessId)
-            .toList();
+        final validProducts = productProvider.getCustomerProductsForStore(businessId);
         
         // Sort by date created
-        final sortedProducts = List<ProductModel>.from(storeProducts);
+        final sortedProducts = List<ProductModel>.from(validProducts);
         sortedProducts.sort((a, b) {
           final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
           final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -50,7 +48,7 @@ class NewArrivalsSection extends StatelessWidget {
               isMobile
                   ? _MobileProductGrid(products: products)
                   : _DesktopProductGrid(products: products),
-              if (storeProducts.length > 4)
+              if (validProducts.length > 4)
                 Column(
                   children: [
                     const SizedBox(height: 36),

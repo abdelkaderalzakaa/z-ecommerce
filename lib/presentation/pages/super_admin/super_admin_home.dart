@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/store_categories_page.dart';
@@ -24,6 +26,16 @@ class _SuperAdminHomeState extends State<SuperAdminHome> {
   int _selectedIndex = 0;
   bool _isSidebarCollapsed = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<BusinessProvider>().clearSelectedBusiness();
+      }
+    });
+  }
 
   final List<Widget> _pages = const [
     DashboardOverviewPage(), 

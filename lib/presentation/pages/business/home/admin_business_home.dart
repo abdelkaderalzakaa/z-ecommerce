@@ -16,6 +16,7 @@ import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_app_bar
 import 'package:z_ecommerce/presentation/widgets/admin_store/store_owner_sidebar.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
+import 'package:z_ecommerce/presentation/widgets/common/business_theme_scope.dart';
 
 class AdminStore extends StatefulWidget {
   const AdminStore({super.key});
@@ -169,59 +170,62 @@ class _AdminStoreState extends State<AdminStore> {
       );
     }
 
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: StoreOwnerAppBar(
-        isMobile: isMobile,
-        onMenuPressed: () {
-          _scaffoldKey.currentState?.openDrawer();
-        },
-      ),
-      drawer: isMobile
-          ? Drawer(
-              child: SafeArea(
-                child: StoreOwnerSidebar(
-                  items: _getSidebarItems(store),
-                  selectedIndex: _selectedIndex,
-                  onItemSelected: (index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                    Navigator.of(context).pop(); // Close drawer on selection
-                  },
+    return BusinessThemeScope(
+      explicitBusiness: store,
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: StoreOwnerAppBar(
+          isMobile: isMobile,
+          onMenuPressed: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+        ),
+        drawer: isMobile
+            ? Drawer(
+                child: SafeArea(
+                  child: StoreOwnerSidebar(
+                    items: _getSidebarItems(store),
+                    selectedIndex: _selectedIndex,
+                    onItemSelected: (index) {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                      Navigator.of(context).pop(); // Close drawer on selection
+                    },
+                  ),
                 ),
+              )
+            : null,
+        body: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Sidebar for Desktop & Large Screens
+            if (!isMobile)
+              StoreOwnerSidebar(
+                items: _getSidebarItems(store),
+                selectedIndex: _selectedIndex,
+                isCollapsed: _isSidebarCollapsed,
+                onToggleCollapse: () {
+                  setState(() {
+                    _isSidebarCollapsed = !_isSidebarCollapsed;
+                  });
+                },
+                onItemSelected: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
               ),
-            )
-          : null,
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Sidebar for Desktop & Large Screens
-          if (!isMobile)
-            StoreOwnerSidebar(
-              items: _getSidebarItems(store),
-              selectedIndex: _selectedIndex,
-              isCollapsed: _isSidebarCollapsed,
-              onToggleCollapse: () {
-                setState(() {
-                  _isSidebarCollapsed = !_isSidebarCollapsed;
-                });
-              },
-              onItemSelected: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-            ),
 
-          // Main View Area
-          Expanded(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: _getPages(store),
+            // Main View Area
+            Expanded(
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _getPages(store),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

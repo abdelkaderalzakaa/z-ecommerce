@@ -18,6 +18,14 @@ class CustomerProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  CustomerModel? getCustomerById(String id) {
+    try {
+      return _customers.firstWhere((c) => c.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// جلب قائمة جميع العملاء من السيرفس
   Future<void> fetchAllCustomers() async {
     _isLoading = true;

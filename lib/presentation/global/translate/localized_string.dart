@@ -8,6 +8,9 @@ class LocalizedString {
 
   const LocalizedString({required this.ar, required this.en});
 
+  bool get isEmpty => ar.trim().isEmpty && en.trim().isEmpty;
+  bool get isNotEmpty => !isEmpty;
+
   String get(BuildContext context) {
     try {
       final locale = context.watch<LocaleProvider>().locale.languageCode;

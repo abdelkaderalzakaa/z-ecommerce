@@ -12,6 +12,7 @@
     }
   },
   "hosting": {
+    "site": "z-ecommerce",
     "public": "build/web",
     "ignore": [
       "firebase.json",

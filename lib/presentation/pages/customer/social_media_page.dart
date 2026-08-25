@@ -60,7 +60,7 @@ class SocialMediaPage extends StatelessWidget {
 
     final businessProvider = context.watch<BusinessProvider>();
     final selectedBusiness = businessProvider.selectedBusiness;
-    final hasSelectedBusiness = !selectedBusiness.isEmpty;
+    final hasSelectedBusiness = selectedBusiness.isNotEmpty;
 
     final superAdminProvider = context.watch<SuperAdminProvider>();
 

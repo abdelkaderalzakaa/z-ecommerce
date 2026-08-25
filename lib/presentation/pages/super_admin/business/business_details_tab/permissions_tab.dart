@@ -31,13 +31,13 @@ class PermissionsTab extends StatelessWidget {
     // Calculate launch readiness
     int readinessScore = 0;
     final hasOwner = currentStore.hasOwner;
-    final hasAddress = currentStore.addAddress.isNotEmpty;
+    final hasDescription = currentStore.localization.description.ar.isNotEmpty;
     final hasArabicName = currentStore.localization.name.ar.isNotEmpty;
     final hasSocials = currentStore.socials.isNotEmpty;
     final hasPayments = currentStore.paymentMethods.isNotEmpty;
 
     if (hasOwner) readinessScore += 20;
-    if (hasAddress) readinessScore += 20;
+    if (hasDescription) readinessScore += 20;
     if (hasArabicName) readinessScore += 20;
     if (hasSocials) readinessScore += 20;
     if (hasPayments) readinessScore += 20;
@@ -189,9 +189,9 @@ class PermissionsTab extends StatelessWidget {
                               onTap: () => changeScreen(context, CreateBusinessPage(businessToEdit: currentStore)),
                             ),
                             _buildReadinessItem(
-                              'عناوين المتجر (20%)',
-                              hasAddress,
-                              onTap: () => changeScreen(context, StoreManageAddressesPage(store: currentStore)),
+                              'وصف المتجر (20%)',
+                              hasDescription,
+                              onTap: () => changeScreen(context, CreateBusinessPage(businessToEdit: currentStore)),
                             ),
                             _buildReadinessItem(
                               'الاسم العربي (20%)',

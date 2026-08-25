@@ -1,42 +1,38 @@
-import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/shared/localization_admin.dart';
+import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 import 'package:z_ecommerce/data/models/shared/theme_admin.dart';
 import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
+import 'package:z_ecommerce/data/models/store/currency_store.dart';
 import 'package:z_ecommerce/data/models/store/followers_store.dart';
-import 'package:z_ecommerce/data/models/shared/rating_store.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_constant.dart';
-import 'currency_store.dart';
 import 'package:z_ecommerce/presentation/global/translate/localized_string.dart';
 
-// ==========================================
-// 🧮 حالات جاهزية المتجر (Readiness Status)
-// ==========================================
-
 enum ReadinessStatus {
-  critical,
-  fair,
-  good,
-  complete,
-}
+  needsAttention, // 0 - 49%
+  good,           // 50 - 79%
+  complete;       // 80 - 100%
 
-extension ReadinessStatusExtension on ReadinessStatus {
-  /// الحصول على التسمية العربية للحالة
-  String get label {
+  String get labelAr {
     switch (this) {
-      case ReadinessStatus.critical: return 'حرج';
-      case ReadinessStatus.fair: return 'مقبول';
-      case ReadinessStatus.good: return 'جيد';
-      case ReadinessStatus.complete: return 'مكتمل';
+      case ReadinessStatus.needsAttention: return 'يحتاج إلى تحسين';
+      case ReadinessStatus.good: return 'جاهز جزئياً';
+      case ReadinessStatus.complete: return 'مكتمل وجاهز';
     }
   }
 
-  /// الحصول على كود اللون (Hex Color) للحالة
-  String get hexColor {
+  String get labelEn {
     switch (this) {
-      case ReadinessStatus.critical: return '#F44336'; // أحمر
-      case ReadinessStatus.fair: return '#FF9800'; // برتقالي
+      case ReadinessStatus.needsAttention: return 'Needs Attention';
+      case ReadinessStatus.good: return 'Partially Ready';
+      case ReadinessStatus.complete: return 'Fully Ready';
+    }
+  }
+
+  String get colorHex {
+    switch (this) {
+      case ReadinessStatus.needsAttention: return '#FFA000'; // برتقالي
       case ReadinessStatus.good: return '#2196F3'; // أزرق
       case ReadinessStatus.complete: return '#4CAF50'; // أخضر
     }
@@ -52,7 +48,6 @@ class BusinessModel {
   final String? ownerPhone;
 
   final BusinessType businessType;
-  final List<AddressModel> addAddress;
   final int likes;
   // 2. الهوية والإعدادات البصرية والمالية
   final ThemeAdmin theme;
@@ -87,7 +82,8 @@ class BusinessModel {
   bool get isVerified => status == 'Active & Verified';
   bool get isPending => status == 'Pending';
   bool get isInactive => status == 'Inactive' || status == null;
-  bool get isEmpty => id.isEmpty;
+  bool get isEmpty => id.isEmpty || id == 'empty_business';
+  bool get isNotEmpty => !isEmpty;
 
   BusinessModel({
     required this.id,
@@ -95,7 +91,6 @@ class BusinessModel {
     this.ownerName,
     this.ownerEmail,
     this.ownerPhone,
-    this.addAddress = const [],
     this.businessType = BusinessType.retailStore,
     this.likes = 0,
     required this.theme,
@@ -126,7 +121,6 @@ class BusinessModel {
     String? ownerEmail,
     String? ownerPhone,
     BusinessType? businessType,
-    List<AddressModel>? addAddress,
     int? likes,
     ThemeAdmin? theme,
     LocalizationAdmin? localization,
@@ -155,7 +149,6 @@ class BusinessModel {
       ownerEmail: ownerEmail ?? this.ownerEmail,
       ownerPhone: ownerPhone ?? this.ownerPhone,
       businessType: businessType ?? this.businessType,
-      addAddress: addAddress ?? this.addAddress,
       likes: likes ?? this.likes,
       theme: theme ?? this.theme,
       localization: localization ?? this.localization,
@@ -206,12 +199,11 @@ class BusinessModel {
   bool get hasTerms => _isValidLocalizedText(localization.termsAndConditions);
   bool get hasPrivacy => _isValidLocalizedText(localization.privacyPolicy);
   
-  // المنتجات والفئات (ملاحظة: تحتاج لربطها ببيانات الداتابيز الفعلي إذا لم تكن في الموديل)
+  // المنتجات والفئات
   bool get hasProducts => false; 
   bool get hasCategories => false; 
 
   bool get hasPaymentMethods => paymentMethods.isNotEmpty;
-  bool get hasAddress => addAddress.isNotEmpty;
 
   /// مؤشر جهوزية المتجر للإطلاق (نسبة مئوية من 0 إلى 100)
   double get readinessPercentage {
@@ -228,64 +220,49 @@ class BusinessModel {
     if (hasAbout) score += 5.0;
     if (hasTerms) score += 5.0;
     if (hasPrivacy) score += 5.0;
-    
-    // المنتجات (10%)
-    if (hasProducts) score += 10.0;
-    
-    // الفئات (10%)
-    if (hasCategories) score += 10.0;
-    
-    // وسائل الدفع (10%)
-    if (hasPaymentMethods) score += 10.0;
-    
-    // العنوان (15%)
-    if (hasAddress) score += 15.0;
-    
-    return score;
+
+    // الدفع (15%)
+    if (hasPaymentMethods) score += 15.0;
+
+    // الهوية البصرية (20%)
+    if (theme.logoUrl != null && theme.logoUrl!.isNotEmpty) score += 10.0;
+    if (theme.coverBannerUrl != null && theme.coverBannerUrl!.isNotEmpty) score += 10.0;
+
+    // التواصل (20%)
+    if (socials.isNotEmpty) score += 20.0;
+
+    return score.clamp(0.0, 100.0);
   }
 
-  /// حالة الجاهزية الحالية
+  /// حالة الجاهزية كنص وتصنيف Enum
   ReadinessStatus get readinessStatus {
     final score = readinessPercentage;
-    if (score < 50.0) return ReadinessStatus.critical;
-    if (score >= 50.0 && score <= 74.0) return ReadinessStatus.fair;
-    if (score >= 75.0 && score <= 99.0) return ReadinessStatus.good;
-    return ReadinessStatus.complete;
+    if (score >= 80.0) return ReadinessStatus.complete;
+    if (score >= 50.0) return ReadinessStatus.good;
+    return ReadinessStatus.needsAttention;
   }
 
-  /// العناصر الناقصة للوصول إلى 100%
-  List<String> get missingItems {
-    final List<String> missing = [];
-    if (!hasOwner) missing.add('تحديد مدير المتجر');
-    if (!hasName) missing.add('اسم المتجر');
-    if (!hasSlogan) missing.add('الشعار اللفظي (Slogan)');
-    if (!hasDescription) missing.add('وصف المتجر');
-    if (!hasFooterDescription) missing.add('وصف الفوتر');
-    if (!hasAbout) missing.add('صفحة من نحن');
-    if (!hasTerms) missing.add('الشروط والأحكام');
-    if (!hasPrivacy) missing.add('سياسة الخصوصية');
-    if (!hasProducts) missing.add('إضافة منتج واحد على الأقل');
-    if (!hasCategories) missing.add('إضافة فئة واحدة على الأقل');
-    if (!hasPaymentMethods) missing.add('تحديد وسيلة دفع واحدة على الأقل');
-    if (!hasAddress) missing.add('إضافة عنوان واحد على الأقل');
-    return missing;
+  // ==========================================
+  // 🌟 دوال مساعدة لحساب التقييمات
+  // ==========================================
+
+  int get totalRatingsCount => ratings.length;
+
+  double get averageRating {
+    if (ratings.isEmpty) return 0.0;
+    final total = ratings.fold<double>(
+      0.0,
+      (sum, item) => sum + item.rating,
+    );
+    return total / ratings.length;
   }
 
-  /// إجمالي عدد المتابعين بناءً على القائمة
-  int get followersCount => followersUsers.length;
-
-  /// حساب التقييم النهائي الموزون للنشاط (Weighted Score)
-  double get rating {
+  double get smartStoreScore {
     if (ratings.isEmpty) return 0.0;
 
-    // 1. حساب متوسط التقييمات المباشرة (من 5)
-    double averageRating =
-        ratings.map((e) => e.rating).reduce((a, b) => a + b) / ratings.length;
-
-    // 2. عامل مؤشر التفاعل (Engagement Score) بناءً على المتابعين والزيارات
     double engagementBonus = 0.0;
-    if (visitorsCount > 0) {
-      double followerRatio = followersCount / visitorsCount;
+    if (followersUsers.isNotEmpty) {
+      double followerRatio = followersUsers.length / 100.0;
       engagementBonus = (followerRatio * 0.5).clamp(0.0, 0.5);
     }
 
@@ -303,11 +280,6 @@ class BusinessModel {
       ownerName: map['ownerName'] ?? map['owner']?['name'],
       ownerEmail: map['ownerEmail'] ?? map['owner']?['email'],
       ownerPhone: map['ownerPhone'] ?? (map['owner']?['phoneNumber']),
-      addAddress:
-          (map['addAddress'] as List<dynamic>?)
-              ?.map((e) => AddressModel.fromMap(e))
-              .toList() ??
-          [],
       businessType: BusinessType.fromString(map['businessType']),
       likes: map['likes'] ?? 0,
       theme: ThemeAdmin.fromMap(map['theme'] ?? {}),
@@ -368,7 +340,6 @@ class BusinessModel {
       'ownerName': ownerName,
       'ownerEmail': ownerEmail,
       'ownerPhone': ownerPhone,
-      'addAddress': addAddress.map((e) => e.toMap()).toList(),
       'businessType': businessType.name,
       'likes': likes,
       'theme': theme.toMap(),
@@ -396,7 +367,7 @@ class BusinessModel {
   /// إنشاء كائن BusinessModel فارغ بقيم افتراضية
   factory BusinessModel.empty() {
     return BusinessModel(
-      id: 'empty_business',
+      id: '',
       theme: ThemeAdmin.empty(),
       localization: LocalizationAdmin.empty(),
       currency: CurrencyStore.empty(),

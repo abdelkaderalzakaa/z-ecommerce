@@ -41,8 +41,12 @@ class _StoreManagePaymentMethodsPageState extends State<StoreManagePaymentMethod
     final socials = widget.store.socials;
 
     String getSocialUrl(String keyword) {
-      final found = socials.where((s) => s.title.ar.contains(keyword) || s.title.en.toLowerCase().contains(keyword.toLowerCase()));
-      return found.isNotEmpty ? found.first.url : '';
+      for (final s in socials) {
+        if (s.title.ar.contains(keyword) || s.title.en.toLowerCase().contains(keyword.toLowerCase())) {
+          return s.url;
+        }
+      }
+      return '';
     }
 
     _wishPhoneController = TextEditingController(text: getSocialUrl('ويش').isNotEmpty ? getSocialUrl('ويش') : getSocialUrl('Wish'));

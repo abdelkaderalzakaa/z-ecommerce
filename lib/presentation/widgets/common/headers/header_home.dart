@@ -57,8 +57,9 @@ class _HeaderHomeState extends State<HeaderHome> {
 
     final hasCategories = categoryProvider.categories.isNotEmpty;
     final hasBrands = brandProvider.brands.isNotEmpty;
-    final hasOffers = offerProvider.activeOffers.any((o) => o.businessId == businessId) ||
-        productProvider.allProducts.any((p) => p.businessId == businessId && (p.discounts.isNotEmpty || p.offers.isNotEmpty));
+    final hasOffers = selectedBusiness.allowOffers &&
+        (offerProvider.activeOffers.any((o) => o.businessId == businessId) ||
+            productProvider.allProducts.any((p) => p.businessId == businessId && (p.discounts.isNotEmpty || p.offers.isNotEmpty)));
 
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,

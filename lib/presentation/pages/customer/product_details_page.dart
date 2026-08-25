@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:z_ecommerce/data/models/product/product_model.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
+import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_buisness.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_details.dart';
-import '../../global/core/constants/app_constants.dart';
-import '../../global/core/responsive/responsive_layout.dart';
-import '../../widgets/common/footers/footer_section.dart';
-import '../../widgets/common/headers/widgets/top_title.dart';
-import 'package:z_ecommerce/presentation/global/navigation.dart';
-import 'package:provider/provider.dart';
-import '../../../data/providers/business_provider.dart';
-import '../../widgets/product_details/product_gallery.dart';
-import '../../widgets/product_details/product_info.dart';
-import '../../global/translate/app_localizations.dart';
-import '../../global/translate/translation_keys.dart';
-
-import '../../widgets/product_details/related_products.dart';
-import '../../../../data/models/product/product_model.dart';
-import 'package:z_ecommerce/presentation/pages/customer/product_details_page.dart';
-import '../../widgets/product_details/product_offers_section.dart';
-import '../../widgets/product_details/product_reviews_section.dart';
+import 'package:z_ecommerce/presentation/widgets/common/headers/widgets/top_title.dart';
+import 'package:z_ecommerce/presentation/widgets/product_details/product_gallery.dart';
+import 'package:z_ecommerce/presentation/widgets/product_details/product_info.dart';
+import 'package:z_ecommerce/presentation/widgets/product_details/product_offers_section.dart';
+import 'package:z_ecommerce/presentation/widgets/product_details/product_reviews_section.dart';
+import 'package:z_ecommerce/presentation/widgets/product_details/related_products.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final ProductModel product;
@@ -27,6 +22,50 @@ class ProductDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
     final hPad = ResponsiveLayout.horizontalPadding(context);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+
+    // If product is inactive or zero-dollar / free, display clear unavailable screen
+    if (!product.isValidForCustomer) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: HeaderDetails(title: TranslationKeys.productDetails.tr(context)),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inventory_2_outlined, size: 72, color: Colors.grey.shade400),
+                const SizedBox(height: 16),
+                Text(
+                  isAr ? 'عذراً، هذا المنتج غير متاح حالياً' : 'Sorry, this product is currently unavailable',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isAr
+                      ? 'المنتج غير نشط أو قيد التحديث من قبل إدارة المتجر'
+                      : 'This product is currently inactive or undergoing maintenance',
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  label: Text(isAr ? 'العودة للمتجر' : 'Back to Store'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

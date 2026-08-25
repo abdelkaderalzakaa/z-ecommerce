@@ -1,24 +1,26 @@
-import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
-import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:z_ecommerce/data/providers/business_provider.dart';
-import 'package:z_ecommerce/data/providers/follower_provider.dart';
-import 'package:z_ecommerce/data/providers/review_provider.dart';
-import 'package:z_ecommerce/data/providers/like_provider.dart';
-import 'package:z_ecommerce/data/providers/auth_provider.dart';
-import 'package:z_ecommerce/data/providers/order_provider.dart';
-import 'package:z_ecommerce/data/models/store/business_model.dart';
-import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
+import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/models/shared/follower_model.dart';
 import 'package:z_ecommerce/data/models/shared/like_model.dart';
+import 'package:z_ecommerce/data/models/store/business_model.dart';
+import 'package:z_ecommerce/data/models/store/business_visit_model.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
+import 'package:z_ecommerce/data/providers/auth_provider.dart';
+import 'package:z_ecommerce/data/providers/business_provider.dart';
+import 'package:z_ecommerce/data/providers/follower_provider.dart';
+import 'package:z_ecommerce/data/providers/like_provider.dart';
+import 'package:z_ecommerce/data/providers/order_provider.dart';
+import 'package:z_ecommerce/data/providers/review_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/locale_provider.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
+import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 
 class HeroSection extends StatefulWidget {
   const HeroSection({super.key});
@@ -28,33 +30,33 @@ class HeroSection extends StatefulWidget {
 }
 
 class _HeroSectionState extends State<HeroSection> {
+  bool _isSloganExpanded = false;
+  bool _isDescExpanded = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final selectedBusiness = context
-          .read<BusinessProvider>()
-          .selectedBusiness;
+      final selectedBusiness = context.read<BusinessProvider>().selectedBusiness;
       if (selectedBusiness.id.isNotEmpty) {
-        context.read<FollowerProvider>().listenToStoreFollowers(
-          selectedBusiness.id,
-        );
-        context.read<ReviewProvider>().listenToBusinessReviews(
-          selectedBusiness.id,
-        );
-        context.read<LikeProvider>().listenToTargetLikesCount(
-          selectedBusiness.id,
-        );
-        context.read<OrderProvider>().listenToBusinessOrders(
-          selectedBusiness.id,
-        );
+        if (selectedBusiness.allowFollow) {
+          context.read<FollowerProvider>().listenToStoreFollowers(selectedBusiness.id);
+        }
+        if (selectedBusiness.allowReviews) {
+          context.read<ReviewProvider>().listenToBusinessReviews(selectedBusiness.id);
+        }
+        if (selectedBusiness.allowLikes) {
+          context.read<LikeProvider>().listenToTargetLikesCount(selectedBusiness.id);
+        }
+        context.read<OrderProvider>().listenToBusinessOrders(selectedBusiness.id);
+
         final auth = context.read<AuthProvider>();
-        if (auth.isAuthenticated) {
+        if (auth.isAuthenticated && selectedBusiness.allowLikes) {
           context.read<LikeProvider>().listenToUserLikes(auth.currentUser!.id);
         }
 
-        // Record a visit
+        // Record visit
         final visit = BusinessVisitModel(
           id: '',
           businessId: selectedBusiness.id,
@@ -73,18 +75,23 @@ class _HeroSectionState extends State<HeroSection> {
     final isDark = theme.brightness == Brightness.dark;
 
     final selectedBusiness = context.watch<BusinessProvider>().selectedBusiness;
+    final isAr = context.watch<LocaleProvider>().locale.languageCode == 'ar';
+    final langCode = isAr ? 'ar' : 'en';
 
     final storeName = selectedBusiness.localization.name.get(context);
     final storeSlogan = selectedBusiness.localization.slogan.get(context);
     final storeDesc = selectedBusiness.localization.description.get(context);
     final logoUrl = selectedBusiness.theme.logoUrl;
-    final primaryColor = Theme.of(context).primaryColor;
+    final primaryColor = theme.primaryColor;
+    final coverBannerUrl = selectedBusiness.theme.coverBannerUrl;
+    final dynamicCardRadius = selectedBusiness.theme.cardRadius > 0 ? selectedBusiness.theme.cardRadius : AppRadius.xl;
 
-    final langCode = Localizations.localeOf(context).languageCode;
+    final hasActions = selectedBusiness.allowLikes || selectedBusiness.allowFollow;
+
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
+        borderRadius: BorderRadius.circular(dynamicCardRadius),
         border: Border.all(
           color: isDark ? Colors.white.withOpacity(0.1) : theme.dividerColor,
           width: 1,
@@ -95,21 +102,34 @@ class _HeroSectionState extends State<HeroSection> {
         children: [
           /// 1. Top Cover / Hero Header Banner
           Container(
-            height: isMobile ? 50 : 90,
+            height: isMobile ? 80 : 130,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  primaryColor.withOpacity(0.25),
-                  primaryColor.withOpacity(0.85),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              image: (coverBannerUrl != null && coverBannerUrl.isNotEmpty)
+                  ? DecorationImage(
+                      image: NetworkImage(coverBannerUrl),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.35),
+                        BlendMode.darken,
+                      ),
+                    )
+                  : null,
+              gradient: (coverBannerUrl == null || coverBannerUrl.isEmpty)
+                  ? LinearGradient(
+                      colors: [
+                        primaryColor.withOpacity(0.25),
+                        primaryColor.withOpacity(0.85),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(dynamicCardRadius)),
             ),
             child: Row(
               children: [
                 Container(
-                  margin: EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.3),
                     shape: BoxShape.circle,
@@ -127,127 +147,208 @@ class _HeroSectionState extends State<HeroSection> {
                     },
                   ),
                 ),
-                Spacer(),
-                ChipApp(
-                  icon: selectedBusiness.businessType.icon,
-                  lable: selectedBusiness.businessType.ar,
-                  color: primaryColor,
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: ChipApp(
+                    icon: selectedBusiness.businessType.icon,
+                    lable: isAr ? selectedBusiness.businessType.ar : selectedBusiness.businessType.en,
+                    color: primaryColor,
+                  ),
                 ),
               ],
             ),
           ),
-          Row(
-            children: [
-              Container(
-                margin: EdgeInsets.all(10),
-                width: isMobile ? 35 : 75,
-                height: isMobile ? 35 : 75,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.scaffoldBackgroundColor,
-                  border: Border.all(color: theme.cardColor, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: ClipOval(
-                  child: logoUrl != null && logoUrl.isNotEmpty
-                      ? CustomNetworkImage(
-                          imageUrl: logoUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (ctx, err, stack) =>
-                              _buildFallbackLogo(context, primaryColor),
-                        )
-                      : _buildFallbackLogo(context, primaryColor),
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      storeName.isNotEmpty ? storeName : 'اسم البزنس غير محدد',
-                      style: TextStyle(
-                        fontSize: isMobile ? 18 : 21,
-                        fontWeight: FontWeight.bold,
-                        color: theme.textTheme.displayLarge?.color,
-                      ),
-                    ),
 
-                    /// الفروع والعناوين
-                    if (selectedBusiness.addAddress.isNotEmpty)
+          /// 2. Store Info Row
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Row(
+              children: [
+                Container(
+                  width: isMobile ? 48 : 75,
+                  height: isMobile ? 48 : 75,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.scaffoldBackgroundColor,
+                    border: Border.all(color: theme.cardColor, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.25),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: logoUrl != null && logoUrl.isNotEmpty
+                        ? CustomNetworkImage(
+                            imageUrl: logoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (ctx, err, stack) =>
+                                _buildFallbackLogo(context, primaryColor),
+                          )
+                        : _buildFallbackLogo(context, primaryColor),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.location_on_rounded,
-                            color: theme.primaryColor,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 6),
                           Flexible(
                             child: Text(
-                              selectedBusiness.addAddress.first
-                                  .getFormattedAddress(langCode: langCode),
+                              storeName.isNotEmpty ? storeName : (isAr ? 'اسم البزنس' : 'Store Name'),
                               style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: theme.textTheme.bodyMedium?.color,
+                                fontSize: isMobile ? 18 : 22,
+                                fontWeight: FontWeight.bold,
+                                color: theme.textTheme.displayLarge?.color,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (selectedBusiness.isVerified) ...[
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.verified_rounded,
+                              color: Colors.blueAccent,
+                              size: 22,
+                            ),
+                          ],
                         ],
                       ),
-                  ],
-                ),
-              ),
-              if (selectedBusiness.isVerified) ...[
-                const SizedBox(width: 6),
-                const Icon(
-                  Icons.verified_rounded,
-                  color: Colors.blueAccent,
-                  size: 24,
+
+                      StreamBuilder<List<AddressModel>>(
+                        stream: AddressService().streamAddressesByUserId(selectedBusiness.id),
+                        builder: (context, addrSnapshot) {
+                          final addrs = addrSnapshot.data ?? [];
+                          if (addrs.isEmpty) return const SizedBox.shrink();
+                          final defaultAddr = addrs.firstWhere((a) => a.isDefault, orElse: () => addrs.first);
+
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.location_on_rounded,
+                                  color: theme.primaryColor,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    defaultAddr.getFormattedAddress(langCode: langCode),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ],
+            ),
           ),
+
           if (storeSlogan.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              storeSlogan,
-              textAlign: isMobile ? TextAlign.center : TextAlign.start,
-              style: TextStyle(
-                fontSize: isMobile ? 14 : 16,
-                fontWeight: FontWeight.w600,
-                color: primaryColor,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    storeSlogan,
+                    maxLines: _isSloganExpanded ? null : 1,
+                    overflow: _isSloganExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: isMobile ? 13 : 15,
+                      fontWeight: FontWeight.w600,
+                      color: primaryColor,
+                    ),
+                  ),
+                  if (storeSlogan.length > 60)
+                    InkWell(
+                      onTap: () => setState(() => _isSloganExpanded = !_isSloganExpanded),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
+                        child: Text(
+                          _isSloganExpanded
+                              ? (isAr ? 'عرض أقل' : 'Show less')
+                              : (isAr ? 'عرض المزيد' : 'Show more'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
 
           if (storeDesc.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              storeDesc,
-              textAlign: isMobile ? TextAlign.center : TextAlign.start,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.5,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    storeDesc,
+                    maxLines: _isDescExpanded ? null : 3,
+                    overflow: _isDescExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.5,
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.75),
+                    ),
+                  ),
+                  if (storeDesc.length > 120)
+                    InkWell(
+                      onTap: () => setState(() => _isDescExpanded = !_isDescExpanded),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 2.0, bottom: 4.0),
+                        child: Text(
+                          _isDescExpanded
+                              ? (isAr ? 'عرض أقل' : 'Show less')
+                              : (isAr ? 'عرض المزيد' : 'Show more'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
+
+          /// 3. Metrics and Permissions Actions Row
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
                 Expanded(child: _HeroMetricsBar(business: selectedBusiness)),
-                const SizedBox(width: 16),
-                _HeroActions(business: selectedBusiness),
+                if (hasActions) ...[
+                  const SizedBox(width: 12),
+                  _HeroActions(business: selectedBusiness),
+                ],
               ],
             ),
           ),
@@ -260,7 +361,7 @@ class _HeroSectionState extends State<HeroSection> {
     return Container(
       color: primaryColor.withOpacity(0.12),
       child: Center(
-        child: Icon(Icons.storefront_rounded, size: 50, color: primaryColor),
+        child: Icon(Icons.storefront_rounded, size: 36, color: primaryColor),
       ),
     );
   }
@@ -354,7 +455,7 @@ class CardActionHero extends StatelessWidget {
 }
 
 /// ============================================================================
-/// 👥 Hero Actions Widget (Like & Follow Action Buttons)
+/// 👥 Hero Actions Widget (Like & Follow Respecting Business Permissions)
 /// ============================================================================
 class _HeroActions extends StatelessWidget {
   final BusinessModel business;
@@ -378,98 +479,100 @@ class _HeroActions extends StatelessWidget {
         ? followerProvider.storeFollowers.length
         : business.followersUsers.length;
 
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final isAr = context.watch<LocaleProvider>().locale.languageCode == 'ar';
 
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        /// 1. بطاقة الإعجاب (Like Card)
-        CardActionHero(
-          icon: Icons.favorite,
-          iconColor: Colors.redAccent,
-          countText: isAr ? '$likesCount إعجاب' : '$likesCount Likes',
-          buttonLabel: isLiked
-              ? (isAr ? 'معجب' : 'Liked')
-              : (isAr ? 'إعجاب' : 'Like'),
-          buttonIcon: isLiked
-              ? Icons.favorite_rounded
-              : Icons.favorite_border_rounded,
-          format: isLiked ? FormatButtonApp.outline : FormatButtonApp.elevated,
-          buttonColor: Colors.redAccent,
-          onPressed: () async {
-            if (authProvider.isAuthenticated) {
-              final likeModel = LikeModel(
-                id: '',
-                userId: authProvider.currentUser!.id,
-                targetId: business.id,
-                targetType: 'store',
-                createdAt: DateTime.now(),
-              );
-              await likeProvider.toggleLike(likeModel);
-            } else {
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    TranslationKeys.pleaseLoginToSaveItems.tr(context),
+        /// 1. بطاقة الإعجاب (تظهر فقط عند السماح بها)
+        if (business.allowLikes)
+          CardActionHero(
+            icon: Icons.favorite,
+            iconColor: Colors.redAccent,
+            countText: isAr ? '$likesCount إعجاب' : '$likesCount Likes',
+            buttonLabel: isLiked
+                ? (isAr ? 'معجب' : 'Liked')
+                : (isAr ? 'إعجاب' : 'Like'),
+            buttonIcon: isLiked
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            format: isLiked ? FormatButtonApp.outline : FormatButtonApp.elevated,
+            buttonColor: Colors.redAccent,
+            onPressed: () async {
+              if (authProvider.isAuthenticated) {
+                final likeModel = LikeModel(
+                  id: '',
+                  userId: authProvider.currentUser!.id,
+                  targetId: business.id,
+                  targetType: 'store',
+                  createdAt: DateTime.now(),
+                );
+                await likeProvider.toggleLike(likeModel);
+              } else {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      TranslationKeys.pleaseLoginToSaveItems.tr(context),
+                    ),
+                    backgroundColor: Colors.red,
                   ),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-        ),
+                );
+              }
+            },
+          ),
 
-        /// 2. بطاقة المتابعة (Follow Card)
-        CardActionHero(
-          icon: Icons.people_alt_rounded,
-          iconColor: primaryColor,
-          countText: isAr
-              ? '$followersCount متابع'
-              : '$followersCount Followers',
-          buttonLabel: isFollowing
-              ? (isAr ? 'متابع' : 'Following')
-              : (isAr ? 'متابعة البزنس' : 'Follow'),
-          buttonIcon: isFollowing
-              ? Icons.check_circle_outline_rounded
-              : Icons.person_add_alt_1_rounded,
-          format: isFollowing
-              ? FormatButtonApp.outline
-              : FormatButtonApp.elevated,
-          buttonColor: isFollowing ? Colors.grey : primaryColor,
-          onPressed: () async {
-            if (authProvider.isAuthenticated) {
-              final follower = FollowerModel(
-                id: '',
-                userId: authProvider.currentUser!.id,
-                userName: authProvider.currentUser!.name,
-                userAvatar: authProvider.currentUser!.avatarUrl,
-                businessId: business.id,
-                followedAt: DateTime.now(),
-              );
-              await followerProvider.toggleFollow(follower);
-            } else {
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    TranslationKeys.pleaseLoginToSaveItems.tr(context),
+        /// 2. بطاقة المتابعة (تظهر فقط عند السماح بها)
+        if (business.allowFollow)
+          CardActionHero(
+            icon: Icons.people_alt_rounded,
+            iconColor: primaryColor,
+            countText: isAr
+                ? '$followersCount متابع'
+                : '$followersCount Followers',
+            buttonLabel: isFollowing
+                ? (isAr ? 'متابع' : 'Following')
+                : (isAr ? 'متابعة البزنس' : 'Follow'),
+            buttonIcon: isFollowing
+                ? Icons.check_circle_outline_rounded
+                : Icons.person_add_alt_1_rounded,
+            format: isFollowing
+                ? FormatButtonApp.outline
+                : FormatButtonApp.elevated,
+            buttonColor: isFollowing ? Colors.grey : primaryColor,
+            onPressed: () async {
+              if (authProvider.isAuthenticated) {
+                final follower = FollowerModel(
+                  id: '',
+                  userId: authProvider.currentUser!.id,
+                  userName: authProvider.currentUser!.name,
+                  userAvatar: authProvider.currentUser!.avatarUrl,
+                  businessId: business.id,
+                  followedAt: DateTime.now(),
+                );
+                await followerProvider.toggleFollow(follower);
+              } else {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      TranslationKeys.pleaseLoginToSaveItems.tr(context),
+                    ),
+                    backgroundColor: Colors.red,
                   ),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-        ),
+                );
+              }
+            },
+          ),
       ],
     );
   }
 }
 
 /// ============================================================================
-/// 📊 Hero Metrics Bar (الزيارات، الطلبات، التقييم)
+/// 📊 Hero Metrics Bar (الزيارات، الطلبات، والتقييم المشروط بالصلاحية)
 /// ============================================================================
 class _HeroMetricsBar extends StatelessWidget {
   final BusinessModel business;
@@ -492,9 +595,7 @@ class _HeroMetricsBar extends StatelessWidget {
           reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length;
     } else if (business.ratings.isNotEmpty) {
       reviewsCount = business.ratings.length;
-      avgRating =
-          business.ratings.map((r) => r.rating).reduce((a, b) => a + b) /
-          business.ratings.length;
+      avgRating = business.averageRating;
     }
 
     final visitsCount = business.visits.isNotEmpty ? business.visits.length : 1;
@@ -502,7 +603,7 @@ class _HeroMetricsBar extends StatelessWidget {
         ? orderProvider.businessOrders.length
         : business.orders;
 
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final isAr = context.watch<LocaleProvider>().locale.languageCode == 'ar';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -534,17 +635,18 @@ class _HeroMetricsBar extends StatelessWidget {
             value: '$ordersCount',
           ),
 
-          /// 3. التقييم
-          _MetricTile(
-            icon: Icons.star_rounded,
-            color: Colors.amber,
-            label: isAr
-                ? (reviewsCount > 0
-                      ? 'التقييمات ($reviewsCount)'
-                      : 'التقييم العام')
-                : (reviewsCount > 0 ? 'Reviews ($reviewsCount)' : 'Rating'),
-            value: avgRating > 0 ? avgRating.toStringAsFixed(1) : '5.0',
-          ),
+          /// 3. التقييم (يظهر فقط إذا كانت صلاحية التقييمات مفعلة للمتجر)
+          if (business.allowReviews)
+            _MetricTile(
+              icon: Icons.star_rounded,
+              color: Colors.amber,
+              label: isAr
+                  ? (reviewsCount > 0
+                        ? 'التقييمات ($reviewsCount)'
+                        : 'التقييم العام')
+                  : (reviewsCount > 0 ? 'Reviews ($reviewsCount)' : 'Rating'),
+              value: avgRating > 0 ? avgRating.toStringAsFixed(1) : '5.0',
+            ),
         ],
       ),
     );
@@ -566,33 +668,38 @@ class _MetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: color.withOpacity(0.12),
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: color, size: 20),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
             ),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                fontSize: 11,
+                color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
               ),
             ),
           ],
@@ -601,4 +708,3 @@ class _MetricTile extends StatelessWidget {
     );
   }
 }
-

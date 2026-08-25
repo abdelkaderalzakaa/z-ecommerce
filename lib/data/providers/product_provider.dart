@@ -20,9 +20,16 @@ class ProductProvider extends ChangeNotifier {
   List<ProductModel> get allProducts => _allProducts;
   List<ProductModel> get storeProducts => _storeProducts;
   
-  /// المنتجات المسموح للزبون برؤيتها (نشطة ولها سعر أو مجانية)
+  /// المنتجات المسموح للزبون برؤيتها (نشطة ولها سعر أكبر من 0 وليست مجانية)
   List<ProductModel> get customerAllProducts => _allProducts.where((p) => p.isValidForCustomer).toList();
   List<ProductModel> get customerStoreProducts => _storeProducts.where((p) => p.isValidForCustomer).toList();
+
+  /// جلب المنتجات الصالحة للزبون الخاصة بمتجر محدد
+  List<ProductModel> getCustomerProductsForStore(String businessId) {
+    return _allProducts
+        .where((p) => p.businessId == businessId && p.isValidForCustomer)
+        .toList();
+  }
 
   ProductModel get selectedProduct => _selectedProduct;
   bool get selectedProductIsEmpty => _selectedProduct.isEmpty;

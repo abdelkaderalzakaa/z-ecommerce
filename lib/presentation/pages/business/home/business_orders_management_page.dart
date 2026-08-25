@@ -11,6 +11,8 @@ import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/orders/order_details_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/common/status_dialogs.dart'; 
+import 'package:z_ecommerce/presentation/pages/business/orders/store_orders_flow_tab.dart';
+
 class BusinessOrdersManagementPage extends StatefulWidget {
   final String businessId;
 
@@ -24,6 +26,7 @@ class BusinessOrdersManagementPage extends StatefulWidget {
 class _BusinessOrdersManagementPageState
     extends State<BusinessOrdersManagementPage> {
   String _selectedStatusFilter = 'all';
+  bool _isFlowView = true;
 
   @override
   void initState() {
@@ -36,6 +39,34 @@ class _BusinessOrdersManagementPageState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (_isFlowView) {
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'مسار تنفيذ وتوصيل الطلبات',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.table_chart_outlined, size: 18),
+                    label: const Text('عرض جدول الطلبات'),
+                    onPressed: () => setState(() => _isFlowView = false),
+                  ),
+                ],
+              ),
+            ),
+            const Expanded(child: StoreOrdersFlowTab()),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -56,12 +87,22 @@ class _BusinessOrdersManagementPageState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Page Header
-                Text(
-                  TranslationKeys.ordersManagement.tr(context),
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      TranslationKeys.ordersManagement.tr(context),
+                      style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.view_kanban_outlined, size: 18),
+                      label: const Text('عرض مراحل التنفيذ الحية 🚀'),
+                      onPressed: () => setState(() => _isFlowView = true),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
 

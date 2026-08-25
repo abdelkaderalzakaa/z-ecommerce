@@ -738,7 +738,7 @@ class DashboardOverviewPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ...businesses.map((s) {
-            double rating = s.rating;
+            double rating = s.averageRating;
 
             return InkWell(
               onTap: () =>

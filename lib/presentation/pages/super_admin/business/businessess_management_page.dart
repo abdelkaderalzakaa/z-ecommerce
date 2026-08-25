@@ -113,7 +113,7 @@ class _BusinessessManagementPageState extends State<BusinessessManagementPage> {
                         sortKey: (store) => store.orders,
                         cellBuilder: (store) => TableTextCell(
                           title: '${store.orders}',
-                          subtitle: '⭐ ${store.rating.toStringAsFixed(1)}',
+                          subtitle: '⭐ ${store.averageRating.toStringAsFixed(1)}',
                         ),
                       ),
                       AppTableColumn<BusinessModel>(

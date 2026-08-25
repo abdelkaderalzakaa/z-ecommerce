@@ -15,11 +15,12 @@ import '../../../widgets/common/footers/footer_section.dart';
 import '../../../widgets/cart/order_summary.dart';
 import '../../../widgets/cart/cart_item.dart';
 import '../../../widgets/common/headers/widgets/top_title.dart';
-import '../../../widgets/profile/tabs/widgets/address_form_dialog.dart';
 import '../../../global/translate/app_localizations.dart';
 import '../../../global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/customer/cart/confirm_order_page.dart';
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
+import 'package:z_ecommerce/presentation/pages/add_edit_address.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
 import 'package:z_ecommerce/data/services/order_service.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
@@ -37,13 +38,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authProvider = context.read<AuthProvider>();
-      if (authProvider.isAuthenticated) {
-        final addresses = authProvider.currentCustomer?.addresses ?? [];
-        if (addresses.isNotEmpty) {
+      final userId = authProvider.currentUser?.id ?? '';
+      if (userId.isNotEmpty) {
+        final addresses = await AddressService().getAddressesByUserId(userId);
+        if (addresses.isNotEmpty && mounted) {
           setState(() {
-            _selectedAddresses.add(addresses.first);
+            final defaultAddr = addresses.firstWhere((a) => a.isDefault, orElse: () => addresses.first);
+            _selectedAddresses.add(defaultAddr);
           });
         }
       }
@@ -51,7 +54,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       final businessProvider = context.read<BusinessProvider>();
       final methods =
           businessProvider.selectedBusiness.paymentMethods;
-      if (methods.isNotEmpty) {
+      if (methods.isNotEmpty && mounted) {
         setState(() {
           _selectedPaymentMethod = methods.first;
         });
@@ -345,7 +348,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget _buildAddressSection() {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        if (!authProvider.isAuthenticated) {
+        final userId = authProvider.currentUser?.id ?? '';
+        if (!authProvider.isAuthenticated || userId.isEmpty) {
           return _buildSectionContainer(
             title: TranslationKeys.shippingAddress.tr(context),
             child: Text(
@@ -357,167 +361,143 @@ class _CheckoutPageState extends State<CheckoutPage> {
           );
         }
 
-        final addresses = authProvider.currentCustomer?.addresses ?? [];
+        return StreamBuilder<List<AddressModel>>(
+          stream: AddressService().streamAddressesByUserId(userId),
+          builder: (context, snapshot) {
+            final addresses = snapshot.data ?? [];
 
-        return _buildSectionContainer(
-          title: TranslationKeys.shippingAddress.tr(context),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (addresses.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    TranslationKeys.noSavedAddresses.tr(context),
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ),
-
-              if (addresses.isNotEmpty)
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: addresses.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final address = addresses[index];
-                    final isSelected = _selectedAddresses.any(
-                      (a) => a.id == address.id,
-                    );
-
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            _selectedAddresses.removeWhere(
-                              (a) => a.id == address.id,
-                            );
-                          } else {
-                            _selectedAddresses.add(address);
-                          }
-                        });
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Theme.of(context).scaffoldBackgroundColor
-                              : Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(AppRadius.card),
-                          border: Border.all(
-                            color: isSelected
-                                ? Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.color ??
-                                      Colors.white
-                                : Theme.of(context).dividerColor,
-                            width: isSelected ? 2 : 1,
-                          ),
+            return _buildSectionContainer(
+              title: TranslationKeys.shippingAddress.tr(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (addresses.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        TranslationKeys.noSavedAddresses.tr(context),
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              isSelected
-                                  ? Icons.check_box
-                                  : Icons.check_box_outline_blank,
+                      ),
+                    ),
+
+                  if (addresses.isNotEmpty)
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: addresses.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final address = addresses[index];
+                        final isSelected = _selectedAddresses.any(
+                          (a) => a.id == address.id,
+                        );
+
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              if (isSelected) {
+                                _selectedAddresses.removeWhere(
+                                  (a) => a.id == address.id,
+                                );
+                              } else {
+                                _selectedAddresses.clear();
+                                _selectedAddresses.add(address);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
                               color: isSelected
-                                  ? Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.color
-                                  : Theme.of(context).dividerColor,
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.card,
+                              ),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.color ??
+                                      Colors.white
+                                    : Theme.of(context).dividerColor,
+                                width: isSelected ? 2 : 1,
+                              ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isSelected
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                  color: isSelected
+                                      ? Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.color
+                                      : Theme.of(context).dividerColor,
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Icon(
-                                        address.title.toLowerCase() ==
-                                                    'home' ||
-                                                address.title.toLowerCase() ==
-                                                    'المنزل'
-                                            ? Icons.home
-                                            : Icons.business,
-                                        size: 16,
-                                        color: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color,
-                                      ),
-                                      const SizedBox(width: 8),
                                       Text(
                                         address.title.isNotEmpty
                                             ? address.title
-                                            : TranslationKeys.addressFallback
-                                                  .tr(context),
+                                            : address.type.displayName(isAr: Localizations.localeOf(context).languageCode == 'ar'),
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                           color: Theme.of(
                                             context,
                                           ).textTheme.bodyLarge?.color,
                                         ),
                                       ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        address.getFormattedAddress(langCode: Localizations.localeOf(context).languageCode),
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium?.color,
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    address.getFormattedAddress(
-                                      langCode: Localizations.localeOf(
-                                        context,
-                                      ).languageCode,
-                                    ),
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.bodyMedium?.color,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
+                        );
+                      },
+                    ),
+
+                  const SizedBox(height: 20),
+
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      changeScreen(
+                        context,
+                        AddEditAddress(
+                          userId: userId,
+                          userType: 'customer',
                         ),
-                      ),
-                    );
-                  },
-                ),
-
-              const SizedBox(height: 20),
-
-              OutlinedButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => const AddressFormDialog(),
-                  ).then((_) {
-                    if (!context.mounted) return;
-                    final updatedAddresses =
-                        context
-                            .read<AuthProvider>()
-                            .currentCustomer
-                            ?.addresses ??
-                        [];
-                    if (updatedAddresses.isNotEmpty &&
-                        !_selectedAddresses.any(
-                          (a) => a.id == updatedAddresses.last.id,
-                        )) {
-                      setState(() {
-                        _selectedAddresses.add(updatedAddresses.last);
-                      });
-                    }
-                  });
-                },
-                icon: const Icon(Icons.add),
-                label: Text(TranslationKeys.addNewAddress.tr(context)),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    label: Text(TranslationKeys.addNewAddress.tr(context)),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -537,13 +517,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
           title: TranslationKeys.paymentMethod.tr(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: methods.map((method) {
+            children: methods.map<Widget>((PaymentMethodType method) {
               final isSelected = _selectedPaymentMethod == method;
               final methodData = PaymentMethodModel.availableMethods.firstWhere(
                 (m) => m.type == method,
                 orElse: () => PaymentMethodModel.availableMethods.first,
               );
               final String title = methodData.title.get(context);
+
+              IconData methodIcon;
+              switch (method) {
+                case PaymentMethodType.cashOnDelivery:
+                  methodIcon = Icons.money;
+                  break;
+                case PaymentMethodType.creditCard:
+                  methodIcon = Icons.credit_card;
+                  break;
+                case PaymentMethodType.paypal:
+                  methodIcon = Icons.paypal;
+                  break;
+                default:
+                  methodIcon = Icons.account_balance_wallet;
+              }
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -572,13 +567,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: Row(
                       children: [
                         Icon(
-                          method.id == 'cod'
-                              ? Icons.money
-                              : method.id == 'credit_card'
-                              ? Icons.credit_card
-                              : method.id == 'paypal'
-                              ? Icons.paypal
-                              : Icons.account_balance_wallet,
+                          methodIcon,
                           size: 28,
                           color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),

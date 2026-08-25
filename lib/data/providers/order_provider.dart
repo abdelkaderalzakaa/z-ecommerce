@@ -46,16 +46,55 @@ class OrderProvider with ChangeNotifier {
 
 
 
-  Future<bool> updateOrderStatus(String orderId, OrderStatus newStatus) async {
-    return await _orderService.updateOrderStatus(orderId: orderId, newStatus: newStatus);
+  Future<bool> updateOrderStatus(
+    String orderId,
+    OrderStatus newStatus, {
+    String? deliveryDriverName,
+    String? deliveryDriverPhone,
+    String? deliveryNotes,
+  }) async {
+    return await _orderService.updateOrderStatus(
+      orderId: orderId,
+      newStatus: newStatus,
+      deliveryDriverName: deliveryDriverName,
+      deliveryDriverPhone: deliveryDriverPhone,
+      deliveryNotes: deliveryNotes,
+    );
   }
 
   Future<bool> updateOrderAddress(String orderId, AddressModel newAddress) async {
     return await _orderService.updateOrderAddress(orderId: orderId, newAddress: newAddress);
   }
 
-  Future<bool> updateOrderDelivery(String orderId, String? deliveryId) async {
-    return await _orderService.updateOrderDelivery(orderId: orderId, deliveryId: deliveryId);
+  Future<bool> updateOrderDelivery(
+    String orderId,
+    String? deliveryId, {
+    String? driverName,
+    String? driverPhone,
+  }) async {
+    return await _orderService.updateOrderDelivery(
+      orderId: orderId,
+      deliveryId: deliveryId,
+      driverName: driverName,
+      driverPhone: driverPhone,
+    );
+  }
+
+  /// 🛵 تحديث إحداثيات السائق الحية والمسافة وزمن الوصول للطلبية
+  Future<bool> updateDriverLiveLocation(
+    String orderId, {
+    required double latitude,
+    required double longitude,
+    double? distanceKm,
+    int? estimatedMinutes,
+  }) async {
+    return await _orderService.updateDriverLiveLocation(
+      orderId: orderId,
+      latitude: latitude,
+      longitude: longitude,
+      distanceKm: distanceKm,
+      estimatedMinutes: estimatedMinutes,
+    );
   }
 
   @override

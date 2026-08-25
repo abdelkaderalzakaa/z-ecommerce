@@ -37,8 +37,12 @@ class _StoreManageSocialsPageState extends State<StoreManageSocialsPage> {
     final socials = widget.store.socials;
 
     String getUrl(SocialPlatform platform) {
-      final found = socials.where((s) => s.platform == platform);
-      return found.isNotEmpty ? found.first.url : '';
+      for (final s in socials) {
+        if (s.platform == platform) {
+          return s.url;
+        }
+      }
+      return '';
     }
 
     _whatsappCtrl = TextEditingController(text: getUrl(SocialPlatform.whatsapp));

@@ -49,6 +49,14 @@ class SettingsProvider extends ChangeNotifier {
     await prefs.setInt('theme_mode', mode.index);
   }
 
+  Future<void> toggleTheme() async {
+    if (_themeMode == ThemeMode.dark) {
+      await setThemeMode(ThemeMode.light);
+    } else {
+      await setThemeMode(ThemeMode.dark);
+    }
+  }
+
   Future<void> setLanguage(String code) async {
     _languageCode = code;
     notifyListeners();

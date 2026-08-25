@@ -72,8 +72,8 @@ class ThemeAdmin {
       backgroundColor: json['backgroundColor'] ?? '#F9FAFB',
       surfaceColor: json['surfaceColor'] ?? '#FFFFFF',
       textColor: json['textColor'] ?? '#111827',
-      darkPrimaryColor: json['darkPrimaryColor'] ?? json['primaryColor'] ?? '#4F46E5',
-      darkSecondaryColor: json['darkSecondaryColor'] ?? json['secondaryColor'] ?? '#10B981',
+      darkPrimaryColor: json['darkPrimaryColor'] ?? json['primaryColor'] ?? '',
+      darkSecondaryColor: json['darkSecondaryColor'] ?? json['secondaryColor'] ?? '',
       darkBackgroundColor: json['darkBackgroundColor'] ?? '#111827',
       darkSurfaceColor: json['darkSurfaceColor'] ?? '#1F2937',
       darkTextColor: json['darkTextColor'] ?? '#F9FAFB',
@@ -103,10 +103,24 @@ class ThemeAdmin {
   Color get textColorValue => _parseColor(textColor, const Color(0xFF111827));
 
   // Flutter Helper Getters (Dark)
-  Color get darkPrimaryColorValue =>
-      _parseColor(darkPrimaryColor, const Color(0xFF4F46E5));
-  Color get darkSecondaryColorValue =>
-      _parseColor(darkSecondaryColor, const Color(0xFF10B981));
+  Color get darkPrimaryColorValue {
+    if (darkPrimaryColor.isNotEmpty &&
+        darkPrimaryColor != '#4F46E5' &&
+        darkPrimaryColor != '4F46E5') {
+      return _parseColor(darkPrimaryColor, primaryColorValue);
+    }
+    return primaryColorValue;
+  }
+
+  Color get darkSecondaryColorValue {
+    if (darkSecondaryColor.isNotEmpty &&
+        darkSecondaryColor != '#10B981' &&
+        darkSecondaryColor != '10B981') {
+      return _parseColor(darkSecondaryColor, secondaryColorValue);
+    }
+    return secondaryColorValue;
+  }
+
   Color get darkBackgroundColorValue =>
       _parseColor(darkBackgroundColor, const Color(0xFF111827));
   Color get darkSurfaceColorValue =>
@@ -137,6 +151,46 @@ class ThemeAdmin {
 
   factory ThemeAdmin.fromMap(Map<String, dynamic> map) =>
       ThemeAdmin.fromJson(map);
+
+  ThemeAdmin copyWith({
+    String? primaryColor,
+    String? secondaryColor,
+    String? backgroundColor,
+    String? surfaceColor,
+    String? textColor,
+    String? darkPrimaryColor,
+    String? darkSecondaryColor,
+    String? darkBackgroundColor,
+    String? darkSurfaceColor,
+    String? darkTextColor,
+    String? fontFamily,
+    double? fontScale,
+    double? buttonRadius,
+    double? cardRadius,
+    double? inputRadius,
+    String? logoUrl,
+    String? coverBannerUrl,
+  }) {
+    return ThemeAdmin(
+      primaryColor: primaryColor ?? this.primaryColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      surfaceColor: surfaceColor ?? this.surfaceColor,
+      textColor: textColor ?? this.textColor,
+      darkPrimaryColor: darkPrimaryColor ?? this.darkPrimaryColor,
+      darkSecondaryColor: darkSecondaryColor ?? this.darkSecondaryColor,
+      darkBackgroundColor: darkBackgroundColor ?? this.darkBackgroundColor,
+      darkSurfaceColor: darkSurfaceColor ?? this.darkSurfaceColor,
+      darkTextColor: darkTextColor ?? this.darkTextColor,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontScale: fontScale ?? this.fontScale,
+      buttonRadius: buttonRadius ?? this.buttonRadius,
+      cardRadius: cardRadius ?? this.cardRadius,
+      inputRadius: inputRadius ?? this.inputRadius,
+      logoUrl: logoUrl ?? this.logoUrl,
+      coverBannerUrl: coverBannerUrl ?? this.coverBannerUrl,
+    );
+  }
 
   Map<String, dynamic> toMap() => toJson();
 

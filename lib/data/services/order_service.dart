@@ -237,11 +237,35 @@ class OrderService {
   Future<bool> updateOrderStatus({
     required String orderId,
     required OrderStatus newStatus,
+    String? deliveryDriverName,
+    String? deliveryDriverPhone,
+    String? deliveryNotes,
   }) async {
     try {
-      await _firestore.collection('orders').doc(orderId).update({
+      final nowStr = DateTime.now().toIso8601String();
+      final Map<String, dynamic> updateData = {
         'status': newStatus.name,
-      });
+      };
+
+      if (newStatus == OrderStatus.confirmed) {
+        updateData['confirmedAt'] = nowStr;
+      } else if (newStatus == OrderStatus.preparing) {
+        updateData['preparedAt'] = nowStr;
+      } else if (newStatus == OrderStatus.ready) {
+        updateData['preparedAt'] = nowStr;
+      } else if (newStatus == OrderStatus.shipped) {
+        updateData['shippedAt'] = nowStr;
+      } else if (newStatus == OrderStatus.delivered) {
+        updateData['deliveredAt'] = nowStr;
+      } else if (newStatus == OrderStatus.cancelled) {
+        updateData['cancelledAt'] = nowStr;
+      }
+
+      if (deliveryDriverName != null) updateData['deliveryDriverName'] = deliveryDriverName;
+      if (deliveryDriverPhone != null) updateData['deliveryDriverPhone'] = deliveryDriverPhone;
+      if (deliveryNotes != null) updateData['deliveryNotes'] = deliveryNotes;
+
+      await _firestore.collection('orders').doc(orderId).update(updateData);
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -271,15 +295,47 @@ class OrderService {
   Future<bool> updateOrderDelivery({
     required String orderId,
     required String? deliveryId,
+    String? driverName,
+    String? driverPhone,
   }) async {
     try {
-      await _firestore.collection('orders').doc(orderId).update({
+      final Map<String, dynamic> updateData = {
         'deliveryId': deliveryId,
-      });
+      };
+      if (driverName != null) updateData['deliveryDriverName'] = driverName;
+      if (driverPhone != null) updateData['deliveryDriverPhone'] = driverPhone;
+
+      await _firestore.collection('orders').doc(orderId).update(updateData);
       return true;
     } catch (e) {
       if (kDebugMode) {
         print('Error updating order delivery: $e');
+      }
+      return false;
+    }
+  }
+
+  /// 🛵 تحديث إحداثيات السائق الحية والمسافة وزمن الوصول للطلبية
+  Future<bool> updateDriverLiveLocation({
+    required String orderId,
+    required double latitude,
+    required double longitude,
+    double? distanceKm,
+    int? estimatedMinutes,
+  }) async {
+    try {
+      final Map<String, dynamic> updateData = {
+        'driverLatitude': latitude,
+        'driverLongitude': longitude,
+      };
+      if (distanceKm != null) updateData['distanceKm'] = distanceKm;
+      if (estimatedMinutes != null) updateData['estimatedMinutes'] = estimatedMinutes;
+
+      await _firestore.collection('orders').doc(orderId).update(updateData);
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating driver live location: $e');
       }
       return false;
     }

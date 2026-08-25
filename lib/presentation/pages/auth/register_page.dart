@@ -11,8 +11,8 @@ import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart'
 import 'package:z_ecommerce/presentation/pages/auth/login_page.dart';
 import 'package:z_ecommerce/presentation/pages/business/home/admin_business_home.dart';
 import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
-import 'package:z_ecommerce/presentation/pages/customer/business_page.dart';
 import 'package:z_ecommerce/presentation/pages/super_admin/super_admin_home.dart';
+import 'package:z_ecommerce/presentation/pages/delivery/delivery_home.dart';
 import 'package:z_ecommerce/presentation/widgets/auth/auth_split_layout.dart';
 import 'package:z_ecommerce/presentation/widgets/auth/auth_text_field.dart';
 import 'package:z_ecommerce/presentation/widgets/auth/password_field.dart';
@@ -89,6 +89,8 @@ class _RegisterPageState extends State<RegisterPage> {
           changeScreenUntill(context, const SuperAdminHome());
         } else if (role == UserRole.businessOwner) {
           changeScreenUntill(context, const AdminStore());
+        } else if (role == UserRole.delivery) {
+          changeScreenUntill(context, const DeliveryPortalHome());
         } else {
           final destination = widget.redirectTo ?? '/';
           if (destination == '/') {
@@ -124,6 +126,8 @@ class _RegisterPageState extends State<RegisterPage> {
           changeScreenUntill(context, const SuperAdminHome());
         } else if (role == UserRole.businessOwner) {
           changeScreenUntill(context, const AdminStore());
+        } else if (role == UserRole.delivery) {
+          changeScreenUntill(context, const DeliveryPortalHome());
         } else {
           final destination = widget.redirectTo ?? '/';
           if (destination == '/') {

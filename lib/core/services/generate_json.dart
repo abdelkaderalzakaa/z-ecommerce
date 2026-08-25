@@ -20,7 +20,7 @@ void main() {
       'email': 'usertestbuisness@gmail.com',
       'role': 'businessOwner',
       'businessId': 'cmp_99344235',
-      'phoneNumber': '+9647701234567',
+      'phoneNumber': '+96170123456',
       'avatarUrl': 'https://example.com/avatar.png',
       'createdAt': '2026-08-01T18:40:36.774Z',
       'isActive': true
@@ -28,11 +28,13 @@ void main() {
     'businessType': 'retailStore',
     'addAddress': [{
       'id': 'addr_1',
-      'title': 'الرئيسي',
-      'city': {'ar': 'بغداد', 'en': 'Baghdad'},
-      'street': 'شارع الرشيد',
-      'building': '12',
-      'phone': '+9647701234567',
+      'title': 'الفرع الرئيسي',
+      'country': {'ar': 'لبنان', 'en': 'Lebanon'},
+      'city': {'ar': 'بيروت', 'en': 'Beirut'},
+      'region': {'ar': 'الحمرا', 'en': 'Hamra'},
+      'street': 'شارع الحمرا الرئيسي',
+      'building': 'مبنى السنتر 4',
+      'phone': '+96170123456',
       'isDefault': true
     }],
     'likes': 245,

@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
-import 'package:z_ecommerce/data/providers/customer_provider.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
+import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/widgets/profile/tabs/widgets/address_form_dialog.dart';
+import 'package:z_ecommerce/presentation/pages/add_edit_address.dart';
 
 class AddressesTab extends StatelessWidget {
   const AddressesTab({super.key});
@@ -19,112 +20,139 @@ class AddressesTab extends StatelessWidget {
     final theme = Theme.of(context);
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
-    final customer = context.watch<AuthProvider>().currentCustomer;
-    final addresses = customer?.addresses ?? [];
+    final authProvider = context.watch<AuthProvider>();
+    final userId = authProvider.currentUser?.id ?? '';
+    final addressService = AddressService();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return StreamBuilder<List<AddressModel>>(
+      stream: addressService.streamAddressesByUserId(userId),
+      builder: (context, snapshot) {
+        final addresses = snapshot.data ?? [];
+        final isLoading = snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  TranslationKeys.addresses.tr(context),
-                  style: TextStyle(
-                    fontSize: isMobile ? 20 : 24,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primaryColor,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      TranslationKeys.addresses.tr(context),
+                      style: TextStyle(
+                        fontSize: isMobile ? 20 : 24,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isAr
+                          ? 'العناوين المحفوظة الخاصة بك'
+                          : 'Your saved personal addresses',
+                      style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  isAr
-                      ? 'العناوين المحفوظة الخاصة بك (البيت، العمل، أخرى)'
-                      : 'Your saved personal addresses (Home, Work, Other)',
-                  style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
-                ),
-              ],
-            ),
-            ButtonApp(
-              label: isAr ? 'إضافة عنوان جديد' : 'Add New Address',
-              icon: Icons.add_location_alt_outlined,
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => const AddressFormDialog(),
-                );
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: 28),
-
-        if (addresses.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.cardBorder),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  size: 64,
-                  color: theme.primaryColor.withOpacity(0.4),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  TranslationKeys.noAddressesFound.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isAr ? 'أضف عنوان المنزل أو العمل لتسهيل واستلام طلباتك.' : 'Add your home or work address for faster delivery.',
-                  style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
-                ),
-                const SizedBox(height: 20),
                 ButtonApp(
-                  label: isAr ? 'إضافة عنوان الآن' : 'Add Address Now',
-                  icon: Icons.add,
+                  label: isAr ? 'إضافة عنوان جديد' : 'Add New Address',
+                  icon: Icons.add_location_alt_outlined,
                   onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => const AddressFormDialog(),
+                    changeScreen(
+                      context,
+                      AddEditAddress(
+                        userId: userId,
+                        userType: 'customer',
+                      ),
                     );
                   },
                 ),
               ],
             ),
-          )
-        else
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: addresses.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              return _AddressCardItem(address: addresses[index]);
-            },
-          ),
-      ],
+            const SizedBox(height: 28),
+
+            if (isLoading)
+              const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()))
+            else if (addresses.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 64,
+                      color: theme.primaryColor.withOpacity(0.4),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      TranslationKeys.noAddressesFound.tr(context),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: theme.textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      isAr ? 'أضف عنوانك لتسهيل واستلام طلباتك.' : 'Add your address for faster delivery.',
+                      style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+                    ),
+                    const SizedBox(height: 20),
+                    ButtonApp(
+                      label: isAr ? 'إضافة عنوان الآن' : 'Add Address Now',
+                      icon: Icons.add,
+                      onPressed: () {
+                        changeScreen(
+                          context,
+                          AddEditAddress(
+                            userId: userId,
+                            userType: 'customer',
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: addresses.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  return _AddressCardItem(
+                    address: addresses[index],
+                    userId: userId,
+                    addressService: addressService,
+                  );
+                },
+              ),
+          ],
+        );
+      },
     );
   }
 }
 
 class _AddressCardItem extends StatelessWidget {
   final AddressModel address;
+  final String userId;
+  final AddressService addressService;
 
-  const _AddressCardItem({required this.address});
+  const _AddressCardItem({
+    required this.address,
+    required this.userId,
+    required this.addressService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,15 +161,19 @@ class _AddressCardItem extends StatelessWidget {
     final langCode = isAr ? 'ar' : 'en';
 
     IconData addressIcon = Icons.home_outlined;
-    String addressTagLabel = isAr ? 'البيت' : 'Home';
-
-    final titleLower = address.title.toLowerCase();
-    if (titleLower.contains('work') || titleLower.contains('عمل') || titleLower.contains('مكتب')) {
-      addressIcon = Icons.work_outline;
-      addressTagLabel = isAr ? 'العمل' : 'Work';
-    } else if (titleLower.contains('other') || titleLower.contains('أخرى') || titleLower.contains('اخرى')) {
-      addressIcon = Icons.location_city_outlined;
-      addressTagLabel = isAr ? 'أخرى' : 'Other';
+    switch (address.type) {
+      case AddressType.home:
+        addressIcon = Icons.home_outlined;
+        break;
+      case AddressType.office:
+        addressIcon = Icons.work_outline;
+        break;
+      case AddressType.main:
+        addressIcon = Icons.storefront_outlined;
+        break;
+      case AddressType.other:
+        addressIcon = Icons.location_city_outlined;
+        break;
     }
 
     final formattedAddress = address.getFormattedAddress(langCode: langCode);
@@ -181,7 +213,7 @@ class _AddressCardItem extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    address.title.isNotEmpty ? address.title : addressTagLabel,
+                    address.title.isNotEmpty ? address.title : address.type.displayName(isAr: isAr),
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -215,22 +247,20 @@ class _AddressCardItem extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.edit_outlined, size: 18),
                     onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AddressFormDialog(initialAddress: address),
+                      changeScreen(
+                        context,
+                        AddEditAddress(
+                          initialAddress: address,
+                          userId: userId,
+                          userType: 'customer',
+                        ),
                       );
                     },
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
                     onPressed: () async {
-                      final customerProvider = context.read<CustomerProvider>();
-                      final authProvider = context.read<AuthProvider>();
-                      final currentCustomer = authProvider.currentCustomer;
-                      if (currentCustomer != null) {
-                        final updatedList = currentCustomer.addresses.where((a) => a.id != address.id).toList();
-                        await customerProvider.updateAddresses(currentCustomer.id, updatedList);
-                      }
+                      await addressService.deleteAddress(address.id);
                     },
                   ),
                 ],

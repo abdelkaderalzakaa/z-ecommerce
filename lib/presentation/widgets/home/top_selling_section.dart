@@ -23,13 +23,11 @@ class TopSellingSection extends StatelessWidget {
     return Consumer2<ProductProvider, BusinessProvider>(
       builder: (context, productProvider, businessProvider, child) {
         final businessId = businessProvider.selectedBusiness.id;
-        final storeProducts = productProvider.allProducts
-            .where((p) => p.businessId == businessId)
-            .toList();
-        final topSellingProducts = storeProducts
+        final validProducts = productProvider.getCustomerProductsForStore(businessId);
+        final topSellingProducts = validProducts
             .where((p) => p.isTopSelling)
             .toList();
-        final products = (topSellingProducts.isNotEmpty ? topSellingProducts : storeProducts).take(4).toList();
+        final products = topSellingProducts.take(4).toList();
         if (products.isEmpty) return const SizedBox.shrink();
 
         return Container(

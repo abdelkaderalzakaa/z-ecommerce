@@ -1,4 +1,3 @@
-import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:z_ecommerce/data/models/shared/follower_model.dart';
@@ -6,6 +5,7 @@ import 'package:z_ecommerce/data/models/store/business_model.dart';
 import 'package:z_ecommerce/data/providers/auth_provider.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/follower_provider.dart';
+import 'package:z_ecommerce/data/services/geo_proximity_service.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 import 'package:z_ecommerce/presentation/global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
@@ -14,15 +14,15 @@ import 'package:z_ecommerce/presentation/global/theme/app_colors.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_text_styles.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
-import 'package:z_ecommerce/presentation/pages/auth/register_page.dart';
-import 'package:z_ecommerce/presentation/pages/customer/business_entry.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
+import 'package:z_ecommerce/presentation/widgets/common/custom_network_image.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_buisness.dart';
+import 'package:z_ecommerce/presentation/widgets/home/customer_location_bar.dart';
 
 /// ============================================================================
 /// 🏛️ BusinessPage (StatelessWidget)
-/// واجهة استكشاف الأنشطة التجارية الشاملة المصممة بأسلوب عالي الإنتاجية والنظافة
+/// واجهة استكشاف الأنشطة التجارية الشاملة المدعومة بمحرك القرب الجغرافي ونطاق التوصيل
 /// ============================================================================
 class BusinessPage extends StatelessWidget {
   final bool useAdminTheme;
@@ -50,7 +50,7 @@ class BusinessPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: AppColors.accent),
+                  const Icon(Icons.error_outline, size: 64, color: AppColors.accent),
                   const SizedBox(height: 16),
                   Text(
                     'حدث خطأ أثناء تحميل بيانات الأنشطة التجارية',
@@ -73,31 +73,33 @@ class BusinessPage extends StatelessWidget {
                 /// 1. Hero Banner Section
                 _SectionHeroBusinessPage(activeCount: activeBusinesses.length),
 
-                /// 2. Search and Category Filter Section
+                /// 2. Customer Location Bar (شريط موقع التوصيل)
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: const CustomerLocationBar(),
+                ),
+
+                /// 3. Search and Category Filter Section
                 _SectionSearchAndFilter(
                   searchQueryNotifier: searchQueryNotifier,
                   selectedCategoryNotifier: selectedCategoryNotifier,
                 ),
 
-                /// 3. Business Catalog Grid Section
+                /// 4. Business Catalog Grid Section
                 ValueListenableBuilder<String>(
                   valueListenable: searchQueryNotifier,
                   builder: (context, searchQuery, _) {
                     return ValueListenableBuilder<String?>(
                       valueListenable: selectedCategoryNotifier,
                       builder: (context, selectedCategory, _) {
-                        final filteredBusinesses = activeBusinesses.where((b) {
-                          final nameAr = b.localization.name.ar.toLowerCase();
-                          final nameEn = b.localization.name.en.toLowerCase();
-                          final q = searchQuery.toLowerCase();
-                          final matchesSearch = nameAr.contains(q) || nameEn.contains(q);
-                          final matchesCategory =
-                              selectedCategory == null || b.businessType.name == selectedCategory;
-                          return matchesSearch && matchesCategory;
-                        }).toList();
+                        final analyzedList = businessProvider.getGeoSortedBusinesses(
+                          searchQuery: searchQuery,
+                          categoryId: selectedCategory,
+                          isAr: Localizations.localeOf(context).languageCode == 'ar',
+                        );
 
                         return _SectionBusinessGrid(
-                          businesses: filteredBusinesses,
+                          analyzedList: analyzedList,
                           searchQuery: searchQuery,
                           selectedCategory: selectedCategory,
                         );
@@ -106,15 +108,15 @@ class BusinessPage extends StatelessWidget {
                   },
                 ),
 
-                /// 4. Platform Quality KPI Features Section
+                /// 5. Platform Quality KPI Features Section
                 const _SectionKpiBusiness(),
 
-                /// 5. Join Merchant Callout Banner
+                /// 6. Join Merchant Callout Banner
                 const _SectionJoinMerchantBanner(),
 
                 const SizedBox(height: 40),
 
-                /// 6. Footer Section
+                /// 7. Footer Section
                 const FooterSection(),
               ],
             ),
@@ -150,17 +152,15 @@ class _SectionHeroBusinessPage extends StatelessWidget {
                   theme.scaffoldBackgroundColor,
                 ]
               : [
-                  theme.primaryColor.withOpacity(0.9),
-                  theme.primaryColor.withOpacity(0.7),
+                  theme.primaryColor,
+                  theme.scaffoldBackgroundColor,
                   theme.scaffoldBackgroundColor,
                 ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
         ),
       ),
       padding: EdgeInsets.symmetric(
-        horizontal: ResponsiveLayout.horizontalPadding(context),
-        vertical: 36,
+        horizontal: isMobile ? 16 : 40,
+        vertical: isMobile ? 24 : 36,
       ),
       child: Center(
         child: Container(
@@ -168,43 +168,40 @@ class _SectionHeroBusinessPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
             children: [
-              // Back Button Row
+              // Return to Home Link
               Align(
-                alignment: isAr ? Alignment.centerRight : Alignment.centerLeft,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? theme.cardColor : Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.3)),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        } else {
-                          changeScreenReplacement(context, const BusinessEntry());
-                        }
-                      },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.arrow_back, color: Colors.white, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              isAr ? 'العودة للمدخل الرئيسي' : 'Back to Entry',
-                              style: TextStyle(
-                                color: isDark ? theme.textTheme.bodyLarge?.color : Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                alignment: isMobile ? Alignment.center : Alignment.centerRight,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? theme.cardColor : Colors.white.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark ? AppColors.cardBorder : Colors.white.withOpacity(0.3),
                         ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.arrow_back_rounded,
+                            size: 16,
+                            color: isDark ? theme.textTheme.bodyLarge?.color : Colors.white,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            isAr ? 'العودة للمدخل الرئيسي' : 'Back to main',
+                            style: TextStyle(
+                              color: isDark ? theme.textTheme.bodyLarge?.color : Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -313,14 +310,17 @@ class _SectionSearchAndFilter extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final businessProvider = context.watch<BusinessProvider>();
+    final activeLocation = businessProvider.activeCustomerLocation;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 1200),
-      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search Input Bar
+          // 1. Search Input Bar
           ValueListenableBuilder<String>(
             valueListenable: searchQueryNotifier,
             builder: (context, query, _) {
@@ -357,11 +357,103 @@ class _SectionSearchAndFilter extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
-          // BusinessType Choice Chips Bar
+          // 2. Geographic Proximity & Delivery Filter Chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                // Filter: All Regions
+                _buildGeoChip(
+                  context: context,
+                  label: isAr ? 'كافة المناطق' : 'All Regions',
+                  icon: Icons.public_rounded,
+                  isSelected: businessProvider.selectedProximityFilter == null && !businessProvider.onlyDeliverableFilter,
+                  onSelected: () {
+                    businessProvider.setProximityFilter(null);
+                    businessProvider.toggleDeliverableFilter(false);
+                  },
+                ),
+
+                // Filter: Same Town (إذا تم تحديد موقع)
+                if (activeLocation != null && activeLocation.town.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  _buildGeoChip(
+                    context: context,
+                    label: isAr ? '📍 في ${activeLocation.town.get(context)}' : '📍 In ${activeLocation.town.get(context)}',
+                    count: businessProvider.countBusinessesInTier(GeoProximityTier.sameTown, isAr: isAr),
+                    isSelected: businessProvider.selectedProximityFilter == GeoProximityTier.sameTown,
+                    color: const Color(0xFF10B981),
+                    onSelected: () {
+                      businessProvider.setProximityFilter(
+                        businessProvider.selectedProximityFilter == GeoProximityTier.sameTown
+                            ? null
+                            : GeoProximityTier.sameTown,
+                      );
+                    },
+                  ),
+                ],
+
+                // Filter: Same District
+                if (activeLocation != null && activeLocation.district.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  _buildGeoChip(
+                    context: context,
+                    label: isAr ? '🏢 في قضاء ${activeLocation.district.get(context)}' : '🏢 In ${activeLocation.district.get(context)} district',
+                    count: businessProvider.countBusinessesInTier(GeoProximityTier.sameDistrict, isAr: isAr),
+                    isSelected: businessProvider.selectedProximityFilter == GeoProximityTier.sameDistrict,
+                    color: const Color(0xFF0284C7),
+                    onSelected: () {
+                      businessProvider.setProximityFilter(
+                        businessProvider.selectedProximityFilter == GeoProximityTier.sameDistrict
+                            ? null
+                            : GeoProximityTier.sameDistrict,
+                      );
+                    },
+                  ),
+                ],
+
+                // Filter: Same Governorate
+                if (activeLocation != null && activeLocation.governorate.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  _buildGeoChip(
+                    context: context,
+                    label: isAr ? '🗺️ في محافظة ${activeLocation.governorate.get(context)}' : '🗺️ In ${activeLocation.governorate.get(context)}',
+                    count: businessProvider.countBusinessesInTier(GeoProximityTier.sameGovernorate, isAr: isAr),
+                    isSelected: businessProvider.selectedProximityFilter == GeoProximityTier.sameGovernorate,
+                    color: const Color(0xFF6366F1),
+                    onSelected: () {
+                      businessProvider.setProximityFilter(
+                        businessProvider.selectedProximityFilter == GeoProximityTier.sameGovernorate
+                            ? null
+                            : GeoProximityTier.sameGovernorate,
+                      );
+                    },
+                  ),
+                ],
+
+                // Filter: Deliverable only (يوصل إليك)
+                const SizedBox(width: 8),
+                _buildGeoChip(
+                  context: context,
+                  label: isAr ? '🛵 يوصل لموقعك' : '🛵 Delivers to you',
+                  count: businessProvider.countDeliverableBusinesses(isAr: isAr),
+                  isSelected: businessProvider.onlyDeliverableFilter,
+                  color: Colors.amber.shade800,
+                  onSelected: () {
+                    businessProvider.toggleDeliverableFilter(null);
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 3. BusinessType Choice Chips Bar
           SizedBox(
-            height: 44,
+            height: 40,
             child: ValueListenableBuilder<String?>(
               valueListenable: selectedCategoryNotifier,
               builder: (context, selectedCategory, _) {
@@ -372,7 +464,7 @@ class _SectionSearchAndFilter extends StatelessWidget {
                     if (index == 0) {
                       final isAllSelected = selectedCategory == null;
                       return Padding(
-                        padding: const EdgeInsets.only(left: 6, right: 6),
+                        padding: const EdgeInsets.only(left: 4, right: 4),
                         child: ChoiceChip(
                           label: Text(TranslationKeys.allCategories.tr(context)),
                           selected: isAllSelected,
@@ -381,7 +473,7 @@ class _SectionSearchAndFilter extends StatelessWidget {
                           labelStyle: TextStyle(
                             color: isAllSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
                             fontWeight: isAllSelected ? FontWeight.bold : FontWeight.normal,
-                            fontSize: 13,
+                            fontSize: 12.5,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -400,11 +492,11 @@ class _SectionSearchAndFilter extends StatelessWidget {
                     final isSelected = selectedCategory == type.name;
 
                     return Padding(
-                      padding: const EdgeInsets.only(left: 6, right: 6),
+                      padding: const EdgeInsets.only(left: 4, right: 4),
                       child: ChoiceChip(
                         avatar: Icon(
                           type.icon,
-                          size: 16,
+                          size: 15,
                           color: isSelected ? Colors.white : theme.primaryColor,
                         ),
                         label: Text(
@@ -416,7 +508,7 @@ class _SectionSearchAndFilter extends StatelessWidget {
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 13,
+                          fontSize: 12.5,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -438,18 +530,78 @@ class _SectionSearchAndFilter extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildGeoChip({
+    required BuildContext context,
+    required String label,
+    IconData? icon,
+    int? count,
+    required bool isSelected,
+    Color? color,
+    required VoidCallback onSelected,
+  }) {
+    final theme = Theme.of(context);
+    final activeColor = color ?? theme.primaryColor;
+
+    return FilterChip(
+      selected: isSelected,
+      showCheckmark: false,
+      avatar: icon != null
+          ? Icon(icon, size: 16, color: isSelected ? Colors.white : activeColor)
+          : null,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          if (count != null) ...[
+            const SizedBox(width: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white.withOpacity(0.25) : activeColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : activeColor,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+        color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
+      ),
+      backgroundColor: theme.cardColor,
+      selectedColor: activeColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? activeColor : AppColors.cardBorder,
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      onSelected: (_) => onSelected(),
+    );
+  }
 }
 
 /// ============================================================================
 /// 📦 Section 3: Business Grid Section (StatelessWidget)
 /// ============================================================================
 class _SectionBusinessGrid extends StatelessWidget {
-  final List<BusinessModel> businesses;
+  final List<BusinessGeoAnalysis> analyzedList;
   final String searchQuery;
   final String? selectedCategory;
 
   const _SectionBusinessGrid({
-    required this.businesses,
+    required this.analyzedList,
     required this.searchQuery,
     required this.selectedCategory,
   });
@@ -458,6 +610,7 @@ class _SectionBusinessGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final theme = Theme.of(context);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 1200),
@@ -472,7 +625,7 @@ class _SectionBusinessGrid extends StatelessWidget {
               Text(
                 searchQuery.isNotEmpty
                     ? "${TranslationKeys.searchResultsFor.tr(context)} '$searchQuery'"
-                    : TranslationKeys.viewAllBusinesses.tr(context),
+                    : (isAr ? 'الأنشطة التجارية المتاحة' : 'Available Businesses'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -486,7 +639,7 @@ class _SectionBusinessGrid extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  "${businesses.length}",
+                  "${analyzedList.length}",
                   style: TextStyle(
                     color: theme.primaryColor,
                     fontWeight: FontWeight.bold,
@@ -499,7 +652,7 @@ class _SectionBusinessGrid extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Business Grid or Empty State
-          if (businesses.isEmpty)
+          if (analyzedList.isEmpty)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(40),
@@ -517,7 +670,7 @@ class _SectionBusinessGrid extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    "عذراً، لم يتم العثور على نشاط تجاري يطابق بحثك",
+                    isAr ? "عذراً، لم يتم العثور على نشاط تجاري يطابق معاييرك" : "No businesses matching your criteria",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -526,7 +679,9 @@ class _SectionBusinessGrid extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "جرّب البحث باسم آخر أو تغيير تصفية القطاعات.",
+                    isAr
+                        ? "جرّب تغيير المنطقة أو تصفية القطاعات أو إزالة فلتر التوصيل."
+                        : "Try changing your area or expanding the category filters.",
                     style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
                   ),
                 ],
@@ -547,13 +702,13 @@ class _SectionBusinessGrid extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
-                    childAspectRatio: 0.88,
+                    childAspectRatio: 0.82,
                     crossAxisSpacing: 20,
                     mainAxisSpacing: 20,
                   ),
-                  itemCount: businesses.length,
+                  itemCount: analyzedList.length,
                   itemBuilder: (context, index) {
-                    return _BusinessCardItem(business: businesses[index]);
+                    return _BusinessCardItem(analysis: analyzedList[index]);
                   },
                 );
               },
@@ -565,13 +720,13 @@ class _SectionBusinessGrid extends StatelessWidget {
 }
 
 /// ============================================================================
-/// 💳 Business Card Component (StatelessWidget)
+/// 💳 Business Card Component (StatelessWidget with Smart Proximity Badges)
 /// ============================================================================
 class _BusinessCardItem extends StatelessWidget {
-  final BusinessModel business;
+  final BusinessGeoAnalysis analysis;
 
   const _BusinessCardItem({
-    required this.business,
+    required this.analysis,
   });
 
   void _navigateToBusiness(BuildContext context) async {
@@ -583,7 +738,7 @@ class _BusinessCardItem extends StatelessWidget {
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
     
-    await businessProvider.selectBusiness(business.id);
+    await businessProvider.selectBusiness(analysis.business.id);
     
     if (context.mounted) {
       Navigator.of(context).pop(); // Close loading dialog
@@ -593,26 +748,29 @@ class _BusinessCardItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final business = analysis.business;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     final name = business.localization.name.get(context);
-    final addressText = business.addAddress.firstOrNull?.street ?? '';
+    final sloganText = business.localization.slogan.get(context);
     final logoUrl = business.theme.logoUrl;
 
     final hasRatings = business.ratings.isNotEmpty;
-    final double avgRating = hasRatings
-        ? (business.ratings.map((r) => r.rating).reduce((a, b) => a + b) /
-            business.ratings.length)
-        : 0.0;
+    final double avgRating = business.averageRating;
     final String ratingDisplay = hasRatings ? avgRating.toStringAsFixed(1) : (isAr ? 'جديد' : 'New');
 
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(
+          color: analysis.proximityTier == GeoProximityTier.sameTown
+              ? const Color(0xFF10B981).withOpacity(0.4)
+              : AppColors.cardBorder,
+          width: analysis.proximityTier == GeoProximityTier.sameTown ? 1.5 : 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: theme.shadowColor.withOpacity(0.04),
@@ -667,7 +825,7 @@ class _BusinessCardItem extends StatelessWidget {
                               icon: Icon(
                                 isFollowing ? Icons.favorite : Icons.favorite_border,
                                 color: isFollowing ? Colors.red : AppColors.textMuted,
-                                size: 20,
+                                size: 18,
                               ),
                               onPressed: () async {
                                 if (authProvider.isAuthenticated) {
@@ -696,60 +854,67 @@ class _BusinessCardItem extends StatelessWidget {
                       ),
                     ),
 
-                    // Rating Badge
+                    // Rating & Proximity Badges Row (Top Left/Right)
                     Positioned(
                       top: 12,
                       left: isAr ? 12 : null,
                       right: isAr ? null : 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.black54 : Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              hasRatings ? Icons.star : Icons.new_releases_outlined,
-                              color: hasRatings ? AppColors.star : theme.primaryColor,
-                              size: 14,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Rating Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.black54 : Colors.white.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              ratingDisplay,
-                              style: TextStyle(
-                                color: isDark ? Colors.white : theme.textTheme.bodyLarge?.color,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  hasRatings ? Icons.star : Icons.new_releases_outlined,
+                                  color: hasRatings ? AppColors.star : theme.primaryColor,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  ratingDisplay,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : theme.textTheme.bodyLarge?.color,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
 
                     // Verified Badge
                     if (business.isVerified)
                       Positioned(
-                        top: 12,
-                        left: 12,
+                        top: 44,
+                        left: isAr ? 12 : null,
+                        right: isAr ? null : 12,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                           decoration: BoxDecoration(
                             color: AppColors.green,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: const [
-                              Icon(Icons.verified, color: Colors.white, size: 14),
+                              Icon(Icons.verified, color: Colors.white, size: 12),
                               SizedBox(width: 4),
                               Text(
                                 "معتمد",
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontSize: 10.5,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -782,8 +947,8 @@ class _BusinessCardItem extends StatelessWidget {
                             backgroundColor: theme.primaryColor.withOpacity(0.12),
                             child: (logoUrl != null && logoUrl.isNotEmpty)
                                 ? ClipOval(
-                                    child: CustomNetworkImage(imageUrl: 
-                                      logoUrl,
+                                    child: CustomNetworkImage(
+                                      imageUrl: logoUrl,
                                       width: 52,
                                       height: 52,
                                       fit: BoxFit.cover,
@@ -809,9 +974,9 @@ class _BusinessCardItem extends StatelessWidget {
 
               // Card Content Body
               Expanded(
-                flex: 5,
+                flex: 6,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 14),
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -822,7 +987,7 @@ class _BusinessCardItem extends StatelessWidget {
                           Text(
                             name,
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: theme.textTheme.bodyLarge?.color,
                             ),
@@ -830,35 +995,93 @@ class _BusinessCardItem extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 6),
-                          Row(
+
+                          // Smart Geo Location Snippet & Tier Tag
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                              Icon(Icons.storefront_outlined, size: 15, color: theme.primaryColor),
-                              const SizedBox(width: 6),
-                              Text(
-                                isAr ? business.businessType.ar : business.businessType.en,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.primaryColor,
+                              // Proximity Badge
+                              if (analysis.proximityTier != GeoProximityTier.allLebanon)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: analysis.proximityTier.badgeColor.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: analysis.proximityTier.badgeColor.withOpacity(0.3)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(analysis.proximityTier.icon, size: 12, color: analysis.proximityTier.badgeColor),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        isAr
+                                            ? analysis.proximityTier.labelAr()
+                                            : analysis.proximityTier.labelEn(),
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: analysis.proximityTier.badgeColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
+
+                              // Delivery Reach Tag
+                              if (analysis.canDeliver)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade800.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.delivery_dining, size: 13, color: Colors.amber.shade800),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        isAr ? 'يوصل إليك' : 'Delivers',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.amber.shade800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ],
                           ),
-                          if (addressText.isNotEmpty) ...[
-                            const SizedBox(height: 4),
+
+                          const SizedBox(height: 4),
+                          // Address text snippet
+                          if (analysis.locationSnippet.isNotEmpty)
                             Row(
                               children: [
-                                const Icon(Icons.location_on_outlined, size: 15, color: AppColors.textMuted),
-                                const SizedBox(width: 6),
+                                const Icon(Icons.place_outlined, size: 14, color: AppColors.textMuted),
+                                const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
-                                    addressText,
-                                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                    analysis.locationSnippet,
+                                    style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
+                            ),
+
+                          if (sloganText.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              sloganText,
+                              style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ],
@@ -867,10 +1090,11 @@ class _BusinessCardItem extends StatelessWidget {
                       // Visit Business Button
                       SizedBox(
                         width: double.infinity,
-                        height: 38,
+                        height: 36,
                         child: ButtonApp(
                           label: TranslationKeys.enterStore.tr(context),
                           icon: Icons.arrow_forward_rounded,
+                          fontSize: 12.5,
                           onPressed: () => _navigateToBusiness(context),
                         ),
                       ),
@@ -897,53 +1121,55 @@ class _SectionKpiBusiness extends StatelessWidget {
     final hPad = ResponsiveLayout.horizontalPadding(context);
     final isMobile = ResponsiveLayout.isMobile(context);
     final theme = Theme.of(context);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 1200),
       padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 32),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             TranslationKeys.whyOurPlatform.tr(context),
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: theme.primaryColor,
+              color: theme.textTheme.bodyLarge?.color,
             ),
           ),
-          const SizedBox(height: 20),
-          Flex(
-            direction: isMobile ? Axis.vertical : Axis.horizontal,
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.center,
             children: [
-              Expanded(
-                flex: isMobile ? 0 : 1,
-                child: _KpiCardItem(
-                  title: TranslationKeys.verifiedStoresTitle.tr(context),
-                  description: "جميع الأنشطة التجارية المعروضة تخضع لمعايير الفحص والتوثيق المباشر.",
-                  icon: Icons.verified_user_outlined,
-                  color: AppColors.green,
-                ),
+              _buildKpiCard(
+                context,
+                icon: Icons.verified_user_outlined,
+                title: isAr ? 'متاجر معتمدة وموثقة' : 'Verified Stores Only',
+                desc: isAr ? 'نضمن لك التعامل مع متاجر موثقة ومعتمدة رسمياً.' : 'Deal with officially verified businesses.',
+                width: isMobile ? double.infinity : 260,
               ),
-              SizedBox(width: isMobile ? 0 : 16, height: isMobile ? 16 : 0),
-              Expanded(
-                flex: isMobile ? 0 : 1,
-                child: _KpiCardItem(
-                  title: TranslationKeys.growingCommunityTitle.tr(context),
-                  description: TranslationKeys.growingCommunityDesc.tr(context),
-                  icon: Icons.people_outline,
-                  color: Colors.blue,
-                ),
+              _buildKpiCard(
+                context,
+                icon: Icons.delivery_dining_outlined,
+                title: isAr ? 'توصيل سريع وموثوق' : 'Fast & Reliable Delivery',
+                desc: isAr ? 'توصيل مباشر إلى بلدتك وقضائك بأفضل الأسعار.' : 'Direct delivery to your town and district.',
+                width: isMobile ? double.infinity : 260,
               ),
-              SizedBox(width: isMobile ? 0 : 16, height: isMobile ? 16 : 0),
-              Expanded(
-                flex: isMobile ? 0 : 1,
-                child: _KpiCardItem(
-                  title: TranslationKeys.topRatingsTitle.tr(context),
-                  description: TranslationKeys.topRatingsDesc.tr(context),
-                  icon: Icons.star_outline,
-                  color: AppColors.accent,
-                ),
+              _buildKpiCard(
+                context,
+                icon: Icons.storefront_outlined,
+                title: isAr ? 'تنوع في الأنشطة والخدمات' : 'Diversity & Variety',
+                desc: isAr ? 'متاجر تجزئة، مطاعم، مقاهي، وخدمات في مكان واحد.' : 'Retail, restaurants, cafes & services in one place.',
+                width: isMobile ? double.infinity : 260,
+              ),
+              _buildKpiCard(
+                context,
+                icon: Icons.support_agent_outlined,
+                title: isAr ? 'دعم فني وتواصل دائم' : '24/7 Support & Care',
+                desc: isAr ? 'فريق جاهز لخدمتك والإجابة على استفساراتك دائماً.' : 'Dedicated team ready to assist you anytime.',
+                width: isMobile ? double.infinity : 260,
               ),
             ],
           ),
@@ -951,62 +1177,41 @@ class _SectionKpiBusiness extends StatelessWidget {
       ),
     );
   }
-}
 
-class _KpiCardItem extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-
-  const _KpiCardItem({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildKpiCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String desc,
+    required double width,
+  }) {
     final theme = Theme.of(context);
-
     return Container(
+      width: width,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.04),
-            blurRadius: 8,
-          ),
-        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 14),
+          Icon(icon, size: 36, color: theme.primaryColor),
+          const SizedBox(height: 12),
           Text(
             title,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: theme.textTheme.bodyLarge?.color,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            description,
-            style: AppTextStyles.bodyText(context).copyWith(fontSize: 13),
+            desc,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
         ],
       ),
@@ -1023,70 +1228,72 @@ class _SectionJoinMerchantBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hPad = ResponsiveLayout.horizontalPadding(context);
-    final isMobile = ResponsiveLayout.isMobile(context);
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 1200),
-      margin: EdgeInsets.symmetric(horizontal: hPad, vertical: 16),
-      padding: EdgeInsets.all(isMobile ? 20 : 32),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: isDark
-              ? [theme.primaryColor.withOpacity(0.3), theme.cardColor, theme.cardColor]
-              : [theme.primaryColor, theme.cardColor, theme.cardColor],
-        ),
-        border: Border.all(color: AppColors.cardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Flex(
-        direction: isMobile ? Axis.vertical : Axis.horizontal,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            flex: isMobile ? 0 : 7,
-            child: Column(
-              crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-              children: [
-                Text(
-                  TranslationKeys.joinMerchantTitle.tr(context),
-                  textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                  style: TextStyle(
-                    fontSize: isMobile ? 18 : 22,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  TranslationKeys.joinMerchantDesc.tr(context),
-                  textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                  style: AppTextStyles.bodyText(context).copyWith(fontSize: 14),
-                ),
-                const SizedBox(height: 20),
-                ButtonApp(
-                  label: TranslationKeys.registerStoreNow.tr(context),
-                  icon: Icons.arrow_forward_rounded,
-                  onPressed: () {
-                    changeScreen(context, const RegisterPage());
-                  },
-                ),
-              ],
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 20),
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: theme.primaryColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: theme.primaryColor.withOpacity(0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.store_mall_directory_outlined, size: 48, color: Colors.white),
+            const SizedBox(height: 16),
+            Text(
+              isAr ? 'هل تمتلك نشاطاً تجارياً أو متجراً؟' : 'Do you own a business or store?',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isAr
+                  ? 'انضم إلى منصتنا الرقمية الآن ووسّع نطاق عملائك وتوصيلك في كافة المناطق اللبنانية.'
+                  : 'Join our digital platform now and expand your reach across Lebanon.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: theme.primaryColor,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              icon: const Icon(Icons.add_business_outlined),
+              label: Text(
+                isAr ? 'سجّل متجرك مجاناً' : 'Register Your Business',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BusinessPage()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
-/// Backward compatibility typedef
-typedef StoreCard = _BusinessCardItem;

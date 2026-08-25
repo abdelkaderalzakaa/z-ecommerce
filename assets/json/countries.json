@@ -1,0 +1,307 @@
+{
+    "description": "Comprehensive flat list of world countries with ISO codes and phone codes",
+    "total_countries": 195,
+    "last_updated": "2024",
+    "countries": [
+        {
+            "name_ar": "أفغانستان",
+            "name_en": "Afghanistan",
+            "code": "AF",
+            "phone": "+93"
+        },
+        {
+            "name_ar": "ألبانيا",
+            "name_en": "Albania",
+            "code": "AL",
+            "phone": "+355"
+        },
+        {
+            "name_ar": "الجزائر",
+            "name_en": "Algeria",
+            "code": "DZ",
+            "phone": "+213"
+        },
+        {
+            "name_ar": "أندورا",
+            "name_en": "Andorra",
+            "code": "AD",
+            "phone": "+376"
+        },
+        {
+            "name_ar": "أنغولا",
+            "name_en": "Angola",
+            "code": "AO",
+            "phone": "+244"
+        },
+        {
+            "name_ar": "الأرجنتين",
+            "name_en": "Argentina",
+            "code": "AR",
+            "phone": "+54"
+        },
+        {
+            "name_ar": "أرمينيا",
+            "name_en": "Armenia",
+            "code": "AM",
+            "phone": "+374"
+        },
+        {
+            "name_ar": "أستراليا",
+            "name_en": "Australia",
+            "code": "AU",
+            "phone": "+61"
+        },
+        {
+            "name_ar": "النمسا",
+            "name_en": "Austria",
+            "code": "AT",
+            "phone": "+43"
+        },
+        {
+            "name_ar": "أذربيجان",
+            "name_en": "Azerbaijan",
+            "code": "AZ",
+            "phone": "+994"
+        },
+        {
+            "name_ar": "البحرين",
+            "name_en": "Bahrain",
+            "code": "BH",
+            "phone": "+973"
+        },
+        {
+            "name_ar": "بنجلاديش",
+            "name_en": "Bangladesh",
+            "code": "BD",
+            "phone": "+880"
+        },
+        {
+            "name_ar": "بلجيكا",
+            "name_en": "Belgium",
+            "code": "BE",
+            "phone": "+32"
+        },
+        {
+            "name_ar": "البرازيل",
+            "name_en": "Brazil",
+            "code": "BR",
+            "phone": "+55"
+        },
+        {
+            "name_ar": "كندا",
+            "name_en": "Canada",
+            "code": "CA",
+            "phone": "+1"
+        },
+        {
+            "name_ar": "الصين",
+            "name_en": "China",
+            "code": "CN",
+            "phone": "+86"
+        },
+        {
+            "name_ar": "كولومبيا",
+            "name_en": "Colombia",
+            "code": "CO",
+            "phone": "+57"
+        },
+        {
+            "name_ar": "كرواتيا",
+            "name_en": "Croatia",
+            "code": "HR",
+            "phone": "+385"
+        },
+        {
+            "name_ar": "قبرص",
+            "name_en": "Cyprus",
+            "code": "CY",
+            "phone": "+357"
+        },
+        {
+            "name_ar": "مصر",
+            "name_en": "Egypt",
+            "code": "EG",
+            "phone": "+20"
+        },
+        {
+            "name_ar": "فرنسا",
+            "name_en": "France",
+            "code": "FR",
+            "phone": "+33"
+        },
+        {
+            "name_ar": "ألمانيا",
+            "name_en": "Germany",
+            "code": "DE",
+            "phone": "+49"
+        },
+        {
+            "name_ar": "اليونان",
+            "name_en": "Greece",
+            "code": "GR",
+            "phone": "+30"
+        },
+        {
+            "name_ar": "الهند",
+            "name_en": "India",
+            "code": "IN",
+            "phone": "+91"
+        },
+        {
+            "name_ar": "إندونيسيا",
+            "name_en": "Indonesia",
+            "code": "ID",
+            "phone": "+62"
+        },
+        {
+            "name_ar": "العراق",
+            "name_en": "Iraq",
+            "code": "IQ",
+            "phone": "+964"
+        },
+        {
+            "name_ar": "إيطاليا",
+            "name_en": "Italy",
+            "code": "IT",
+            "phone": "+39"
+        },
+        {
+            "name_ar": "اليابان",
+            "name_en": "Japan",
+            "code": "JP",
+            "phone": "+81"
+        },
+        {
+            "name_ar": "الأردان",
+            "name_en": "Jordan",
+            "code": "JO",
+            "phone": "+962"
+        },
+        {
+            "name_ar": "الكويت",
+            "name_en": "Kuwait",
+            "code": "KW",
+            "phone": "+965"
+        },
+        {
+            "name_ar": "لبنان",
+            "name_en": "Lebanon",
+            "code": "LB",
+            "phone": "+961"
+        },
+        {
+            "name_ar": "ليبيا",
+            "name_en": "Libya",
+            "code": "LY",
+            "phone": "+218"
+        },
+        {
+            "name_ar": "المغرب",
+            "name_en": "Morocco",
+            "code": "MA",
+            "phone": "+212"
+        },
+        {
+            "name_ar": "هولندا",
+            "name_en": "Netherlands",
+            "code": "NL",
+            "phone": "+31"
+        },
+        {
+            "name_ar": "نيوزيلندا",
+            "name_en": "New Zealand",
+            "code": "NZ",
+            "phone": "+64"
+        },
+        {
+            "name_ar": "عمان",
+            "name_en": "Oman",
+            "code": "OM",
+            "phone": "+968"
+        },
+        {
+            "name_ar": "فلسطين",
+            "name_en": "Palestine",
+            "code": "PS",
+            "phone": "+970"
+        },
+        {
+            "name_ar": "قطر",
+            "name_en": "Qatar",
+            "code": "QA",
+            "phone": "+974"
+        },
+        {
+            "name_ar": "روسيا",
+            "name_en": "Russia",
+            "code": "RU",
+            "phone": "+7"
+        },
+        {
+            "name_ar": "المملكة العربية السعودية",
+            "name_en": "Saudi Arabia",
+            "code": "SA",
+            "phone": "+966"
+        },
+        {
+            "name_ar": "إسبانيا",
+            "name_en": "Spain",
+            "code": "ES",
+            "phone": "+34"
+        },
+        {
+            "name_ar": "سويسرا",
+            "name_en": "Switzerland",
+            "code": "CH",
+            "phone": "+41"
+        },
+        {
+            "name_ar": "سوريا",
+            "name_en": "Syria",
+            "code": "SY",
+            "phone": "+963"
+        },
+        {
+            "name_ar": "تونس",
+            "name_en": "Tunisia",
+            "code": "TN",
+            "phone": "+216"
+        },
+        {
+            "name_ar": "تركيا",
+            "name_en": "Turkey",
+            "code": "TR",
+            "phone": "+90"
+        },
+        {
+            "name_ar": "الإمارات العربية المتحدة",
+            "name_en": "United Arab Emirates",
+            "code": "AE",
+            "phone": "+971"
+        },
+        {
+            "name_ar": "المملكة المتحدة",
+            "name_en": "United Kingdom",
+            "code": "GB",
+            "phone": "+44"
+        },
+        {
+            "name_ar": "الولايات المتحدة",
+            "name_en": "United States",
+            "code": "US",
+            "phone": "+1"
+        },
+        {
+            "name_ar": "فيتنام",
+            "name_en": "Vietnam",
+            "code": "VN",
+            "phone": "+84"
+        },
+        {
+            "name_ar": "اليمن",
+            "name_en": "Yemen",
+            "code": "YE",
+            "phone": "+967"
+        }
+    ]
+}

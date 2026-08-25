@@ -29,6 +29,8 @@ import 'package:z_ecommerce/presentation/pages/customer/categories_page.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
 import 'package:z_ecommerce/presentation/widgets/common/footers/footer_section.dart';
 import 'package:z_ecommerce/presentation/widgets/common/headers/header_buisness.dart';
+import 'package:z_ecommerce/presentation/widgets/home/customer_location_bar.dart';
+import 'package:z_ecommerce/data/services/geo_proximity_service.dart';
 
 class BusinessEntry extends StatefulWidget {
   const BusinessEntry({super.key});
@@ -51,6 +53,7 @@ class _BusinessEntryState extends State<BusinessEntry> {
     super.initState();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BusinessProvider>().clearSelectedBusiness();
       context.read<BusinessProvider>().fetchBusinesses();
       context.read<CategoryProvider>().fetchCategories();
       context.read<ProductProvider>().fetchAllProducts();
@@ -97,9 +100,6 @@ class _BusinessEntryState extends State<BusinessEntry> {
     final brandProvider = context.watch<BrandProvider>();
 
     final activeBusinesses = businessProvider.activeBusinesses;
-    final recommendedBusinesses = activeBusinesses
-        .where((b) => b.isRecommended)
-        .toList();
     final categories = categoryProvider.categories;
     final recommendedCategories = categories
         .where((c) => c.isRecommended)
@@ -116,15 +116,16 @@ class _BusinessEntryState extends State<BusinessEntry> {
         .toList();
     final freeProducts = allProducts.where((p) => p.isFreeProduct).toList();
 
-    final filteredStores = activeBusinesses.where((b) {
-      final nameAr = b.localization.name.ar.toLowerCase();
-      final nameEn = b.localization.name.en.toLowerCase();
-      final q = _searchQuery.toLowerCase();
-      final matchesSearch = nameAr.contains(q) || nameEn.contains(q);
-      final matchesCategory =
-          _selectedCategory == null || b.businessType.name == _selectedCategory;
-      return matchesSearch && matchesCategory;
-    }).toList();
+    final isAr = context.watch<LocaleProvider>().locale.languageCode == 'ar';
+    final geoSortedAnalyzed = businessProvider.getGeoSortedBusinesses(
+      searchQuery: _searchQuery,
+      categoryId: _selectedCategory,
+      isAr: isAr,
+    );
+    final filteredStores = geoSortedAnalyzed.map((a) => a.business).toList();
+    final recommendedBusinesses = filteredStores
+        .where((b) => b.isRecommended)
+        .toList();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -135,6 +136,12 @@ class _BusinessEntryState extends State<BusinessEntry> {
           children: [
             /// Section 1: Hero Banner Section
             SectionHero(activeStoresCount: activeBusinesses.length),
+
+            /// Section 1.5: Customer Delivery Location Bar
+            Container(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: const CustomerLocationBar(),
+            ),
 
             /// Section 2: Search and Category Filter Section
             SectionSearchAndCategory(
@@ -174,7 +181,7 @@ class _BusinessEntryState extends State<BusinessEntry> {
             ),
             SectionTopBusiness(
               screenWidth: width * 0.75,
-              businesses: recommendedBusinesses,
+              businesses: recommendedBusinesses.isNotEmpty ? recommendedBusinesses : filteredStores,
             ),
 
             /// Section 4: Recommended Products Section
@@ -1325,17 +1332,15 @@ class CardBusiness extends StatelessWidget {
 
     final coverUrl = business.theme.coverBannerUrl;
     final hasRatings = business.ratings.isNotEmpty;
-    final double avgRating = hasRatings
-        ? (business.ratings.map((r) => r.rating).reduce((a, b) => a + b) /
-              business.ratings.length)
-        : 0.0;
+    final double avgRating = business.averageRating;
     final String ratingDisplay = hasRatings
         ? avgRating.toStringAsFixed(1)
         : (isAr ? 'جديد' : 'New');
 
+    final businessProvider = context.watch<BusinessProvider>();
+    final geoAnalysis = businessProvider.analyzeBusiness(business, isAr: isAr);
+
     void openStore() async {
-      final businessProvider = context.read<BusinessProvider>();
-      
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -1356,7 +1361,12 @@ class CardBusiness extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(
+            color: geoAnalysis.proximityTier == GeoProximityTier.sameTown
+                ? const Color(0xFF10B981).withOpacity(0.4)
+                : AppColors.cardBorder,
+            width: geoAnalysis.proximityTier == GeoProximityTier.sameTown ? 1.5 : 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: theme.shadowColor.withOpacity(0.06),
@@ -1413,20 +1423,84 @@ class CardBusiness extends StatelessWidget {
                       color: hasRatings ? AppColors.star : theme.primaryColor,
                     ),
                   ),
+
+                  // Smart Proximity / Delivery Badge on Cover
+                  if (geoAnalysis.proximityTier != GeoProximityTier.allLebanon || geoAnalysis.canDeliver)
+                    Positioned(
+                      top: 6,
+                      left: isAr ? 6 : null,
+                      right: isAr ? null : 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: (geoAnalysis.proximityTier != GeoProximityTier.allLebanon
+                                  ? geoAnalysis.proximityTier.badgeColor
+                                  : Colors.amber.shade800)
+                              .withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              geoAnalysis.proximityTier != GeoProximityTier.allLebanon
+                                  ? geoAnalysis.proximityTier.icon
+                                  : Icons.delivery_dining,
+                              size: 11,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              geoAnalysis.proximityTier != GeoProximityTier.allLebanon
+                                  ? (isAr ? geoAnalysis.proximityTier.labelAr() : geoAnalysis.proximityTier.labelEn())
+                                  : (isAr ? 'توصيل' : 'Delivery'),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                title.isNotEmpty ? title : "---",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  color: theme.textTheme.bodyLarge?.color,
-                ),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title.isNotEmpty ? title : "---",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  if (geoAnalysis.locationSnippet.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.place_outlined, size: 11, color: AppColors.textMuted),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Text(
+                              geoAnalysis.locationSnippet,
+                              style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
             Padding(

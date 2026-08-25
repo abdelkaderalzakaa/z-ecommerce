@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:z_ecommerce/data/models/common/address_model.dart';
+import 'package:z_ecommerce/data/models/common/social_media.dart';
 import 'package:z_ecommerce/data/models/store/business_model.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
+import 'package:z_ecommerce/presentation/global/core/constants/payment_methods_constant.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
 import 'package:z_ecommerce/presentation/global/navigation.dart';
 import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
@@ -25,9 +30,7 @@ class OverviewTab extends StatelessWidget {
     final totalVisitors = store.visits.length;
 
     final hasRatings = store.ratings.isNotEmpty;
-    final double avgRating = hasRatings
-        ? (store.ratings.map((r) => r.rating).reduce((a, b) => a + b) / store.ratings.length)
-        : 0.0;
+    final double avgRating = store.averageRating;
     final String ratingDisplay = hasRatings ? avgRating.toStringAsFixed(1) : (isAr ? 'جديد' : 'New');
 
     final ownerName = store.ownerName?.isNotEmpty == true ? store.ownerName! : (isAr ? 'غير محدد' : 'Not set');
@@ -182,36 +185,42 @@ class OverviewTab extends StatelessWidget {
           const SizedBox(height: 24),
 
           // SECTION 3: 📍 عناوين المواقع والفروع (Locations & Branches)
-          _buildSectionCard(
-            context: context,
-            title: isAr ? 'عناوين المواقع والفروع' : 'Locations & Branches',
-            icon: Icons.location_on_outlined,
-            actionWidget: ButtonApp(
-              format: FormatButtonApp.outline,
-              label: isAr ? 'إدارة وتعديل العناوين' : 'Manage & Edit Addresses',
-              icon: Icons.map_outlined,
-              fontSize: 12,
-              onPressed: () {
-                changeScreen(context, StoreManageAddressesPage(store: store));
-              },
-            ),
-            children: store.addAddress.isEmpty
-                ? [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        isAr ? 'لا توجد عناوين مضافة بعد للمتجر' : 'No branch locations added yet',
-                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                      ),
-                    ),
-                  ]
-                : store.addAddress.map((addr) {
-                    final fullFormatted = addr.getFormattedAddress(langCode: isAr ? 'ar' : 'en');
-                    return _buildInfoRow(
-                      addr.title.isNotEmpty ? addr.title : (isAr ? 'عنوان فرعي' : 'Branch Address'),
-                      fullFormatted.isNotEmpty ? fullFormatted : addr.street,
-                    );
-                  }).toList(),
+          StreamBuilder<List<AddressModel>>(
+            stream: AddressService().streamAddressesByUserId(store.id),
+            builder: (context, snapshot) {
+              final addresses = snapshot.data ?? [];
+              return _buildSectionCard(
+                context: context,
+                title: isAr ? 'عناوين المواقع والفروع (${addresses.length})' : 'Locations & Branches (${addresses.length})',
+                icon: Icons.location_on_outlined,
+                actionWidget: ButtonApp(
+                  format: FormatButtonApp.outline,
+                  label: isAr ? 'إدارة وتعديل العناوين' : 'Manage & Edit Addresses',
+                  icon: Icons.map_outlined,
+                  fontSize: 12,
+                  onPressed: () {
+                    changeScreen(context, StoreManageAddressesPage(store: store));
+                  },
+                ),
+                children: addresses.isEmpty
+                    ? [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Text(
+                            isAr ? 'لا توجد عناوين مضافة بعد للمتجر' : 'No branch locations added yet',
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                          ),
+                        ),
+                      ]
+                    : addresses.map((addr) {
+                        final fullFormatted = addr.getFormattedAddress(langCode: isAr ? 'ar' : 'en');
+                        return _buildInfoRow(
+                          addr.title.isNotEmpty ? addr.title : (isAr ? 'عنوان فرعي' : 'Branch Address'),
+                          fullFormatted.isNotEmpty ? fullFormatted : addr.street,
+                        );
+                      }).toList(),
+              );
+            },
           ),
           const SizedBox(height: 24),
 
@@ -239,7 +248,7 @@ class OverviewTab extends StatelessWidget {
                       ),
                     ),
                   ]
-                : store.socials.map((social) {
+                : store.socials.map((SocialModel social) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
@@ -294,7 +303,7 @@ class OverviewTab extends StatelessWidget {
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
-                      children: store.paymentMethods.map((pm) {
+                      children: store.paymentMethods.map((PaymentMethodType pm) {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(

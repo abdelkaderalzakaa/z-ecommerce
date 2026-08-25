@@ -1,5 +1,4 @@
 import 'package:z_ecommerce/data/models/customer/activity_customer_inbusiness.dart';
-import '../common/address_model.dart';
 
 class CustomerModel {
   // 1. البيانات الأساسية الخفيفة
@@ -8,7 +7,6 @@ class CustomerModel {
   final String? email;
   final String? phoneNumber;
   final String? avatarUrl;
-  final List<AddressModel> addresses;
 
   // 2. المفضلة والأنشطة
   final List<String> wishlist; // معرّفات المنتجات المفضلة (Product IDs)
@@ -24,7 +22,6 @@ class CustomerModel {
     this.email,
     this.phoneNumber,
     this.avatarUrl,
-    this.addresses = const [],
     this.wishlist = const [],
     this.businessActivities = const [],
     this.createdAt,
@@ -36,15 +33,7 @@ class CustomerModel {
   // ==========================================
 
   bool get isEmpty => id.isEmpty;
-
-  /// الحصول على العنوان الافتراضي
-  AddressModel? get defaultAddress {
-    if (addresses.isEmpty) return null;
-    return addresses.firstWhere(
-      (addr) => addr.isDefault,
-      orElse: () => addresses.first,
-    );
-  }
+  String? get phone => phoneNumber;
 
   /// حساب مجموع طلبات العميل في جميع البزنسات تلقائياً
   int get totalOrdersCount {
@@ -79,10 +68,6 @@ class CustomerModel {
       email: map['email'] ?? map['user']?['email'],
       phoneNumber: map['phoneNumber'] ?? map['user']?['phoneNumber'],
       avatarUrl: map['avatarUrl'] ?? map['user']?['avatarUrl'],
-      addresses: (map['addresses'] as List<dynamic>?)
-              ?.map((e) => AddressModel.fromMap(e))
-              .toList() ??
-          [],
       wishlist: (map['wishlist'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
@@ -107,7 +92,6 @@ class CustomerModel {
       'email': email,
       'phoneNumber': phoneNumber,
       'avatarUrl': avatarUrl,
-      'addresses': addresses.map((e) => e.toMap()).toList(),
       'wishlist': wishlist,
       'businessActivities': businessActivities.map((e) => e.toMap()).toList(),
       'createdAt': createdAt?.toIso8601String(),
@@ -121,7 +105,6 @@ class CustomerModel {
     String? email,
     String? phoneNumber,
     String? avatarUrl,
-    List<AddressModel>? addresses,
     List<String>? wishlist,
     List<ActivityCustomerInBusiness>? businessActivities,
     DateTime? createdAt,
@@ -133,7 +116,6 @@ class CustomerModel {
       email: email ?? this.email,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       avatarUrl: avatarUrl ?? this.avatarUrl,
-      addresses: addresses ?? this.addresses,
       wishlist: wishlist ?? this.wishlist,
       businessActivities: businessActivities ?? this.businessActivities,
       createdAt: createdAt ?? this.createdAt,
@@ -146,7 +128,6 @@ class CustomerModel {
     return CustomerModel(
       id: '',
       name: '',
-      addresses: const [],
       wishlist: const [],
       businessActivities: const [],
     );

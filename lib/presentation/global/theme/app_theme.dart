@@ -205,14 +205,6 @@ class AppTheme {
     );
   }
 
-  static Color _adjustForDarkMode(Color color) {
-    final hsl = HSLColor.fromColor(color);
-    if (hsl.lightness < 0.5) {
-      return hsl.withLightness(0.6).toColor();
-    }
-    return color;
-  }
-
   static ThemeData getDarkTheme({
     Color? primaryColor,
     Color? secondaryColor,
@@ -229,24 +221,24 @@ class AppTheme {
     final effectiveInputRadius = inputRadius ?? 10.0;
     final effectiveCardRadius = cardRadius ?? 16.0;
 
-    final adjustedPrimary = primaryColor != null ? _adjustForDarkMode(primaryColor) : const Color(0xFF4F46E5);
-    final adjustedSecondary = secondaryColor != null ? _adjustForDarkMode(secondaryColor) : const Color(0xFFFF3333);
+    final effectivePrimary = primaryColor ?? const Color(0xFF4F46E5);
+    final effectiveSecondary = secondaryColor ?? const Color(0xFF10B981);
     final adjustedBackground = backgroundColor ?? const Color(0xFF121212);
-    final adjustedSurface = surfaceColor ?? adjustedPrimary.withValues(alpha: 0.15);
+    final adjustedSurface = surfaceColor ?? const Color(0xFF1E293B);
     final adjustedText = textColor ?? const Color(0xFFFFFFFF);
 
     return ThemeData(
       brightness: Brightness.dark,
       fontFamily: effectiveFontFamily,
-      primaryColor: adjustedPrimary,
+      primaryColor: effectivePrimary,
       scaffoldBackgroundColor: adjustedBackground,
       cardColor: adjustedSurface,
-      dividerColor: adjustedPrimary.withValues(alpha: 0.2),
+      dividerColor: effectivePrimary.withValues(alpha: 0.2),
       colorScheme: ColorScheme.dark(
-        primary: adjustedPrimary,
-        secondary: adjustedSecondary,
+        primary: effectivePrimary,
+        secondary: effectiveSecondary,
         surface: adjustedSurface,
-        surfaceContainerHighest: adjustedPrimary.withValues(alpha: 0.2),
+        surfaceContainerHighest: effectivePrimary.withValues(alpha: 0.2),
         onSurface: adjustedText,
         onSurfaceVariant: const Color(0xFFA0A0A0),
       ),
@@ -257,7 +249,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: adjustedPrimary.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+          foregroundColor: effectivePrimary.computeLuminance() > 0.5 ? Colors.black : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(effectiveButtonRadius)),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
           textStyle: TextStyle(
@@ -269,9 +261,9 @@ class AppTheme {
           splashFactory: InkRipple.splashFactory,
         ).copyWith(
           backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-            if (states.contains(WidgetState.pressed)) return adjustedPrimary.withValues(alpha: 0.8);
-            if (states.contains(WidgetState.hovered)) return adjustedPrimary.withValues(alpha: 0.9);
-            return adjustedPrimary;
+            if (states.contains(WidgetState.pressed)) return effectivePrimary.withValues(alpha: 0.8);
+            if (states.contains(WidgetState.hovered)) return effectivePrimary.withValues(alpha: 0.9);
+            return effectivePrimary;
           }),
         ),
       ),
@@ -289,7 +281,7 @@ class AppTheme {
         ).copyWith(
           backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
             if (states.contains(WidgetState.hovered) || states.contains(WidgetState.pressed)) {
-              return adjustedPrimary;
+              return effectivePrimary;
             }
             return Colors.transparent;
           }),
@@ -303,7 +295,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: adjustedPrimary,
+          foregroundColor: effectivePrimary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(effectiveButtonRadius)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           textStyle: TextStyle(
@@ -314,7 +306,7 @@ class AppTheme {
           splashFactory: InkRipple.splashFactory,
         ).copyWith(
           backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-            final baseColor = adjustedPrimary;
+            final baseColor = effectivePrimary;
             if (states.contains(WidgetState.pressed)) return baseColor.withValues(alpha: 0.12);
             if (states.contains(WidgetState.hovered)) return baseColor.withValues(alpha: 0.08);
             return Colors.transparent;
@@ -329,7 +321,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: adjustedPrimary.withValues(alpha: 0.1),
+        fillColor: effectivePrimary.withValues(alpha: 0.1),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(effectiveInputRadius),
@@ -341,7 +333,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(effectiveInputRadius),
-          borderSide: BorderSide(color: adjustedPrimary, width: 1.5),
+          borderSide: BorderSide(color: effectivePrimary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(effectiveInputRadius),
@@ -376,7 +368,7 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: const Color(0xFF121212),
-        selectedItemColor: adjustedPrimary,
+        selectedItemColor: effectivePrimary,
         unselectedItemColor: const Color(0xFF707070),
         type: BottomNavigationBarType.fixed,
         elevation: 8,
@@ -384,13 +376,13 @@ class AppTheme {
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return adjustedPrimary;
+          if (states.contains(WidgetState.selected)) return effectivePrimary;
           return Colors.transparent;
         }),
       ),
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return adjustedPrimary;
+          if (states.contains(WidgetState.selected)) return effectivePrimary;
           return const Color(0xFF707070);
         }),
       ),
@@ -400,7 +392,7 @@ class AppTheme {
           return const Color(0xFFB0B0B0);
         }),
         trackColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return adjustedPrimary;
+          if (states.contains(WidgetState.selected)) return effectivePrimary;
           return const Color(0xFF333333);
         }),
         trackOutlineColor: WidgetStateProperty.all(Colors.transparent),

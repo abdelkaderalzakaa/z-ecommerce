@@ -53,7 +53,7 @@ class BusinessDetailsPage extends StatelessWidget {
         // Calculate readiness based on filled fields
         int readinessScore = 0;
         if (store.hasOwner) readinessScore += 20;
-        if (store.addAddress.isNotEmpty) readinessScore += 20;
+        if (store.localization.description.ar.isNotEmpty) readinessScore += 20;
         if (store.localization.name.ar.isNotEmpty) readinessScore += 20;
         if (store.socials.isNotEmpty) readinessScore += 20;
         if (store.paymentMethods.isNotEmpty) readinessScore += 20;

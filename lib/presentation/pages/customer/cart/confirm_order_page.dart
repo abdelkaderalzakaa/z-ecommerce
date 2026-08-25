@@ -11,6 +11,7 @@ import '../../../widgets/common/footers/footer_section.dart';
 import '../../../global/core/constants/app_constants.dart';
 import '../../../global/core/responsive/responsive_layout.dart';
 import 'package:z_ecommerce/presentation/pages/customer/home_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/order_tracking/live_order_tracking_page.dart';
 import '../../../widgets/common/headers/widgets/top_title.dart';
 
 class ConfirmOrderPage extends StatelessWidget {
@@ -94,16 +95,49 @@ class ConfirmOrderPage extends StatelessWidget {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 32),
+                      if (ids != null && ids!.isNotEmpty) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppRadius.button),
+                              ),
+                              elevation: 0,
+                            ),
+                            icon: const Icon(Icons.track_changes_rounded, size: 20),
+                            label: const Text(
+                              'تتبع مسار وحالة طلبك لحظياً 🚀',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: () {
+                              changeScreen(
+                                context,
+                                LiveOrderTrackingPage(orderId: ids!.first),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       SizedBox(
                         width: double.infinity,
-                        height: 56,
-                        child: ButtonApp(
-                          icon: Icons.home,
+                        height: 52,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppRadius.button),
+                            ),
+                          ),
+                          icon: const Icon(Icons.home_outlined),
                           onPressed: () {
                             changeScreen(context, const HomePage());
                           },
-                          label: TranslationKeys.backToHome.tr(context),
+                          label: Text(TranslationKeys.backToHome.tr(context)),
                         ),
                       ),
                     ],

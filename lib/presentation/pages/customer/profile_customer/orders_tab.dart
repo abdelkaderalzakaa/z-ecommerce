@@ -13,6 +13,7 @@ import 'package:z_ecommerce/presentation/global/theme/app_button.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 import 'package:z_ecommerce/presentation/pages/order_details_page.dart';
+import 'package:z_ecommerce/presentation/pages/customer/order_tracking/live_order_tracking_page.dart';
 
 class OrdersTab extends StatefulWidget {
   const OrdersTab({super.key});
@@ -308,18 +309,45 @@ class _OrderItem extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            height: 36,
-            child: ButtonApp(
-              format: FormatButtonApp.outline,
-              label: 'تفاصيل الطلبية',
-              icon: Icons.receipt_outlined,
-              fontSize: 12,
-              onPressed: () {
-                changeScreen(context, OrderDetailsPage(order: order));
-              },
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 38,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    icon: const Icon(Icons.track_changes_rounded, size: 16),
+                    label: const Text('تتبع حي للمسار', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      changeScreen(context, LiveOrderTrackingPage(orderId: order.id, initialOrder: order));
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  height: 38,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    icon: const Icon(Icons.receipt_outlined, size: 16),
+                    label: const Text('تفاصيل الفاتورة', style: TextStyle(fontSize: 12)),
+                    onPressed: () {
+                      changeScreen(context, OrderDetailsPage(order: order));
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

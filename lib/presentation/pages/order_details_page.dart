@@ -15,6 +15,7 @@ import '../global/translate/translation_keys.dart';
 import '../../presentation/global/core/constants/enum_data.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/models/common/address_model.dart';
+import '../../data/services/address_service.dart';
 import '../widgets/order/order_tracker_widget.dart';
 
 class OrderDetailsPage extends StatelessWidget {
@@ -112,6 +113,7 @@ class OrderDetailsPage extends StatelessWidget {
     return Column(
       children: [
         OrderTrackerWidget(
+          order: order,
           currentStatus: order.status,
           isMobile: true,
         ),
@@ -143,6 +145,7 @@ class OrderDetailsPage extends StatelessWidget {
           child: Column(
             children: [
               OrderTrackerWidget(
+                order: order,
                 currentStatus: order.status,
                 isMobile: false,
               ),
@@ -199,8 +202,14 @@ class OrderDetailsPage extends StatelessWidget {
     );
   }
 
-  void _showAddressSelectionDialog(BuildContext context) {
-    final addresses = context.read<AuthProvider>().currentCustomer?.addresses ?? [];
+  Future<void> _showAddressSelectionDialog(BuildContext context) async {
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.currentUser?.id ?? '';
+    final addresses = userId.isNotEmpty
+        ? await AddressService().getAddressesByUserId(userId)
+        : <AddressModel>[];
+
+    if (!context.mounted) return;
     if (addresses.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(TranslationKeys.noSavedAddresses.tr(context))),
@@ -277,11 +286,7 @@ class OrderDetailsPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = order.items[index];
                 return CartItemWidget(
-                  title: item.productName ?? '',
-                  size: item.variantDisplayName ?? TranslationKeys.notAvailable.tr(context),
-                  color: TranslationKeys.notAvailable.tr(context),
-                  price: item.unitPrice,
-                  quantity: item.quantity,
+                  item: item,
                   isReadOnly: true,
                   isGift: item.unitPrice == 0.0,
                   isBundle: false,

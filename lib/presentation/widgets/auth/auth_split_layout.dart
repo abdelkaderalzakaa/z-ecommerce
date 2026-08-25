@@ -26,6 +26,8 @@ class AuthSplitLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = ResponsiveLayout.isMobile(context);
+    final superAdminProvider = context.watch<SuperAdminProvider>();
+    final platformPrimary = superAdminProvider.platformTheme.primaryColorValue;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -49,7 +51,7 @@ class AuthSplitLayout extends StatelessWidget {
                       ],
                     ),
                     padding: const EdgeInsets.all(20),
-                    child: _buildFormSection(context, theme.primaryColor, theme),
+                    child: _buildFormSection(context, platformPrimary, theme),
                   ),
                 )
               : Container(
@@ -66,7 +68,7 @@ class AuthSplitLayout extends StatelessWidget {
                         child: _buildVisualSection(
                           context,
                           theme,
-                          theme.primaryColor,
+                          platformPrimary,
                         ),
                       ),
                       Container(color: AppColors.cardBorder, width: 1),
@@ -95,7 +97,7 @@ class AuthSplitLayout extends StatelessWidget {
                               ),
                               child: _buildFormSection(
                                 context,
-                                theme.primaryColor,
+                                platformPrimary,
                                 theme,
                               ),
                             ),

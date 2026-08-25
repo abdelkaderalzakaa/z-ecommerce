@@ -4,6 +4,7 @@ import 'package:universal_html/html.dart' as html;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
 import 'package:z_ecommerce/data/models/common/social_media.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
 import 'package:z_ecommerce/data/providers/business_provider.dart';
 import 'package:z_ecommerce/data/providers/super_admin_provider.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/app_constants.dart';
@@ -165,9 +166,8 @@ class ContactUsPage extends StatelessWidget {
             .where((s) => s.isVisible && s.url.trim().isNotEmpty)
             .toList()
         : selectedBusiness.socials
-            .where((s) => s.isVisible && s.url.trim().isNotEmpty)
+            .where((SocialModel s) => s.isVisible && s.url.trim().isNotEmpty)
             .toList();
-    final addresses = selectedBusiness.addAddress;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -372,27 +372,38 @@ class ContactUsPage extends StatelessWidget {
                     ],
 
                     /// 3. الفروع والعناوين الجغرافية
-                    if (addresses.isNotEmpty) ...[
-                      const SizedBox(height: 36),
-                      Text(
-                        isAr ? 'الفروع والعناوين' : 'Branches & Locations',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme.textTheme.bodyLarge?.color,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Column(
-                        children: addresses.map((address) {
-                          return _AddressCard(
-                            address: address,
-                            langCode: langCode,
-                            primaryColor: primaryColor,
-                          );
-                        }).toList(),
-                      ),
-                    ],
+                    StreamBuilder<List<AddressModel>>(
+                      stream: AddressService().streamAddressesByUserId(selectedBusiness.id),
+                      builder: (context, snapshot) {
+                        final addresses = snapshot.data ?? [];
+                        if (addresses.isEmpty) return const SizedBox.shrink();
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 36),
+                            Text(
+                              isAr ? 'الفروع والعناوين (${addresses.length})' : 'Branches & Locations (${addresses.length})',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: theme.textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Column(
+                              children: addresses.map((address) {
+                                return _AddressCard(
+                                  address: address,
+                                  langCode: langCode,
+                                  primaryColor: primaryColor,
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

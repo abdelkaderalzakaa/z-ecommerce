@@ -8,6 +8,7 @@ import 'package:z_ecommerce/data/models/store/currency_store.dart';
 import 'package:z_ecommerce/data/models/super_admin/super_admin_model.dart';
 import 'package:z_ecommerce/data/models/customer/customer_model.dart';
 import 'package:z_ecommerce/data/models/common/address_model.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
 import 'package:z_ecommerce/data/services/auth_service.dart';
 import 'package:z_ecommerce/data/services/user_service.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
@@ -140,7 +141,6 @@ class AuthProvider with ChangeNotifier {
           name: user.name,
           email: user.email,
           phoneNumber: user.phoneNumber,
-          addresses: [],
           businessActivities: [],
           createdAt: now,
         );
@@ -199,7 +199,6 @@ class AuthProvider with ChangeNotifier {
           ownerEmail: ownerUser.email,
           ownerPhone: ownerUser.phoneNumber,
           businessType: businessType,
-          addAddress: addresses,
           theme: ThemeAdmin.empty(),
           localization: LocalizationAdmin.empty(),
           currency: CurrencyStore.empty(),
@@ -208,6 +207,17 @@ class AuthProvider with ChangeNotifier {
         );
 
         await _userService.saveBusiness(business);
+
+        // حفظ عناوين المتجر في كولكشن addresses
+        for (final addr in addresses) {
+          await AddressService().saveAddress(
+            addr.copyWith(
+              userId: credential.user!.uid,
+              userType: 'business',
+            ),
+          );
+        }
+
         await setCurrentUser(ownerUser);
       }
 
@@ -243,7 +253,6 @@ class AuthProvider with ChangeNotifier {
             email: user.email,
             phoneNumber: user.phoneNumber,
             avatarUrl: user.avatarUrl,
-            addresses: [],
             businessActivities: [],
             createdAt: DateTime.now(),
           );
@@ -299,48 +308,23 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// إضافة أو تحديث عنوان للعميل الحالي
+  /// إضافة أو تحديث عنوان في كولكشن addresses المستقل
   Future<void> addAddress(AddressModel address) async {
-    if (_currentCustomer == null && _currentUser != null) {
-      _currentCustomer = CustomerModel(
-        id: _currentUser!.id,
-        name: _currentUser!.name,
-        email: _currentUser!.email,
-        phoneNumber: _currentUser!.phoneNumber,
-        avatarUrl: _currentUser!.avatarUrl,
-        addresses: [address],
+    final effectiveUserId = _currentUser?.id ?? _currentCustomer?.id ?? '';
+    if (effectiveUserId.isNotEmpty) {
+      final addressToSave = address.copyWith(
+        userId: effectiveUserId,
+        userType: _currentUser?.role.name ?? 'customer',
       );
-    } else if (_currentCustomer != null) {
-      final updatedAddresses = List<AddressModel>.from(_currentCustomer!.addresses);
-      final index = updatedAddresses.indexWhere((a) => a.id == address.id);
-      if (index >= 0) {
-        updatedAddresses[index] = address;
-      } else {
-        updatedAddresses.add(address);
-      }
-      _currentCustomer = _currentCustomer!.copyWith(
-        addresses: updatedAddresses,
-      );
-    }
-
-    if (_currentCustomer != null) {
-      await _userService.saveCustomer(_currentCustomer!);
+      await AddressService().saveAddress(addressToSave);
       notifyListeners();
     }
   }
 
-  /// حذف عنوان للعميل الحالي
+  /// حذف عنوان من كولكشن addresses
   Future<void> deleteAddress(String addressId) async {
-    if (_currentCustomer != null) {
-      final updatedAddresses = _currentCustomer!.addresses
-          .where((a) => a.id != addressId)
-          .toList();
-      _currentCustomer = _currentCustomer!.copyWith(
-        addresses: updatedAddresses,
-      );
-      await _userService.saveCustomer(_currentCustomer!);
-      notifyListeners();
-    }
+    await AddressService().deleteAddress(addressId);
+    notifyListeners();
   }
 
   /// إضافة أو إزالة منتج من قائمة المفضلة للعميل الحالي

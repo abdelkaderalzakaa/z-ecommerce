@@ -23,13 +23,11 @@ class FeaturedSection extends StatelessWidget {
     return Consumer2<ProductProvider, BusinessProvider>(
       builder: (context, productProvider, businessProvider, child) {
         final businessId = businessProvider.selectedBusiness.id;
-        final storeProducts = productProvider.allProducts
-            .where((p) => p.businessId == businessId)
-            .toList();
-        final featuredProducts = storeProducts
+        final validProducts = productProvider.getCustomerProductsForStore(businessId);
+        final featuredProducts = validProducts
             .where((p) => p.isFeatured)
             .toList();
-        final products = (featuredProducts.isNotEmpty ? featuredProducts : storeProducts).take(4).toList();
+        final products = featuredProducts.take(4).toList();
         if (products.isEmpty) return const SizedBox.shrink();
 
         return Container(

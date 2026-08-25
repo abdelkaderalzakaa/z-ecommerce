@@ -7,7 +7,7 @@
             "email": "usertestbuisness@gmail.com",
             "role": "businessOwner",
             "businessId": "cmp_99344235",
-            "phoneNumber": "+9647701234567",
+            "phoneNumber": "+96170123456",
             "avatarUrl": "https://example.com/avatar.png",
             "createdAt": "2026-08-01T18:40:36.774Z",
             "isActive": true
@@ -16,14 +16,22 @@
         "addAddress": [
             {
                 "id": "addr_1",
-                "title": "الرئيسي",
-                "city": {
-                    "ar": "بغداد",
-                    "en": "Baghdad"
+                "title": "الفرع الرئيسي",
+                "country": {
+                    "ar": "لبنان",
+                    "en": "Lebanon"
                 },
-                "street": "شارع الرشيد",
+                "city": {
+                    "ar": "بيروت",
+                    "en": "Beirut"
+                },
+                "region": {
+                    "ar": "الحمرا",
+                    "en": "Hamra"
+                },
+                "street": "شارع الحمرا الرئيسي",
                 "building": "12",
-                "phone": "+9647701234567",
+                "phone": "+96170123456",
                 "isDefault": true
             }
         ],

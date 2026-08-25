@@ -1,3 +1,4 @@
+import 'package:z_ecommerce/data/models/delivery/delivery_driver_model.dart';
 import 'package:z_ecommerce/presentation/global/core/constants/enum_data.dart';
 
 class DeliveryModel {
@@ -15,6 +16,12 @@ class DeliveryModel {
   final DateTime updatedAt;
   final String? userId;
   final bool isPlatformApproved;
+  final bool isOnline;
+  final int currentOrdersCount;
+  final int totalDeliveredOrders;
+  final double totalEarnings;
+  final double rating;
+  final List<DeliveryDriverModel> drivers;
 
   DeliveryModel({
     required this.id,
@@ -31,6 +38,12 @@ class DeliveryModel {
     required this.updatedAt,
     this.userId,
     this.isPlatformApproved = false,
+    this.isOnline = true,
+    this.currentOrdersCount = 0,
+    this.totalDeliveredOrders = 0,
+    this.totalEarnings = 0.0,
+    this.rating = 5.0,
+    this.drivers = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -49,6 +62,12 @@ class DeliveryModel {
       'updatedAt': updatedAt.toIso8601String(),
       'userId': userId,
       'isPlatformApproved': isPlatformApproved,
+      'isOnline': isOnline,
+      'currentOrdersCount': currentOrdersCount,
+      'totalDeliveredOrders': totalDeliveredOrders,
+      'totalEarnings': totalEarnings,
+      'rating': rating,
+      'drivers': drivers.map((d) => d.toMap()).toList(),
     };
   }
 
@@ -67,10 +86,24 @@ class DeliveryModel {
       vehicleDetails: map['vehicleDetails'],
       coverageAreas: List<String>.from(map['coverageAreas'] ?? []),
       baseFee: (map['baseFee'] ?? 0.0).toDouble(),
-      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
-      updatedAt: map['updatedAt'] != null ? DateTime.parse(map['updatedAt']) : DateTime.now(),
+      createdAt: map['createdAt'] != null
+          ? DateTime.tryParse(map['createdAt']) ?? DateTime.now()
+          : DateTime.now(),
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.tryParse(map['updatedAt']) ?? DateTime.now()
+          : DateTime.now(),
       userId: map['userId'],
       isPlatformApproved: map['isPlatformApproved'] ?? false,
+      isOnline: map['isOnline'] ?? true,
+      currentOrdersCount: map['currentOrdersCount'] ?? 0,
+      totalDeliveredOrders: map['totalDeliveredOrders'] ?? 0,
+      totalEarnings: (map['totalEarnings'] ?? 0.0).toDouble(),
+      rating: (map['rating'] ?? 5.0).toDouble(),
+      drivers: map['drivers'] != null
+          ? (map['drivers'] as List)
+              .map((d) => DeliveryDriverModel.fromMap(Map<String, dynamic>.from(d)))
+              .toList()
+          : [],
     );
   }
 
@@ -89,6 +122,12 @@ class DeliveryModel {
     DateTime? updatedAt,
     String? userId,
     bool? isPlatformApproved,
+    bool? isOnline,
+    int? currentOrdersCount,
+    int? totalDeliveredOrders,
+    double? totalEarnings,
+    double? rating,
+    List<DeliveryDriverModel>? drivers,
   }) {
     return DeliveryModel(
       id: id ?? this.id,
@@ -105,6 +144,25 @@ class DeliveryModel {
       updatedAt: updatedAt ?? this.updatedAt,
       userId: userId ?? this.userId,
       isPlatformApproved: isPlatformApproved ?? this.isPlatformApproved,
+      isOnline: isOnline ?? this.isOnline,
+      currentOrdersCount: currentOrdersCount ?? this.currentOrdersCount,
+      totalDeliveredOrders: totalDeliveredOrders ?? this.totalDeliveredOrders,
+      totalEarnings: totalEarnings ?? this.totalEarnings,
+      rating: rating ?? this.rating,
+      drivers: drivers ?? this.drivers,
     );
   }
+
+  factory DeliveryModel.empty() {
+    return DeliveryModel(
+      id: '',
+      name: '',
+      phone: '',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  bool get isEmpty => id.isEmpty;
+  bool get isNotEmpty => id.isNotEmpty;
 }

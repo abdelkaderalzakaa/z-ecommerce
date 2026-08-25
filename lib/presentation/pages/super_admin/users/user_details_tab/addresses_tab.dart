@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:z_ecommerce/data/models/auth/user_model.dart';
-import 'package:z_ecommerce/data/models/customer/customer_model.dart';
-import 'package:z_ecommerce/data/services/user_service.dart';
+import 'package:z_ecommerce/data/models/common/address_model.dart';
+import 'package:z_ecommerce/data/services/address_service.dart';
 import 'package:z_ecommerce/presentation/global/translate/app_localizations.dart';
 import 'package:z_ecommerce/presentation/global/translate/translation_keys.dart';
 
@@ -14,10 +14,10 @@ class UserAddressesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return FutureBuilder<CustomerModel?>(
-      future: UserService().getCustomerById(user.id),
+    return StreamBuilder<List<AddressModel>>(
+      stream: AddressService().streamAddressesByUserId(user.id),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(24.0),
@@ -25,7 +25,7 @@ class UserAddressesTab extends StatelessWidget {
             ),
           );
         }
-        final addresses = snapshot.data?.addresses ?? [];
+        final addresses = snapshot.data ?? [];
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -33,7 +33,7 @@ class UserAddressesTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                TranslationKeys.savedAddresses.tr(context),
+                '${TranslationKeys.savedAddresses.tr(context)} (${addresses.length})',
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -64,22 +64,51 @@ class UserAddressesTab extends StatelessWidget {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: theme.dividerColor.withOpacity(0.12)),
+                        side: BorderSide(
+                          color: addr.isDefault
+                              ? theme.primaryColor.withOpacity(0.5)
+                              : theme.dividerColor.withOpacity(0.15),
+                        ),
                       ),
                       child: ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: theme.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(Icons.location_on_rounded, color: theme.primaryColor),
+                        leading: Icon(
+                          addr.type == AddressType.home
+                              ? Icons.home_outlined
+                              : addr.type == AddressType.office
+                              ? Icons.business_outlined
+                              : Icons.location_on_outlined,
+                          color: theme.primaryColor,
                         ),
-                        title: Text(
-                          addr.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        title: Row(
+                          children: [
+                            Text(
+                              addr.title,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            if (addr.isDefault) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'Default',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        subtitle: Text(addr.getFormattedAddress()),
+                        subtitle: Text(
+                          addr.getFormattedAddress(),
+                          style: const TextStyle(fontSize: 13),
+                        ),
                       ),
                     );
                   },

@@ -92,6 +92,16 @@ class CartProvider with ChangeNotifier {
     int quantity = 1,
     ProductVariant? selectedVariant,
   }) {
+    if (!product.isValidForCustomer) {
+      debugPrint("Attempted to add invalid or free product ${product.id} to cart - blocked.");
+      return;
+    }
+
+    final effectiveVariant = selectedVariant ?? (product.variants.isNotEmpty ? product.defaultVariant : null);
+    final unitPrice = effectiveVariant != null 
+        ? product.getPriceForVariant(effectiveVariant) 
+        : product.basePrice;
+
     if (!_cartItemsByStore.containsKey(businessId)) {
       _cartItemsByStore[businessId] = [];
     }
@@ -101,7 +111,7 @@ class CartProvider with ChangeNotifier {
       (item) =>
           item.type == CartItemType.product &&
           item.productId == product.id &&
-          item.selectedVariant == selectedVariant,
+          item.selectedVariant == effectiveVariant,
     );
 
     if (existingIndex >= 0) {
@@ -115,16 +125,46 @@ class CartProvider with ChangeNotifier {
           productName: product.name,
           productImage: product.displayImage,
           businessId: product.businessId,
-          displayPrice: selectedVariant != null 
-              ? product.getPriceForVariant(selectedVariant) 
-              : product.basePrice,
+          displayPrice: unitPrice,
           quantity: quantity,
-          selectedVariant: selectedVariant,
+          selectedVariant: effectiveVariant,
         ),
       );
     }
     notifyListeners();
     _saveCartToLocal();
+  }
+
+  /// 🔄 تبديل خيار/متغير المنتج مباشرة من داخل السلة
+  void updateItemVariant({
+    required String businessId,
+    required String itemId,
+    required ProductVariant newVariant,
+    required double newPrice,
+  }) {
+    final storeList = _cartItemsByStore[businessId];
+    if (storeList == null) return;
+
+    final index = storeList.indexWhere((item) => item.id == itemId);
+    if (index != -1) {
+      final oldItem = storeList[index];
+      storeList[index] = CartItemModel(
+        id: oldItem.id,
+        type: oldItem.type,
+        productId: oldItem.productId,
+        productName: oldItem.productName,
+        productImage: oldItem.productImage,
+        businessId: oldItem.businessId,
+        selectedVariant: newVariant,
+        offerId: oldItem.offerId,
+        offerName: oldItem.offerName,
+        displayPrice: newPrice,
+        discountAmount: oldItem.discountAmount,
+        quantity: oldItem.quantity,
+      );
+      notifyListeners();
+      _saveCartToLocal();
+    }
   }
 
   void addOfferToCart({
